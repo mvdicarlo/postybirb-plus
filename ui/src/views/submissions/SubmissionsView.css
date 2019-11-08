@@ -1,0 +1,5 @@
+.submission-list {
+  max-height: 33vh;
+  overflow: auto;
+  margin-bottom: 1em;
+}
