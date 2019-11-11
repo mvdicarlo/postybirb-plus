@@ -1,4 +1,4 @@
-import { Icon, Layout, Menu } from 'antd';
+import { Icon, Layout, Menu, Drawer } from 'antd';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { Link, Route, Switch } from 'react-router-dom';
@@ -16,13 +16,15 @@ interface Props {
 
 interface State {
   currentNavActive: string;
+  accountsVisible: boolean;
 }
 
 @inject('uiStore')
 @observer
 export default class App extends React.Component<any | Props, State> {
   public state: any = {
-    currentNavActive: '1'
+    currentNavActive: '1',
+    accountsVisible: false
   };
 
   constructor(props: Props) {
@@ -43,6 +45,9 @@ export default class App extends React.Component<any | Props, State> {
   handleCollapsedChange = (collapsed: boolean) => {
     this.props.uiStore.collapseNav(collapsed);
   };
+
+  showDrawer = () => this.setState({ accountsVisible: true });
+  hideDrawer = () => this.setState({ accountsVisible: false });
 
   handleNavSelectChange = ({ key }) => this.setState({ currentNavActive: key });
 
@@ -81,11 +86,18 @@ export default class App extends React.Component<any | Props, State> {
                 <span>Home</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="2">
-              <Link to="/">
-                <Icon type="user" />
-                <span>Accounts</span>
-              </Link>
+            <Menu.Item key="2" onClick={this.showDrawer}>
+              <Icon type="user" />
+              <span>Accounts</span>
+              <Drawer
+                title="Accounts"
+                visible={this.state.accountsVisible}
+                onClose={this.hideDrawer}
+                maskClosable={true}
+                closable={true}
+              >
+                <div>Hello!</div>
+              </Drawer>
             </Menu.Item>
             <Menu.Item key="3">
               <Link to="/submissions">
@@ -97,11 +109,11 @@ export default class App extends React.Component<any | Props, State> {
         </Sider>
 
         <Layout>
-          <Content>
+          <Content className="container primary-layout-container">
             <div className="header">
               <AppHeader />
             </div>
-            <div className="container">
+            <div className="pt-3">
               <Switch>
                 <Route exact path="/" component={Home} />
                 <Route path="/submissions" component={SubmissionsView} />

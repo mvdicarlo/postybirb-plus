@@ -8,12 +8,12 @@ import {
   Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { SubmissionService } from './submission.service';
-import { Submission } from './submission.interface';
+import { FileSubmissionService } from './file-submission.service';
+import { Submission } from '../submission.interface';
 
-@Controller('submission')
-export class SubmissionController {
-  constructor(private readonly service: SubmissionService) {}
+@Controller('file_submission')
+export class FileSubmissionController {
+  constructor(private readonly service: FileSubmissionService) {}
 
   @Get()
   findAll(): Submission[] {

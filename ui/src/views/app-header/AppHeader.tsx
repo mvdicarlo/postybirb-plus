@@ -29,7 +29,6 @@ export default class AppHeader extends React.Component<any | Props, any> {
     const headerState: HeaderState = this.props.headerStore.headerState;
     return (
       <PageHeader
-        className="container"
         title={headerState.title}
         subTitle={headerState.subtitle}
       >

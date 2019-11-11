@@ -2,4 +2,9 @@
 
 @tailwind components;
 
+.primary-layout-container {
+    @apply px-3;
+    background-color: white;
+}
+
 @tailwind utilities;

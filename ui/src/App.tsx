@@ -4,7 +4,7 @@ import AppLayout from './views/app-layout/AppLayout';
 import { ConfigProvider } from 'antd';
 import { Provider } from 'mobx-react';
 import { uiStore } from './stores/ui.store';
-import { submissionStore } from './stores/submission.store';
+import { submissionStore } from './stores/file-submission.store';
 import { headerStore } from './stores/header.store';
 
 export default class App extends React.Component {

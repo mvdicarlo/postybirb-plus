@@ -1,7 +1,7 @@
 import axios from '../utils/http';
 
 export default class SubmissionService {
-    static deleteSubmission(id: string) {
-        axios.delete(`/submission/${id}`);
+    static deleteFileSubmission(id: string) {
+        axios.delete(`/file_submission/${id}`);
     }
 }

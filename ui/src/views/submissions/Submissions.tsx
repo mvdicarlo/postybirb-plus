@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { SubmissionStore } from '../../stores/submission.store';
+import { SubmissionStore } from '../../stores/file-submission.store';
 import { inject, observer } from 'mobx-react';
 import { List, Avatar, Popconfirm, Modal, Input } from 'antd';
-import { SubmissionDTO } from '../../interfaces/submission.interface';
+import { FileSubmissionDTO } from '../../interfaces/submission.interface';
 import SubmissionService from '../../services/submission.service';
 import { ReactComponent } from '*.svg';
 import { isFlowBaseAnnotation } from '@babel/types';
@@ -17,7 +17,7 @@ interface State {
 }
 
 interface ListItemProps {
-  item: SubmissionDTO;
+  item: FileSubmissionDTO;
 }
 
 class ListItem extends React.Component<ListItemProps, any> {
@@ -40,7 +40,7 @@ class ListItem extends React.Component<ListItemProps, any> {
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
-            onConfirm={() => SubmissionService.deleteSubmission(item.id)}
+            onConfirm={() => SubmissionService.deleteFileSubmission(item.id)}
           >
             <a key="submission-delete">Delete</a>
           </Popconfirm>
@@ -59,6 +59,7 @@ class ListItem extends React.Component<ListItemProps, any> {
           visible={this.state.previewVisible}
           footer={null}
           onCancel={this.handleCancel}
+          destroyOnClose={true}
         >
           <img
             alt="preview"
@@ -81,8 +82,10 @@ export class Submissions extends React.Component<any | Props, State> {
   handleSearch = search => this.setState({ search: search.toLowerCase() });
 
   render() {
-    const submissions: SubmissionDTO[] = this.props.submissionStore.all
-      .filter((s: SubmissionDTO) => s.title.toLowerCase().includes(this.state.search));
+    const submissions: FileSubmissionDTO[] = this.props.submissionStore.all.filter(
+      (s: FileSubmissionDTO) =>
+        s.title.toLowerCase().includes(this.state.search)
+    );
     return (
       <div>
         <Input.Search onSearch={this.handleSearch} style={{ width: 200 }} />
@@ -90,7 +93,7 @@ export class Submissions extends React.Component<any | Props, State> {
           <List
             loading={this.props.submissionStore.isLoading}
             dataSource={submissions}
-            renderItem={(item: SubmissionDTO) => (
+            renderItem={(item: FileSubmissionDTO) => (
               <ListItem item={item}></ListItem>
             )}
           ></List>

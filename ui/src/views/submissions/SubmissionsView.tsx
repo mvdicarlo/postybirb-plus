@@ -16,7 +16,7 @@ export default class SubmissionView extends React.Component {
       Promise.resolve(
         `http://localhost:${
           window['PORT']
-        }/submission/create/${encodeURIComponent(file['path'])}`
+        }/file_submission/create/${encodeURIComponent(file['path'])}`
       ),
     onChange(info) {
       const { status } = info.file;

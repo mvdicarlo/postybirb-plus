@@ -1,22 +1,22 @@
 import { observable, computed, action } from 'mobx';
 import axios from '../utils/http';
-import { SubmissionDTO } from '../interfaces/submission.interface';
+import { FileSubmissionDTO } from '../interfaces/submission.interface';
 import socket from '../utils/websocket';
 
-export interface SubmissionState {
+export interface FileSubmissionState {
   loading: boolean;
-  submissions: SubmissionDTO[];
+  submissions: FileSubmissionDTO[];
 }
 
 export class SubmissionStore {
-  @observable state: SubmissionState = {
+  @observable state: FileSubmissionState = {
     submissions: [],
     loading: true
   };
 
   constructor() {
     axios
-      .get('/submission')
+      .get('/file_submission')
       .then(({ data }) => {
         this.state.submissions = data || [];
       })
@@ -24,7 +24,7 @@ export class SubmissionStore {
   }
 
   @computed
-  get all(): SubmissionDTO[] {
+  get all(): FileSubmissionDTO[] {
     return [...this.state.submissions].sort((a, b) => a.order - b.order);
   }
 
@@ -34,7 +34,7 @@ export class SubmissionStore {
   }
 
   @action
-  addSubmission(submission: SubmissionDTO) {
+  addSubmission(submission: FileSubmissionDTO) {
     this.state.submissions.push(submission);
   }
 
@@ -44,17 +44,17 @@ export class SubmissionStore {
   }
 
   @action
-  setSubmissions(submissions: SubmissionDTO[]) {
+  setSubmissions(submissions: FileSubmissionDTO[]) {
     this.state.submissions = submissions || [];
   }
 }
 
 export const submissionStore = new SubmissionStore();
 
-socket.on('SUBMISSION REMOVED', (id: string) => {
+socket.on('FILE SUBMISSION REMOVED', (id: string) => {
   submissionStore.removeSubmission(id);
 });
 
-socket.on('SUBMISSION CREATED', (data: SubmissionDTO) => {
+socket.on('FILE SUBMISSION CREATED', (data: FileSubmissionDTO) => {
   submissionStore.addSubmission(data);
 });

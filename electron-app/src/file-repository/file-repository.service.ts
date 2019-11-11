@@ -6,7 +6,7 @@ import {
   SUBMISSION_FILE_DIRECTORY,
   THUMBNAIL_FILE_DIRECTORY,
 } from '../directories';
-import { Submission } from 'src/submission/submission.interface';
+import { FileSubmission } from 'src/submission/file-submission/file-submission.interface';
 
 @Injectable()
 export class FileRepositoryService {
@@ -56,7 +56,7 @@ export class FileRepositoryService {
     };
   }
 
-  async removeSubmissionFiles(submission: Submission) {
+  async removeSubmissionFiles(submission: FileSubmission) {
     this.logger.debug(`Removing files at\n${JSON.stringify(submission.fileLocations, null, 1)}`);
     const promises = [
       fs.remove(submission.fileLocations.submission),
