@@ -5,6 +5,7 @@ import { Link, Route, Switch } from 'react-router-dom';
 import { UIStore } from '../../stores/ui.store';
 import Home from '../home/Home';
 import SubmissionsView from '../submissions/SubmissionsView';
+import AppHeader from '../app-header/AppHeader';
 import './AppLayout.css';
 
 const { Header, Content, Sider } = Layout;
@@ -50,7 +51,7 @@ export default class App extends React.Component<any | Props, State> {
     return (
       <Layout
         style={{
-          minHeight: '100vh'
+          height: '100vh'
         }}
       >
         <Sider
@@ -97,6 +98,9 @@ export default class App extends React.Component<any | Props, State> {
 
         <Layout>
           <Content>
+            <div className="header">
+              <AppHeader />
+            </div>
             <div className="container">
               <Switch>
                 <Route exact path="/" component={Home} />

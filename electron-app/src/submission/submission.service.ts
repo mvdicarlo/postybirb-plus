@@ -3,13 +3,19 @@ import { Submission } from './submission.interface';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 import * as shortid from 'shortid';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
+import { EventsGateway } from 'src/events/events.gateway';
+
+enum EVENTS {
+  SUBMISSION_CREATED = 'SUBMISSION CREATED',
+  SUBMISSION_REMOVED = 'SUBMISSION REMOVED',
+}
 
 @Injectable()
 export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
   private submissions: Submission[] = [];
 
-  constructor(private readonly fileRepository: FileRepositoryService) {}
+  constructor(private readonly fileRepository: FileRepositoryService, private readonly eventEmitter: EventsGateway) {}
 
   getAllSubmissions(): Submission[] {
     return this.submissions;
@@ -30,6 +36,7 @@ export class SubmissionService {
       created: Date.now(),
     };
     this.submissions.push(submission);
+    this.eventEmitter.emitSubmissionEvent(EVENTS.SUBMISSION_CREATED, submission);
   }
 
   async removeSubmission(id: string) {
@@ -37,6 +44,7 @@ export class SubmissionService {
     if (submission) {
       await this.fileRepository.removeSubmissionFiles(submission);
       this.submissions.splice(this.submissions.indexOf(submission), 1);
+      this.eventEmitter.emitSubmissionEvent(EVENTS.SUBMISSION_REMOVED, id);
     }
   }
 

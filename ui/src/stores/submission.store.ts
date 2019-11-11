@@ -1,6 +1,7 @@
 import { observable, computed, action } from 'mobx';
 import axios from '../utils/http';
 import { SubmissionDTO } from '../interfaces/submission.interface';
+import socket from '../utils/websocket';
 
 export interface SubmissionState {
   loading: boolean;
@@ -24,7 +25,7 @@ export class SubmissionStore {
 
   @computed
   get all(): SubmissionDTO[] {
-    return [...this.state.submissions];
+    return [...this.state.submissions].sort((a, b) => a.order - b.order);
   }
 
   @computed
@@ -37,6 +38,11 @@ export class SubmissionStore {
     this.state.submissions.push(submission);
   }
 
+  @action removeSubmission(id: string) {
+    const index: number = this.state.submissions.findIndex(s => s.id === id);
+    if (index !== -1) this.state.submissions.splice(index, 1);
+  }
+
   @action
   setSubmissions(submissions: SubmissionDTO[]) {
     this.state.submissions = submissions || [];
@@ -44,3 +50,11 @@ export class SubmissionStore {
 }
 
 export const submissionStore = new SubmissionStore();
+
+socket.on('SUBMISSION REMOVED', (id: string) => {
+  submissionStore.removeSubmission(id);
+});
+
+socket.on('SUBMISSION CREATED', (data: SubmissionDTO) => {
+  submissionStore.addSubmission(data);
+});

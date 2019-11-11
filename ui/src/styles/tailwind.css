@@ -2724,32 +2724,9 @@
   border-left-width: 1px
 }
 
-.cursor-auto {
-  cursor: auto
-}
-
-.cursor-default {
-  cursor: default
-}
-
-.cursor-pointer {
-  cursor: pointer
-}
-
-.cursor-wait {
-  cursor: wait
-}
-
-.cursor-text {
-  cursor: text
-}
-
-.cursor-move {
-  cursor: move
-}
-
-.cursor-not-allowed {
-  cursor: not-allowed
+.cursor-zoom-in {
+  cursor: -webkit-zoom-in;
+  cursor: zoom-in
 }
 
 .block {
@@ -13485,32 +13462,9 @@
     border-left-width: 1px
   }
 
-  .sm\:cursor-auto {
-    cursor: auto
-  }
-
-  .sm\:cursor-default {
-    cursor: default
-  }
-
-  .sm\:cursor-pointer {
-    cursor: pointer
-  }
-
-  .sm\:cursor-wait {
-    cursor: wait
-  }
-
-  .sm\:cursor-text {
-    cursor: text
-  }
-
-  .sm\:cursor-move {
-    cursor: move
-  }
-
-  .sm\:cursor-not-allowed {
-    cursor: not-allowed
+  .sm\:cursor-zoom-in {
+    cursor: -webkit-zoom-in;
+    cursor: zoom-in
   }
 
   .sm\:block {
@@ -24247,32 +24201,9 @@
     border-left-width: 1px
   }
 
-  .md\:cursor-auto {
-    cursor: auto
-  }
-
-  .md\:cursor-default {
-    cursor: default
-  }
-
-  .md\:cursor-pointer {
-    cursor: pointer
-  }
-
-  .md\:cursor-wait {
-    cursor: wait
-  }
-
-  .md\:cursor-text {
-    cursor: text
-  }
-
-  .md\:cursor-move {
-    cursor: move
-  }
-
-  .md\:cursor-not-allowed {
-    cursor: not-allowed
+  .md\:cursor-zoom-in {
+    cursor: -webkit-zoom-in;
+    cursor: zoom-in
   }
 
   .md\:block {
@@ -35009,32 +34940,9 @@
     border-left-width: 1px
   }
 
-  .lg\:cursor-auto {
-    cursor: auto
-  }
-
-  .lg\:cursor-default {
-    cursor: default
-  }
-
-  .lg\:cursor-pointer {
-    cursor: pointer
-  }
-
-  .lg\:cursor-wait {
-    cursor: wait
-  }
-
-  .lg\:cursor-text {
-    cursor: text
-  }
-
-  .lg\:cursor-move {
-    cursor: move
-  }
-
-  .lg\:cursor-not-allowed {
-    cursor: not-allowed
+  .lg\:cursor-zoom-in {
+    cursor: -webkit-zoom-in;
+    cursor: zoom-in
   }
 
   .lg\:block {
@@ -45771,32 +45679,9 @@
     border-left-width: 1px
   }
 
-  .xl\:cursor-auto {
-    cursor: auto
-  }
-
-  .xl\:cursor-default {
-    cursor: default
-  }
-
-  .xl\:cursor-pointer {
-    cursor: pointer
-  }
-
-  .xl\:cursor-wait {
-    cursor: wait
-  }
-
-  .xl\:cursor-text {
-    cursor: text
-  }
-
-  .xl\:cursor-move {
-    cursor: move
-  }
-
-  .xl\:cursor-not-allowed {
-    cursor: not-allowed
+  .xl\:cursor-zoom-in {
+    cursor: -webkit-zoom-in;
+    cursor: zoom-in
   }
 
   .xl\:block {

@@ -39,7 +39,7 @@ export class FileRepositoryService {
             width: Math.min(sizes.width, 300),
             height: Math.min(sizes.height, 300),
           })
-          .toJPEG(100);
+          .toPNG();
       }
     } else {
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);

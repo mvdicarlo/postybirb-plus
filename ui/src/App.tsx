@@ -5,12 +5,17 @@ import { ConfigProvider } from 'antd';
 import { Provider } from 'mobx-react';
 import { uiStore } from './stores/ui.store';
 import { submissionStore } from './stores/submission.store';
+import { headerStore } from './stores/header.store';
 
 export default class App extends React.Component {
   render() {
     return (
       <ConfigProvider>
-        <Provider uiStore={uiStore} submissionStore={submissionStore}>
+        <Provider
+          uiStore={uiStore}
+          submissionStore={submissionStore}
+          headerStore={headerStore}
+        >
           <AppLayout></AppLayout>
         </Provider>
       </ConfigProvider>

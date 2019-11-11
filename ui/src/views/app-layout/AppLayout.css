@@ -4,7 +4,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   padding-left: 36px;
-  color: white;
+  color: hsla(0, 0%, 100%, 0.65);
   font-size: 1.5em;
 }
 
@@ -12,4 +12,21 @@
   color: transparent;
   background-position: center;
   font-size: 0 !important;
+}
+
+.ant-page-header,
+.ant-page-header-content {
+  padding: 0;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #f0f2f5;
+  margin-bottom: 1em;
+}
+
+.header > * {
+  border-bottom: 1px solid #e0e0e0;
 }

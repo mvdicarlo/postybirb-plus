@@ -6,6 +6,9 @@ module.exports = {
     extend: {},
     container: {
       center: true
+    },
+    cursor: {
+      'zoom-in': 'zoom-in'
     }
   },
   variants: {},
