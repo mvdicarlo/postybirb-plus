@@ -4,6 +4,7 @@ import { FileRepositoryService } from 'src/file-repository/file-repository.servi
 import * as shortid from 'shortid';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { EventsGateway } from 'src/events/events.gateway';
+import { FileSubmissionRepository } from './file-submission.repository';
 
 enum EVENTS {
   SUBMISSION_CREATED = 'FILE SUBMISSION CREATED',
@@ -13,15 +14,14 @@ enum EVENTS {
 @Injectable()
 export class FileSubmissionService {
   private readonly logger = new Logger(FileSubmissionService.name);
-  private submissions: FileSubmission[] = [];
 
-  constructor(private readonly fileRepository: FileRepositoryService, private readonly eventEmitter: EventsGateway) {}
+  constructor(
+    private readonly repository: FileSubmissionRepository,
+    private readonly fileRepository: FileRepositoryService,
+    private readonly eventEmitter: EventsGateway,
+  ) {}
 
-  getAllSubmissions(): FileSubmission[] {
-    return this.submissions;
-  }
-
-  async createSubmission(file: UploadedFile, path: string) {
+  async createSubmission(file: UploadedFile, path: string): Promise<void> {
     const id = shortid.generate();
     const locations = await this.fileRepository.insertFile(id, file, path);
     const submission: FileSubmission = {
@@ -33,23 +33,27 @@ export class FileSubmissionService {
         thumbnail: locations.thumbnailLocation,
       },
       originalFilename: file.originalname,
-      order: this.submissions.length,
+      order: await this.repository.count(),
       created: Date.now(),
     };
-    this.submissions.push(submission);
-    this.eventEmitter.emitSubmissionEvent(EVENTS.SUBMISSION_CREATED, submission);
+
+    await this.repository.create(submission);
+    this.eventEmitter.emitSubmissionEvent(
+      EVENTS.SUBMISSION_CREATED,
+      submission,
+    );
   }
 
-  async removeSubmission(id: string) {
-    const submission: FileSubmission = await this.getSubmission(id);
-    if (submission) {
-      await this.fileRepository.removeSubmissionFiles(submission);
-      this.submissions.splice(this.submissions.indexOf(submission), 1);
-      this.eventEmitter.emitSubmissionEvent(EVENTS.SUBMISSION_REMOVED, id);
-    }
+  async removeSubmission(id: string): Promise<void> {
+    await this.repository.remove(id);
+    this.eventEmitter.emitSubmissionEvent(EVENTS.SUBMISSION_REMOVED, id);
   }
 
-  async getSubmission(id: string): Promise<FileSubmission> {
-    return Promise.resolve(this.submissions.find(s => s.id === id));
+  async find(id: string): Promise<FileSubmission> {
+    return this.repository.find(id);
+  }
+
+  getAll(): Promise<FileSubmission[]> {
+    return this.repository.findAll();
   }
 }

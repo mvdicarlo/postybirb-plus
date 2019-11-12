@@ -16,13 +16,13 @@ export class FileSubmissionController {
   constructor(private readonly service: FileSubmissionService) {}
 
   @Get()
-  findAll(): Submission[] {
-    return this.service.getAllSubmissions();
+  async findAll(): Promise<Submission[]> {
+    return this.service.getAll();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-      this.service.removeSubmission(id);
+  async remove(@Param('id') id: string) {
+    return this.service.removeSubmission(id);
   }
 
   @Post('create/:path')

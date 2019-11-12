@@ -1,4 +1,8 @@
-import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Submission } from 'src/submission/submission.interface';
 
@@ -7,7 +11,11 @@ export class EventsGateway {
   @WebSocketServer()
   server: Server;
 
-  public emitSubmissionEvent(event: string, data: string|Submission) {
+  public emit(event: string, data: any) {
+    this.server.emit(event, data);
+  }
+
+  public emitSubmissionEvent(event: string, data: string | Submission) {
     this.server.emit(event, data);
   }
 }
