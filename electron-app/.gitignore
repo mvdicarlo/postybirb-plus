@@ -2,6 +2,7 @@
 /dist
 /build
 /node_modules
+/electron-dist
 
 # Logs
 logs

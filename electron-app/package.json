@@ -2,11 +2,17 @@
   "name": "electron-app",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "main": "main.js",
+  "author": "Michael DiCarlo",
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
+    "build:linux": "electron-builder -l",
+    "build:mac": "electron-builder -m",
+    "build:windows": "electron-builder -w",
+    "build:release": "export $(cat .env | xargs) && electron-builder -mwl -p always",
+    "clean": "rimraf electron-dist",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "rimraf dist; nest build; electron main --develop",
     "start:electron": "electron main --develop",
@@ -27,7 +33,6 @@
     "@nestjs/platform-socket.io": "^6.9.0",
     "@nestjs/websockets": "^6.9.0",
     "class-validator": "^0.11.0",
-    "electron": "^7.1.0",
     "electron-log": "^3.0.9",
     "electron-window-state": "^5.0.3",
     "fs-extra": "^8.1.0",
@@ -46,6 +51,7 @@
     "@types/node": "^12.7.5",
     "@types/socket.io": "^2.1.4",
     "@types/supertest": "^2.0.8",
+    "electron": "^7.1.0",
     "electron-builder": "^22.1.0",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
@@ -100,9 +106,6 @@
         "snap"
       ]
     },
-    "appImage": {
-      "systemIntegration": "doNotAsk"
-    },
     "win": {
       "publisherName": [
         "Michael DiCarlo"
@@ -118,13 +121,6 @@
         },
         {
           "target": "portable",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        },
-        {
-          "target": "zip",
           "arch": [
             "x64",
             "ia32"

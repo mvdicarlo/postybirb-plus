@@ -1,3 +1,5 @@
+import { FileSubmissionType } from "../enums/file-submission-type.enum";
+
 export interface SubmissionDTO {
   id: string;
   title: string;
@@ -7,6 +9,7 @@ export interface SubmissionDTO {
 
 export interface FileSubmissionDTO extends SubmissionDTO {
   originalFilename: string;
+  type: FileSubmissionType;
   fileLocations: {
     originalPath: string;
     submission: string;

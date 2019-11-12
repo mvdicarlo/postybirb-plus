@@ -5,6 +5,7 @@ import * as shortid from 'shortid';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmissionRepository } from './file-submission.repository';
+import { getSubmissionType } from './enums/file-submission-type.enum';
 
 enum EVENTS {
   SUBMISSION_CREATED = 'FILE SUBMISSION CREATED',
@@ -27,6 +28,7 @@ export class FileSubmissionService {
     const submission: FileSubmission = {
       id,
       title: file.originalname,
+      type: getSubmissionType(file.mimetype, file.originalname),
       fileLocations: {
         originalPath: path,
         submission: locations.submissionLocation,

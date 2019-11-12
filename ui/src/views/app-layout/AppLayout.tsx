@@ -49,7 +49,9 @@ export default class App extends React.Component<any | Props, State> {
   showDrawer = () => this.setState({ accountsVisible: true });
   hideDrawer = () => this.setState({ accountsVisible: false });
 
-  handleNavSelectChange = ({ key }) => this.setState({ currentNavActive: key });
+  handleNavSelectChange = ({ key }) => {
+    if (key !== '-1') this.setState({ currentNavActive: key });
+  };
 
   render() {
     const { state } = this.props.uiStore;
@@ -86,18 +88,9 @@ export default class App extends React.Component<any | Props, State> {
                 <span>Home</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="2" onClick={this.showDrawer}>
+            <Menu.Item key="-1" onClick={this.showDrawer}>
               <Icon type="user" />
               <span>Accounts</span>
-              <Drawer
-                title="Accounts"
-                visible={this.state.accountsVisible}
-                onClose={this.hideDrawer}
-                maskClosable={true}
-                closable={true}
-              >
-                <div>Hello!</div>
-              </Drawer>
             </Menu.Item>
             <Menu.Item key="3">
               <Link to="/submissions">
@@ -106,6 +99,13 @@ export default class App extends React.Component<any | Props, State> {
               </Link>
             </Menu.Item>
           </Menu>
+          <Drawer
+            title="Accounts"
+            visible={this.state.accountsVisible}
+            onClose={this.hideDrawer}
+          >
+            <div>Hello!</div>
+          </Drawer>
         </Sider>
 
         <Layout>
