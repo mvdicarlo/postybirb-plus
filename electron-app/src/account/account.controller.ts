@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Delete, Param, Get } from '@nestjs/common';
 import { AccountService } from './account.service';
-import { Account } from './account.interface';
+import { UserAccount, UserAccountDto } from './account.interface';
 import { CreateAccountDto } from './account.dto';
 
 @Controller('account')
@@ -20,5 +20,15 @@ export class AccountController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.service.removeAccount(id);
+  }
+
+  @Get('/checkLogin/:id')
+  async checkLogin(@Param('id') id: string) {
+    return this.service.checkLogin(id);
+  }
+
+  @Get('/loginStatuses')
+  loginStatuses(): UserAccountDto[] {
+    return this.service.getLoginStatuses();
   }
 }

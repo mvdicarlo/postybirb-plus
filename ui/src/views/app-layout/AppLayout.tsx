@@ -7,6 +7,7 @@ import Home from '../home/Home';
 import SubmissionsView from '../submissions/SubmissionsView';
 import AppHeader from '../app-header/AppHeader';
 import './AppLayout.css';
+import { Login } from '../login/Login';
 
 const { Header, Content, Sider } = Layout;
 
@@ -101,10 +102,11 @@ export default class App extends React.Component<any | Props, State> {
           </Menu>
           <Drawer
             title="Accounts"
+            width={'75vw'}
             visible={this.state.accountsVisible}
             onClose={this.hideDrawer}
           >
-            <div>Hello!</div>
+            <Login />
           </Drawer>
         </Sider>
 

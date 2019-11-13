@@ -5,8 +5,6 @@ import { inject, observer } from 'mobx-react';
 import { List, Avatar, Popconfirm, Modal, Input } from 'antd';
 import { FileSubmissionDTO } from '../../interfaces/submission.interface';
 import SubmissionService from '../../services/submission.service';
-import { ReactComponent } from '*.svg';
-import { isFlowBaseAnnotation } from '@babel/types';
 
 interface Props {
   submissionStore?: SubmissionStore;

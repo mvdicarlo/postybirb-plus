@@ -6,6 +6,7 @@ import { Provider } from 'mobx-react';
 import { uiStore } from './stores/ui.store';
 import { submissionStore } from './stores/file-submission.store';
 import { headerStore } from './stores/header.store';
+import { loginStatusStore } from './stores/login-status.store';
 
 export default class App extends React.Component {
   render() {
@@ -15,6 +16,7 @@ export default class App extends React.Component {
           uiStore={uiStore}
           submissionStore={submissionStore}
           headerStore={headerStore}
+          loginStatusStore={loginStatusStore}
         >
           <AppLayout></AppLayout>
         </Provider>

@@ -7,9 +7,10 @@ import { AccountController } from './account/account.controller';
 import { AccountService } from './account/account.service';
 import { AccountRepository } from './account/account.repository';
 import { FileSubmissionRepository } from './submission/file-submission/file-submission.repository';
+import { WebsitesModule } from './websites/websites.module';
 
 @Module({
-  imports: [],
+  imports: [WebsitesModule],
   controllers: [FileSubmissionController, AccountController],
   providers: [
     FileSubmissionService,

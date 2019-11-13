@@ -38,6 +38,7 @@
     "fs-extra": "^8.1.0",
     "nedb": "^1.8.0",
     "reflect-metadata": "^0.1.13",
+    "request-promise": "^4.2.5",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.3",
     "shortid": "^2.2.15"

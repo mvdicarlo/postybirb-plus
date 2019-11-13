@@ -1,7 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
-import { Account } from './account.interface';
+import { UserAccount } from './account.interface';
 
-export class CreateAccountDto implements Account {
+export class CreateAccountDto implements UserAccount {
   @IsNotEmpty()
   id: string;
 
@@ -13,7 +13,7 @@ export class CreateAccountDto implements Account {
   @IsNotEmpty()
   website: string;
 
-  toModel(): Account {
+  toModel(): UserAccount {
     return {
       id: this.id,
       alias: this.alias,
