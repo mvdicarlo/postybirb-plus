@@ -102,7 +102,7 @@ export default class App extends React.Component<any | Props, State> {
           </Menu>
           <Drawer
             title="Accounts"
-            width={'75vw'}
+            width={'50vw'}
             visible={this.state.accountsVisible}
             onClose={this.hideDrawer}
           >

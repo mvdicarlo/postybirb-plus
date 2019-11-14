@@ -7,8 +7,9 @@ export class GenericLoginDialog extends React.Component<LoginDialogProps, any> {
     componentDidMount() {
         const node = ReactDOM.findDOMNode(this);
         if (node instanceof HTMLElement) {
-            const view = node.querySelector('.webview');
-            console.log(view);
+            const view: any = node.querySelector('.webview');
+            view.partition = `persist:${this.props.account.id}`;
+            view.src = this.props.url;
         }
     }
 

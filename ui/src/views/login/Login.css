@@ -1,0 +1,16 @@
+.login-modal .ant-modal {
+  padding: 0;
+  margin: 0;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100vh;
+}
+
+.login-modal .ant-modal-content {
+  height: 100%;
+}
+
+.login-modal .ant-modal-body {
+  height: calc(100% - 55px);
+  padding: 0 !important;
+}

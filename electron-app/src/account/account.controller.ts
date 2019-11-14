@@ -23,7 +23,7 @@ export class AccountController {
   }
 
   @Get('/checkLogin/:id')
-  async checkLogin(@Param('id') id: string) {
+  async checkLogin(@Param('id') id: string): Promise<UserAccountDto> {
     return this.service.checkLogin(id);
   }
 

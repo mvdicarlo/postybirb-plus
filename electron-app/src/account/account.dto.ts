@@ -8,17 +8,8 @@ export class CreateAccountDto implements UserAccount {
   @IsNotEmpty()
   alias: string;
 
-  data: any;
+  data: any = {};
 
   @IsNotEmpty()
   website: string;
-
-  toModel(): UserAccount {
-    return {
-      id: this.id,
-      alias: this.alias,
-      data: this.data || {},
-      website: this.website,
-    };
-  }
 }

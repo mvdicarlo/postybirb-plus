@@ -4,8 +4,8 @@ import { UserAccount, UserAccountDto } from './account.interface';
 import { AccountRepository } from './account.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
-import { ModuleRef } from '@nestjs/core';
 import { Website } from 'src/websites/interfaces/website.interface';
+import { WebsiteProvider } from 'src/websites/website-provider.service';
 
 enum EVENTS {
   ACCOUNT_CREATED = 'ACCOUNT CREATED',
@@ -22,7 +22,7 @@ export class AccountService {
   constructor(
     private readonly repository: AccountRepository,
     private readonly eventEmitter: EventsGateway,
-    private readonly moduleRef: ModuleRef,
+    private readonly websiteProvider: WebsiteProvider
   ) {
     this.repository
       .findAll()
@@ -50,11 +50,7 @@ export class AccountService {
       throw new Error(`Account with Id ${createAccountDto.id} already exists.`);
     }
 
-    await this.repository.create(createAccountDto.toModel());
-    this.eventEmitter.emit(
-      EVENTS.ACCOUNTS_UPDATED,
-      await this.repository.findAll(),
-    );
+    await this.repository.create(createAccountDto);
 
     this.loginStatuses.push({
       id: createAccountDto.id,
@@ -66,6 +62,10 @@ export class AccountService {
 
     this.eventEmitter.emit(EVENTS.ACCOUNT_CREATED, createAccountDto.id);
     this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(
+      EVENTS.ACCOUNTS_UPDATED,
+      await this.repository.findAll(),
+    );
   }
 
   getAll(): Promise<UserAccount[]> {
@@ -84,7 +84,11 @@ export class AccountService {
     }
 
     this.eventEmitter.emit(EVENTS.ACCOUNT_DELETED, id);
-    this.eventEmitter.emit(EVENTS.ACCOUNTS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(
+      EVENTS.ACCOUNTS_UPDATED,
+      await this.repository.findAll(),
+    );
   }
 
   async checkLogin(id: string): Promise<UserAccountDto> {
@@ -93,7 +97,7 @@ export class AccountService {
       throw new Error(`Account ID ${id} does not exist.`);
     }
 
-    const website: Website = this.moduleRef.get(account.website);
+    const website: Website = this.websiteProvider.getWebsiteModule(account.website);
     const response: LoginResponse = await website.checkLoginStatus(
       account.data,
     );
