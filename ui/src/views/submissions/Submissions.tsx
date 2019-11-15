@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { SubmissionStore } from '../../stores/file-submission.store';
 import { inject, observer } from 'mobx-react';
 import { List, Avatar, Popconfirm, Modal, Input } from 'antd';
-import { FileSubmissionDTO } from '../../interfaces/submission.interface';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/file-submission.interface';
 import SubmissionService from '../../services/submission.service';
 
 interface Props {
@@ -15,7 +15,7 @@ interface State {
 }
 
 interface ListItemProps {
-  item: FileSubmissionDTO;
+  item: FileSubmission;
 }
 
 class ListItem extends React.Component<ListItemProps, any> {
@@ -80,8 +80,8 @@ export class Submissions extends React.Component<any | Props, State> {
   handleSearch = search => this.setState({ search: search.toLowerCase() });
 
   render() {
-    const submissions: FileSubmissionDTO[] = this.props.submissionStore.all.filter(
-      (s: FileSubmissionDTO) =>
+    const submissions: FileSubmission[] = this.props.submissionStore.all.filter(
+      (s: FileSubmission) =>
         s.title.toLowerCase().includes(this.state.search)
     );
     return (
@@ -91,7 +91,7 @@ export class Submissions extends React.Component<any | Props, State> {
           <List
             loading={this.props.submissionStore.isLoading}
             dataSource={submissions}
-            renderItem={(item: FileSubmissionDTO) => (
+            renderItem={(item: FileSubmission) => (
               <ListItem item={item}></ListItem>
             )}
           ></List>

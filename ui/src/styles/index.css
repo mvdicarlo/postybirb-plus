@@ -3,8 +3,16 @@
 @tailwind components;
 
 .primary-layout-container {
-    @apply px-3;
-    background-color: white;
+  @apply px-3;
+  background-color: white;
+}
+
+.full-size-spinner {
+  @apply h-full w-full;
+}
+
+.full-size-spinner .ant-spin-container {
+  @apply h-full w-full;
 }
 
 @tailwind utilities;

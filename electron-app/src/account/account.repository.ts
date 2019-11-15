@@ -28,9 +28,9 @@ export class AccountRepository {
     });
   }
 
-  findAll(): Promise<UserAccount[]> {
+  findAll(search?: any): Promise<UserAccount[]> {
     return new Promise(resolve => {
-      this.db.find({}, (err, docs) => {
+      this.db.find({ ...search }, (err, docs) => {
         resolve(docs || []);
       });
     });

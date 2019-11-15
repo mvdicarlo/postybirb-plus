@@ -1,11 +1,11 @@
 import { observable, computed, action } from 'mobx';
 import axios from '../utils/http';
-import { FileSubmissionDTO } from '../interfaces/submission.interface';
+import { FileSubmission } from '../../../electron-app/src/submission/file-submission/file-submission.interface';
 import socket from '../utils/websocket';
 
 export interface FileSubmissionState {
   loading: boolean;
-  submissions: FileSubmissionDTO[];
+  submissions: FileSubmission[];
 }
 
 export class SubmissionStore {
@@ -24,7 +24,7 @@ export class SubmissionStore {
   }
 
   @computed
-  get all(): FileSubmissionDTO[] {
+  get all(): FileSubmission[] {
     return [...this.state.submissions].sort((a, b) => a.order - b.order);
   }
 
@@ -34,7 +34,7 @@ export class SubmissionStore {
   }
 
   @action
-  addSubmission(submission: FileSubmissionDTO) {
+  addSubmission(submission: FileSubmission) {
     this.state.submissions.push(submission);
   }
 
@@ -44,7 +44,7 @@ export class SubmissionStore {
   }
 
   @action
-  setSubmissions(submissions: FileSubmissionDTO[]) {
+  setSubmissions(submissions: FileSubmission[]) {
     this.state.submissions = submissions || [];
   }
 }
@@ -55,6 +55,6 @@ socket.on('FILE SUBMISSION REMOVED', (id: string) => {
   submissionStore.removeSubmission(id);
 });
 
-socket.on('FILE SUBMISSION CREATED', (data: FileSubmissionDTO) => {
+socket.on('FILE SUBMISSION CREATED', (data: FileSubmission) => {
   submissionStore.addSubmission(data);
 });

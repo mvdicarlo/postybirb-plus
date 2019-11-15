@@ -1,6 +1,6 @@
-import { Icon, Layout, Menu, Drawer } from 'antd';
-import { inject, observer } from 'mobx-react';
 import React from 'react';
+import { Icon, Layout, Menu, Drawer, Select } from 'antd';
+import { inject, observer } from 'mobx-react';
 import { Link, Route, Switch } from 'react-router-dom';
 import { UIStore } from '../../stores/ui.store';
 import Home from '../home/Home';
@@ -8,8 +8,9 @@ import SubmissionsView from '../submissions/SubmissionsView';
 import AppHeader from '../app-header/AppHeader';
 import './AppLayout.css';
 import { Login } from '../login/Login';
+import { WebsiteRegistry } from '../../website-components/website-registry';
 
-const { Header, Content, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 interface Props {
   uiStore?: UIStore;
@@ -27,6 +28,8 @@ export default class App extends React.Component<any | Props, State> {
     currentNavActive: '1',
     accountsVisible: false
   };
+
+  private readonly websites = Object.keys(WebsiteRegistry.websites);
 
   constructor(props: Props) {
     super(props);
@@ -50,6 +53,10 @@ export default class App extends React.Component<any | Props, State> {
   showDrawer = () => this.setState({ accountsVisible: true });
   hideDrawer = () => this.setState({ accountsVisible: false });
 
+  updateWebsiteFilter = (filtered: string[]) => {
+    this.props.uiStore.changeWebsiteFilter(filtered);
+  };
+
   handleNavSelectChange = ({ key }) => {
     if (key !== '-1') this.setState({ currentNavActive: key });
   };
@@ -62,11 +69,7 @@ export default class App extends React.Component<any | Props, State> {
           height: '100vh'
         }}
       >
-        <Sider
-          collapsible
-          collapsed={state.navCollapsed}
-          onCollapse={this.handleCollapsedChange}
-        >
+        <Sider collapsible collapsed={state.navCollapsed} onCollapse={this.handleCollapsedChange}>
           <Link to="/">
             <div
               className="logo"
@@ -101,7 +104,26 @@ export default class App extends React.Component<any | Props, State> {
             </Menu.Item>
           </Menu>
           <Drawer
-            title="Accounts"
+            title={
+              <div className="inline-flex w-4/5">
+                <div className="flex-1 mr-1">Accounts</div>
+                <div className="w-full">
+                  <Select
+                    mode="multiple"
+                    size="small"
+                    placeholder="Hide websites"
+                    style={{ width: '100%' }}
+                    defaultValue={this.props.uiStore.websiteFilter}
+                    onChange={this.updateWebsiteFilter}
+                    allowClear={true}
+                  >
+                    {this.websites.map(website => (
+                      <Select.Option key={website}>{website}</Select.Option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+            }
             width={'50vw'}
             visible={this.state.accountsVisible}
             onClose={this.hideDrawer}

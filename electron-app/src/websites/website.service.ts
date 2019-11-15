@@ -22,6 +22,17 @@ export abstract class WebsiteService implements Website {
 
   abstract postFileSubmission(data: any): Promise<any>;
 
+  protected storeAccountInformation(
+    profileId: string,
+    key: string,
+    value: any,
+  ): void {
+    this.accountInformation.set(profileId, {
+      ...this.accountInformation.get(profileId),
+      [key]: value,
+    });
+  }
+
   parseTags(
     tags: string[],
     options = { spaceReplacer: '_', minLength: 1, maxLength: 100 },

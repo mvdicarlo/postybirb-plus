@@ -1,7 +1,7 @@
 import { observable, computed, action } from 'mobx';
 import socket from '../utils/websocket';
 import axios from '../utils/http';
-import { UserAccountDto } from '../interfaces/user-account.interface';
+import { UserAccountDto } from '../../../electron-app/src/account/account.interface';
 
 export interface LoginStatusState {
   statuses: UserAccountDto[];

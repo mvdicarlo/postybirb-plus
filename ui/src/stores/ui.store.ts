@@ -1,4 +1,4 @@
-import { observable, action, autorun } from 'mobx';
+import { observable, action, autorun, computed } from 'mobx';
 
 const STORE_KEY: string = 'UIState';
 
@@ -6,19 +6,26 @@ interface UIState {
   theme: 'light' | 'dark' | undefined;
   navId: number;
   navCollapsed: boolean;
+  websiteFilter: string[];
 }
 
 export class UIStore {
   @observable state: UIState = {
     theme: 'dark',
     navId: 0,
-    navCollapsed: false
+    navCollapsed: false,
+    websiteFilter: []
   };
 
   constructor() {
     const storedState = localStorage.getItem(STORE_KEY);
     if (storedState) Object.assign(this.state, JSON.parse(storedState));
     autorun(() => localStorage.setItem(STORE_KEY, JSON.stringify(this.state)));
+  }
+
+  @computed
+  get websiteFilter(): string[] {
+    return [...this.state.websiteFilter];
   }
 
   @action
@@ -34,6 +41,11 @@ export class UIStore {
   @action
   changeNavId(navId: number) {
     this.state.navId = navId;
+  }
+
+  @action
+  changeWebsiteFilter(excludedWebsites: string[]) {
+    this.state.websiteFilter = excludedWebsites || [];
   }
 }
 

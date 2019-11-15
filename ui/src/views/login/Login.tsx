@@ -1,8 +1,12 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { LoginStatusStore } from '../../stores/login-status.store';
+import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { Website } from '../../website-components/interfaces/website.interface';
+import { UserAccountDto } from '../../../../electron-app/src/account/account.interface';
+import LoginService from '../../services/login.service';
+import './Login.css';
 import {
   List,
   Card,
@@ -16,24 +20,25 @@ import {
   Typography,
   Badge
 } from 'antd';
-import { UserAccountDto } from '../../interfaces/user-account.interface';
-import LoginService from '../../services/login.service';
-import './Login.css';
 
 interface Props {
   loginStatusStore?: LoginStatusStore;
+  uiStore?: UIStore;
 }
 
-@inject('loginStatusStore')
+@inject('loginStatusStore', 'uiStore')
 @observer
 export class Login extends React.Component<any | Props> {
   private readonly entries = Object.entries(WebsiteRegistry.websites);
 
   render() {
+    const websitesToDisplay = this.entries.filter(
+      ([key, website]) => !this.props.uiStore.websiteFilter.includes(key)
+    );
     return (
       <ConfigProvider renderEmpty={() => <div></div>}>
         <div className="h-100 w-100">
-          {this.entries.map(([key, website]) => (
+          {websitesToDisplay.map(([key, website]) => (
             <LoginPanel
               key={key}
               website={website}
@@ -66,8 +71,7 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
 
   setAccountAlias = ({ target }: { target: HTMLInputElement }) =>
     this.setState({ newAccountAlias: target.value });
-  showAddAccount = () =>
-    this.setState({ showAddAccount: true, newAccountAlias: '' });
+  showAddAccount = () => this.setState({ showAddAccount: true, newAccountAlias: '' });
   hideAddAccount = () => this.setState({ showAddAccount: false });
   createAccount = () => {
     if (this.state.newAccountAlias && this.state.newAccountAlias.trim()) {
@@ -96,9 +100,7 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
         <List
           size="small"
           dataSource={this.props.accounts}
-          renderItem={item => (
-            <AccountInfo accountInfo={item} website={this.props.website} />
-          )}
+          renderItem={item => <AccountInfo accountInfo={item} website={this.props.website} />}
         />
         <Modal
           visible={this.state.showAddAccount}
@@ -109,11 +111,7 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
           closeIcon={false}
           title="Create Account"
         >
-          <Input
-            placeholder="Account Alias"
-            maxLength={64}
-            onChange={this.setAccountAlias}
-          />
+          <Input placeholder="Account Alias" maxLength={64} onChange={this.setAccountAlias} />
         </Modal>
       </Card>
     );
@@ -157,8 +155,7 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
               <div>
                 Are you sure you want to delete this account?
                 <br />
-                This action cannot be undone and the account will be removed
-                from all submissions.
+                This action cannot be undone and the account will be removed from all submissions.
               </div>
             }
             onConfirm={() => this.deleteAccount(this.props.accountInfo.id)}

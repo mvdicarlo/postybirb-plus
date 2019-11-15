@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserAccountDto } from '../../interfaces/user-account.interface';
+import { UserAccountDto } from '../../../../electron-app/src/account/account.interface';
 
 export interface LoginDialogProps {
     account: UserAccountDto;

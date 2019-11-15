@@ -4,8 +4,8 @@ import { UserAccount, UserAccountDto } from './account.interface';
 import { AccountRepository } from './account.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
-import { Website } from 'src/websites/interfaces/website.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
+import { session } from 'electron';
 
 enum EVENTS {
   ACCOUNT_CREATED = 'ACCOUNT CREATED',
@@ -18,11 +18,13 @@ enum EVENTS {
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
   private readonly loginStatuses: UserAccountDto[] = [];
+  private readonly loginCheckTimers: { [key: number]: any } = [];
+  private readonly loginCheckMap: { [key: number]: string[] } = [];
 
   constructor(
     private readonly repository: AccountRepository,
     private readonly eventEmitter: EventsGateway,
-    private readonly websiteProvider: WebsiteProvider
+    private readonly websiteProvider: WebsiteProvider,
   ) {
     this.repository
       .findAll()
@@ -40,12 +42,25 @@ export class AccountService {
       .finally(() => {
         this.loginStatuses.forEach(s => this.checkLogin(s.id));
       });
+
+    this.websiteProvider.getAllWebsiteModules().forEach(website => {
+      const { refreshInterval } = website;
+      if (!this.loginCheckTimers[refreshInterval]) {
+        this.loginCheckTimers[refreshInterval] = setInterval(async () => {
+          const accountsToRefresh = await this.repository.findAll({
+            website: { $in: this.loginCheckMap[refreshInterval] },
+          });
+          accountsToRefresh.forEach(account => this.checkLogin(account));
+        }, refreshInterval);
+      }
+
+      this.loginCheckMap[refreshInterval] = this.loginCheckMap[refreshInterval] || [];
+      this.loginCheckMap[refreshInterval].push(website.constructor.name);
+    });
   }
 
   async createAccount(createAccountDto: CreateAccountDto) {
-    const existing: UserAccount = await this.repository.find(
-      createAccountDto.id,
-    );
+    const existing: UserAccount = await this.repository.find(createAccountDto.id);
     if (existing) {
       throw new Error(`Account with Id ${createAccountDto.id} already exists.`);
     }
@@ -62,10 +77,7 @@ export class AccountService {
 
     this.eventEmitter.emit(EVENTS.ACCOUNT_CREATED, createAccountDto.id);
     this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(
-      EVENTS.ACCOUNTS_UPDATED,
-      await this.repository.findAll(),
-    );
+    this.eventEmitter.emit(EVENTS.ACCOUNTS_UPDATED, await this.repository.findAll());
   }
 
   getAll(): Promise<UserAccount[]> {
@@ -85,22 +97,24 @@ export class AccountService {
 
     this.eventEmitter.emit(EVENTS.ACCOUNT_DELETED, id);
     this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(
-      EVENTS.ACCOUNTS_UPDATED,
-      await this.repository.findAll(),
-    );
+    this.eventEmitter.emit(EVENTS.ACCOUNTS_UPDATED, await this.repository.findAll());
+
+    session
+      .fromPartition(`persist:${id}`)
+      .clearStorageData()
+      .then(() => this.logger.debug(`Session data for ${id} cleared`, 'Account'));
   }
 
-  async checkLogin(id: string): Promise<UserAccountDto> {
-    const account = await this.repository.find(id);
+  async checkLogin(userAccount: string | UserAccount): Promise<UserAccountDto> {
+    const account: UserAccount =
+      typeof userAccount === 'string' ? await this.repository.find(userAccount) : userAccount;
     if (!account) {
-      throw new Error(`Account ID ${id} does not exist.`);
+      throw new Error(`Account ID ${userAccount} does not exist.`);
     }
 
-    const website: Website = this.websiteProvider.getWebsiteModule(account.website);
-    const response: LoginResponse = await website.checkLoginStatus(
-      account.data,
-    );
+    this.logger.debug(`Checking login for ${account.id}`, 'Login Check');
+    const website = this.websiteProvider.getWebsiteModule(account.website);
+    const response: LoginResponse = await website.checkLoginStatus(account);
 
     const login: UserAccountDto = {
       id: account.id,
@@ -114,10 +128,7 @@ export class AccountService {
     return login;
   }
 
-  private async insertOrUpdateLoginStatus(
-    login: UserAccountDto,
-    data: any,
-  ): Promise<void> {
+  private async insertOrUpdateLoginStatus(login: UserAccountDto, data: any): Promise<void> {
     const index: number = this.loginStatuses.findIndex(s => s.id === login.id);
     this.loginStatuses[index] = login;
     await this.repository.update(login.id, { data });

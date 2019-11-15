@@ -20,12 +20,15 @@ if (!hasLock) {
     return;
 }
 
-const nest = require('./dist/main');
+let nest;
 
 app.disableHardwareAcceleration(); // TODO setting
 app.on('second-instance', show);
-app.on('ready', initialize);
 app.on('window-all-closed', () => {});
+app.on('ready', () => {
+    nest = require('./dist/main');
+    initialize()
+});
 
 let window = null;
 let initializedOnce = false;

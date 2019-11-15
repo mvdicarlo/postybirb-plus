@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { UserAccountDto } from '../interfaces/user-account.interface';
+import { UserAccountDto } from '../../../electron-app/src/account/account.interface';
 
 export default class LoginService {
   static createAccount(

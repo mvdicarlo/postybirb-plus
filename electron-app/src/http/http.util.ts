@@ -15,6 +15,7 @@ interface PostOptions extends GetOptions {
 
 interface HttpResponse<T> {
   body: T;
+  error: any;
   response: request.Response;
   returnUrl: string;
 }
@@ -34,12 +35,12 @@ export default class Http {
     const _session = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
-    if (!headers.cookies) {
+    if (!headers.cookie) {
       const cookies = await _session.cookies.get({
         url: new URL(uri).origin,
       });
 
-      headers.cookies = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+      headers.cookie = cookies.map(c => `${c.name}=${c.value}`).join('; ');
     }
 
     const opts: request.CoreOptions = Object.assign(
@@ -48,14 +49,15 @@ export default class Http {
       },
       options.requestOptions,
     );
-    return new Promise((resolve, reject) => {
-      Http.Request.get(uri, opts, (err, response, body) => {
+    return new Promise((resolve) => {
+      Http.Request.get(uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           response,
+          error,
           body,
           returnUrl: response.request.uri.href,
         };
-        err ? reject(res) : resolve(res);
+        resolve(res);
       });
     });
   }
@@ -68,12 +70,12 @@ export default class Http {
     const _session = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
-    if (!headers.cookies) {
+    if (!headers.cookie) {
       const cookies = await _session.cookies.get({
         url: new URL(uri).origin,
       });
 
-      headers.cookies = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+      headers.cookie = cookies.map(c => `${c.name}=${c.value}`).join('; ');
     }
 
     const opts: request.CoreOptions = Object.assign(
@@ -94,14 +96,15 @@ export default class Http {
       opts.body = options.data;
     }
 
-    return new Promise((resolve, reject) => {
-      Http.Request.get(uri, opts, (err, response, body) => {
+    return new Promise((resolve) => {
+      Http.Request.get(uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
+          error,
           response,
           body,
           returnUrl: response.request.uri.href,
         };
-        err ? reject(res) : resolve(res);
+        resolve(res);
       });
     });
   }

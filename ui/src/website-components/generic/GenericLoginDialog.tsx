@@ -1,21 +1,40 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { LoginDialogProps } from '../interfaces/website.interface';
+import { Spin } from 'antd';
 
-export class GenericLoginDialog extends React.Component<LoginDialogProps, any> {
+interface State {
+  loading: boolean;
+}
 
-    componentDidMount() {
-        const node = ReactDOM.findDOMNode(this);
-        if (node instanceof HTMLElement) {
-            const view: any = node.querySelector('.webview');
-            view.partition = `persist:${this.props.account.id}`;
-            view.src = this.props.url;
-        }
+export class GenericLoginDialog extends React.Component<LoginDialogProps, State> {
+  state: State = {
+    loading: true
+  };
+
+  componentDidMount() {
+    const node = ReactDOM.findDOMNode(this);
+    if (node instanceof HTMLElement) {
+      const view: any = node.querySelector('.webview');
+      view.addEventListener('did-stop-loading', () => {
+        if (this.state.loading) this.setState({ loading: false });
+      });
+      view.partition = `persist:${this.props.account.id}`;
+      view.src = this.props.url;
     }
+  }
 
-    render() {
-        return <div className="h-full w-full">
-            <webview className="webview h-full w-full" webpreferences="nativeWindowOpen=1" allowpopups />
-        </div>;
-    }
+  render() {
+    return (
+      <div className="h-full w-full">
+        <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
+          <webview
+            className="webview h-full w-full"
+            webpreferences="nativeWindowOpen=1"
+            allowpopups
+          />
+        </Spin>
+      </div>
+    );
+  }
 }
