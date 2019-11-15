@@ -1,6 +1,17 @@
 export interface Submission {
-  id: string;
-  title: string;
-  order: number;
   created: number;
+  id: string;
+  order: number;
+  schedule: SubmissionSchedule;
+  title: string;
+  type: SubmissionType;
+}
+
+export enum SubmissionType {
+  FILE = 'FILE',
+  STATUS = 'STATUS',
+}
+export interface SubmissionSchedule {
+  isScheduled?: boolean;
+  postAt?: number;
 }

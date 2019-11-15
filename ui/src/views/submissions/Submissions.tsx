@@ -47,7 +47,7 @@ class ListItem extends React.Component<ListItemProps, any> {
         <List.Item.Meta
           avatar={
             <div className="cursor-zoom-in" onClick={this.handleShow}>
-              <Avatar src={item.fileLocations.thumbnail} shape="square" />
+              <Avatar src={item.primary.preview} shape="square" />
             </div>
           }
           title={item.title}
@@ -62,7 +62,7 @@ class ListItem extends React.Component<ListItemProps, any> {
           <img
             alt="preview"
             style={{ width: '100%' }}
-            src={item.fileLocations.submission}
+            src={item.primary.type === 'IMAGE' ? item.primary.location : item.primary.preview}
           />
         </Modal>
       </List.Item>

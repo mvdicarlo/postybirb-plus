@@ -6,6 +6,7 @@ import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmissionRepository } from './file-submission.repository';
 import { getSubmissionType } from './enums/file-submission-type.enum';
+import { SubmissionType } from '../submission.interface';
 
 enum EVENTS {
   SUBMISSION_CREATED = 'FILE SUBMISSION CREATED',
@@ -27,14 +28,18 @@ export class FileSubmissionService {
     const locations = await this.fileRepository.insertFile(id, file, path);
     const submission: FileSubmission = {
       id,
+      type: SubmissionType.FILE,
       title: file.originalname,
-      type: getSubmissionType(file.mimetype, file.originalname),
-      fileLocations: {
+      schedule: {},
+      primary: {
+        location: locations.submissionLocation,
+        mimetype: file.mimetype,
+        name: file.originalname,
         originalPath: path,
-        submission: locations.submissionLocation,
-        thumbnail: locations.thumbnailLocation,
+        preview: locations.thumbnailLocation,
+        size: file.buffer.length,
+        type: getSubmissionType(file.mimetype, file.originalname),
       },
-      originalFilename: file.originalname,
       order: await this.repository.count(),
       created: Date.now(),
     };
@@ -47,6 +52,7 @@ export class FileSubmissionService {
   }
 
   async removeSubmission(id: string): Promise<void> {
+    await this.fileRepository.removeSubmissionFiles(await this.repository.find(id));
     await this.repository.remove(id);
     this.eventEmitter.emitSubmissionEvent(EVENTS.SUBMISSION_REMOVED, id);
   }

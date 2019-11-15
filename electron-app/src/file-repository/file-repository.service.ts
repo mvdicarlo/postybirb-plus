@@ -2,11 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as fs from 'fs-extra';
-import {
-  SUBMISSION_FILE_DIRECTORY,
-  THUMBNAIL_FILE_DIRECTORY,
-} from '../directories';
+import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from '../directories';
 import { FileSubmission } from 'src/submission/file-submission/file-submission.interface';
+import * as _ from 'lodash';
 
 @Injectable()
 export class FileRepositoryService {
@@ -21,10 +19,7 @@ export class FileRepositoryService {
 
     const idName = `${id}.${file.originalname.split('.').pop()}`;
     const submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${idName}`;
-    const insertSubmissionFile = await fs.outputFile(
-      submissionFilePath,
-      file.buffer,
-    );
+    const insertSubmissionFile = await fs.outputFile(submissionFilePath, file.buffer);
 
     let thumbnail: Buffer = null;
     const thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${idName}.jpeg`;
@@ -45,10 +40,7 @@ export class FileRepositoryService {
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
 
-    const insertThumbnailFile = await fs.outputFile(
-      thumbnailFilePath,
-      thumbnail,
-    );
+    const insertThumbnailFile = await fs.outputFile(thumbnailFilePath, thumbnail);
 
     return {
       thumbnailLocation: thumbnailFilePath,
@@ -57,16 +49,11 @@ export class FileRepositoryService {
   }
 
   async removeSubmissionFiles(submission: FileSubmission) {
-    this.logger.debug(`Removing files at\n${JSON.stringify(submission.fileLocations, null, 1)}`);
-    const promises = [
-      fs.remove(submission.fileLocations.submission),
-      fs.remove(submission.fileLocations.thumbnail),
-    ];
-
-    if (submission.fileLocations.customThumbnail) {
-      promises.push(fs.remove(submission.fileLocations.customThumbnail));
-    }
-
+    this.logger.debug(`Removing files for ${submission.id}`);
+    const files = [submission.primary, submission.thumbnail, ...(submission.additional || [])];
+    const promises = _.flatten(
+      files.filter(f => !!f).map(f => [fs.remove(f.location), fs.remove(f.preview)]),
+    );
     await Promise.all(promises);
   }
 }
