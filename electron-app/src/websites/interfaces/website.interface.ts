@@ -1,5 +1,7 @@
-import { UserAccount } from '../../account/account.interface';
+import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from './login-response.interface';
+import { SubmissionType, Submission } from 'src/submission/submission.interface';
+import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 
 export interface Website {
   readonly BASE_URL: string;
@@ -14,6 +16,7 @@ export interface Website {
   readonly defaultFileSubmissionOptions: any;
   readonly accountInformation: Map<string, any>;
 
+  getDefaultOptions(submissionType: SubmissionType): any;
   parseDescription(text: string): string;
   postStatusSubmission(data: any): Promise<any>;
   postFileSubmission(data: any): Promise<any>;
@@ -22,6 +25,6 @@ export interface Website {
     options?: { minLength?: number; maxLength?: number; spaceReplace?: string },
   ): any;
   checkLoginStatus(data: UserAccount): Promise<LoginResponse>;
-  validateFileSubmission(data: any): string[];
-  validateStatusSubmission(data: any): string[];
+  validateFileSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
+  validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
 }

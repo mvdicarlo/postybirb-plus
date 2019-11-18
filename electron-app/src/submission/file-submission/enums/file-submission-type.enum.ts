@@ -28,11 +28,13 @@ const TEXT_TYPES: string[] = [
   'docx',
   'xls',
   'xlsx',
-  'mp3',
   'pdf',
+  'odt',
+  'md',
+  'html',
 ];
 
-const AUDIO_TYPES: string[] = ['wav', 'wave', 'x-wav', 'x-pn-wav', 'audio'];
+const AUDIO_TYPES: string[] = ['wav', 'wave', 'x-wav', 'x-pn-wav', 'audio', 'odt', 'mp3'];
 
 const VIDEO_TYPES: string[] = [
   'video',
@@ -42,6 +44,8 @@ const VIDEO_TYPES: string[] = [
   'mov',
   'wmv',
   'mpeg',
+  'swf',
+  'webm',
 ];
 
 export function getSubmissionType(

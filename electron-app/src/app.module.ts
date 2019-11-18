@@ -8,6 +8,9 @@ import { AccountService } from './account/account.service';
 import { AccountRepository } from './account/account.repository';
 import { FileSubmissionRepository } from './submission/file-submission/file-submission.repository';
 import { WebsitesModule } from './websites/websites.module';
+import { ValidatorService } from './submission/validator/validator.service';
+import { SubmissionPartService } from './submission/submission-part/submission-part.service';
+import { SubmissionPartRepository } from './submission/submission-part/submission-part.repository';
 
 @Module({
   imports: [WebsitesModule],
@@ -19,6 +22,9 @@ import { WebsitesModule } from './websites/websites.module';
     EventsGateway,
     AccountService,
     AccountRepository,
+    ValidatorService,
+    SubmissionPartService,
+    SubmissionPartRepository,
   ],
 })
 export class AppModule {}

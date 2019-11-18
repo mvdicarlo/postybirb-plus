@@ -9,6 +9,7 @@ import AppHeader from '../app-header/AppHeader';
 import './AppLayout.css';
 import { Login } from '../login/Login';
 import { WebsiteRegistry } from '../../website-components/website-registry';
+import SubmissionEditForm from '../submissions/SubmissionEditForm';
 
 const { Content, Sider } = Layout;
 
@@ -23,7 +24,7 @@ interface State {
 
 @inject('uiStore')
 @observer
-export default class App extends React.Component<any | Props, State> {
+export default class App extends React.Component<Props, State> {
   public state: any = {
     currentNavActive: '1',
     accountsVisible: false
@@ -47,14 +48,14 @@ export default class App extends React.Component<any | Props, State> {
   }
 
   handleCollapsedChange = (collapsed: boolean) => {
-    this.props.uiStore.collapseNav(collapsed);
+    this.props.uiStore!.collapseNav(collapsed);
   };
 
   showDrawer = () => this.setState({ accountsVisible: true });
   hideDrawer = () => this.setState({ accountsVisible: false });
 
   updateWebsiteFilter = (filtered: string[]) => {
-    this.props.uiStore.changeWebsiteFilter(filtered);
+    this.props.uiStore!.changeWebsiteFilter(filtered);
   };
 
   handleNavSelectChange = ({ key }) => {
@@ -62,7 +63,8 @@ export default class App extends React.Component<any | Props, State> {
   };
 
   render() {
-    const { state } = this.props.uiStore;
+    const { uiStore } = this.props;
+    const state = uiStore!.state;
     return (
       <Layout
         style={{
@@ -113,7 +115,7 @@ export default class App extends React.Component<any | Props, State> {
                     size="small"
                     placeholder="Hide websites"
                     style={{ width: '100%' }}
-                    defaultValue={this.props.uiStore.websiteFilter}
+                    defaultValue={this.props.uiStore!.websiteFilter}
                     onChange={this.updateWebsiteFilter}
                     allowClear={true}
                   >
@@ -138,10 +140,9 @@ export default class App extends React.Component<any | Props, State> {
               <AppHeader />
             </div>
             <div className="pt-3">
-              <Switch>
-                <Route exact path="/" component={Home} />
-                <Route path="/submissions" component={SubmissionsView} />
-              </Switch>
+              <Route exact path="/" component={Home} />
+              <Route path="/submissions" component={SubmissionsView} />
+              <Route path="/edit/submission/:id" component={SubmissionEditForm} />
             </div>
           </Content>
         </Layout>

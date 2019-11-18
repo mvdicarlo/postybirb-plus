@@ -28,12 +28,12 @@ interface Props {
 
 @inject('loginStatusStore', 'uiStore')
 @observer
-export class Login extends React.Component<any | Props> {
+export class Login extends React.Component<Props> {
   private readonly entries = Object.entries(WebsiteRegistry.websites);
 
   render() {
     const websitesToDisplay = this.entries.filter(
-      ([key, website]) => !this.props.uiStore.websiteFilter.includes(key)
+      ([key, website]) => !this.props.uiStore!.websiteFilter.includes(key)
     );
     return (
       <ConfigProvider renderEmpty={() => <div></div>}>
@@ -42,7 +42,7 @@ export class Login extends React.Component<any | Props> {
             <LoginPanel
               key={key}
               website={website}
-              accounts={this.props.loginStatusStore.statuses.filter(
+              accounts={this.props.loginStatusStore!.statuses.filter(
                 status => status.website === website.name
               )}
             />

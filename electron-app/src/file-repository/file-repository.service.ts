@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as fs from 'fs-extra';
-import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from '../directories';
+import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directories';
 import { FileSubmission } from 'src/submission/file-submission/file-submission.interface';
 import * as _ from 'lodash';
 

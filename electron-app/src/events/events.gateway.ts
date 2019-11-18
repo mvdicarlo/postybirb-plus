@@ -15,7 +15,7 @@ export class EventsGateway {
     this.server.emit(event, data);
   }
 
-  public emitSubmissionEvent(event: string, data: string | Submission) {
-    this.server.emit(event, data);
+  public async emitOnComplete(event: string, promise: Promise<any>) {
+    this.server.emit(event, await promise);
   }
 }

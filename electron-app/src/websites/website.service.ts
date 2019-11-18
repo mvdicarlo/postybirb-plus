@@ -1,6 +1,9 @@
 import { Website } from './interfaces/website.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
-import { UserAccount } from '../account/account.interface';
+import { UserAccount } from 'src/account/account.interface';
+import { SubmissionType, Submission } from 'src/submission/submission.interface';
+import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
+import * as _ from 'lodash';
 
 export abstract class WebsiteService implements Website {
   abstract readonly defaultStatusOptions?: any;
@@ -22,11 +25,16 @@ export abstract class WebsiteService implements Website {
 
   abstract postFileSubmission(data: any): Promise<any>;
 
-  protected storeAccountInformation(
-    profileId: string,
-    key: string,
-    value: any,
-  ): void {
+  getDefaultOptions(submissionType: SubmissionType) {
+    switch (submissionType) {
+      case SubmissionType.FILE:
+        return _.cloneDeep(this.defaultFileSubmissionOptions);
+      case SubmissionType.STATUS:
+        return _.cloneDeep(this.defaultStatusOptions);
+    }
+  }
+
+  protected storeAccountInformation(profileId: string, key: string, value: any): void {
     this.accountInformation.set(profileId, {
       ...this.accountInformation.get(profileId),
       [key]: value,
@@ -40,17 +48,14 @@ export abstract class WebsiteService implements Website {
     return tags
       .filter(tag => {
         const t: string = tag.trim();
-        return (
-          t.length >= (options.minLength || 0) &&
-          t.length <= (options.maxLength || 100)
-        );
+        return t.length >= (options.minLength || 0) && t.length <= (options.maxLength || 100);
       })
       .map(tag => tag.replace(/\s/g, options.spaceReplacer));
   }
 
   abstract checkLoginStatus(data: UserAccount): Promise<LoginResponse>;
 
-  abstract validateFileSubmission(data: any): string[];
+  abstract validateFileSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
 
-  abstract validateStatusSubmission(data: any): string[];
+  abstract validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
 }
