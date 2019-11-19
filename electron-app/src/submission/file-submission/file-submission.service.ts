@@ -11,6 +11,7 @@ import { SubmissionPartService } from '../submission-part/submission-part.servic
 import { ValidatorService } from '../validator/validator.service';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
+import { SubmissionUpdate } from 'src/submission/interfaces/submission-update.interface';
 
 enum EVENTS {
   SUBMISSION_CREATED = 'FILE SUBMISSION CREATED',
@@ -55,10 +56,7 @@ export class FileSubmissionService {
     await this.repository.create(submission);
     await this.submissionPartService.createDefaultPart(submission);
 
-    this.eventEmitter.emit(
-      EVENTS.SUBMISSION_CREATED,
-      submission,
-    );
+    this.eventEmitter.emit(EVENTS.SUBMISSION_CREATED, submission);
 
     this.eventEmitter.emitOnComplete(
       EVENTS.SUBMISSION_VERIFIED,
@@ -104,9 +102,22 @@ export class FileSubmissionService {
       throw new Error('Submission does not exist');
     }
 
-    const part = await this.submissionPartService.createOrUpdateSubmissionPart(submissionPart, SubmissionType.FILE);
-    this.eventEmitter.emit(EVENTS.SUBMISSION_VERIFIED, await this.getSubmissionPackage(submissionPart.submissionId));
+    const part = await this.submissionPartService.createOrUpdateSubmissionPart(
+      submissionPart,
+      SubmissionType.FILE,
+    );
+    this.eventEmitter.emitOnComplete(
+      EVENTS.SUBMISSION_VERIFIED,
+      this.getSubmissionPackage(submissionPart.submissionId),
+    );
     return part;
+  }
+
+  async updateSubmission(
+    update: SubmissionUpdate,
+  ): Promise<SubmissionPackage<FileSubmission>> {
+    await Promise.all(update.parts.map(part => this.setPart(part)));
+    return this.getSubmissionPackage(update.id);
   }
 
   async validate(submission: FileSubmission): Promise<SubmissionPackage<FileSubmission>> {

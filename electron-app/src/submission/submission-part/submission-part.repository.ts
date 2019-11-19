@@ -56,7 +56,7 @@ export class SubmissionPartRepository {
 
   update(submissionId: string, accountId, data: any): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.update({ submissionId, accountId }, { $set: data }, {}, (err, numReplaced) => {
+      this.db.update({ submissionId, accountId }, { $set: { data } }, {}, (err, numReplaced) => {
         err ? reject(err) : resolve();
       });
     });

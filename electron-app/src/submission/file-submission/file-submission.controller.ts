@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSubmissionService } from './file-submission.service';
-import { Submission } from 'src/submission/submission.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { FileSubmission } from './file-submission.interface';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
+import { SubmissionUpdate } from 'src/submission/interfaces/submission-update.interface';
 
 @Controller('file_submission')
 export class FileSubmissionController {
@@ -27,6 +27,11 @@ export class FileSubmissionController {
   @Get('/packages')
   async findAllPackages(): Promise<Array<SubmissionPackage<FileSubmission>>> {
     return this.service.getAllSubmissionPackages();
+  }
+
+  @Get('/package/:id')
+  async getPackage(@Param('id') id: string) {
+    return this.service.getSubmissionPackage(id);
   }
 
   @Delete(':id')
@@ -43,5 +48,10 @@ export class FileSubmissionController {
   @Post('setPart')
   async setPart(@Body() submissionPart: SubmissionPart<any>) {
     return this.service.setPart(submissionPart);
+  }
+
+  @Post('/update')
+  async update(@Body() submissionPackage: SubmissionUpdate) {
+    return this.service.updateSubmission(submissionPackage);
   }
 }
