@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { SubmissionPart, DefaultOptions } from '../interfaces/submission-part.interface';
-import { SubmissionType, Submission } from '../submission.interface';
+import { SubmissionType, Submission } from '../interfaces/submission.interface';
 import { Website } from 'src/websites/interfaces/website.interface';
 import * as _ from 'lodash';
 
@@ -13,7 +13,7 @@ export class ValidatorService {
     submission: Submission,
     parts: Array<SubmissionPart<any>>,
   ): { [key: string]: string[] } {
-    const defaultPart: DefaultOptions = parts.find(p => p.website === 'default').data;
+    const defaultPart: SubmissionPart<DefaultOptions> = parts.find(p => p.website === 'default');
     const websiteProblems = {};
     parts
       .filter(p => p.website !== 'default')
@@ -30,43 +30,34 @@ export class ValidatorService {
   private validatePart(
     submission: Submission,
     part: SubmissionPart<any>,
-    defaultPart: DefaultOptions,
+    defaultPart: SubmissionPart<DefaultOptions>,
   ): string[] {
     const website: Website = this.websiteProvider.getWebsiteModule(part.website);
     const parsedPart = this.parsePart(part, defaultPart);
     switch (submission.type) {
       case SubmissionType.FILE:
-        return website.validateFileSubmission(submission, parsedPart);
+        return website.validateFileSubmission(submission, parsedPart, defaultPart);
       case SubmissionType.STATUS:
-        return website.validateStatusSubmission(submission, parsedPart);
+        return website.validateStatusSubmission(submission, parsedPart, defaultPart);
     }
   }
 
-  private validateDefaultPart(submission: Submission, defaultPart: DefaultOptions): string[] {
-      const problems: string[] = [];
-      if (!defaultPart.rating) {
-          problems.push('Please provide a rating.');
-      }
+  private validateDefaultPart(
+    submission: Submission,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): string[] {
+    const problems: string[] = [];
+    if (!defaultPart.data.rating) {
+      problems.push('Please provide a rating.');
+    }
 
-      return problems;
+    return problems;
   }
 
-  private parsePart(part: SubmissionPart<any>, defaultPart: DefaultOptions): SubmissionPart<any> {
-    const extendTags: boolean = _.get(part, 'tags.extendDefault', true);
-    const overwriteDescription: boolean = _.get(part, 'description.overwriteDefault', false);
-
-    const copy = _.cloneDeep(part);
-    if (!overwriteDescription) {
-      _.set(copy.data, 'description.value', defaultPart.description.value);
-    }
-
-    if (extendTags) {
-      _.set(copy.data, 'tags.value', [
-        ..._.get(copy, 'data.tags.value', []),
-        ...defaultPart.tags.value,
-      ]);
-    }
-
-    return copy;
+  private parsePart(
+    part: SubmissionPart<any>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): SubmissionPart<any> {
+    return _.cloneDeep(part);
   }
 }

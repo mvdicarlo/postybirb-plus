@@ -1,15 +1,15 @@
 import React from 'react';
-import { Icon, Layout, Menu, Drawer, Select } from 'antd';
-import { inject, observer } from 'mobx-react';
-import { Link, Route, Switch } from 'react-router-dom';
-import { UIStore } from '../../stores/ui.store';
-import Home from '../home/Home';
-import SubmissionsView from '../submissions/SubmissionsView';
-import AppHeader from '../app-header/AppHeader';
 import './AppLayout.css';
-import { Login } from '../login/Login';
-import { WebsiteRegistry } from '../../website-components/website-registry';
+import AppHeader from '../app-header/AppHeader';
+import Home from '../home/Home';
 import SubmissionEditForm from '../submissions/SubmissionEditForm';
+import SubmissionsView from '../submissions/SubmissionsView';
+import { Link, Route } from 'react-router-dom';
+import { Login } from '../login/Login';
+import { UIStore } from '../../stores/ui.store';
+import { WebsiteRegistry } from '../../website-components/website-registry';
+import { inject, observer } from 'mobx-react';
+import { Icon, Layout, Menu, Drawer, Select, BackTop } from 'antd';
 
 const { Content, Sider } = Layout;
 
@@ -38,13 +38,12 @@ export default class App extends React.Component<Props, State> {
   }
 
   getCurrentNavId(): string {
-    const baseUrl = location.hash.split('/')[1]; // eslint-disable-line no-restricted-globals
-    switch (baseUrl) {
-      case 'submissions':
-        return '3';
-      default:
-        return '1';
+    const baseUrl = location.hash; // eslint-disable-line no-restricted-globals
+    if (baseUrl.includes('submission')) {
+      return '3';
     }
+
+    return '1';
   }
 
   handleCollapsedChange = (collapsed: boolean) => {
@@ -135,14 +134,15 @@ export default class App extends React.Component<Props, State> {
         </Sider>
 
         <Layout>
+          <div className="header container">
+            <AppHeader />
+          </div>
           <Content className="container primary-layout-container">
-            <div className="header">
-              <AppHeader />
-            </div>
-            <div className="pt-3">
+            <div className="pt-3 px-3 h-full overflow-y-auto" id="primary-container">
               <Route exact path="/" component={Home} />
               <Route path="/submissions" component={SubmissionsView} />
               <Route path="/edit/submission/:id" component={SubmissionEditForm} />
+              <BackTop target={() => document.getElementById('primary-container') || window} />
             </div>
           </Content>
         </Layout>

@@ -9,6 +9,7 @@
     "@types/react-dom": "16.9.4",
     "antd": "^3.25.0",
     "axios": "^0.19.0",
+    "lodash": "^4.17.15",
     "mobx": "^5.14.2",
     "mobx-react": "^6.1.4",
     "react": "^16.11.0",
@@ -46,6 +47,7 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.149",
     "@types/socket.io": "^2.1.4",
     "@types/socket.io-client": "^1.4.32",
     "autoprefixer": "^9.7.1",

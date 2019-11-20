@@ -3,7 +3,6 @@
 @tailwind components;
 
 .primary-layout-container {
-  @apply px-3;
   background-color: white;
 }
 
@@ -13,6 +12,10 @@
 
 .full-size-spinner .ant-spin-container {
   @apply h-full w-full;
+}
+
+.ant-form-item {
+  margin-bottom: 10px;
 }
 
 @tailwind utilities;

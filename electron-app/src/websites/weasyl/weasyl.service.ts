@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import Http from 'src/http/http.util';
 import { Injectable, Logger } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
-import { Submission } from 'src/submission/submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
 import {
   SubmissionPart,
   DefaultOptions,
@@ -10,15 +10,10 @@ import {
 import { UserAccount } from 'src/account/account.interface';
 import { WebsiteService } from 'src/websites/website.service';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
-import { FileSubmission } from 'src/submission/file-submission/file-submission.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-
-interface DefaultWeasylSubmissionOptions extends DefaultOptions {
-  notify: boolean;
-  critique: boolean;
-  folder: string;
-  category: string;
-}
+import { DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
+import { DefaultWeasylSubmissionOptions } from './weasyl.interface';
 
 @Injectable()
 export class Weasyl extends WebsiteService {
@@ -29,21 +24,7 @@ export class Weasyl extends WebsiteService {
 
   readonly defaultStatusOptions: any = {};
 
-  readonly defaultFileSubmissionOptions: DefaultWeasylSubmissionOptions = {
-    notify: true,
-    critique: false,
-    folder: null,
-    category: null,
-    tags: {
-      extendDefault: true,
-      value: [],
-    },
-    description: {
-      overwriteDefault: false,
-      value: '',
-    },
-    rating: null,
-  };
+  readonly defaultFileSubmissionOptions: DefaultWeasylSubmissionOptions = DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   parseDescription(text: string): string {
     throw new Error('Method not implemented.');
@@ -75,6 +56,7 @@ export class Weasyl extends WebsiteService {
   validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<DefaultWeasylSubmissionOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
   ): string[] {
     const problems: string[] = [];
 
@@ -82,7 +64,7 @@ export class Weasyl extends WebsiteService {
       problems.push(`Weasyl does not support file format: ${submission.primary.mimetype}.`);
     }
 
-    if (submissionPart.data.tags.value.length < 2) {
+    if (WebsiteValidator.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
       problems.push('Weasyl requires at least 2 tags.');
     }
 

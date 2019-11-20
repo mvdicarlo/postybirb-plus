@@ -2,13 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './styles/tailwind.css';
 import App from './App';
-import { HashRouter } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
-  <HashRouter basename="/">
+  <Router basename="/">
     <App />
-  </HashRouter>,
+  </Router>,
   document.getElementById('root')
 );
 

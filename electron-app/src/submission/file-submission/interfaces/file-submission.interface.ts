@@ -1,5 +1,5 @@
-import { Submission } from '../submission.interface';
-import { FileRecord } from './interfaces/file-record.interface';
+import { Submission } from '../../interfaces/submission.interface';
+import { FileRecord } from './file-record.interface';
 
 export interface FileSubmission extends Submission {
   primary: FileRecord;

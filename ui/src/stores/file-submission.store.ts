@@ -1,6 +1,6 @@
 import axios from '../utils/http';
 import socket from '../utils/websocket';
-import { FileSubmission } from '../../../electron-app/src/submission/file-submission/file-submission.interface';
+import { FileSubmission } from '../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { observable, computed, action } from 'mobx';
 

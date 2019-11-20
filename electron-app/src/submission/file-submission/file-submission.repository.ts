@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as Datastore from 'nedb';
 import { DATABASE_DIRECTORY } from 'src/directories';
 import * as path from 'path';
-import { FileSubmission } from './file-submission.interface';
+import { FileSubmission } from './interfaces/file-submission.interface';
 
 @Injectable()
 export class FileSubmissionRepository {

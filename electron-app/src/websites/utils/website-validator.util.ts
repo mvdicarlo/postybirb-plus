@@ -1,4 +1,6 @@
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { TagData, DescriptionData } from 'src/submission/interfaces/submission-part.interface';
+import * as _ from 'lodash';
 
 export default class WebsiteValidator {
   static supportsFileType(fileInfo: FileRecord, supportedFileTypes: string[]): boolean {
@@ -24,6 +26,21 @@ export default class WebsiteValidator {
   }
 
   static MBtoBytes(size: any): number {
-    return Number(size) * (1024 ** 2);
+    return Number(size) * 1024 ** 2;
+  }
+
+  static getTags(defaultTags: TagData, websiteTags: TagData): string[] {
+    const extendDefault: boolean = _.get(websiteTags, 'extendDefault', true);
+    return extendDefault
+      ? [...defaultTags.value, ..._.get(websiteTags, 'value', [])]
+      : [..._.get(websiteTags, 'value', [])];
+  }
+
+  static getDescription(
+    defaultDescription: DescriptionData,
+    websiteDescription: DescriptionData,
+  ): string {
+    const overwriteDefault: boolean = _.get(websiteDescription, 'overwriteDefault', false);
+    return overwriteDefault ? _.get(websiteDescription, 'value', '') : defaultDescription.value;
   }
 }

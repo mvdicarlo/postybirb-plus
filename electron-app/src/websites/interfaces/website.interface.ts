@@ -1,7 +1,10 @@
 import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from './login-response.interface';
-import { SubmissionType, Submission } from 'src/submission/submission.interface';
-import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionType, Submission } from 'src/submission/interfaces/submission.interface';
+import {
+  SubmissionPart,
+  DefaultOptions,
+} from 'src/submission/interfaces/submission-part.interface';
 
 export interface Website {
   readonly BASE_URL: string;
@@ -25,6 +28,14 @@ export interface Website {
     options?: { minLength?: number; maxLength?: number; spaceReplace?: string },
   ): any;
   checkLoginStatus(data: UserAccount): Promise<LoginResponse>;
-  validateFileSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
-  validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
+  validateFileSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<any>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): string[];
+  validateStatusSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<any>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): string[];
 }

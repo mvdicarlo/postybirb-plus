@@ -12,6 +12,7 @@ export enum SubmissionType {
   FILE = 'FILE',
   STATUS = 'STATUS',
 }
+
 export interface SubmissionSchedule {
   isScheduled?: boolean;
   postAt?: number;

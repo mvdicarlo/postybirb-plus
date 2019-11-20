@@ -1,18 +1,18 @@
 import React from 'react';
-import { Match } from 'react-router-dom';
-import { inject, observer } from 'mobx-react';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/file-submission.interface';
-import { headerStore } from '../../stores/header.store';
+import * as _ from 'lodash';
+import DefaultFormSection from './form-sections/DefaultFormSection';
+import SubmissionService from '../../services/submission.service';
+import SubmissionUtil from '../../utils/submission.util';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { LoginStatusStore } from '../../stores/login-status.store';
-import { SubmissionStore } from '../../stores/file-submission.store';
+import { Match } from 'react-router-dom';
+import { headerStore } from '../../stores/header.store';
+import { inject, observer } from 'mobx-react';
 import {
   SubmissionPart,
   DefaultOptions
 } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
-import { Form, Button } from 'antd';
-import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
-import DefaultFormSection from './form-sections/DefaultFormSection';
-import SubmissionService from '../../services/submission.service';
+import { Form, Button, Typography } from 'antd';
 
 interface Props {
   match?: Match;
@@ -21,7 +21,7 @@ interface Props {
 
 interface State {
   submission: FileSubmission | null;
-  parts: Array<SubmissionPart<any>>;
+  parts: { [key: string]: SubmissionPart<any> };
   problems: { [key: string]: any };
   loading: boolean;
   touched: boolean;
@@ -47,7 +47,7 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
   state: State = {
     submission: null,
     problems: {},
-    parts: [],
+    parts: {},
     loading: true,
     touched: false
   };
@@ -64,18 +64,9 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
     });
   }
 
-  findPart(partName: string): SubmissionPart<any> {
-    const part: any = this.state.parts.find(p => p.accountId === 'default');
-    return part;
-  }
-
   onUpdate = updatePart => {
-    const parts = [...this.state.parts];
-    const index = parts.findIndex(p => p.accountId === updatePart.accountId);
-    if (index !== -1) {
-      parts[index].data = updatePart.data;
-    }
-
+    const parts = _.cloneDeep(this.state.parts);
+    parts[updatePart.accountId] = updatePart;
     this.setState({ parts, touched: true });
   };
 
@@ -83,7 +74,7 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
     if (this.state.touched) {
       this.setState({ loading: true });
       SubmissionService.updateSubmission({
-        parts: this.state.parts,
+        parts: Object.values(this.state.parts),
         id: this.id
       })
         .then(({ data }) => {
@@ -103,7 +94,7 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
 
   render() {
     if (!this.state.loading) {
-      this.defaultOptions = this.findPart('default').data;
+      this.defaultOptions = this.state.parts.default.data;
 
       headerStore.updateHeaderState({
         title: 'Edit Submission',
@@ -114,21 +105,22 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
           },
           {
             path: `/edit/submission/${this.id}`,
-            breadcrumbName: `${this.state.submission!.title}`
+            breadcrumbName: SubmissionUtil.getFileSubmissionTitle(this.state)
           }
         ]
       });
 
       return (
         <div>
-          <div className="mb-2">
+          <Form layout="vertical">
+            <Typography.Title level={3}>Defaults</Typography.Title>
+            <DefaultFormSection part={this.state.parts.default} onUpdate={this.onUpdate} />
+          </Form>
+          <div className="py-2 text-right z-10 sticky bg-white" style={{ bottom: '0' }}>
             <Button onClick={this.onSubmit} type="primary" disabled={!this.state.touched}>
               Save
             </Button>
           </div>
-          <Form layout="vertical">
-            <DefaultFormSection part={this.findPart('default')} onUpdate={this.onUpdate} />
-          </Form>
         </div>
       );
     }

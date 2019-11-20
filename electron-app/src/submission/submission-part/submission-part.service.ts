@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { SubmissionPartRepository } from './submission-part.repository';
 import { SubmissionPart, DefaultOptions } from '../interfaces/submission-part.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
-import { SubmissionType, Submission } from '../submission.interface';
+import { SubmissionType, Submission } from '../interfaces/submission.interface';
 import { Website } from 'src/websites/interfaces/website.interface';
+import * as _ from 'lodash';
 
 @Injectable()
 export class SubmissionPartService {
+  private readonly logger = new Logger(SubmissionPartService.name);
+
   constructor(
     private readonly repository: SubmissionPartRepository,
     private readonly websiteProvider: WebsiteProvider,
@@ -16,30 +19,41 @@ export class SubmissionPartService {
     part: SubmissionPart<any>,
     submissionType: SubmissionType,
   ): Promise<SubmissionPart<any>> {
-    let data;
-    if (part.website !== 'default') {
-      const website: Website = this.websiteProvider.getWebsiteModule(part.website);
-      data = website.getDefaultOptions(submissionType);
-    } else {
-      data = part.data;
+    const copy = _.cloneDeep(part);
+    let defaultData = {};
+    if (copy.website !== 'default') {
+      const website: Website = this.websiteProvider.getWebsiteModule(copy.website);
+      defaultData = website.getDefaultOptions(submissionType);
     }
 
-    const existing = await this.repository.find(part.submissionId, part.accountId);
+    let update = {};
+
+    const existing = await this.repository.find(copy.submissionId, copy.accountId);
     if (existing) {
-      Object.assign(data, existing.data);
-      Object.assign(data, part.data);
-      await this.repository.update(part.submissionId, part.accountId, data);
+      update = {
+        ...defaultData,
+        ...existing.data,
+        ...copy.data,
+      };
+      await this.repository.update(copy.submissionId, copy.accountId, update);
     } else {
-      Object.assign(data, part.data);
-      await this.repository.create({ ...part, data });
+      update = {
+        ...defaultData,
+        ...copy.data,
+      };
+      await this.repository.create({
+        ...copy,
+        data: update,
+      });
     }
 
-    part.data = data;
-    return part;
+    copy.data = update;
+    return copy;
   }
 
-  async createDefaultPart(submission: Submission): Promise<void> {
+  async createDefaultPart(submission: Submission, title?: string): Promise<void> {
     const defaultPart: DefaultOptions = {
+      title,
       rating: null,
       description: {
         overwriteDefault: false,

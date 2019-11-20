@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { SubmissionStore } from '../../stores/file-submission.store';
 import { inject, observer } from 'mobx-react';
 import { List, Avatar, Popconfirm, Modal, Input } from 'antd';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/file-submission.interface';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import SubmissionService from '../../services/submission.service';
 import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import SubmissionUtil from '../../utils/submission.util';
 
 interface Props {
   submissionStore?: SubmissionStore;
@@ -51,7 +52,7 @@ class ListItem extends React.Component<ListItemProps, any> {
               <Avatar src={item.submission.primary.preview} shape="square" />
             </div>
           }
-          title={item.submission.title}
+          title={SubmissionUtil.getFileSubmissionTitle(item)}
           description={`Created - ${new Date(item.submission.created).toLocaleString()}`}
         ></List.Item.Meta>
         <Modal

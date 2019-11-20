@@ -29,8 +29,6 @@
 }
 
 .primary-layout-container {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
   background-color: white;
 }
 
@@ -42,6 +40,10 @@
 .full-size-spinner .ant-spin-container {
   height: 100%;
   width: 100%;
+}
+
+.ant-form-item {
+  margin-bottom: 10px;
 }
 
 .sr-only {

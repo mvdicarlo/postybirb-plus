@@ -1,8 +1,11 @@
 import { Website } from './interfaces/website.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
 import { UserAccount } from 'src/account/account.interface';
-import { SubmissionType, Submission } from 'src/submission/submission.interface';
-import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionType, Submission } from 'src/submission/interfaces/submission.interface';
+import {
+  SubmissionPart,
+  DefaultOptions,
+} from 'src/submission/interfaces/submission-part.interface';
 import * as _ from 'lodash';
 
 export abstract class WebsiteService implements Website {
@@ -55,7 +58,15 @@ export abstract class WebsiteService implements Website {
 
   abstract checkLoginStatus(data: UserAccount): Promise<LoginResponse>;
 
-  abstract validateFileSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
+  abstract validateFileSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<any>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): string[];
 
-  abstract validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[];
+  abstract validateStatusSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<any>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): string[];
 }

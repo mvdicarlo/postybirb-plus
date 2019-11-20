@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FileSubmission } from './file-submission.interface';
+import { FileSubmission } from './interfaces/file-submission.interface';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 import * as shortid from 'shortid';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmissionRepository } from './file-submission.repository';
 import { getSubmissionType, FileSubmissionType } from './enums/file-submission-type.enum';
-import { SubmissionType, Submission } from 'src/submission/submission.interface';
+import { SubmissionType, Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { ValidatorService } from '../validator/validator.service';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
@@ -37,8 +37,8 @@ export class FileSubmissionService {
     const locations = await this.fileRepository.insertFile(id, file, path);
     const submission: FileSubmission = {
       id,
-      type: SubmissionType.FILE,
       title: file.originalname,
+      type: SubmissionType.FILE,
       schedule: {},
       primary: {
         location: locations.submissionLocation,
@@ -54,7 +54,7 @@ export class FileSubmissionService {
     };
 
     await this.repository.create(submission);
-    await this.submissionPartService.createDefaultPart(submission);
+    await this.submissionPartService.createDefaultPart(submission, file.originalname);
 
     this.eventEmitter.emit(EVENTS.SUBMISSION_CREATED, submission);
 
@@ -113,9 +113,7 @@ export class FileSubmissionService {
     return part;
   }
 
-  async updateSubmission(
-    update: SubmissionUpdate,
-  ): Promise<SubmissionPackage<FileSubmission>> {
+  async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<FileSubmission>> {
     await Promise.all(update.parts.map(part => this.setPart(part)));
     return this.getSubmissionPackage(update.id);
   }
@@ -123,9 +121,11 @@ export class FileSubmissionService {
   async validate(submission: FileSubmission): Promise<SubmissionPackage<FileSubmission>> {
     const parts = await this.submissionPartService.getPartsForSubmission(submission.id);
     const problems = this.validatorService.validateParts(submission, parts);
+    const mappedParts = {};
+    parts.forEach(part => (mappedParts[part.accountId] = part));
     return {
       submission,
-      parts,
+      parts: mappedParts,
       problems,
     };
   }

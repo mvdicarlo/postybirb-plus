@@ -2,6 +2,7 @@ import React from 'react';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { FileSubmissionSectionProps } from '../../views/submissions/interfaces/file-submission-section.interface';
+import { DefaultWeasylSubmissionOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 
 export class Weasyl implements Website {
   name: string = 'Weasyl';
@@ -21,6 +22,21 @@ export class WeasylFileSubmissionForm extends React.Component<
   WeasylFileSubmissionState
 > {
   state: WeasylFileSubmissionState = {};
+  private readonly defaultOptions: DefaultWeasylSubmissionOptions = {
+    notify: true,
+    critique: false,
+    folder: null,
+    category: null,
+    tags: {
+      extendDefault: true,
+      value: []
+    },
+    description: {
+      overwriteDefault: false,
+      value: ''
+    },
+    rating: null
+  };
 
   render() {
     return <div>Weasyl Form!</div>;

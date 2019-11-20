@@ -11,7 +11,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSubmissionService } from './file-submission.service';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
-import { FileSubmission } from './file-submission.interface';
+import { FileSubmission } from './interfaces/file-submission.interface';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { SubmissionUpdate } from 'src/submission/interfaces/submission-update.interface';
 
