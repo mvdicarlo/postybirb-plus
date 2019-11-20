@@ -28,14 +28,14 @@ export class SubmissionPartService {
 
     let update = {};
 
-    const existing = await this.repository.find(copy.submissionId, copy.accountId);
+    const existing = await this.repository.find(copy.id);
     if (existing) {
       update = {
         ...defaultData,
         ...existing.data,
         ...copy.data,
       };
-      await this.repository.update(copy.submissionId, copy.accountId, update);
+      await this.repository.update(copy.id, update);
     } else {
       update = {
         ...defaultData,
@@ -44,6 +44,7 @@ export class SubmissionPartService {
       await this.repository.create({
         ...copy,
         data: update,
+        id: `${copy.accountId}-${copy.website}`,
       });
     }
 
@@ -66,6 +67,7 @@ export class SubmissionPartService {
     };
 
     await this.repository.create({
+      id: `${submission.id}-default`,
       submissionId: submission.id,
       website: 'default',
       accountId: 'default',
@@ -77,8 +79,8 @@ export class SubmissionPartService {
     return this.repository.findAllBySubmissionId(submissionId);
   }
 
-  removeSubmissionPart(submissionId: string, accountId: string): Promise<number> {
-    return this.repository.remove(submissionId, accountId);
+  removeSubmissionPart(id: string): Promise<number> {
+    return this.repository.remove(id);
   }
 
   removeAllSubmissionPartsForAccount(accountId: string): Promise<number> {

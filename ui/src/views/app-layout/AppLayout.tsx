@@ -4,6 +4,7 @@ import AppHeader from '../app-header/AppHeader';
 import Home from '../home/Home';
 import SubmissionEditForm from '../submissions/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
+import TagGroups from '../tag-groups/TagGroups';
 import { Link, Route } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { UIStore } from '../../stores/ui.store';
@@ -41,6 +42,10 @@ export default class App extends React.Component<Props, State> {
     const baseUrl = location.hash; // eslint-disable-line no-restricted-globals
     if (baseUrl.includes('submission')) {
       return '3';
+    }
+
+    if (baseUrl.includes('tag-groups')) {
+      return '4';
     }
 
     return '1';
@@ -103,6 +108,12 @@ export default class App extends React.Component<Props, State> {
                 <span>Submissions</span>
               </Link>
             </Menu.Item>
+            <Menu.Item key="4">
+              <Link to="/tag-groups">
+                <Icon type="tags" />
+                <span>Tag Groups</span>
+              </Link>
+            </Menu.Item>
           </Menu>
           <Drawer
             title={
@@ -142,6 +153,7 @@ export default class App extends React.Component<Props, State> {
               <Route exact path="/" component={Home} />
               <Route path="/submissions" component={SubmissionsView} />
               <Route path="/edit/submission/:id" component={SubmissionEditForm} />
+              <Route path="/edit/submission/:id" component={TagGroups} />
               <BackTop target={() => document.getElementById('primary-container') || window} />
             </div>
           </Content>

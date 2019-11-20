@@ -1,6 +1,7 @@
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 
 export interface SubmissionPart<T> {
+  id: string;
   data: T;
   accountId: string;
   submissionId: string;

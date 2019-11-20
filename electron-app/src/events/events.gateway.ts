@@ -4,7 +4,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Submission } from 'src/submission/interfaces/submission.interface';
 
 @WebSocketGateway()
 export class EventsGateway {

@@ -11,15 +11,16 @@ import { WebsitesModule } from './websites/websites.module';
 import { ValidatorService } from './submission/validator/validator.service';
 import { SubmissionPartService } from './submission/submission-part/submission-part.service';
 import { SubmissionPartRepository } from './submission/submission-part/submission-part.repository';
+import { TagGroupModule } from './tag-group/tag-group.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [WebsitesModule],
+  imports: [WebsitesModule, TagGroupModule, EventsModule],
   controllers: [FileSubmissionController, AccountController],
   providers: [
     FileSubmissionService,
     FileRepositoryService,
     FileSubmissionRepository,
-    EventsGateway,
     AccountService,
     AccountRepository,
     ValidatorService,
