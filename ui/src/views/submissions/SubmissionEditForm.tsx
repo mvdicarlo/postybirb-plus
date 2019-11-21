@@ -8,11 +8,13 @@ import { LoginStatusStore } from '../../stores/login-status.store';
 import { Match } from 'react-router-dom';
 import { headerStore } from '../../stores/header.store';
 import { inject, observer } from 'mobx-react';
+import { uiStore } from '../../stores/ui.store';
+import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import {
   SubmissionPart,
   DefaultOptions
 } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
-import { Form, Button, Typography } from 'antd';
+import { Form, Button, Typography, Spin, message } from 'antd';
 
 interface Props {
   match?: Match;
@@ -31,6 +33,7 @@ interface State {
 @observer
 export default class SubmissionEditForm extends React.Component<Props, State> {
   private id: string;
+  private original!: SubmissionPackage<FileSubmission>;
   private defaultOptions: DefaultOptions = {
     tags: {
       extendDefault: false,
@@ -56,6 +59,7 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
     super(props);
     this.id = props.match!.params.id;
     SubmissionService.getFileSubmissionPackage(this.id).then(({ data }) => {
+      this.original = _.cloneDeep(data);
       this.setState({
         ...this.state,
         ...data,
@@ -67,7 +71,9 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
   onUpdate = updatePart => {
     const parts = _.cloneDeep(this.state.parts);
     parts[updatePart.accountId] = updatePart;
-    this.setState({ parts, touched: true });
+    const isTouched: boolean = !_.isEqual(parts, this.original.parts);
+    this.setState({ parts, touched: isTouched });
+    uiStore.setPendingChanges(isTouched);
   };
 
   onSubmit = () => {
@@ -78,19 +84,26 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
         id: this.id
       })
         .then(({ data }) => {
+          this.original = _.cloneDeep(data);
           this.setState({
             ...this.state,
             ...data,
             loading: false,
             touched: false
           });
+          message.success('Submission was successfully saved.');
+          uiStore.setPendingChanges(false);
         })
         .catch(() => {
-          // TODO alert
           this.setState({ loading: false });
+          message.error('A problem occurred when trying to save the submission.');
         });
     }
   };
+
+  componentWillUnmount() {
+    uiStore.setPendingChanges(false);
+  }
 
   render() {
     if (!this.state.loading) {
@@ -112,15 +125,17 @@ export default class SubmissionEditForm extends React.Component<Props, State> {
 
       return (
         <div>
-          <Form layout="vertical">
-            <Typography.Title level={3}>Defaults</Typography.Title>
-            <DefaultFormSection part={this.state.parts.default} onUpdate={this.onUpdate} />
-          </Form>
-          <div className="py-2 text-right z-10 sticky bg-white" style={{ bottom: '0' }}>
-            <Button onClick={this.onSubmit} type="primary" disabled={!this.state.touched}>
-              Save
-            </Button>
-          </div>
+          <Spin spinning={this.state.loading} delay={500}>
+            <Form layout="vertical">
+              <Typography.Title level={3}>Defaults</Typography.Title>
+              <DefaultFormSection part={this.state.parts.default} onUpdate={this.onUpdate} />
+            </Form>
+            <div className="py-2 text-right z-10 sticky bg-white" style={{ bottom: '0' }}>
+              <Button onClick={this.onSubmit} type="primary" disabled={!this.state.touched}>
+                Save
+              </Button>
+            </div>
+          </Spin>
         </div>
       );
     }

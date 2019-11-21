@@ -5,12 +5,12 @@ import Home from '../home/Home';
 import SubmissionEditForm from '../submissions/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
 import TagGroups from '../tag-groups/TagGroups';
-import { Link, Route } from 'react-router-dom';
+import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
-import { Icon, Layout, Menu, Drawer, Select, BackTop } from 'antd';
+import { Icon, Layout, Menu, Drawer, Select, BackTop, Modal } from 'antd';
 
 const { Content, Sider } = Layout;
 
@@ -21,6 +21,7 @@ interface Props {
 interface State {
   currentNavActive: string;
   accountsVisible: boolean;
+  tagGroupVisible: boolean;
 }
 
 @inject('uiStore')
@@ -28,7 +29,8 @@ interface State {
 export default class App extends React.Component<Props, State> {
   public state: any = {
     currentNavActive: '1',
-    accountsVisible: false
+    accountsVisible: false,
+    tagGroupVisible: false
   };
 
   private readonly websites = Object.keys(WebsiteRegistry.websites);
@@ -41,14 +43,10 @@ export default class App extends React.Component<Props, State> {
   getCurrentNavId(): string {
     const baseUrl = location.hash; // eslint-disable-line no-restricted-globals
     if (baseUrl.includes('submission')) {
-      return '3';
+      return 'submissions';
     }
 
-    if (baseUrl.includes('tag-groups')) {
-      return '4';
-    }
-
-    return '1';
+    return 'home';
   }
 
   handleCollapsedChange = (collapsed: boolean) => {
@@ -92,29 +90,38 @@ export default class App extends React.Component<Props, State> {
             selectedKeys={[this.state.currentNavActive]}
             onSelect={this.handleNavSelectChange}
           >
-            <Menu.Item key="1">
+            <Menu.Item key="home">
               <Link to="/">
                 <Icon type="home" />
                 <span>Home</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="-1" onClick={this.showDrawer}>
+            <Menu.Item key="accounts" onClick={this.showDrawer}>
               <Icon type="user" />
               <span>Accounts</span>
             </Menu.Item>
-            <Menu.Item key="3">
+            <Menu.Item key="submissions">
               <Link to="/submissions">
                 <Icon type="upload" />
                 <span>Submissions</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="4">
-              <Link to="/tag-groups">
+            <Menu.Item key="tag-groups">
+              <span onClick={() => this.setState({ tagGroupVisible: true })}>
                 <Icon type="tags" />
                 <span>Tag Groups</span>
-              </Link>
+              </span>
             </Menu.Item>
           </Menu>
+          <Drawer
+            title="Tag Groups"
+            visible={this.state.tagGroupVisible}
+            destroyOnClose={true}
+            onClose={() => this.setState({ tagGroupVisible: false })}
+            width="50vw"
+          >
+            <TagGroups />
+          </Drawer>
           <Drawer
             title={
               <div className="inline-flex w-4/5">
@@ -136,7 +143,7 @@ export default class App extends React.Component<Props, State> {
                 </div>
               </div>
             }
-            width={'50vw'}
+            width="50vw"
             visible={this.state.accountsVisible}
             onClose={this.hideDrawer}
           >
@@ -153,8 +160,8 @@ export default class App extends React.Component<Props, State> {
               <Route exact path="/" component={Home} />
               <Route path="/submissions" component={SubmissionsView} />
               <Route path="/edit/submission/:id" component={SubmissionEditForm} />
-              <Route path="/edit/submission/:id" component={TagGroups} />
               <BackTop target={() => document.getElementById('primary-container') || window} />
+              <Prompt when={this.props.uiStore!.state.hasPendingChanges} message="Are you sure you want to navigate? Any unsaved changes will be lost." />
             </div>
           </Content>
         </Layout>

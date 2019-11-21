@@ -8,13 +8,7 @@ import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { session } from 'electron';
 import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
 import { FileSubmissionService } from 'src/submission/file-submission/file-submission.service';
-
-enum EVENTS {
-  ACCOUNT_CREATED = 'ACCOUNT CREATED',
-  ACCOUNT_DELETED = 'ACCOUNT DELETED',
-  ACCOUNTS_UPDATED = 'ACCOUNTS UPDATED',
-  ACCOUNTS_STATUS_UPDATED = 'ACCOUNTS STATUS UPDATED',
-}
+import { AccountEvent } from './account.events.enum';
 
 @Injectable()
 export class AccountService {
@@ -79,9 +73,9 @@ export class AccountService {
       username: null,
     });
 
-    this.eventEmitter.emit(EVENTS.ACCOUNT_CREATED, createAccountDto.id);
-    this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(EVENTS.ACCOUNTS_UPDATED, await this.repository.findAll());
+    this.eventEmitter.emit(AccountEvent.CREATED, createAccountDto.id);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.findAll());
   }
 
   getAll(): Promise<UserAccount[]> {
@@ -99,9 +93,9 @@ export class AccountService {
       this.loginStatuses.splice(index, 1);
     }
 
-    this.eventEmitter.emit(EVENTS.ACCOUNT_DELETED, id);
-    this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(EVENTS.ACCOUNTS_UPDATED, await this.repository.findAll());
+    this.eventEmitter.emit(AccountEvent.DELETED, id);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(AccountEvent.UPDATED, await this.repository.findAll());
 
     session
       .fromPartition(`persist:${id}`)
@@ -139,6 +133,6 @@ export class AccountService {
     const index: number = this.loginStatuses.findIndex(s => s.id === login.id);
     this.loginStatuses[index] = login;
     await this.repository.update(login.id, { data });
-    this.eventEmitter.emit(EVENTS.ACCOUNTS_STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
   }
 }

@@ -12,13 +12,7 @@ import { ValidatorService } from '../validator/validator.service';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { SubmissionUpdate } from 'src/submission/interfaces/submission-update.interface';
-
-enum EVENTS {
-  SUBMISSION_CREATED = 'FILE SUBMISSION CREATED',
-  SUBMISSION_REMOVED = 'FILE SUBMISSION REMOVED',
-  SUBMISSION_VERIFIED = 'FILE SUBMISSION VERIFIED',
-  SUBMISSIONS_VERIFIED = 'FILE SUBMISSIONS VERIFIED',
-}
+import { FileSubmissionEvent } from './file-submission.events.enum';
 
 @Injectable()
 export class FileSubmissionService {
@@ -56,10 +50,10 @@ export class FileSubmissionService {
     await this.repository.create(submission);
     await this.submissionPartService.createDefaultPart(submission, file.originalname);
 
-    this.eventEmitter.emit(EVENTS.SUBMISSION_CREATED, submission);
+    this.eventEmitter.emit(FileSubmissionEvent.CREATED, submission);
 
     this.eventEmitter.emitOnComplete(
-      EVENTS.SUBMISSION_VERIFIED,
+      FileSubmissionEvent.VERIFIED,
       this.getSubmissionPackage(submission.id),
     );
 
@@ -69,7 +63,7 @@ export class FileSubmissionService {
   async removeSubmission(id: string): Promise<void> {
     await this.fileRepository.removeSubmissionFiles(await this.repository.find(id));
     await this.repository.remove(id);
-    this.eventEmitter.emit(EVENTS.SUBMISSION_REMOVED, id);
+    this.eventEmitter.emit(FileSubmissionEvent.REMOVED, id);
   }
 
   async find(id: string): Promise<FileSubmission> {
@@ -107,7 +101,7 @@ export class FileSubmissionService {
       SubmissionType.FILE,
     );
     this.eventEmitter.emitOnComplete(
-      EVENTS.SUBMISSION_VERIFIED,
+      FileSubmissionEvent.VERIFIED,
       this.getSubmissionPackage(submissionPart.submissionId),
     );
     return part;
@@ -131,6 +125,6 @@ export class FileSubmissionService {
   }
 
   async verifyAllSubmissions(): Promise<void> {
-    this.eventEmitter.emitOnComplete(EVENTS.SUBMISSIONS_VERIFIED, this.getAllSubmissionPackages());
+    this.eventEmitter.emitOnComplete(FileSubmissionEvent.SUBMISSIONS_VERIFIED, this.getAllSubmissionPackages());
   }
 }

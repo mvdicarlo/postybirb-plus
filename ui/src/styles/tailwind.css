@@ -43,7 +43,19 @@
 }
 
 .ant-form-item {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
+}
+
+.ant-form-item + .ant-form-item {
+  margin-top: 10px;
+}
+
+.ant-drawer-header {
+  z-index: 10;
+  position: -webkit-sticky;
+  position: sticky;
+  background-color: #fff;
+  top: 0;
 }
 
 .sr-only {

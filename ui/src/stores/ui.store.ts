@@ -7,6 +7,7 @@ interface UIState {
   navId: number;
   navCollapsed: boolean;
   websiteFilter: string[];
+  hasPendingChanges: boolean;
 }
 
 export class UIStore {
@@ -14,12 +15,14 @@ export class UIStore {
     theme: 'dark',
     navId: 0,
     navCollapsed: false,
-    websiteFilter: []
+    websiteFilter: [],
+    hasPendingChanges: false
   };
 
   constructor() {
     const storedState = localStorage.getItem(STORE_KEY);
     if (storedState) Object.assign(this.state, JSON.parse(storedState));
+    this.state.hasPendingChanges = false;
     autorun(() => localStorage.setItem(STORE_KEY, JSON.stringify(this.state)));
   }
 
@@ -46,6 +49,11 @@ export class UIStore {
   @action
   changeWebsiteFilter(excludedWebsites: string[]) {
     this.state.websiteFilter = excludedWebsites || [];
+  }
+
+  @action
+  setPendingChanges(pending: boolean) {
+    this.state.hasPendingChanges = pending;
   }
 }
 

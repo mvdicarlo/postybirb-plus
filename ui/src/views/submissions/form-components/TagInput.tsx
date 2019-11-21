@@ -1,6 +1,10 @@
 import React from 'react';
-import { Switch, Select, Form, Typography } from 'antd';
+import { inject, observer } from 'mobx-react';
+import { TagGroupStore } from '../../../stores/tag-group.store';
 import { TagData } from '../../.././../../electron-app/src/submission/interfaces/submission-part.interface';
+import _ from 'lodash';
+
+import { Switch, Select, Form, Typography, Menu, Dropdown, Tooltip, Icon, Tag } from 'antd';
 
 const { Text } = Typography;
 
@@ -15,8 +19,10 @@ interface Props {
   defaultValue?: TagData;
   defaultTags?: TagData;
   onChange: (change: TagData) => void;
-  label: string;
+  label?: string;
   hideExtend?: boolean;
+  hideExtra?: boolean;
+  hideTagGroup?: boolean;
   tagOptions?: TagOptions;
 }
 
@@ -43,10 +49,6 @@ export default class TagInput extends React.Component<Props, TagData> {
     };
   }
 
-  componentDidUpdate(prevProps) {
-    // TODO is this needed?
-  }
-
   changeExtendDefault = (checked: boolean) => {
     this.setState({ extendDefault: checked });
     this.update();
@@ -60,15 +62,15 @@ export default class TagInput extends React.Component<Props, TagData> {
 
   filterTags(tags: string[]) {
     let filteredTags = tags.map(tag =>
-      tag.trim().replace(/("|;|\\|\[|\]|\{|\}|\||\!|\@|\$|\%|\^|\&|\*|\+|\=|\<|\>||`|~)/g, '')
+      tag.trim().replace(/("|;|\\|\[|\]|\{|\}|\||!|@|\$|%|\^|&|\*|\+|=|<|>||`|~)/g, '')
     );
 
     const filter = this.props.defaultTags ? this.props.defaultTags.value : [];
     if (this.state.extendDefault) {
-        filteredTags = filteredTags.filter(tag => !filter.includes(tag));
+      filteredTags = filteredTags.filter(tag => !filter.includes(tag));
     }
 
-    return filteredTags.splice(0, this.options.maxTags || 200);
+    return _.uniq(filteredTags).splice(0, this.options.maxTags || 200);
   }
 
   update() {
@@ -107,11 +109,13 @@ export default class TagInput extends React.Component<Props, TagData> {
         label={this.props.label}
         required={!!this.options.minTags}
         extra={
-          <Help
-            options={this.options}
-            defaultValue={this.state}
-            defaultTags={this.props.defaultTags}
-          />
+          this.props.hideExtend ? null : (
+            <Help
+              options={this.options}
+              defaultValue={this.state}
+              defaultTags={this.props.defaultTags}
+            />
+          )
         }
       >
         {tagSwitch}
@@ -131,6 +135,9 @@ export default class TagInput extends React.Component<Props, TagData> {
             </Select.Option>
           ))}
         </Select>
+        {this.props.hideTagGroup ? null : (
+          <TagGroupSelect onSelect={tags => this.handleTagChange([...this.state.value, ...tags])} />
+        )}
       </Form.Item>
     );
   }
@@ -164,8 +171,49 @@ const Help: React.SFC<HelpProps> = props => {
         {options.minTags ? `Requires at least ${options.minTags}` : ''}
       </div>
       <div className="text-right">
-        <Text type={count > max ? 'danger' : 'secondary'}>{count} / {max}</Text>
+        <Text type={count > max ? 'danger' : 'secondary'}>
+          {count} / {max}
+        </Text>
       </div>
     </div>
   );
 };
+
+interface TagGroupSelectProps {
+  onSelect: (tags: string[]) => void;
+  tagGroupStore?: TagGroupStore;
+}
+
+@inject('tagGroupStore')
+@observer
+class TagGroupSelect extends React.Component<TagGroupSelectProps> {
+  render() {
+    const menu = (
+      <Menu>
+        {this.props.tagGroupStore!.groups.map(g => (
+          <Menu.Item key={g.id}>
+            <Tooltip
+              placement="right"
+              title={
+                <div>
+                  {g.tags.map(tag => (
+                    <Tag>{tag}</Tag>
+                  ))}
+                </div>
+              }
+            >
+              <a onClick={() => this.props.onSelect(g.tags)}>{g.alias}</a>
+            </Tooltip>
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
+    return (
+      <Dropdown overlay={menu}>
+        <a className="ant-dropdown-link">
+          Apply Tag Group <Icon type="down" />
+        </a>
+      </Dropdown>
+    );
+  }
+}

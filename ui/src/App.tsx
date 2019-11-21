@@ -7,6 +7,7 @@ import { uiStore } from './stores/ui.store';
 import { submissionStore } from './stores/file-submission.store';
 import { headerStore } from './stores/header.store';
 import { loginStatusStore } from './stores/login-status.store';
+import { tagGroupStore } from './stores/tag-group.store';
 
 export default class App extends React.Component {
   render() {
@@ -17,6 +18,7 @@ export default class App extends React.Component {
           submissionStore={submissionStore}
           headerStore={headerStore}
           loginStatusStore={loginStatusStore}
+          tagGroupStore={tagGroupStore}
         >
           <AppLayout></AppLayout>
         </Provider>

@@ -1,6 +1,5 @@
 import axios from '../utils/http';
 import { TagGroup } from '../../../electron-app/src/tag-group/tag-group.interface';
-import { AxiosResponse } from 'axios';
 
 export default class TagGroupService {
   static getAll() {

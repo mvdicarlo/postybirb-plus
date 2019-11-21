@@ -4,6 +4,13 @@ import { FileSubmission } from '../../../electron-app/src/submission/file-submis
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { observable, computed, action } from 'mobx';
 
+enum FileSubmissionEvent {
+  CREATED = '[FILE SUBMISSION] CREATED',
+  REMOVED = '[FILE SUBMISSION] REMOVED',
+  VERIFIED = '[FILE SUBMISSION] VERIFIED',
+  SUBMISSIONS_VERIFIED = '[FILE SUBMISSIONS] VERIFIED'
+}
+
 export interface FileSubmissionState {
   loading: boolean;
   submissions: SubmissionPackage<FileSubmission>[];
@@ -59,14 +66,14 @@ export class SubmissionStore {
 
 export const submissionStore = new SubmissionStore();
 
-socket.on('FILE SUBMISSION REMOVED', (id: string) => {
+socket.on(FileSubmissionEvent.REMOVED, (id: string) => {
   submissionStore.removeSubmission(id);
 });
 
-socket.on('FILE SUBMISSION VERIFIED', (data: SubmissionPackage<FileSubmission>) => {
+socket.on(FileSubmissionEvent.VERIFIED, (data: SubmissionPackage<FileSubmission>) => {
   submissionStore.addOrUpdateSubmission(data);
 });
 
-socket.on('FILE SUBMISSIONS VERIFIED', (data: SubmissionPackage<FileSubmission>[]) => {
+socket.on(FileSubmissionEvent.SUBMISSIONS_VERIFIED, (data: SubmissionPackage<FileSubmission>[]) => {
   submissionStore.setSubmissions(data);
 });

@@ -15,7 +15,15 @@
 }
 
 .ant-form-item {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
+}
+
+.ant-form-item + .ant-form-item {
+  margin-top: 10px;
+}
+
+.ant-drawer-header {
+  @apply z-10 sticky bg-white top-0;
 }
 
 @tailwind utilities;

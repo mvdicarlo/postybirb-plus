@@ -4,12 +4,7 @@ import { TagGroup } from './tag-group.interface';
 import { TagGroupDto } from './tag-group.dto';
 import * as shortid from 'shortid';
 import { EventsGateway } from 'src/events/events.gateway';
-
-enum EVENTS {
-  TAG_GROUP_REMOVED = '[TAG GROUP] REMOVED',
-  TAG_GROUP_UPDATED = '[TAG GROUP] UPDATED',
-  TAG_GROUP_ADDED = '[TAG GROUP] ADDED',
-}
+import { TagGroupEvent } from './tag-group.events.enum';
 
 @Injectable()
 export class TagGroupService {
@@ -25,17 +20,17 @@ export class TagGroupService {
   async create(tagGroup: TagGroupDto) {
     tagGroup.id = shortid.generate();
     const newTagGroup = await this.repository.create(tagGroup);
-    this.eventEmitter.emit(EVENTS.TAG_GROUP_ADDED, newTagGroup);
+    this.eventEmitter.emit(TagGroupEvent.ADDED, newTagGroup);
     return newTagGroup;
   }
 
   async update(tagGroup: TagGroup) {
     await this.repository.update(tagGroup.id, { alias: tagGroup.alias, tags: tagGroup.tags });
-    this.eventEmitter.emit(EVENTS.TAG_GROUP_UPDATED, tagGroup);
+    this.eventEmitter.emit(TagGroupEvent.UPDATED, tagGroup);
   }
 
   async deleteTagGroup(id: string) {
     await this.repository.remove(id);
-    this.eventEmitter.emit(EVENTS.TAG_GROUP_REMOVED, id);
+    this.eventEmitter.emit(TagGroupEvent.REMOVED, id);
   }
 }
