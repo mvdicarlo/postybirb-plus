@@ -1,7 +1,8 @@
 import { SubmissionPart } from './submission-part.interface';
+import { Problems } from '../validator/interfaces/problems.interface';
 
 export interface SubmissionPackage<T> {
   submission: T;
   parts: { [key: string]: SubmissionPart<any> };
-  problems: { [key: string]: any };
+  problems: Problems;
 }

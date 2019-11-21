@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { SubmissionStore } from '../../stores/file-submission.store';
 import { inject, observer } from 'mobx-react';
-import { List, Avatar, Popconfirm, Modal, Input } from 'antd';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import SubmissionService from '../../services/submission.service';
 import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import SubmissionUtil from '../../utils/submission.util';
+import { List, Avatar, Popconfirm, Modal, Input, Typography, Button, Badge, Tooltip } from 'antd';
 
 interface Props {
   submissionStore?: SubmissionStore;
@@ -14,6 +14,39 @@ interface Props {
 
 interface State {
   search: string;
+}
+
+@inject('submissionStore')
+@observer
+export class Submissions extends React.Component<Props, State> {
+  state: State = {
+    search: ''
+  };
+
+  handleSearch = search => this.setState({ search: search.toLowerCase() });
+
+  render() {
+    const { submissionStore } = this.props;
+
+    const submissions = submissionStore!.all.filter(s =>
+      s.submission.title.toLowerCase().includes(this.state.search)
+    );
+    return (
+      <div>
+        <Input.Search onSearch={this.handleSearch} style={{ width: 200 }} />
+        <div className="submission-list">
+          <List
+            itemLayout="vertical"
+            loading={submissionStore!.isLoading}
+            dataSource={submissions}
+            renderItem={(item: SubmissionPackage<FileSubmission>) => (
+              <ListItem item={item}></ListItem>
+            )}
+          ></List>
+        </div>
+      </div>
+    );
+  }
 }
 
 interface ListItemProps {
@@ -30,11 +63,16 @@ class ListItem extends React.Component<ListItemProps, any> {
 
   render() {
     const { item } = this.props;
+    const problemCount: number = SubmissionUtil.getProblemCount(item);
+    const problemTree = null;
     return (
       <List.Item
+        className={problemCount > 0 ? 'bg-red-100' : ''}
         actions={[
           <Link to={`/edit/submission/${item.submission.id}`}>
-            <a key="submission-edit">Edit</a>
+            <Button type="link" key="submission-edit">
+              Edit
+            </Button>
           </Link>,
           <Popconfirm
             cancelText="No"
@@ -42,9 +80,26 @@ class ListItem extends React.Component<ListItemProps, any> {
             title="Are you sure you want to delete? This action cannot be undone."
             onConfirm={() => SubmissionService.deleteFileSubmission(item.submission.id)}
           >
-            <a key="submission-delete">Delete</a>
-          </Popconfirm>
+            <Button type="link" key="submission-delete">
+              <Typography.Text type="danger">Delete</Typography.Text>
+            </Button>
+          </Popconfirm>,
+          <Button type="link" key="submission-post" disabled={problemCount > 0}>
+            Post
+          </Button>
         ]}
+        extra={
+          problemCount > 0 ? (
+            <div>
+              <Typography.Text className="align-middle mr-1" type="danger">
+                Submission is incomplete
+              </Typography.Text>
+              <Tooltip title={problemTree}>
+                <Badge count={problemCount} />
+              </Tooltip>
+            </div>
+          ) : null
+        }
       >
         <List.Item.Meta
           avatar={
@@ -72,36 +127,6 @@ class ListItem extends React.Component<ListItemProps, any> {
           />
         </Modal>
       </List.Item>
-    );
-  }
-}
-
-@inject('submissionStore')
-@observer
-export class Submissions extends React.Component<Props, State> {
-  state: State = {
-    search: ''
-  };
-
-  handleSearch = search => this.setState({ search: search.toLowerCase() });
-
-  render() {
-    const { submissionStore } = this.props;
-
-    const submissions = submissionStore!.all.filter(s =>
-      s.submission.title.toLowerCase().includes(this.state.search)
-    );
-    return (
-      <div>
-        <Input.Search onSearch={this.handleSearch} style={{ width: 200 }} />
-        <div className="submission-list">
-          <List
-            loading={submissionStore!.isLoading}
-            dataSource={submissions}
-            renderItem={(item: SubmissionPackage<FileSubmission>) => <ListItem item={item}></ListItem>}
-          ></List>
-        </div>
-      </div>
     );
   }
 }
