@@ -2,6 +2,23 @@
 
 @tailwind components;
 
+.disabled {
+  @apply text-disabled 
+}
+
+.text-link:hover {
+  cursor: pointer;
+  color: #40a9ff;
+}
+
+.text-link:active {
+  color: #096dd9;
+}
+
+.text-diabled {
+  pointer-events: none;
+}
+
 .primary-layout-container {
   background-color: white;
 }

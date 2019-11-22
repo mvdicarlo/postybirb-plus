@@ -3,5 +3,6 @@ export interface Problems {
   [key: string]: {
     problems: string[];
     website: string;
+    accountId: string;
   };
 }

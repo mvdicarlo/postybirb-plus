@@ -5,14 +5,15 @@ import * as shortid from 'shortid';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmissionRepository } from './file-submission.repository';
-import { getSubmissionType, FileSubmissionType } from './enums/file-submission-type.enum';
-import { SubmissionType, Submission } from 'src/submission/interfaces/submission.interface';
+import { getSubmissionType } from './enums/file-submission-type.enum';
+import { SubmissionType } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { ValidatorService } from '../validator/validator.service';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { SubmissionUpdate } from 'src/submission/interfaces/submission-update.interface';
 import { FileSubmissionEvent } from './file-submission.events.enum';
+import * as _ from 'lodash';
 
 @Injectable()
 export class FileSubmissionService {
@@ -58,6 +59,54 @@ export class FileSubmissionService {
     );
 
     return submission;
+  }
+
+  async duplicateSubmission(originalId: string): Promise<FileSubmission> {
+    this.logger.debug(`Duplicating ${originalId}`, 'FileSubmission Duplicate');
+    const toDuplicate = await this.find(originalId);
+    if (!toDuplicate) {
+      throw new Error('Submission does not exist');
+    }
+
+    const id = shortid.generate();
+
+    const duplicate: FileSubmission = _.cloneDeep(toDuplicate);
+    duplicate.id = id;
+
+    // Copy files
+    duplicate.primary = await this.fileRepository.copyFileWithNewId(id, duplicate.primary);
+
+    if (duplicate.thumbnail) {
+      duplicate.thumbnail = await this.fileRepository.copyFileWithNewId(id, duplicate.thumbnail);
+    }
+
+    if (duplicate.additional && duplicate.additional.length) {
+      for (let i = 0; i < duplicate.additional.length; i++) {
+        duplicate.additional[i] = await this.fileRepository.copyFileWithNewId(
+          id,
+          duplicate.additional[i],
+        );
+      }
+    }
+
+    this.logger.debug(`Duplicating parts for ${originalId} (${id})`, 'FileSubmission Duplicate');
+    const parts = await this.submissionPartService.getPartsForSubmission(originalId);
+    const duplicateParts: Array<SubmissionPart<any>> = _.cloneDeep(parts);
+    await Promise.all(
+      duplicateParts.map(p => {
+        p.submissionId = duplicate.id;
+        return this.submissionPartService.createOrUpdateSubmissionPart(p, SubmissionType.FILE);
+      }),
+    );
+
+    this.logger.debug(`Saving duplicate submission ${id} from ${originalId}`, 'FileSubmission Duplicate');
+    const createdSubmission = this.repository.create(duplicate);
+
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.CREATED,
+      this.getSubmissionPackage(duplicate.id),
+    );
+    return createdSubmission;
   }
 
   async removeSubmission(id: string): Promise<void> {
@@ -125,6 +174,9 @@ export class FileSubmissionService {
   }
 
   async verifyAllSubmissions(): Promise<void> {
-    this.eventEmitter.emitOnComplete(FileSubmissionEvent.SUBMISSIONS_VERIFIED, this.getAllSubmissionPackages());
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.SUBMISSIONS_VERIFIED,
+      this.getAllSubmissionPackages(),
+    );
   }
 }

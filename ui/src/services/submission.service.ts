@@ -13,4 +13,8 @@ export default class SubmissionService {
   static updateSubmission(submissionPackage: SubmissionUpdate) {
     return axios.post('/file_submission/update', submissionPackage);
   }
+
+  static duplicate(id: string) {
+    return axios.post(`/file_submission/duplicate/${id}`);
+  }
 }

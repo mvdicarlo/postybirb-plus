@@ -1,15 +1,12 @@
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 
 export default class SubmissionUtil {
   static getFileSubmissionTitle(submissionPackage: SubmissionPackage<any>): string {
     return submissionPackage.parts.default.data.title || submissionPackage.submission.title;
   }
 
-  static getProblemCount(submissionPackage: SubmissionPackage<any>): number {
-    let count = 0;
-    Object.values(submissionPackage.problems).forEach(
-      problem => (count += problem.problems.length)
-    );
-    return count;
+  static getProblemCount(problems: Problems): number {
+    return Object.values(problems).flatMap(p => p.problems).length;
   }
 }

@@ -54,4 +54,9 @@ export class FileSubmissionController {
   async update(@Body() submissionPackage: SubmissionUpdate) {
     return this.service.updateSubmission(submissionPackage);
   }
+
+  @Post('/duplicate/:id')
+  async duplicate(@Param('id') id: string) {
+    return this.service.duplicateSubmission(id);
+  }
 }

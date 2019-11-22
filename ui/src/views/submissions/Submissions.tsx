@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { SubmissionStore } from '../../stores/file-submission.store';
 import { inject, observer } from 'mobx-react';
@@ -6,7 +6,23 @@ import { FileSubmission } from '../../../../electron-app/src/submission/file-sub
 import SubmissionService from '../../services/submission.service';
 import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import SubmissionUtil from '../../utils/submission.util';
-import { List, Avatar, Popconfirm, Modal, Input, Typography, Button, Badge, Tooltip } from 'antd';
+import _ from 'lodash';
+import { Problems } from '../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+
+import {
+  List,
+  Avatar,
+  Popconfirm,
+  Modal,
+  Input,
+  Typography,
+  Tooltip,
+  Icon,
+  Tree,
+  message
+} from 'antd';
+import { filter } from 'minimatch';
+import { loginStatusStore } from '../../stores/login-status.store';
 
 interface Props {
   submissionStore?: SubmissionStore;
@@ -61,45 +77,49 @@ class ListItem extends React.Component<ListItemProps, any> {
   handleCancel = () => this.setState({ previewVisible: false });
   handleShow = () => this.setState({ previewVisible: true });
 
+  onDuplicate() {
+    SubmissionService.duplicate(this.props.item.submission.id)
+      .then(() => {
+        message.success('Submission duplicated.');
+      })
+      .catch(() => {
+        message.error('PostyBirb was unable to duplicate the submission.');
+      });
+  }
+
   render() {
     const { item } = this.props;
-    const problemCount: number = SubmissionUtil.getProblemCount(item);
-    const problemTree = null;
+    const problems: Problems = JSON.parse(JSON.stringify(item.problems));
+    const problemCount: number = SubmissionUtil.getProblemCount(problems);
     return (
       <List.Item
-        className={problemCount > 0 ? 'bg-red-100' : ''}
         actions={[
+          <span
+            className={`text-link ${problemCount > 0 ? 'text-disabled' : ''}`}
+            key="submission-post"
+          >
+            Post
+          </span>,
           <Link to={`/edit/submission/${item.submission.id}`}>
-            <Button type="link" key="submission-edit">
-              Edit
-            </Button>
+            <span key="submission-edit">Edit</span>
           </Link>,
+          <span
+            className="text-link"
+            key="submission-duplicate"
+            onClick={this.onDuplicate.bind(this)}
+          >
+            Duplicate
+          </span>,
           <Popconfirm
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
             onConfirm={() => SubmissionService.deleteFileSubmission(item.submission.id)}
           >
-            <Button type="link" key="submission-delete">
-              <Typography.Text type="danger">Delete</Typography.Text>
-            </Button>
+            <Typography.Text type="danger">Delete</Typography.Text>
           </Popconfirm>,
-          <Button type="link" key="submission-post" disabled={problemCount > 0}>
-            Post
-          </Button>
+          <IssueState problems={problems} problemCount={problemCount} />
         ]}
-        extra={
-          problemCount > 0 ? (
-            <div>
-              <Typography.Text className="align-middle mr-1" type="danger">
-                Submission is incomplete
-              </Typography.Text>
-              <Tooltip title={problemTree}>
-                <Badge count={problemCount} />
-              </Tooltip>
-            </div>
-          ) : null
-        }
       >
         <List.Item.Meta
           avatar={
@@ -128,5 +148,90 @@ class ListItem extends React.Component<ListItemProps, any> {
         </Modal>
       </List.Item>
     );
+  }
+}
+
+interface ProblemTreeProps {
+  problems: Problems;
+}
+
+const IssueState: React.FC<{ problems: Problems; problemCount: number }> = props => {
+  return props.problemCount ? (
+    <span className="text-warning">
+      <Tooltip
+        title={<div className="bg-red-100">{<ProblemTree problems={props.problems} />}</div>}
+      >
+        <Icon type="warning" />
+        <span className="ml-2">{props.problemCount}</span>
+      </Tooltip>
+    </span>
+  ) : (
+    <span className="text-success">
+      <Icon type="check-circle" />
+      <span className="ml-2">Ready</span>
+    </span>
+  );
+};
+
+class ProblemTree extends React.Component<ProblemTreeProps> {
+  createProblemNode = (problem: string): any => {
+    return <Tree.TreeNode title={problem} />;
+  };
+
+  createAliasNode = (problemObj: any): any => {
+    const children = problemObj.problems.map(this.createProblemNode);
+    return (
+      <Tree.TreeNode
+        title={
+          <span className="capitalize">
+            {loginStatusStore.getAliasForAccountId(problemObj.accountId)}
+          </span>
+        }
+      >
+        {children}
+      </Tree.TreeNode>
+    );
+  };
+
+  createWebsiteTree = (website: string, arr: any[]): any => {
+    if (website === 'default') {
+      return (
+        <Tree.TreeNode title="Default" key="default">
+          {arr
+            .flatMap(p => p.problems)
+            .map(p => (
+              <Tree.TreeNode title={p} />
+            ))}
+        </Tree.TreeNode>
+      );
+    } else {
+      const children = arr.map(this.createAliasNode);
+      return (
+        <Tree.TreeNode title={<span className="capitalize">{website}</span>} key={website}>
+          {children}
+        </Tree.TreeNode>
+      );
+    }
+  };
+
+  filterEmptyTrees(problems: Problems): Problems {
+    const filteredProblems: Problems = {};
+    Object.keys(problems).forEach(accountId => {
+      if (problems[accountId].problems.length) {
+        filteredProblems[accountId] = problems[accountId];
+      }
+    });
+
+    return filteredProblems;
+  }
+
+  render() {
+    const problems = this.filterEmptyTrees(this.props.problems);
+    const group = _.groupBy(problems, 'website');
+    const websiteNodes = Object.entries(group).map(([key, value]) =>
+      this.createWebsiteTree(key, value)
+    );
+
+    return <Tree defaultExpandAll>{websiteNodes}</Tree>;
   }
 }

@@ -19,6 +19,7 @@ export class ValidatorService {
         websiteProblems[p.accountId] = {
           problems: this.validatePart(submission, p, defaultPart),
           website: p.website,
+          accountId: p.accountId,
         };
       });
 
@@ -26,6 +27,7 @@ export class ValidatorService {
       [defaultPart.accountId]: {
         problems: this.validateDefaultPart(submission, defaultPart),
         website: defaultPart.website,
+        accountId: defaultPart.accountId,
       },
       ...websiteProblems,
     };

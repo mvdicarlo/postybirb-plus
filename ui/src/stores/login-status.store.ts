@@ -34,6 +34,10 @@ export class LoginStatusStore {
   updateStatuses(statuses: UserAccountDto[]) {
     this.state.statuses = statuses || [];
   }
+
+  getAliasForAccountId(id: string): string {
+    return (this.state.statuses.find(s => s.id === id) || {}).alias || id;
+  }
 }
 
 export const loginStatusStore = new LoginStatusStore();
