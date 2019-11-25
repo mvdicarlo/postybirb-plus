@@ -38,6 +38,10 @@ export class LoginStatusStore {
   getAliasForAccountId(id: string): string {
     return (this.state.statuses.find(s => s.id === id) || {}).alias || id;
   }
+
+  getWebsiteForAccountId(id: string): string {
+    return (this.state.statuses.find(s => s.id === id) || {}).website || id;
+  }
 }
 
 export const loginStatusStore = new LoginStatusStore();

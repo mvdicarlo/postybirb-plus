@@ -5,6 +5,7 @@ import {
 
 export interface FileSubmissionSectionProps<T> {
   onUpdate: (update: SubmissionPart<T>) => void;
-  defaultValues?: DefaultOptions;
+  defaultData?: DefaultOptions;
   part: SubmissionPart<T>;
+  problems: string[];
 }

@@ -11,4 +11,5 @@ export interface Website {
   name: string;
   LoginDialog: (props: LoginDialogProps) => JSX.Element;
   FileSubmissionForm: (props: FileSubmissionSectionProps<any>) => JSX.Element;
+  getDefaults(): any;
 }

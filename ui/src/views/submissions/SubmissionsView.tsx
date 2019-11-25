@@ -1,6 +1,6 @@
 import React from 'react';
 import { Submissions } from './Submissions';
-import { Upload, Icon, message } from 'antd';
+import { Upload, Icon, message, Tabs } from 'antd';
 import { RcFile } from 'antd/lib/upload';
 import { headerStore } from '../../stores/header.store';
 import './SubmissionsView.css';
@@ -14,9 +14,9 @@ export default class SubmissionView extends React.Component {
     showUploadList: false,
     action: (file: RcFile) =>
       Promise.resolve(
-        `http://localhost:${
-          window['PORT']
-        }/file_submission/create/${encodeURIComponent(file['path'])}`
+        `http://localhost:${window['PORT']}/file_submission/create/${encodeURIComponent(
+          file['path']
+        )}`
       ),
     onChange(info) {
       const { status } = info.file;
@@ -40,19 +40,29 @@ export default class SubmissionView extends React.Component {
     });
 
     return (
-      <div className="submission-view">
-        <Submissions></Submissions>
-        <div className="uploader">
-          <Dragger {...this.uploadProps}>
-            <p className="ant-upload-drag-icon">
-              <Icon type="inbox" />
-            </p>
-            <p className="ant-upload-text">
-              Click or drag file to this area to create a submission
-            </p>
-          </Dragger>
-        </div>
-      </div>
+      <Tabs>
+        <Tabs.TabPane tab="Submissions" key="submissions">
+          <div className="submission-view">
+            <Submissions></Submissions>
+            <div className="uploader">
+              <Dragger {...this.uploadProps}>
+                <p className="ant-upload-drag-icon">
+                  <Icon type="inbox" />
+                </p>
+                <p className="ant-upload-text">
+                  Click or drag file to this area to create a submission
+                </p>
+              </Dragger>
+            </div>
+          </div>
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Scheduled" key="scheduled">
+          TBD
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Posting" key="posting">
+          TBD
+        </Tabs.TabPane>
+      </Tabs>
     );
   }
 }

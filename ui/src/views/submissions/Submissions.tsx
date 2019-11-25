@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { SubmissionStore } from '../../stores/file-submission.store';
 import { inject, observer } from 'mobx-react';
@@ -21,7 +21,6 @@ import {
   Tree,
   message
 } from 'antd';
-import { filter } from 'minimatch';
 import { loginStatusStore } from '../../stores/login-status.store';
 
 interface Props {
@@ -49,9 +48,11 @@ export class Submissions extends React.Component<Props, State> {
     );
     return (
       <div>
-        <Input.Search onSearch={this.handleSearch} style={{ width: 200 }} />
         <div className="submission-list">
           <List
+            header={<Input.Search onSearch={this.handleSearch} style={{ width: 200 }} />}
+            footer={this.props.children}
+            bordered
             itemLayout="vertical"
             loading={submissionStore!.isLoading}
             dataSource={submissions}
@@ -159,6 +160,7 @@ const IssueState: React.FC<{ problems: Problems; problemCount: number }> = props
   return props.problemCount ? (
     <span className="text-warning">
       <Tooltip
+        overlayStyle={{ maxWidth: 'unset' }}
         title={<div className="bg-red-100">{<ProblemTree problems={props.problems} />}</div>}
       >
         <Icon type="warning" />

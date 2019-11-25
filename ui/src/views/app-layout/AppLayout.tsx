@@ -10,7 +10,7 @@ import { Login } from '../login/Login';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
-import { Icon, Layout, Menu, Drawer, Select, BackTop, Modal } from 'antd';
+import { Icon, Layout, Menu, Drawer, Select, BackTop } from 'antd';
 
 const { Content, Sider } = Layout;
 

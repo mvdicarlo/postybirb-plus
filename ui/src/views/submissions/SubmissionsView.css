@@ -1,5 +1,8 @@
 .submission-list {
-  max-height: 33vh;
-  overflow: auto;
   margin-bottom: 1em;
+}
+
+.submission-list .ant-list-items {
+  max-height: 50vh;
+  overflow: auto;
 }
