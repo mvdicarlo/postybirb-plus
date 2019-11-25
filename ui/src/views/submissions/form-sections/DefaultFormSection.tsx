@@ -1,24 +1,32 @@
 import React from 'react';
+import _ from 'lodash';
 import {
   DefaultOptions,
   SubmissionPart
 } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { FileSubmissionSectionProps } from '../interfaces/file-submission-section.interface';
 import TagInput from '../form-components/TagInput';
+import DescriptionInput from '../form-components/DescriptionInput';
 import { Form, Input, Radio } from 'antd';
 
 export default class DefaultFormSection extends React.Component<
   FileSubmissionSectionProps<DefaultOptions>
 > {
   handleChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DefaultOptions> = JSON.parse(JSON.stringify(this.props.part));
+    const part: SubmissionPart<DefaultOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.value;
     this.props.onUpdate(part);
   }
 
   handleTagChange(update: any) {
-    const part: SubmissionPart<DefaultOptions> = JSON.parse(JSON.stringify(this.props.part));
+    const part: SubmissionPart<DefaultOptions> = _.cloneDeep(this.props.part);
     part.data.tags = update;
+    this.props.onUpdate(part);
+  }
+
+  handleDescriptionChange(update) {
+    const part: SubmissionPart<DefaultOptions> = _.cloneDeep(this.props.part);
+    part.data.description = update;
     this.props.onUpdate(part);
   }
 
@@ -44,8 +52,14 @@ export default class DefaultFormSection extends React.Component<
         <TagInput
           onChange={this.handleTagChange.bind(this)}
           defaultValue={data.tags}
-          label="Default Tags"
+          label="Tags"
           hideExtend={true}
+        />
+        <DescriptionInput
+          defaultValue={data.description}
+          onChange={this.handleDescriptionChange.bind(this)}
+          label="Description"
+          hideOverwrite={true}
         />
       </div>
     );

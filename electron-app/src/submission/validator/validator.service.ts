@@ -25,7 +25,7 @@ export class ValidatorService {
 
     return {
       [defaultPart.accountId]: {
-        problems: this.validateDefaultPart(submission, defaultPart),
+        problems: this.validateDefaultPart(submission, defaultPart, parts),
         website: defaultPart.website,
         accountId: defaultPart.accountId,
       },
@@ -51,10 +51,15 @@ export class ValidatorService {
   private validateDefaultPart(
     submission: Submission,
     defaultPart: SubmissionPart<DefaultOptions>,
+    allParts: Array<SubmissionPart<any>>
   ): string[] {
     const problems: string[] = [];
     if (!defaultPart.data.rating) {
       problems.push('Please provide a rating.');
+    }
+
+    if (allParts.length <= 1) {
+      problems.push('Please add one or more websites to post to.');
     }
 
     return problems;

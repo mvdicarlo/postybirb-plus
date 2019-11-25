@@ -44,7 +44,7 @@ export class SubmissionPartService {
       await this.repository.create({
         ...copy,
         data: update,
-        id: `${copy.accountId}-${copy.website}`,
+        id: `${copy.submissionId}-${copy.accountId}-${copy.website}`,
       });
     }
 

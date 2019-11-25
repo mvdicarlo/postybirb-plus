@@ -90,7 +90,7 @@ export default class TagInput extends React.Component<Props, TagData> {
 
   render() {
     const tagSwitch = this.props.hideExtend ? (
-      ''
+      null
     ) : (
       <div>
         <span className="mr-2">
