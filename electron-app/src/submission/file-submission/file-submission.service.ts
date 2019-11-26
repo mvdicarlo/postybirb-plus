@@ -14,6 +14,7 @@ import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { SubmissionUpdate } from 'src/submission/interfaces/submission-update.interface';
 import { FileSubmissionEvent } from './file-submission.events.enum';
 import * as _ from 'lodash';
+import { Problems } from '../validator/interfaces/problems.interface';
 
 @Injectable()
 export class FileSubmissionService {
@@ -103,18 +104,15 @@ export class FileSubmissionService {
       }),
     );
 
-    this.logger.debug(`Saving duplicate submission ${id} from ${originalId}`, 'FileSubmission Duplicate');
+    this.logger.debug(
+      `Saving duplicate submission ${id} from ${originalId}`,
+      'FileSubmission Duplicate',
+    );
     const createdSubmission = await this.repository.create(duplicate);
 
-    this.eventEmitter.emit(
-      FileSubmissionEvent.CREATED,
-      createdSubmission,
-    );
+    this.eventEmitter.emit(FileSubmissionEvent.CREATED, createdSubmission);
 
-    this.eventEmitter.emitOnComplete(
-      FileSubmissionEvent.VERIFIED,
-      this.getSubmissionPackage(id),
-    );
+    this.eventEmitter.emitOnComplete(FileSubmissionEvent.VERIFIED, this.getSubmissionPackage(id));
     return createdSubmission;
   }
 
@@ -165,8 +163,13 @@ export class FileSubmissionService {
     return part;
   }
 
+  async removePart(submissionPartId: string): Promise<void> {
+    await this.submissionPartService.removeSubmissionPart(submissionPartId);
+  }
+
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<FileSubmission>> {
     await Promise.all(update.parts.map(part => this.setPart(part)));
+    await Promise.all(update.removedParts.map(id => this.removePart(id)));
     return this.getSubmissionPackage(update.id);
   }
 
@@ -180,6 +183,17 @@ export class FileSubmissionService {
       parts: mappedParts,
       problems,
     };
+  }
+
+  async dryValidate(parts: Array<SubmissionPart<any>>): Promise<Problems> {
+    if (parts.length) {
+      return this.validatorService.validateParts(
+        await this.repository.find(parts[0].submissionId),
+        parts,
+      );
+    }
+
+    return {};
   }
 
   async verifyAllSubmissions(): Promise<void> {

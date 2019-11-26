@@ -59,4 +59,9 @@ export class FileSubmissionController {
   async duplicate(@Param('id') id: string) {
     return this.service.duplicateSubmission(id);
   }
+
+  @Post('/dry_validate')
+  async dryValidate(@Body() parts: Array<SubmissionPart<any>>) {
+    return this.service.dryValidate(parts || []);
+  }
 }

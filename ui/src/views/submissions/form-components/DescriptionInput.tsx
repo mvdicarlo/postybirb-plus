@@ -11,8 +11,8 @@ interface Props {
   onChange: (change: DescriptionData) => void;
 }
 
-export default class DescriptionInput extends React.Component<Props, DescriptionData> {
-  state: DescriptionData = {
+export default class DescriptionInput extends React.Component<Props> {
+  private data: DescriptionData = {
     overwriteDefault: false,
     value: ''
   };
@@ -66,52 +66,53 @@ export default class DescriptionInput extends React.Component<Props, Description
 
   constructor(props) {
     super(props);
-    this.state = props.defaultValue;
+    this.data = props.defaultValue;
   }
 
   changeOverwriteDefault = (checked: boolean) => {
-    this.setState({ overwriteDefault: checked });
+    this.data.overwriteDefault = !checked;
     this.update();
   };
 
   handleDescriptionChange = description => {
-    this.setState({ value: description });
+    this.data.value = description;
     this.update();
   };
 
   update() {
     this.props.onChange({
-      overwriteDefault: this.state.overwriteDefault,
-      value: this.state.value
+      overwriteDefault: this.data.overwriteDefault,
+      value: this.data.value
     });
   }
 
   render() {
+    this.data = this.props.defaultValue;
     const overwriteSwitch = this.props.hideOverwrite ? null : (
       <div>
         <span className="mr-2">
           <Switch
             size="small"
-            defaultChecked={!this.state.overwriteDefault}
+            checked={!this.props.defaultValue.overwriteDefault}
             onChange={this.changeOverwriteDefault}
           />
         </span>
-        <span>Combine with default</span>
+        <span>Use default</span>
       </div>
     );
 
     return (
       <Form.Item label={this.props.label}>
         {overwriteSwitch}
-        {this.state.overwriteDefault || this.props.hideOverwrite ? (
+        {this.props.defaultValue.overwriteDefault || this.props.hideOverwrite ? (
           <div className="relative">
             <Editor
-              value={this.state.value}
+              value={this.props.defaultValue.value}
               init={this.tinyMCESettings}
               onEditorChange={this.handleDescriptionChange}
             />
             <div className="absolute bottom-0 text-gray-600 mr-1 right-0 pointer-events-none">
-              {PlaintextParser.parse(this.state.value).length}
+              {PlaintextParser.parse(this.props.defaultValue.value).length}
             </div>
           </div>
         ) : null}

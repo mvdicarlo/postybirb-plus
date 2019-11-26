@@ -16,7 +16,7 @@ interface TagOptions {
 }
 
 interface Props {
-  defaultValue?: TagData;
+  defaultValue: TagData;
   defaultTags?: TagData;
   onChange: (change: TagData) => void;
   label?: string;
@@ -26,11 +26,11 @@ interface Props {
   tagOptions?: TagOptions;
 }
 
-export default class TagInput extends React.Component<Props, TagData> {
-  state: TagData = {
+export default class TagInput extends React.Component<Props> {
+  private data: TagData = {
     extendDefault: true,
     value: []
-  };
+  }
 
   options: TagOptions = {
     maxTags: 200,
@@ -40,7 +40,7 @@ export default class TagInput extends React.Component<Props, TagData> {
   constructor(props: Props) {
     super(props);
     if (props.defaultValue) {
-      this.state = props.defaultValue;
+      this.data = props.defaultValue;
     }
 
     this.options = {
@@ -50,13 +50,12 @@ export default class TagInput extends React.Component<Props, TagData> {
   }
 
   changeExtendDefault = (checked: boolean) => {
-    this.setState({ extendDefault: checked });
+    this.data.extendDefault = checked;
     this.update();
   };
 
   handleTagChange = (tags: string[]) => {
-    this.state.value = this.filterTags(tags);
-    this.setState({ value: this.state.value });
+    this.data.value = this.filterTags(tags);
     this.update();
   };
 
@@ -66,17 +65,17 @@ export default class TagInput extends React.Component<Props, TagData> {
     );
 
     const filter = this.props.defaultTags ? this.props.defaultTags.value : [];
-    if (this.state.extendDefault) {
+    if (this.data.extendDefault) {
       filteredTags = filteredTags.filter(tag => !filter.includes(tag));
     }
 
-    return _.uniq(filteredTags).splice(0, this.options.maxTags || 200);
+    return _.uniq(filteredTags);
   }
 
   update() {
     this.props.onChange({
-      extendDefault: this.state.extendDefault,
-      value: this.filterTags(this.state.value)
+      extendDefault: this.data.extendDefault,
+      value: this.filterTags(this.data.value)
     });
   }
 
@@ -89,14 +88,13 @@ export default class TagInput extends React.Component<Props, TagData> {
   };
 
   render() {
-    const tagSwitch = this.props.hideExtend ? (
-      null
-    ) : (
+    this.data = this.props.defaultValue;
+    const tagSwitch = this.props.hideExtend ? null : (
       <div>
         <span className="mr-2">
           <Switch
             size="small"
-            defaultChecked={this.state.extendDefault}
+            checked={this.props.defaultValue.extendDefault}
             onChange={this.changeExtendDefault}
           />
         </span>
@@ -105,39 +103,38 @@ export default class TagInput extends React.Component<Props, TagData> {
     );
 
     return (
-      <Form.Item
-        label={this.props.label}
-        required={!!this.options.minTags}
-        extra={
-          this.props.hideExtend ? null : (
-            <Help
-              options={this.options}
-              defaultValue={this.state}
-              defaultTags={this.props.defaultTags}
-            />
-          )
-        }
-      >
+      <Form.Item label={this.props.label} required={!!this.options.minTags}>
         {tagSwitch}
         <Select
           mode="tags"
           style={{ width: '100%' }}
           tokenSeparators={[',']}
           onChange={this.handleTagChange}
-          value={this.state.value}
+          value={this.props.defaultValue.value}
           placeholder="Separate tags with ,"
           allowClear={true}
           onInputKeyDown={this.onKeyDown}
         >
-          {this.state.value.map(tag => (
+          {this.props.defaultValue.value.map(tag => (
             <Select.Option key="tag" value={tag}>
               {tag}
             </Select.Option>
           ))}
         </Select>
-        {this.props.hideTagGroup ? null : (
-          <TagGroupSelect onSelect={tags => this.handleTagChange([...this.state.value, ...tags])} />
-        )}
+        <div className="flex">
+          {this.props.hideTagGroup ? null : (
+            <TagGroupSelect
+              onSelect={tags => this.handleTagChange([...this.props.defaultValue.value, ...tags])}
+            />
+          )}
+          {this.props.hideExtend ? null : (
+            <Help
+              options={this.options}
+              defaultValue={this.props.defaultValue}
+              defaultTags={this.props.defaultTags}
+            />
+          )}
+        </div>
       </Form.Item>
     );
   }
@@ -163,12 +160,12 @@ const Help: React.SFC<HelpProps> = props => {
     count = tags.join(' ').length;
   }
 
-  const max = options.mode === 'count' ? options.minTags || 200 : options.maxLength || 255;
+  const max = options.mode === 'count' ? options.maxTags || 200 : options.maxLength || 255;
 
   return (
-    <div className="flex">
+    <div className="flex text-gray-600" style={{ flex: 10 }}>
       <div className="flex-grow">
-        {options.minTags ? `Requires at least ${options.minTags}` : ''}
+        {options.minTags ? `Requires at least ${options.minTags} tag(s)` : ''}
       </div>
       <div className="text-right">
         <Text type={count > max ? 'danger' : 'secondary'}>
@@ -209,11 +206,13 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps> {
       </Menu>
     );
     return (
-      <Dropdown overlay={menu}>
-        <a className="ant-dropdown-link">
-          Apply Tag Group <Icon type="down" />
-        </a>
-      </Dropdown>
+      <div className="mr-2">
+        <Dropdown overlay={menu}>
+          <a className="ant-dropdown-link">
+            Apply Tag Group <Icon type="down" />
+          </a>
+        </Dropdown>
+      </div>
     );
   }
 }

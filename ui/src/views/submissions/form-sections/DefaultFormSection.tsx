@@ -7,7 +7,7 @@ import {
 import { FileSubmissionSectionProps } from '../interfaces/file-submission-section.interface';
 import TagInput from '../form-components/TagInput';
 import DescriptionInput from '../form-components/DescriptionInput';
-import { Form, Input, Radio } from 'antd';
+import { Form, Input, Radio, Alert } from 'antd';
 
 export default class DefaultFormSection extends React.Component<
   FileSubmissionSectionProps<DefaultOptions>
@@ -34,6 +34,18 @@ export default class DefaultFormSection extends React.Component<
     const { data } = this.props.part;
     return (
       <div>
+        {this.props.problems.length ? (
+          <Alert
+            type="error"
+            message={
+              <ul>
+                {this.props.problems.map(problem => (
+                  <li>{problem}</li>
+                ))}
+              </ul>
+            }
+          />
+        ) : null}
         <Form.Item label="Title">
           <Input defaultValue={data.title} onBlur={this.handleChange.bind(this, 'title')} />
         </Form.Item>

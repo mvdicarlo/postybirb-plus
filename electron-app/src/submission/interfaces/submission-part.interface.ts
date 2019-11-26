@@ -10,7 +10,7 @@ export interface SubmissionPart<T> {
 }
 
 export interface DefaultOptions {
-  title?: string;
+  title?: string|undefined;
   tags: TagData;
   description: DescriptionData;
   rating: SubmissionRating;
