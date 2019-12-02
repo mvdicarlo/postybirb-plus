@@ -14,4 +14,5 @@ export const DEFAULT_FILE_SUBMISSION_OPTIONS: DefaultWeasylSubmissionOptions = {
     value: '',
   },
   rating: null,
+  useThumbnail: true,
 };

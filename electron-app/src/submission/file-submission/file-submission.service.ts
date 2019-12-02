@@ -62,6 +62,154 @@ export class FileSubmissionService {
     return submission;
   }
 
+  async changePrimaryFile(file: UploadedFile, id: string, path: string): Promise<FileSubmission> {
+    const submission = await this.repository.find(id);
+    if (!submission) {
+      throw new Error('Submission does not exist');
+    }
+
+    await this.fileRepository.removeSubmissionFile(submission.primary);
+    const locations = await this.fileRepository.insertFile(submission.id, file, path);
+    submission.primary = {
+      location: locations.submissionLocation,
+      mimetype: file.mimetype,
+      name: file.originalname,
+      originalPath: path,
+      preview: locations.thumbnailLocation,
+      size: file.buffer.length,
+      type: getSubmissionType(file.mimetype, file.originalname),
+    };
+
+    await this.repository.update(id, { primary: submission.primary });
+
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.VERIFIED,
+      this.getSubmissionPackage(submission.id),
+    );
+
+    return submission;
+  }
+
+  async changeThumbnailFile(file: UploadedFile, id: string, path: string): Promise<FileSubmission> {
+    const submission = await this.repository.find(id);
+
+    if (!file) {
+      throw new Error('No file provided');
+    }
+
+    if (
+      !(
+        file.mimetype.includes('image/jpeg') ||
+        file.mimetype.includes('image/jpg') ||
+        file.mimetype.includes('image/png')
+      )
+    ) {
+      throw new Error('Thumbnail file must be png or jpeg');
+    }
+
+    if (!submission) {
+      throw new Error('Submission does not exist');
+    }
+
+    if (submission.thumbnail) {
+      await this.fileRepository.removeSubmissionFile(submission.thumbnail);
+    }
+
+    const scaledUpload = this.fileRepository.scaleImage(file, 640);
+    const locations = await this.fileRepository.insertFile(submission.id, file, path);
+    submission.thumbnail = {
+      location: locations.submissionLocation,
+      mimetype: scaledUpload.mimetype,
+      name: scaledUpload.originalname,
+      originalPath: path,
+      preview: locations.thumbnailLocation,
+      size: scaledUpload.buffer.length,
+      type: getSubmissionType(scaledUpload.mimetype, scaledUpload.originalname),
+    };
+
+    await this.repository.update(id, { thumbnail: submission.thumbnail });
+
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.VERIFIED,
+      this.getSubmissionPackage(submission.id),
+    );
+
+    return submission;
+  }
+
+  async removeThumbnail(id: string): Promise<FileSubmission> {
+    const submission = await this.repository.find(id);
+    if (!submission) {
+      throw new Error('Submission does not exist');
+    }
+
+    if (submission.thumbnail) {
+      await this.fileRepository.removeSubmissionFile(submission.thumbnail);
+    }
+
+    const copy = _.cloneDeep(submission);
+    delete copy.thumbnail;
+
+    await this.repository.update(id, { thumbnail: null });
+
+    return copy;
+  }
+
+  async addAdditionalFile(file: UploadedFile, id: string, path: string): Promise<FileSubmission> {
+    const submission = await this.repository.find(id);
+    if (!submission) {
+      throw new Error('Submission does not exist');
+    }
+
+    const copy = _.cloneDeep(submission);
+    copy.additional = copy.additional || [];
+    const locations = await this.fileRepository.insertFile(submission.id, file, path);
+    copy.additional.push({
+      location: locations.submissionLocation,
+      mimetype: file.mimetype,
+      name: file.originalname,
+      originalPath: path,
+      preview: locations.thumbnailLocation,
+      size: file.buffer.length,
+      type: getSubmissionType(file.mimetype, file.originalname),
+    });
+
+    await this.repository.update(id, { additional: copy.additional });
+
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.VERIFIED,
+      this.getSubmissionPackage(submission.id),
+    );
+
+    return copy;
+  }
+
+  async removeAdditionalFile(id: string, location: string): Promise<FileSubmission> {
+    const submission = await this.repository.find(id);
+    if (!submission) {
+      throw new Error('Submission does not exist');
+    }
+
+    const copy = _.cloneDeep(submission);
+
+    if (submission.additional && submission.additional.length) {
+      const index = submission.additional.findIndex(a => a.location === location);
+      if (index !== -1) {
+        await this.fileRepository.removeSubmissionFile(submission.additional[index]);
+        copy.additional.splice(index, 1);
+      }
+    }
+
+    await this.repository.update(id, { additional: copy.additional });
+
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.VERIFIED,
+      this.getSubmissionPackage(submission.id),
+    );
+
+    return copy;
+  }
+
   async duplicateSubmission(originalId: string): Promise<FileSubmission> {
     this.logger.debug(`Duplicating ${originalId}`, 'FileSubmission Duplicate');
     const toDuplicate = await this.find(originalId);

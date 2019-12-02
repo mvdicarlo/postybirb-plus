@@ -27,9 +27,13 @@ import {
   Tabs,
   Badge,
   Empty,
-  Anchor
+  Anchor,
+  Card,
+  Upload,
+  Icon
 } from 'antd';
 import { TreeNode } from 'antd/lib/tree-select';
+import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
 
 interface Props {
   match?: Match;
@@ -44,6 +48,7 @@ interface State {
   loading: boolean;
   touched: boolean;
   removedParts: string[];
+  additionalFileList: any[];
 }
 
 @inject('loginStatusStore')
@@ -70,7 +75,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
     parts: {},
     loading: true,
     touched: false,
-    removedParts: []
+    removedParts: [],
+    additionalFileList: []
   };
 
   constructor(props: Props) {
@@ -82,6 +88,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
         this.setState({
           ...this.state,
           ...data,
+          additionalFileList: this.getAdditionalFileList(data.submission.additional),
           loading: false
         });
       })
@@ -141,6 +148,12 @@ class SubmissionEditForm extends React.Component<Props, State> {
     }
   };
 
+  websiteHasProblems = (website: string | undefined | null): boolean => {
+    return !!Object.values(this.state.problems).find(
+      p => p.website === website && p.problems.length
+    );
+  };
+
   getWebsiteTreeData(): TreeNode[] {
     const websiteData: { [key: string]: any } = {};
     this.props.loginStatusStore!.statuses.forEach(status => {
@@ -150,7 +163,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
       websiteData[status.website].children.push({
         key: status.id,
         value: status.id,
-        title: status.alias
+        title: `${status.website}: ${status.alias}`
       });
     });
 
@@ -169,17 +182,25 @@ class SubmissionEditForm extends React.Component<Props, State> {
     );
   }
 
-  getWebsiteSections(): JSX.Element[] {
-    const defaultPart = this.state.parts.default;
-    const sections: JSX.Element[] = [];
-
-    const parts = _.sortBy(
+  getSelectedWebsiteParts(): Array<SubmissionPart<any>> {
+    return _.sortBy(
       Object.values(this.state.parts)
         .filter(p => p.website !== 'default')
         .filter(p => !this.state.removedParts.includes(p.accountId)),
       'website'
     );
+  }
 
+  getSelectedWebsites(): string[] {
+    const parts = this.getSelectedWebsiteParts();
+    return Object.keys(_.groupBy(parts, 'website')).sort();
+  }
+
+  getWebsiteSections(): JSX.Element[] {
+    const defaultPart = this.state.parts.default;
+    const sections: JSX.Element[] = [];
+
+    const parts = this.getSelectedWebsiteParts();
     const groups = _.groupBy(parts, 'website');
 
     Object.keys(groups).forEach(website => {
@@ -194,7 +215,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
             defaultData: defaultPart.data,
             part: child,
             onUpdate: this.onUpdate,
-            problems: _.get(this.state.problems[child.accountId], 'problems', [])
+            problems: _.get(this.state.problems[child.accountId], 'problems', []),
+            submission: this.state.submission!
           })
         };
       });
@@ -260,6 +282,111 @@ class SubmissionEditForm extends React.Component<Props, State> {
     document.getElementById(link!.href)!.scrollIntoView({ behavior: 'smooth' });
   };
 
+  isInViewport(elem: Element | null) {
+    if (!elem) return false;
+    const bounding = elem.getBoundingClientRect();
+    return (
+      bounding.top >= 0 &&
+      bounding.left >= 0 &&
+      bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  getHighestInViewport = (): string => {
+    const anchorElements = document.getElementsByClassName('nav-section-anchor');
+    if (anchorElements.length) {
+      for (let i = 0; i <= anchorElements.length; i++) {
+        const item = anchorElements.item(i);
+        if (item && this.isInViewport(anchorElements.item(i))) {
+          return item.id;
+        }
+      }
+
+      return anchorElements.item(anchorElements.length - 1)!.id;
+    }
+    return '#Files';
+  };
+
+  primaryFileChangeAction = (file: RcFile) =>
+    Promise.resolve(
+      `http://localhost:${window['PORT']}/file_submission/change/primary/${
+        this.state.submission!.id
+      }/${encodeURIComponent(file['path'])}`
+    );
+
+  thumbnailFileChangeAction = (file: RcFile) =>
+    Promise.resolve(
+      `http://localhost:${window['PORT']}/file_submission/change/thumbnail/${
+        this.state.submission!.id
+      }/${encodeURIComponent(file['path'])}`
+    );
+
+  additionalFileChangeAction = (file: RcFile) =>
+    Promise.resolve(
+      `http://localhost:${window['PORT']}/file_submission/add/additional/${
+        this.state.submission!.id
+      }/${encodeURIComponent(file['path'])}`
+    );
+
+  additionalFileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
+    const { status } = info.file;
+    if (status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully.`);
+      this.setState({
+        submission: info.file.response,
+        additionalFileList: this.getAdditionalFileList(info.file.response.additional)
+      });
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    } else {
+      this.setState({ additionalFileList: info.fileList });
+    }
+  };
+
+  fileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
+    const { status } = info.file;
+    if (status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully.`);
+      this.setState({ submission: info.file.response });
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  };
+
+  removeThumbnail() {
+    if (this.state.submission!.thumbnail) {
+      SubmissionService.removeThumbnail(this.state.submission!.id)
+        .then(({ data }) => {
+          this.setState({ submission: data });
+        })
+        .catch(() => {
+          message.error('Failed to remove thumbnail.');
+        });
+    }
+  }
+
+  removeAdditionalFile(file: any) {
+    SubmissionService.removeAdditionalFile(this.state.submission!.id, file.uid)
+      .then(({ data }) => {
+        this.setState({ submission: data });
+      })
+      .catch(() => {
+        message.error('Failed to remove additional file.');
+      });
+  }
+
+  getAdditionalFileList(additional: any[] = []): any[] {
+    return additional.map(f => ({
+      uid: f.location,
+      name: f.name,
+      status: 'done',
+      url: f.preview,
+      size: f.size,
+      type: f.type
+    }));
+  }
+
   componentWillUnmount() {
     uiStore.setPendingChanges(false);
   }
@@ -267,6 +394,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   render() {
     if (!this.state.loading) {
       this.defaultOptions = this.state.parts.default.data;
+      const submission = this.state.submission!;
 
       headerStore.updateHeaderState({
         title: 'Edit Submission',
@@ -287,16 +415,118 @@ class SubmissionEditForm extends React.Component<Props, State> {
           <Spin spinning={this.state.loading} delay={500}>
             <div className="flex">
               <Form layout="vertical" style={{ flex: 10, flexBasis: '75%' }}>
-                <Typography.Title level={3}>Defaults</Typography.Title>
+                <Typography.Title level={3}>
+                  Files
+                  <a className="nav-section-anchor" href="#Files" id="#Files"></a>
+                </Typography.Title>
+
+                <Form.Item>
+                  <div className="flex">
+                    <Card
+                      className="flex-1"
+                      title="Primary"
+                      size="small"
+                      cover={
+                        <img
+                          alt={submission.primary.name}
+                          title={submission.primary.name}
+                          src={submission.primary.preview}
+                        />
+                      }
+                      extra={
+                        <Upload
+                          accept="image/jpeg,image/jpg,image/png"
+                          showUploadList={false}
+                          onChange={this.fileUploadChange}
+                          action={this.primaryFileChangeAction}
+                        >
+                          <span className="text-link">Change</span>
+                        </Upload>
+                      }
+                      bodyStyle={{ padding: '0' }}
+                    ></Card>
+                    <Card
+                      className="flex-1 ml-2"
+                      title="Thumbnail"
+                      size="small"
+                      cover={
+                        submission.thumbnail ? (
+                          <img
+                            alt={submission.thumbnail.name}
+                            title={submission.thumbnail.name}
+                            src={submission.thumbnail.preview}
+                          />
+                        ) : null
+                      }
+                      extra={
+                        submission.thumbnail ? (
+                          <span className="text-link" onClick={this.removeThumbnail.bind(this)}>
+                            Remove
+                          </span>
+                        ) : (
+                          <Upload
+                            accept="image/jpeg,image/jpg,image/png"
+                            showUploadList={false}
+                            beforeUpload={file => {
+                              return file.type.includes('image/');
+                            }}
+                            onChange={this.fileUploadChange}
+                            action={this.thumbnailFileChangeAction}
+                          >
+                            <span className="text-link">Set</span>
+                          </Upload>
+                        )
+                      }
+                      bodyStyle={!submission.thumbnail ? {} : { padding: '0' }}
+                    >
+                      <Card.Meta
+                        description={submission.thumbnail ? null : 'No thumbnail provided'}
+                      />
+                    </Card>
+                  </div>
+                  <div>
+                    <Card title="Additional Files" size="small" className="mt-2">
+                      <Upload
+                        onChange={this.additionalFileUploadChange}
+                        action={this.additionalFileChangeAction}
+                        multiple={false}
+                        listType="picture-card"
+                        showUploadList={{
+                          showRemoveIcon: true,
+                          showDownloadIcon: false,
+                          showPreviewIcon: false
+                        }}
+                        fileList={this.state.additionalFileList}
+                        onRemove={this.removeAdditionalFile.bind(this)}
+                      >
+                        {(this.state.submission!.additional || []).length < 8 ? (
+                          <div>
+                            <Icon type="plus" />
+                            <div className="ant-upload-text">Add</div>
+                          </div>
+                        ) : null}
+                      </Upload>
+                    </Card>
+                  </div>
+                </Form.Item>
+
+                <Typography.Title level={3}>
+                  Defaults
+                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
+                </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
                   problems={this.state.problems.default.problems}
                   onUpdate={this.onUpdate}
+                  submission={this.state.submission!}
                 />
 
                 <Divider className="my-2" />
 
-                <Typography.Title level={3}>Websites</Typography.Title>
+                <Typography.Title level={3}>
+                  Websites
+                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                </Typography.Title>
                 <TreeSelect
                   multiple
                   treeCheckable={true}
@@ -310,14 +540,33 @@ class SubmissionEditForm extends React.Component<Props, State> {
                 <WebsiteSections {...this.state} onUpdate={this.onUpdate.bind(this)} />
               </Form>
 
-              <div>
+              <div className="ml-1">
                 <Anchor
                   onClick={this.handleNavClick}
                   getContainer={() => document.getElementById('primary-container') || window}
+                  getCurrentAnchor={this.getHighestInViewport}
                 >
-                  <Anchor.Link title="Default" href="#default" />
-                  {this.getWebsiteTreeData().map(n => (
-                    <Anchor.Link title={n.title} href={`#${n.key}`} />
+                  <Anchor.Link title="Files" href="#Files" />
+                  <Anchor.Link
+                    title={
+                      <span>
+                        {this.websiteHasProblems('default') ? <Icon type="warning" /> : null}{' '}
+                        Defaults
+                      </span>
+                    }
+                    href="#Defaults"
+                  />
+                  <Anchor.Link title="Websites" href="#Websites" />
+                  {this.getSelectedWebsites().map(website => (
+                    <Anchor.Link
+                      title={
+                        <span>
+                          {this.websiteHasProblems(website) ? <Icon type="warning" /> : null}{' '}
+                          {website}
+                        </span>
+                      }
+                      href={`#${website}`}
+                    />
                   ))}
                 </Anchor>
               </div>
@@ -366,7 +615,8 @@ const WebsiteSections: React.FC<WebsiteSectionsProps> = props => {
           defaultData: defaultPart.data,
           part: child,
           onUpdate: props.onUpdate,
-          problems: _.get(props.problems[child.accountId], 'problems', [])
+          problems: _.get(props.problems[child.accountId], 'problems', []),
+          submission: props.submission!
         })
       };
     });
@@ -374,6 +624,7 @@ const WebsiteSections: React.FC<WebsiteSectionsProps> = props => {
       <Form.Item>
         <Typography.Title style={{ marginBottom: '0' }} level={3}>
           {website}
+          <a className="nav-section-anchor" href={`#${website}`} id={`#${website}`}></a>
         </Typography.Title>
         <Tabs>
           {childrenSections.map(section => (

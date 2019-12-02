@@ -28,6 +28,10 @@ export abstract class WebsiteService implements Website {
 
   abstract postFileSubmission(data: any): Promise<any>;
 
+  getAccountInfo(id: string) {
+    return this.accountInformation.get(id) || {};
+  }
+
   getDefaultOptions(submissionType: SubmissionType) {
     switch (submissionType) {
       case SubmissionType.FILE:

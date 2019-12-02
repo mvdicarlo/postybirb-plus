@@ -19,6 +19,7 @@ export interface Website {
   readonly defaultFileSubmissionOptions: any;
   readonly accountInformation: Map<string, any>;
 
+  getAccountInfo(id: string): any;
   getDefaultOptions(submissionType: SubmissionType): any;
   parseDescription(text: string): string;
   postStatusSubmission(data: any): Promise<any>;

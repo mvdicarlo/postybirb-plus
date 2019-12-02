@@ -39,10 +39,38 @@ export class FileSubmissionController {
     return this.service.removeSubmission(id);
   }
 
+  @Delete('remove/thumbnail/:id')
+  async removeThumbnail(@Param('id') id: string) {
+    return this.service.removeThumbnail(id);
+  }
+
+  @Delete('remove/additional/:id/:location')
+  async removeAdditionalFile(@Param() params) {
+    return this.service.removeAdditionalFile(params.id, params.location);
+  }
+
   @Post('create/:path')
   @UseInterceptors(FileInterceptor('file'))
   async create(@UploadedFile() file, @Param() params) {
     await this.service.createSubmission(file, params.path);
+  }
+
+  @Post('change/primary/:id/:path')
+  @UseInterceptors(FileInterceptor('file'))
+  async changePrimary(@UploadedFile() file, @Param() params) {
+    return this.service.changePrimaryFile(file, params.id, params.path);
+  }
+
+  @Post('change/thumbnail/:id/:path')
+  @UseInterceptors(FileInterceptor('file'))
+  async changeThumbnail(@UploadedFile() file, @Param() params) {
+    return this.service.changeThumbnailFile(file, params.id, params.path);
+  }
+
+  @Post('add/additional/:id/:path')
+  @UseInterceptors(FileInterceptor('file'))
+  async addAdditionalFile(@UploadedFile() file, @Param() params) {
+    return this.service.addAdditionalFile(file, params.id, params.path);
   }
 
   @Post('setPart')

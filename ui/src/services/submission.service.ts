@@ -4,23 +4,32 @@ import { FormSubmissionPart } from '../views/submissions/interfaces/form-submiss
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 
 export default class SubmissionService {
+
+  static checkProblems(parts: Array<FormSubmissionPart<any>>) {
+    return axios.post<Problems>('/file_submission/dry_validate', parts);
+  }
+
   static deleteFileSubmission(id: string) {
     axios.delete(`/file_submission/${id}`);
-  }
-
-  static getFileSubmissionPackage(id: string) {
-    return axios.get(`/file_submission/package/${id}`);
-  }
-
-  static updateSubmission(submissionPackage: SubmissionUpdate) {
-    return axios.post('/file_submission/update', submissionPackage);
   }
 
   static duplicate(id: string) {
     return axios.post(`/file_submission/duplicate/${id}`);
   }
 
-  static checkProblems(parts: Array<FormSubmissionPart<any>>) {
-    return axios.post<Problems>('/file_submission/dry_validate', parts);
+  static getFileSubmissionPackage(id: string) {
+    return axios.get(`/file_submission/package/${id}`);
+  }
+
+  static removeAdditionalFile(id: string, location: string) {
+    return axios.delete(`/file_submission/remove/additional/${id}/${encodeURIComponent(location)}`);
+  }
+
+  static removeThumbnail(id: string) {
+    return axios.delete(`/file_submission/remove/thumbnail/${id}`);
+  }
+
+  static updateSubmission(submissionPackage: SubmissionUpdate) {
+    return axios.post('/file_submission/update', submissionPackage);
   }
 }

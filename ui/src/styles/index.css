@@ -43,4 +43,23 @@
   @apply z-10 sticky bg-white top-0;
 }
 
+.ant-card-cover {
+  max-width: 250px;
+  margin: auto;
+}
+
+ul {
+  margin-bottom: 0;
+}
+
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+}
+
 @tailwind utilities;

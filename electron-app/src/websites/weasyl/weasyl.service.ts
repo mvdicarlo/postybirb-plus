@@ -14,6 +14,7 @@ import { FileSubmission } from 'src/submission/file-submission/interfaces/file-s
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
 import { DefaultWeasylSubmissionOptions } from './weasyl.interface';
+import { Folder } from 'src/websites/interfaces/folder.interface';
 
 @Injectable()
 export class Weasyl extends WebsiteService {
@@ -47,10 +48,48 @@ export class Weasyl extends WebsiteService {
       const login: string = _.get(res.body, 'login');
       status.loggedIn = !!login;
       status.username = login;
+      await this.retrieveFolders(data.id, status.username);
     } catch (e) {
       /* Swallow */
     }
     return status;
+  }
+
+  async retrieveFolders(id: string, loginName: string): Promise<void> {
+    const res = await Http.get<{ folders: any[] }>(
+      `${this.BASE_URL}/api/users/${loginName}/view`,
+      id,
+      {
+        requestOptions: { json: true },
+      },
+    );
+
+    const convertedFolders: Folder[] = [];
+
+    const folders = res.body.folders || [];
+    for (let i = 0; i < folders.length; i++) {
+      const folder = folders[i];
+      const _folder: Folder = {
+        title: folder.title,
+        id: folder.folder_id,
+      };
+
+      convertedFolders.push(_folder);
+
+      if (folder.subfolders) {
+        for (let j = 0; j < folder.subfolders.length; j++) {
+          const subfolder = folder.subfolders[j];
+          const _subfolder: Folder = {
+            title: `${_folder.title} / ${subfolder.title}`,
+            id: subfolder.folder_id,
+          };
+
+          convertedFolders.push(_subfolder);
+        }
+      }
+    }
+
+    this.accountInformation.set(id, { folders: convertedFolders });
   }
 
   validateFileSubmission(

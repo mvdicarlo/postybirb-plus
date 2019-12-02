@@ -59,6 +59,25 @@ export class FileRepositoryService {
     await Promise.all(promises);
   }
 
+  scaleImage(file: UploadedFile, w: number): UploadedFile {
+    let image = nativeImage.createFromBuffer(file.buffer);
+    const { width } = image.getSize();
+    image = image.resize({
+      width: Math.min(w, width),
+      height: w / image.getAspectRatio(),
+    });
+    const copy = _.cloneDeep(file);
+    copy.buffer = image.toJPEG(100);
+    copy.mimetype = 'image/jpeg';
+    return copy;
+  }
+
+  async removeSubmissionFile(record: FileRecord): Promise<void> {
+    this.logger.debug(`Removing submission file ${record.location}`);
+    await fs.remove(record.location);
+    await fs.remove(record.preview);
+  }
+
   async copyFileWithNewId(id: string, file: FileRecord): Promise<FileRecord> {
     this.logger.debug(`Copying file ${file.location} with name ${id}`);
     const pathParts = file.location.split('/');
