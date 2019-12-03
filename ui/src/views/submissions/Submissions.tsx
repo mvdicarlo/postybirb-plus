@@ -38,19 +38,19 @@ export class Submissions extends React.Component<Props, State> {
     search: ''
   };
 
-  handleSearch = search => this.setState({ search: search.toLowerCase() });
+  handleSearch = ({ target }) => this.setState({ search: target.value.toLowerCase() });
 
   render() {
     const { submissionStore } = this.props;
 
     const submissions = submissionStore!.all.filter(s =>
-      s.submission.title.toLowerCase().includes(this.state.search)
+      (s.parts.default.data.title || s.submission.title).toLowerCase().includes(this.state.search)
     );
     return (
       <div>
         <div className="submission-list">
           <List
-            header={<Input.Search onSearch={this.handleSearch} style={{ width: 200 }} />}
+            header={<Input.Search onChange={this.handleSearch} style={{ width: 200 }} />}
             footer={this.props.children}
             bordered
             itemLayout="vertical"

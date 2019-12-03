@@ -300,8 +300,18 @@ export class FileSubmissionService {
       throw new Error('Submission does not exist');
     }
 
+    const p: SubmissionPart<any> = {
+      _id: submissionPart._id,
+      id: submissionPart.id,
+      data: submissionPart.data,
+      accountId: submissionPart.accountId,
+      submissionId: submissionPart.submissionId,
+      website: submissionPart.website,
+      isDefault: submissionPart.isDefault,
+    };
+
     const part = await this.submissionPartService.createOrUpdateSubmissionPart(
-      submissionPart,
+      p,
       SubmissionType.FILE,
     );
     this.eventEmitter.emitOnComplete(
@@ -313,6 +323,22 @@ export class FileSubmissionService {
 
   async removePart(submissionPartId: string): Promise<void> {
     await this.submissionPartService.removeSubmissionPart(submissionPartId);
+  }
+
+  async setSchedule(id: string, time: number | undefined): Promise<void> {
+    const submission: FileSubmission = await this.repository.find(id);
+    if (!submission) {
+      throw new Error('Submission does not exist');
+    }
+
+    const copy = _.cloneDeep(submission);
+    copy.schedule.postAt = time;
+
+    await this.repository.update(id, { schedule: copy.schedule });
+    this.eventEmitter.emitOnComplete(
+      FileSubmissionEvent.VERIFIED,
+      this.getSubmissionPackage(id),
+    );
   }
 
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<FileSubmission>> {

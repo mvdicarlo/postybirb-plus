@@ -47,12 +47,12 @@ export default class DefaultFormSection extends React.Component<
           />
         ) : null}
         <Form.Item label="Title">
-          <Input defaultValue={data.title} onBlur={this.handleChange.bind(this, 'title')} />
+          <Input value={data.title} onChange={this.handleChange.bind(this, 'title')} />
         </Form.Item>
         <Form.Item label="Rating" required={true}>
           <Radio.Group
             onChange={this.handleChange.bind(this, 'rating')}
-            defaultValue={data.rating}
+            value={data.rating}
             buttonStyle="solid"
           >
             <Radio.Button value="general">General</Radio.Button>

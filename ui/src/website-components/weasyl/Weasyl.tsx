@@ -224,14 +224,14 @@ export class WeasylFileSubmissionForm extends React.Component<
           <Form.Item label="Title">
             <Input
               placeholder="Using default"
-              defaultValue={data.title}
-              onBlur={this.handleChange.bind(this, 'title')}
+              value={data.title}
+              onChange={this.handleChange.bind(this, 'title')}
             />
           </Form.Item>
           <Form.Item label="Rating">
             <Radio.Group
               onChange={this.handleChange.bind(this, 'rating')}
-              defaultValue={data.rating}
+              value={data.rating}
               buttonStyle="solid"
             >
               <Radio.Button value={null}>Default</Radio.Button>

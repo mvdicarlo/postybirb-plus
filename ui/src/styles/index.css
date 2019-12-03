@@ -2,6 +2,11 @@
 
 @tailwind components;
 
+.form-action-bar {
+  margin: 0 -.75rem;
+  @apply shadow py-2 px-3 text-right z-10 sticky bg-white bottom-0;
+}
+
 .disabled {
   @apply text-disabled 
 }

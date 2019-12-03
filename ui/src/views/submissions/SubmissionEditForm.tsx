@@ -30,10 +30,12 @@ import {
   Anchor,
   Card,
   Upload,
-  Icon
+  Icon,
+  DatePicker
 } from 'antd';
 import { TreeNode } from 'antd/lib/tree-select';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
+import ImportDataSelect from './form-components/ImportDataSelect';
 
 interface Props {
   match?: Match;
@@ -66,7 +68,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
       value: ''
     },
     rating: null,
-    title: ''
+    title: '',
+    useThumbnail: true,
   };
 
   state: State = {
@@ -97,9 +100,10 @@ class SubmissionEditForm extends React.Component<Props, State> {
       });
   }
 
-  onUpdate = updatePart => {
+  onUpdate = (updatePart: SubmissionPart<any> | Array<SubmissionPart<any>>) => {
     const parts = _.cloneDeep(this.state.parts);
-    parts[updatePart.accountId] = updatePart;
+    const updateParts = Array.isArray(updatePart) ? updatePart : [updatePart];
+    updateParts.forEach(p => (parts[p.accountId] = p));
     const isTouched: boolean = !_.isEqual(parts, this.original.parts);
     this.setState({ parts, touched: isTouched });
     uiStore.setPendingChanges(isTouched);
@@ -154,6 +158,22 @@ class SubmissionEditForm extends React.Component<Props, State> {
     );
   };
 
+  importData(parts: Array<SubmissionPart<any>>) {
+    parts.forEach(p => {
+      const existing = Object.values(this.state.parts).find(part => part.accountId === p.accountId);
+      if (existing) {
+        p._id = existing._id;
+        p.id = existing.id;
+      } else {
+        p.submissionId = this.id;
+        p._id = undefined;
+        p.id = `${this.id}-${p.accountId}`;
+      }
+    });
+
+    this.onUpdate(parts);
+  }
+
   getWebsiteTreeData(): TreeNode[] {
     const websiteData: { [key: string]: any } = {};
     this.props.loginStatusStore!.statuses.forEach(status => {
@@ -174,7 +194,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
     return _.sortBy(
       [
         ...Object.values(this.state.parts)
-          .filter(p => p.website !== 'default')
+          .filter(p => !p.isDefault)
           .filter(p => !this.state.removedParts.includes(p.accountId))
           .map(p => p.accountId)
       ],
@@ -185,7 +205,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   getSelectedWebsiteParts(): Array<SubmissionPart<any>> {
     return _.sortBy(
       Object.values(this.state.parts)
-        .filter(p => p.website !== 'default')
+        .filter(p => !p.isDefault)
         .filter(p => !this.state.removedParts.includes(p.accountId)),
       'website'
     );
@@ -244,7 +264,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
     const addedParts = accountIds.filter(id => !existingParts.includes(id));
 
     const removedParts = Object.values(this.state.parts)
-      .filter(p => p.website !== 'default')
+      .filter(p => !p.isDefault)
       .map(p => p.accountId)
       .filter(id => !accountIds.includes(id));
 
@@ -252,7 +272,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
     addedParts.forEach(accountId => {
       parts[accountId] = {
         accountId,
-        submissionId: this.state.submission!.id,
+        submissionId: this.id,
         id: _.uniqueId('New Part'),
         website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
         data: WebsiteRegistry.websites[
@@ -511,6 +531,12 @@ class SubmissionEditForm extends React.Component<Props, State> {
                 </Form.Item>
 
                 <Typography.Title level={3}>
+                  Schedule
+                  <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
+                </Typography.Title>
+                <Form.Item></Form.Item>
+                        
+                <Typography.Title level={3}>
                   Defaults
                   <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
                 </Typography.Title>
@@ -520,8 +546,6 @@ class SubmissionEditForm extends React.Component<Props, State> {
                   onUpdate={this.onUpdate}
                   submission={this.state.submission!}
                 />
-
-                <Divider className="my-2" />
 
                 <Typography.Title level={3}>
                   Websites
@@ -571,7 +595,13 @@ class SubmissionEditForm extends React.Component<Props, State> {
                 </Anchor>
               </div>
             </div>
-            <div className="py-2 text-right z-10 sticky bg-white bottom-0">
+            <div className="form-action-bar">
+              <ImportDataSelect
+                className="mr-1"
+                ignoreId={this.id}
+                submissionType={this.state.submission!.type}
+                onPropsSelect={this.importData.bind(this)}
+              />
               <Button onClick={this.onSubmit} type="primary" disabled={!this.state.touched}>
                 Save
               </Button>
@@ -596,7 +626,7 @@ const WebsiteSections: React.FC<WebsiteSectionsProps> = props => {
 
   const parts = _.sortBy(
     Object.values(props.parts)
-      .filter(p => p.website !== 'default')
+      .filter(p => !p.isDefault)
       .filter(p => !props.removedParts.includes(p.accountId)),
     'website'
   );

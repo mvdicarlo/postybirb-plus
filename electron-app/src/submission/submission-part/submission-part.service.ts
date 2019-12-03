@@ -21,7 +21,7 @@ export class SubmissionPartService {
   ): Promise<SubmissionPart<any>> {
     const copy = _.cloneDeep(part);
     let defaultData = {};
-    if (copy.website !== 'default') {
+    if (!copy.isDefault) {
       const website: Website = this.websiteProvider.getWebsiteModule(copy.website);
       defaultData = website.getDefaultOptions(submissionType);
     }
@@ -44,7 +44,7 @@ export class SubmissionPartService {
       await this.repository.create({
         ...copy,
         data: update,
-        id: `${copy.submissionId}-${copy.accountId}-${copy.website}`,
+        id: `${copy.submissionId}-${copy.accountId}`,
       });
     }
 
@@ -72,6 +72,7 @@ export class SubmissionPartService {
       website: 'default',
       accountId: 'default',
       data: defaultPart,
+      isDefault: true,
     });
   }
 

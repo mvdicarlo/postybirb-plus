@@ -78,6 +78,11 @@ export class FileSubmissionController {
     return this.service.setPart(submissionPart);
   }
 
+  @Post('/setSchedule/:id')
+  async setSchedule(@Param('id') id: string, @Body() schedule: { time: number | undefined }) {
+    return this.service.setSchedule(id, schedule.time);
+  }
+
   @Post('/update')
   async update(@Body() submissionPackage: SubmissionUpdate) {
     return this.service.updateSubmission(submissionPackage);

@@ -29,6 +29,10 @@ export default class SubmissionService {
     return axios.delete(`/file_submission/remove/thumbnail/${id}`);
   }
 
+  static setSchedule(id: string, time: number | undefined) {
+    return axios.post(`/file_submission/setSchedule/${id}`, { time });
+  }
+
   static updateSubmission(submissionPackage: SubmissionUpdate) {
     return axios.post('/file_submission/update', submissionPackage);
   }

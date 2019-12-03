@@ -5,5 +5,4 @@ export interface DefaultWeasylSubmissionOptions extends DefaultOptions {
   critique: boolean;
   folder: string|null;
   notify: boolean;
-  useThumbnail: boolean;
 }

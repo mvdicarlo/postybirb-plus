@@ -4,7 +4,7 @@ import {
 } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 
-export interface FileSubmissionSectionProps<T> {
+export interface FileSubmissionSectionProps<T extends DefaultOptions> {
   onUpdate: (update: SubmissionPart<T>) => void;
   defaultData?: DefaultOptions;
   part: SubmissionPart<T>;
