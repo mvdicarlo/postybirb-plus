@@ -46,6 +46,15 @@ export default class Repository<T> {
     });
   }
 
+  removeBy(search: any): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.db.remove(search, (err: any, numRemoved: number) => {
+        err ? reject(err) : resolve(numRemoved);
+        this.db.persistence.compactDatafile();
+      });
+    });
+  }
+
   update(id: string, fields: any): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.update({ id }, { $set: fields }, {}, (err: any, numReplaced: number) => {

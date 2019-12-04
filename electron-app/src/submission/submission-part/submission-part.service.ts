@@ -2,9 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SubmissionPartRepository } from './submission-part.repository';
 import { SubmissionPart, DefaultOptions } from '../interfaces/submission-part.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
-import { SubmissionType, Submission } from '../interfaces/submission.interface';
+import { Submission } from '../interfaces/submission.interface';
 import { Website } from 'src/websites/interfaces/website.interface';
 import * as _ from 'lodash';
+import { SubmissionType } from '../enums/submission-type.enum';
 
 @Injectable()
 export class SubmissionPartService {
@@ -54,8 +55,9 @@ export class SubmissionPartService {
 
   async createDefaultPart(submission: Submission, title?: string): Promise<void> {
     const defaultPart: DefaultOptions = {
-      title,
+      title: title || submission.title,
       rating: null,
+      useThumbnail: true,
       description: {
         overwriteDefault: false,
         value: '',
@@ -82,6 +84,10 @@ export class SubmissionPartService {
 
   removeSubmissionPart(id: string): Promise<number> {
     return this.repository.remove(id);
+  }
+
+  removeBySubmissionId(submissionId: string): Promise<number> {
+    return this.repository.removeBy({ submissionId });
   }
 
   removeAllSubmissionPartsForAccount(accountId: string): Promise<number> {

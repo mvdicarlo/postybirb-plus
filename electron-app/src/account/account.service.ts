@@ -7,8 +7,8 @@ import { LoginResponse } from 'src/websites/interfaces/login-response.interface'
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { session } from 'electron';
 import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
-import { FileSubmissionService } from 'src/submission/file-submission/file-submission.service';
 import { AccountEvent } from './account.events.enum';
+import { SubmissionService } from 'src/submission/submission.service';
 
 @Injectable()
 export class AccountService {
@@ -22,7 +22,7 @@ export class AccountService {
     private readonly eventEmitter: EventsGateway,
     private readonly websiteProvider: WebsiteProvider,
     private readonly submissionPartService: SubmissionPartService,
-    private readonly fileSubmissionService: FileSubmissionService,
+    private readonly submissionService: SubmissionService,
   ) {
     this.repository
       .findAll()
@@ -103,7 +103,7 @@ export class AccountService {
       .then(() => this.logger.debug(`Session data for ${id} cleared`, 'Account'));
 
     await this.submissionPartService.removeAllSubmissionPartsForAccount(id);
-    this.fileSubmissionService.verifyAllSubmissions();
+    this.submissionService.verifyAll();
   }
 
   async checkLogin(userAccount: string | UserAccount): Promise<UserAccountDto> {

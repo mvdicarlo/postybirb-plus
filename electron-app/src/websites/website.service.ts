@@ -1,12 +1,13 @@
 import { Website } from './interfaces/website.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
 import { UserAccount } from 'src/account/account.interface';
-import { SubmissionType, Submission } from 'src/submission/interfaces/submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
 import {
   SubmissionPart,
   DefaultOptions,
 } from 'src/submission/interfaces/submission-part.interface';
 import * as _ from 'lodash';
+import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 
 export abstract class WebsiteService implements Website {
   abstract readonly defaultStatusOptions?: any;

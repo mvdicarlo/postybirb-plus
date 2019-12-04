@@ -14,7 +14,7 @@
     "build:release": "export $(cat .env | xargs) && electron-builder -mwl -p always",
     "clean": "rimraf electron-dist",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "rimraf dist; nest build; electron main --develop",
+    "start": "npm run prebuild; nest build; electron main --develop",
     "start:electron": "electron main --develop",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

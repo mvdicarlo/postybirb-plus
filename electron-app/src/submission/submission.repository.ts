@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FileSubmission } from './interfaces/file-submission.interface';
 import Repository from 'src/base/repository.base';
+import { Submission } from './interfaces/submission.interface';
 
 @Injectable()
-export class FileSubmissionRepository extends Repository<FileSubmission> {
+export class SubmissionRepository extends Repository<Submission> {
   constructor() {
-    super('file-submissions');
+    super('submissions');
   }
 
   count(): Promise<number> {

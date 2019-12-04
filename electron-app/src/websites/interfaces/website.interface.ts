@@ -1,10 +1,11 @@
 import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from './login-response.interface';
-import { SubmissionType, Submission } from 'src/submission/interfaces/submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
 import {
   SubmissionPart,
   DefaultOptions,
 } from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 
 export interface Website {
   readonly BASE_URL: string;
