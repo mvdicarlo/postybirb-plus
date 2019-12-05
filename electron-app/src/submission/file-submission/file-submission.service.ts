@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { FileSubmission } from './interfaces/file-submission.interface';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
@@ -22,7 +22,7 @@ export class FileSubmissionService {
   ): Promise<FileSubmission> {
     const { file, path } = data;
     if (!file) {
-      throw new Error('FileSubmission requires a file');
+      throw new BadRequestException('FileSubmission requires a file');
     }
 
     const locations = await this.fileRepository.insertFile(submission.id, file, path);
@@ -47,11 +47,13 @@ export class FileSubmissionService {
     await this.fileRepository.removeSubmissionFiles(submission);
   }
 
-  // TODO
-  async changePrimaryFile(file: UploadedFile, id: string, path: string): Promise<FileSubmission> {
-    const submission = (await this.repository.find(id)) as FileSubmission;
-    if (!submission) {
-      throw new Error('Submission does not exist');
+  async changePrimaryFile(
+    submission: FileSubmission,
+    file: UploadedFile,
+    path: string,
+  ): Promise<FileSubmission> {
+    if (!file) {
+      throw new BadRequestException('No file provided');
     }
 
     await this.fileRepository.removeSubmissionFile(submission.primary);
@@ -66,16 +68,16 @@ export class FileSubmissionService {
       type: getSubmissionType(file.mimetype, file.originalname),
     };
 
-    await this.repository.update(id, { primary: submission.primary });
-
     return submission;
   }
 
-  async changeThumbnailFile(file: UploadedFile, id: string, path: string): Promise<FileSubmission> {
-    const submission = (await this.repository.find(id)) as FileSubmission;
-
+  async changeThumbnailFile(
+    submission: FileSubmission,
+    file: UploadedFile,
+    path: string,
+  ): Promise<FileSubmission> {
     if (!file) {
-      throw new Error('No file provided');
+      throw new BadRequestException('No file provided');
     }
 
     if (
@@ -85,11 +87,7 @@ export class FileSubmissionService {
         file.mimetype.includes('image/png')
       )
     ) {
-      throw new Error('Thumbnail file must be png or jpeg');
-    }
-
-    if (!submission) {
-      throw new Error('Submission does not exist');
+      throw new BadRequestException('Thumbnail file must be png or jpeg');
     }
 
     if (submission.thumbnail) {
@@ -108,35 +106,25 @@ export class FileSubmissionService {
       type: getSubmissionType(scaledUpload.mimetype, scaledUpload.originalname),
     };
 
-    await this.repository.update(id, { thumbnail: submission.thumbnail });
+    return submission;
+  }
+
+  async removeThumbnail(submission: FileSubmission): Promise<FileSubmission> {
+    if (submission.thumbnail) {
+      await this.fileRepository.removeSubmissionFile(submission.thumbnail);
+
+      const copy = _.cloneDeep(submission);
+      delete copy.thumbnail;
+
+      await this.repository.update(submission.id, { thumbnail: null });
+
+      return copy;
+    }
 
     return submission;
   }
 
-  async removeThumbnail(id: string): Promise<FileSubmission> {
-    const submission = (await this.repository.find(id)) as FileSubmission;
-    if (!submission) {
-      throw new Error('Submission does not exist');
-    }
-
-    if (submission.thumbnail) {
-      await this.fileRepository.removeSubmissionFile(submission.thumbnail);
-    }
-
-    const copy = _.cloneDeep(submission);
-    delete copy.thumbnail;
-
-    await this.repository.update(id, { thumbnail: null });
-
-    return copy;
-  }
-
-  async addAdditionalFile(file: UploadedFile, id: string, path: string): Promise<FileSubmission> {
-    const submission = (await this.repository.find(id)) as FileSubmission;
-    if (!submission) {
-      throw new Error('Submission does not exist');
-    }
-
+  async addAdditionalFile(submission: FileSubmission, file: UploadedFile, path: string): Promise<FileSubmission> {
     const copy = _.cloneDeep(submission);
     copy.additional = copy.additional || [];
     const locations = await this.fileRepository.insertFile(submission.id, file, path);
@@ -150,17 +138,10 @@ export class FileSubmissionService {
       type: getSubmissionType(file.mimetype, file.originalname),
     });
 
-    await this.repository.update(id, { additional: copy.additional });
-
     return copy;
   }
 
-  async removeAdditionalFile(id: string, location: string): Promise<FileSubmission> {
-    const submission = (await this.repository.find(id)) as FileSubmission;
-    if (!submission) {
-      throw new Error('Submission does not exist');
-    }
-
+  async removeAdditionalFile(submission: FileSubmission, location: string): Promise<FileSubmission> {
     const copy = _.cloneDeep(submission);
 
     if (submission.additional && submission.additional.length) {
@@ -170,8 +151,6 @@ export class FileSubmissionService {
         copy.additional.splice(index, 1);
       }
     }
-
-    await this.repository.update(id, { additional: copy.additional });
 
     return copy;
   }

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { SubmissionStore } from '../../stores/file-submission.store';
-import { inject, observer } from 'mobx-react';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import SubmissionService from '../../services/submission.service';
 import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import SubmissionUtil from '../../utils/submission.util';
 import _ from 'lodash';
 import { Problems } from '../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { loginStatusStore } from '../../stores/login-status.store';
+import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 
 import {
   List,
@@ -21,18 +21,16 @@ import {
   Tree,
   message
 } from 'antd';
-import { loginStatusStore } from '../../stores/login-status.store';
 
 interface Props {
-  submissionStore?: SubmissionStore;
+  submissions: SubmissionPackage<any>[];
+  isLoading: boolean;
 }
 
 interface State {
   search: string;
 }
 
-@inject('submissionStore')
-@observer
 export class Submissions extends React.Component<Props, State> {
   state: State = {
     search: ''
@@ -41,10 +39,8 @@ export class Submissions extends React.Component<Props, State> {
   handleSearch = ({ target }) => this.setState({ search: target.value.toLowerCase() });
 
   render() {
-    const { submissionStore } = this.props;
-
-    const submissions = submissionStore!.all.filter(s =>
-      (s.parts.default.data.title || s.submission.title).toLowerCase().includes(this.state.search)
+    const submissions = this.props.submissions.filter(s =>
+      SubmissionUtil.getFileSubmissionTitle(s).toLowerCase().includes(this.state.search)
     );
     return (
       <div>
@@ -54,7 +50,7 @@ export class Submissions extends React.Component<Props, State> {
             footer={this.props.children}
             bordered
             itemLayout="vertical"
-            loading={submissionStore!.isLoading}
+            loading={this.props.isLoading}
             dataSource={submissions}
             renderItem={(item: SubmissionPackage<FileSubmission>) => (
               <ListItem item={item}></ListItem>

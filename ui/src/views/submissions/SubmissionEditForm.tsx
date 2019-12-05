@@ -11,11 +11,14 @@ import { headerStore } from '../../stores/header.store';
 import { inject, observer } from 'mobx-react';
 import { uiStore } from '../../stores/ui.store';
 import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { TreeNode } from 'antd/lib/tree-select';
+import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
+import ImportDataSelect from './form-components/ImportDataSelect';
+import { FormSubmissionPart } from './interfaces/form-submission-part.interface';
 import {
   SubmissionPart,
   DefaultOptions
 } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
-import { FormSubmissionPart } from './interfaces/form-submission-part.interface';
 import {
   Form,
   Button,
@@ -23,7 +26,6 @@ import {
   Spin,
   message,
   TreeSelect,
-  Divider,
   Tabs,
   Badge,
   Empty,
@@ -33,9 +35,6 @@ import {
   Icon,
   DatePicker
 } from 'antd';
-import { TreeNode } from 'antd/lib/tree-select';
-import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
-import ImportDataSelect from './form-components/ImportDataSelect';
 
 interface Props {
   match?: Match;
@@ -69,7 +68,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
     },
     rating: null,
     title: '',
-    useThumbnail: true,
+    useThumbnail: true
   };
 
   state: State = {
@@ -85,7 +84,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.id = props.match!.params.id;
-    SubmissionService.getFileSubmissionPackage(this.id)
+    SubmissionService.getSubmission(this.id, true)
       .then(({ data }) => {
         this.original = _.cloneDeep(data);
         this.setState({
@@ -330,21 +329,21 @@ class SubmissionEditForm extends React.Component<Props, State> {
 
   primaryFileChangeAction = (file: RcFile) =>
     Promise.resolve(
-      `http://localhost:${window['PORT']}/file_submission/change/primary/${
+      `http://localhost:${window['PORT']}/submission/change/primary/${
         this.state.submission!.id
       }/${encodeURIComponent(file['path'])}`
     );
 
   thumbnailFileChangeAction = (file: RcFile) =>
     Promise.resolve(
-      `http://localhost:${window['PORT']}/file_submission/change/thumbnail/${
+      `http://localhost:${window['PORT']}/submission/change/thumbnail/${
         this.state.submission!.id
       }/${encodeURIComponent(file['path'])}`
     );
 
   additionalFileChangeAction = (file: RcFile) =>
     Promise.resolve(
-      `http://localhost:${window['PORT']}/file_submission/add/additional/${
+      `http://localhost:${window['PORT']}/submission/add/additional/${
         this.state.submission!.id
       }/${encodeURIComponent(file['path'])}`
     );
@@ -354,8 +353,9 @@ class SubmissionEditForm extends React.Component<Props, State> {
     if (status === 'done') {
       message.success(`${info.file.name} file uploaded successfully.`);
       this.setState({
-        submission: info.file.response,
-        additionalFileList: this.getAdditionalFileList(info.file.response.additional)
+        submission: info.file.response.submission,
+        problems: info.file.response.problems,
+        additionalFileList: this.getAdditionalFileList(info.file.response.submission.additional)
       });
     } else if (status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
@@ -368,7 +368,10 @@ class SubmissionEditForm extends React.Component<Props, State> {
     const { status } = info.file;
     if (status === 'done') {
       message.success(`${info.file.name} file uploaded successfully.`);
-      this.setState({ submission: info.file.response });
+      this.setState({
+        submission: info.file.response.submission,
+        problems: info.file.response.problems
+      });
     } else if (status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
@@ -378,7 +381,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
     if (this.state.submission!.thumbnail) {
       SubmissionService.removeThumbnail(this.state.submission!.id)
         .then(({ data }) => {
-          this.setState({ submission: data });
+          this.setState({ submission: data.submission, problems: data.problems });
         })
         .catch(() => {
           message.error('Failed to remove thumbnail.');
@@ -389,7 +392,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   removeAdditionalFile(file: any) {
     SubmissionService.removeAdditionalFile(this.state.submission!.id, file.uid)
       .then(({ data }) => {
-        this.setState({ submission: data });
+        this.setState({ submission: data.submission, problems: data.problems });
       })
       .catch(() => {
         message.error('Failed to remove additional file.');
@@ -535,7 +538,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
                   <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
                 </Typography.Title>
                 <Form.Item></Form.Item>
-                        
+
                 <Typography.Title level={3}>
                   Defaults
                   <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>

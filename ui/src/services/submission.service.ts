@@ -6,34 +6,34 @@ import { Problems } from '../../../electron-app/src/submission/validator/interfa
 export default class SubmissionService {
 
   static checkProblems(parts: Array<FormSubmissionPart<any>>) {
-    return axios.post<Problems>('/file_submission/dry_validate', parts);
+    return axios.post<Problems>('/submission/dryValidate', parts);
   }
 
   static deleteFileSubmission(id: string) {
-    axios.delete(`/file_submission/${id}`);
+    axios.delete(`/submission/${id}`);
   }
 
   static duplicate(id: string) {
-    return axios.post(`/file_submission/duplicate/${id}`);
+    return axios.post(`/submission/duplicate/${id}`);
   }
 
-  static getFileSubmissionPackage(id: string) {
-    return axios.get(`/file_submission/package/${id}`);
+  static getSubmissions(packaged: boolean) {
+    return axios.get(`/submission?packaged=${packaged}`);
+  }
+
+  static getSubmission(id: string, packaged: boolean) {
+    return axios.get(`/submission/${id}?packaged=${packaged}`);
   }
 
   static removeAdditionalFile(id: string, location: string) {
-    return axios.delete(`/file_submission/remove/additional/${id}/${encodeURIComponent(location)}`);
+    return axios.delete(`/submission/remove/additional/${id}/${encodeURIComponent(location)}`);
   }
 
   static removeThumbnail(id: string) {
-    return axios.delete(`/file_submission/remove/thumbnail/${id}`);
-  }
-
-  static setSchedule(id: string, time: number | undefined) {
-    return axios.post(`/file_submission/setSchedule/${id}`, { time });
+    return axios.delete(`/submission/remove/thumbnail/${id}`);
   }
 
   static updateSubmission(submissionPackage: SubmissionUpdate) {
-    return axios.post('/file_submission/update', submissionPackage);
+    return axios.post('/submission/update', submissionPackage);
   }
 }

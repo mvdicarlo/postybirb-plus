@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateAccountDto } from './account.dto';
 import { UserAccount, UserAccountDto } from './account.interface';
 import { AccountRepository } from './account.repository';
@@ -60,7 +60,7 @@ export class AccountService {
   async createAccount(createAccountDto: CreateAccountDto) {
     const existing: UserAccount = await this.repository.find(createAccountDto.id);
     if (existing) {
-      throw new Error(`Account with Id ${createAccountDto.id} already exists.`);
+      throw new BadRequestException(`Account with Id ${createAccountDto.id} already exists.`);
     }
 
     await this.repository.create(createAccountDto);
@@ -110,7 +110,7 @@ export class AccountService {
     const account: UserAccount =
       typeof userAccount === 'string' ? await this.repository.find(userAccount) : userAccount;
     if (!account) {
-      throw new Error(`Account ID ${userAccount} does not exist.`);
+      throw new NotFoundException(`Account ID ${userAccount} does not exist.`);
     }
 
     this.logger.debug(`Checking login for ${account.id}`, 'Login Check');

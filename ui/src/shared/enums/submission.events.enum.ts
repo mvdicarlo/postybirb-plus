@@ -1,0 +1,5 @@
+export enum SubmissionEvent {
+  CREATED = '[SUBMISSION] CREATED',
+  REMOVED = '[SUBMISSION] REMOVED',
+  UPDATED = '[SUBMISSION] UPDATED',
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, NotImplementedException } from '@nestjs/common';
 import * as _ from 'lodash';
 import * as shortid from 'shortid';
 import { EventsGateway } from 'src/events/events.gateway';
@@ -15,6 +15,7 @@ import { SubmissionRepository } from './submission.repository';
 import { SubmissionType } from './enums/submission-type.enum';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { ValidatorService } from './validator/validator.service';
+import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 
 @Injectable()
 export class SubmissionService {
@@ -30,7 +31,7 @@ export class SubmissionService {
   async get(id: string, packaged?: boolean): Promise<Submission | SubmissionPackage<any>> {
     const submission = await this.repository.find(id);
     if (!submission) {
-      throw new Error(`Submission ${id} could not be found`);
+      throw new NotFoundException(`Submission ${id} could not be found`);
     }
 
     return packaged ? await this.validate(submission) : submission;
@@ -53,9 +54,9 @@ export class SubmissionService {
     }
   }
 
-  async create(createDto: SubmissionCreate): Promise<any> {
+  async create(createDto: SubmissionCreate): Promise<Submission> {
     if (!SubmissionType[createDto.type]) {
-      throw Error(`Unknown submission type: ${createDto.type}`);
+      throw new BadRequestException(`Unknown submission type: ${createDto.type}`);
     }
 
     const id = shortid.generate();
@@ -77,10 +78,11 @@ export class SubmissionService {
         );
         break;
       case SubmissionType.STATUS:
-        throw new Error('Type is not implemented yet');
+        throw new NotImplementedException('Type is not implemented yet');
     }
 
-    await this.partService.createDefaultPart(submission);
+    await this.repository.create(completedSubmission);
+    await this.partService.createDefaultPart(completedSubmission);
     this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(completedSubmission));
     return completedSubmission;
   }
@@ -119,7 +121,7 @@ export class SubmissionService {
         await this.fileSubmissionService.cleanupSubmission(submission as FileSubmission);
         break;
       case SubmissionType.STATUS:
-        throw new Error('Unimplemented');
+        throw new NotImplementedException('Unimplemented');
         break;
     }
 
@@ -177,7 +179,7 @@ export class SubmissionService {
         );
         break;
       case SubmissionType.STATUS:
-        throw new Error('Unimplemented');
+        throw new NotImplementedException('Unimplemented');
     }
 
     // Duplicate parts
@@ -196,5 +198,72 @@ export class SubmissionService {
     this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
 
     return createdSubmission;
+  }
+
+  // File Submission Actions
+  // NOTE: Might be good to pull these out into a different place
+  async removeFileSubmissionThumbnail(id: string): Promise<SubmissionPackage<FileSubmission>> {
+    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const updated = await this.fileSubmissionService.removeThumbnail(submission);
+    await this.repository.update(id, { thumbnail: null });
+
+    const validated = await this.validate(updated);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    return validated;
+  }
+
+  async removeFileSubmissionAdditionalFile(
+    id: string,
+    location: string,
+  ): Promise<SubmissionPackage<FileSubmission>> {
+    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const updated = await this.fileSubmissionService.removeAdditionalFile(submission, location);
+    await this.repository.update(id, { additional: updated.additional });
+
+    const validated = await this.validate(updated);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    return validated;
+  }
+
+  async changeFileSubmissionThumbnailFile(
+    file: UploadedFile,
+    id: string,
+    path: string,
+  ): Promise<SubmissionPackage<FileSubmission>> {
+    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const updated = await this.fileSubmissionService.changeThumbnailFile(submission, file, path);
+    await this.repository.update(id, { thumbnail: updated.thumbnail });
+
+    const validated = await this.validate(updated);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    return validated;
+  }
+
+  async changeFileSubmissionPrimaryFile(
+    file: UploadedFile,
+    id: string,
+    path: string,
+  ): Promise<SubmissionPackage<FileSubmission>> {
+    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const updated = await this.fileSubmissionService.changePrimaryFile(submission, file, path);
+    await this.repository.update(id, { primary: updated.primary });
+
+    const validated = await this.validate(updated);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    return validated;
+  }
+
+  async addFileSubmissionAdditionalFile(
+    file: UploadedFile,
+    id: string,
+    path: string,
+  ): Promise<SubmissionPackage<FileSubmission>> {
+    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const updated = await this.fileSubmissionService.addAdditionalFile(submission, file, path);
+    await this.repository.update(id, { additional: updated.additional });
+
+    const validated = await this.validate(updated);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    return validated;
   }
 }

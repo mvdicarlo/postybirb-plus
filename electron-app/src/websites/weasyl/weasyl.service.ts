@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import Http from 'src/http/http.util';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import {
@@ -28,15 +28,15 @@ export class Weasyl extends WebsiteService {
   readonly defaultFileSubmissionOptions: DefaultWeasylSubmissionOptions = DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   parseDescription(text: string): string {
-    throw new Error('Method not implemented.');
+    throw new NotImplementedException('Method not implemented.');
   }
 
   postStatusSubmission(data: any): Promise<any> {
-    throw new Error('Method not implemented.');
+    throw new NotImplementedException('Method not implemented.');
   }
 
   postFileSubmission(data: any): Promise<any> {
-    throw new Error('Method not implemented.');
+    throw new NotImplementedException('Method not implemented.');
   }
 
   async checkLoginStatus(data: UserAccount): Promise<LoginResponse> {
@@ -127,6 +127,6 @@ export class Weasyl extends WebsiteService {
   }
 
   validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[] {
-    throw new Error('Method not implemented.');
+    throw new NotImplementedException('Method not implemented.');
   }
 }

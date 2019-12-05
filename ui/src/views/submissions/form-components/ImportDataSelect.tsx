@@ -2,12 +2,13 @@ import React from 'react';
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { LoginStatusStore } from '../../../stores/login-status.store';
-import { SubmissionStore } from '../../../stores/file-submission.store';
+import { SubmissionStore } from '../../../stores/submission.store';
 import { Modal, Select, Button, Form, TreeSelect } from 'antd';
 import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../website-components/website-registry';
+import SubmissionUtil from '../../../utils/submission.util';
 
 interface Props {
   className?: string;
@@ -42,10 +43,12 @@ export default class ImportDataSelect extends React.Component<Props, State> {
 
   handleComplete = () => {
     this.props.onPropsSelect(
-      _.cloneDeep(Object.values(this.state.selected!.parts).filter(p =>
-        this.state.selectedFields.includes(p.accountId)
+      _.cloneDeep(
+        Object.values(this.state.selected!.parts).filter(p =>
+          this.state.selectedFields.includes(p.accountId)
+        )
       )
-    ));
+    );
     this.hideModal();
   };
 
@@ -114,10 +117,10 @@ export default class ImportDataSelect extends React.Component<Props, State> {
                     this.props.submissionStore!.all.filter(
                       s => s.submission.id !== this.props.ignoreId
                     ),
-                    s => s.parts.default.data.title
+                    s => SubmissionUtil.getFileSubmissionTitle(s)
                   ).map(s => (
                     <Select.Option value={s.submission.id}>
-                      {s.parts.default.data.title}
+                      {SubmissionUtil.getFileSubmissionTitle(s)}
                     </Select.Option>
                   ))}
                 </Select.OptGroup>
