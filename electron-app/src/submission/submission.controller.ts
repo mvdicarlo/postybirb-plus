@@ -9,6 +9,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Patch,
 } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
 import { SubmissionType } from './enums/submission-type.enum';
@@ -59,6 +60,11 @@ export class SubmissionController {
   @Post('/update')
   async update(@Body() submissionPackage: SubmissionUpdate) {
     return this.service.updateSubmission(submissionPackage);
+  }
+
+  @Patch('/set/postAt/:id')
+  async setPostAt(@Body() body: { time: number | undefined }, @Param('id') id: string) {
+    return this.service.setPostAt(id, body.time);
   }
 
   @Post('/dryValidate')

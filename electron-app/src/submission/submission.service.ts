@@ -163,6 +163,13 @@ export class SubmissionService {
     return part;
   }
 
+  async setPostAt(id: string, postAt: number | undefined): Promise<void> {
+    const submission = (await this.get(id)) as Submission;
+    submission.schedule.postAt = postAt;
+    await this.repository.update(id, { schedule: submission.schedule });
+    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, Promise.all([this.validate(submission)]));
+  }
+
   async duplicate(originalId: string): Promise<Submission> {
     const original = (await this.get(originalId)) as Submission;
     const id = shortid.generate();

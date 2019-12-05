@@ -19,8 +19,10 @@ import {
   Tooltip,
   Icon,
   Tree,
-  message
+  message,
+  DatePicker
 } from 'antd';
+import moment from 'moment';
 
 interface Props {
   submissions: SubmissionPackage<any>[];
@@ -40,7 +42,9 @@ export class Submissions extends React.Component<Props, State> {
 
   render() {
     const submissions = this.props.submissions.filter(s =>
-      SubmissionUtil.getFileSubmissionTitle(s).toLowerCase().includes(this.state.search)
+      SubmissionUtil.getFileSubmissionTitle(s)
+        .toLowerCase()
+        .includes(this.state.search)
     );
     return (
       <div>
@@ -68,11 +72,33 @@ interface ListItemProps {
 
 class ListItem extends React.Component<ListItemProps, any> {
   state: any = {
-    previewVisible: false
+    previewVisible: false,
+    showScheduler: false
   };
 
-  handleCancel = () => this.setState({ previewVisible: false });
-  handleShow = () => this.setState({ previewVisible: true });
+  postAt: number | undefined = undefined;
+
+  hidePreview() {
+    this.setState({ previewVisible: false });
+  }
+
+  showPreview() {
+    this.setState({ previewVisible: true });
+  }
+
+  showScheduler() {
+    this.setState({ showScheduler: true });
+  }
+
+  hideScheduler() {
+    this.postAt = undefined;
+    this.setState({ showScheduler: false });
+  }
+
+  handleScheduleUpdate() {
+    SubmissionService.setPostAt(this.props.item.submission.id, this.postAt);
+    this.hideScheduler();
+  }
 
   onDuplicate() {
     SubmissionService.duplicate(this.props.item.submission.id)
@@ -92,10 +118,18 @@ class ListItem extends React.Component<ListItemProps, any> {
       <List.Item
         actions={[
           <span
-            className={`text-link ${problemCount > 0 ? 'text-disabled' : ''}`}
+            className={`text-link ${problemCount > 0 ? 'disabled' : ''}`}
             key="submission-post"
           >
             Post
+          </span>,
+          <span
+            className={`text-link ${
+              problemCount > 0 || !item.submission.schedule.postAt ? 'disabled' : ''
+            }`}
+            key="submission-schedule"
+          >
+            Schedule
           </span>,
           <Link to={`/edit/submission/${item.submission.id}`}>
             <span key="submission-edit">Edit</span>
@@ -120,17 +154,31 @@ class ListItem extends React.Component<ListItemProps, any> {
       >
         <List.Item.Meta
           avatar={
-            <div className="cursor-zoom-in" onClick={this.handleShow}>
+            <div className="cursor-zoom-in" onClick={this.showPreview.bind(this)}>
               <Avatar src={item.submission.primary.preview} shape="square" />
             </div>
           }
           title={SubmissionUtil.getFileSubmissionTitle(item)}
-          description={`Created - ${new Date(item.submission.created).toLocaleString()}`}
+          description={
+            <div>
+              <span className="ml-1">
+                <Icon type="calendar" />
+              </span>
+              <span className="ml-1">
+                {item.submission.schedule.postAt
+                  ? new Date(item.submission.schedule.postAt).toLocaleString()
+                  : 'Unscheduled'}
+              </span>
+              <span className="text-link">
+                <Icon onClick={this.showScheduler.bind(this)} type="edit" />
+              </span>
+            </div>
+          }
         ></List.Item.Meta>
         <Modal
           visible={this.state.previewVisible}
           footer={null}
-          onCancel={this.handleCancel}
+          onCancel={this.hidePreview.bind(this)}
           destroyOnClose={true}
         >
           <img
@@ -141,6 +189,23 @@ class ListItem extends React.Component<ListItemProps, any> {
                 ? item.submission.primary.location
                 : item.submission.primary.preview
             }
+          />
+        </Modal>
+
+        <Modal
+          title="Set Schedule"
+          visible={this.state.showScheduler}
+          onCancel={this.hideScheduler.bind(this)}
+          onOk={this.handleScheduleUpdate.bind(this)}
+          destroyOnClose={true}
+        >
+          <DatePicker
+            className="w-full"
+            defaultValue={this.props.item.submission.schedule.postAt ? moment(this.state.postAt) : undefined}
+            format="YYYY-MM-DD HH:mm"
+            showTime={{ format: 'HH:mm' }}
+            placeholder="Unscheduled"
+            onChange={value => (this.postAt = value ? value.valueOf() : undefined)}
           />
         </Modal>
       </List.Item>

@@ -35,6 +35,7 @@ import {
   Icon,
   DatePicker
 } from 'antd';
+import moment from 'moment';
 
 interface Props {
   match?: Match;
@@ -50,6 +51,7 @@ interface State {
   touched: boolean;
   removedParts: string[];
   additionalFileList: any[];
+  postAt: number | undefined;
 }
 
 @inject('loginStatusStore')
@@ -78,7 +80,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
     loading: true,
     touched: false,
     removedParts: [],
-    additionalFileList: []
+    additionalFileList: [],
+    postAt: undefined
   };
 
   constructor(props: Props) {
@@ -91,7 +94,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
           ...this.state,
           ...data,
           additionalFileList: this.getAdditionalFileList(data.submission.additional),
-          loading: false
+          loading: false,
+          postAt: data.submission.schedule.postAt
         });
       })
       .catch(() => {
@@ -116,7 +120,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   }, 2000);
 
   onSubmit = () => {
-    if (this.state.touched) {
+    if (this.state.touched || this.scheduleHasChanged()) {
       this.setState({ loading: true });
       SubmissionService.updateSubmission({
         parts: Object.values(this.state.parts).filter(
@@ -131,7 +135,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
             return null;
           })
         ),
-        id: this.id
+        id: this.id,
+        postAt: this.state.postAt
       })
         .then(({ data }) => {
           this.original = _.cloneDeep(data);
@@ -150,6 +155,10 @@ class SubmissionEditForm extends React.Component<Props, State> {
         });
     }
   };
+
+  scheduleHasChanged(): boolean {
+    return this.state.postAt !== this.original.submission.schedule.postAt;
+  }
 
   websiteHasProblems = (website: string | undefined | null): boolean => {
     return !!Object.values(this.state.problems).find(
@@ -438,12 +447,11 @@ class SubmissionEditForm extends React.Component<Props, State> {
           <Spin spinning={this.state.loading} delay={500}>
             <div className="flex">
               <Form layout="vertical" style={{ flex: 10, flexBasis: '75%' }}>
-                <Typography.Title level={3}>
-                  Files
-                  <a className="nav-section-anchor" href="#Files" id="#Files"></a>
-                </Typography.Title>
-
                 <Form.Item>
+                  <Typography.Title level={3}>
+                    Files
+                    <a className="nav-section-anchor" href="#Files" id="#Files"></a>
+                  </Typography.Title>
                   <div className="flex">
                     <Card
                       className="flex-1"
@@ -533,37 +541,52 @@ class SubmissionEditForm extends React.Component<Props, State> {
                   </div>
                 </Form.Item>
 
-                <Typography.Title level={3}>
-                  Schedule
-                  <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
-                </Typography.Title>
-                <Form.Item></Form.Item>
+                <Form.Item>
+                  <Typography.Title level={3}>
+                    Schedule
+                    <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
+                  </Typography.Title>
+                  <DatePicker
+                    value={this.state.postAt ? moment(this.state.postAt) : undefined}
+                    format="YYYY-MM-DD HH:mm"
+                    showTime={{ format: 'HH:mm' }}
+                    placeholder="Unscheduled"
+                    onChange={value =>
+                      this.setState({ postAt: value ? value.valueOf() : undefined })
+                    }
+                  />
+                </Form.Item>
 
-                <Typography.Title level={3}>
-                  Defaults
-                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
-                </Typography.Title>
-                <DefaultFormSection
-                  part={this.state.parts.default}
-                  problems={this.state.problems.default.problems}
-                  onUpdate={this.onUpdate}
-                  submission={this.state.submission!}
-                />
+                <Form.Item>
+                  <Typography.Title level={3}>
+                    Defaults
+                    <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
+                  </Typography.Title>
+                  <DefaultFormSection
+                    part={this.state.parts.default}
+                    problems={this.state.problems.default.problems}
+                    onUpdate={this.onUpdate}
+                    submission={this.state.submission!}
+                  />
+                </Form.Item>
 
-                <Typography.Title level={3}>
-                  Websites
-                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
-                </Typography.Title>
-                <TreeSelect
-                  multiple
-                  treeCheckable={true}
-                  treeDefaultExpandAll={true}
-                  allowClear={true}
-                  value={this.getSelectedWebsiteIds()}
-                  treeData={this.getWebsiteTreeData()}
-                  onChange={this.handleWebsiteSelect}
-                  placeholder="Select websites to post to"
-                />
+                <Form.Item>
+                  <Typography.Title level={3}>
+                    Websites
+                    <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                  </Typography.Title>
+                  <TreeSelect
+                    multiple
+                    treeCheckable={true}
+                    treeDefaultExpandAll={true}
+                    allowClear={true}
+                    value={this.getSelectedWebsiteIds()}
+                    treeData={this.getWebsiteTreeData()}
+                    onChange={this.handleWebsiteSelect}
+                    placeholder="Select websites to post to"
+                  />
+                </Form.Item>
+
                 <WebsiteSections {...this.state} onUpdate={this.onUpdate.bind(this)} />
               </Form>
 
@@ -574,6 +597,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
                   getCurrentAnchor={this.getHighestInViewport}
                 >
                   <Anchor.Link title="Files" href="#Files" />
+                  <Anchor.Link title="Schedule" href="#Schedule" />
                   <Anchor.Link
                     title={
                       <span>
@@ -605,7 +629,11 @@ class SubmissionEditForm extends React.Component<Props, State> {
                 submissionType={this.state.submission!.type}
                 onPropsSelect={this.importData.bind(this)}
               />
-              <Button onClick={this.onSubmit} type="primary" disabled={!this.state.touched}>
+              <Button
+                onClick={this.onSubmit}
+                type="primary"
+                disabled={!(this.state.touched || this.scheduleHasChanged())}
+              >
                 Save
               </Button>
             </div>

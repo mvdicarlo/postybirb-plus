@@ -33,6 +33,10 @@ export default class SubmissionService {
     return axios.delete(`/submission/remove/thumbnail/${id}`);
   }
 
+  static setPostAt(id: string, time: number | undefined) {
+    return axios.patch(`/submission/set/postAt/${id}`, { time });
+  }
+
   static updateSubmission(submissionPackage: SubmissionUpdate) {
     return axios.post('/submission/update', submissionPackage);
   }

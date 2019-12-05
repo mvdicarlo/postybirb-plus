@@ -44,7 +44,9 @@
 }
 
 .disabled {
-  color: rgba(0, 0, 0, .25)
+  color: rgba(0, 0, 0, .25);
+  pointer-events: none;
+  color: inherit !important;
 }
 
 .text-link:hover {
@@ -54,10 +56,6 @@
 
 .text-link:active {
   color: #096dd9;
-}
-
-.text-diabled {
-  pointer-events: none;
 }
 
 .primary-layout-container {

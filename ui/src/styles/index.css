@@ -8,7 +8,9 @@
 }
 
 .disabled {
-  @apply text-disabled 
+  @apply text-disabled;
+  pointer-events: none;
+  color: inherit !important;
 }
 
 .text-link:hover {
@@ -18,10 +20,6 @@
 
 .text-link:active {
   color: #096dd9;
-}
-
-.text-diabled {
-  pointer-events: none;
 }
 
 .primary-layout-container {
