@@ -7,7 +7,6 @@ import SubmissionUtil from '../../utils/submission.util';
 import _ from 'lodash';
 import { Problems } from '../../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { loginStatusStore } from '../../stores/login-status.store';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 
 import {
   List,

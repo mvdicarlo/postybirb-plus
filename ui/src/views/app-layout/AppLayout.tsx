@@ -7,6 +7,7 @@ import SubmissionsView from '../submissions/SubmissionsView';
 import TagGroups from '../tag-groups/TagGroups';
 import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
+import SettingsView from '../settings/SettingsView';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
@@ -21,6 +22,7 @@ interface Props {
 interface State {
   currentNavActive: string;
   accountsVisible: boolean;
+  settingsVisible: boolean;
   tagGroupVisible: boolean;
 }
 
@@ -30,6 +32,7 @@ export default class App extends React.Component<Props, State> {
   public state: any = {
     currentNavActive: '1',
     accountsVisible: false,
+    settingsVisible: false,
     tagGroupVisible: false
   };
 
@@ -112,6 +115,12 @@ export default class App extends React.Component<Props, State> {
                 <span>Tag Groups</span>
               </span>
             </Menu.Item>
+            <Menu.Item key="setting">
+              <span onClick={() => this.setState({ settingsVisible: true })}>
+                <Icon type="setting" />
+                <span>Settings</span>
+              </span>
+            </Menu.Item>
           </Menu>
           <Drawer
             title="Tag Groups"
@@ -149,6 +158,15 @@ export default class App extends React.Component<Props, State> {
           >
             <Login />
           </Drawer>
+          <Drawer
+            title="Settings"
+            visible={this.state.settingsVisible}
+            onClose={() => this.setState({ settingsVisible: false })}
+            destroyOnClose={true}
+            width="100vw"
+          >
+            <SettingsView />
+          </Drawer>
         </Sider>
 
         <Layout>
@@ -161,7 +179,10 @@ export default class App extends React.Component<Props, State> {
               <Route path="/submissions" component={SubmissionsView} />
               <Route path="/edit/submission/:id" component={SubmissionEditForm} />
               <BackTop target={() => document.getElementById('primary-container') || window} />
-              <Prompt when={this.props.uiStore!.state.hasPendingChanges} message="Are you sure you want to navigate? Any unsaved changes will be lost." />
+              <Prompt
+                when={this.props.uiStore!.state.hasPendingChanges}
+                message="Are you sure you want to navigate? Any unsaved changes will be lost."
+              />
             </div>
           </Content>
         </Layout>

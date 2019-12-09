@@ -13,9 +13,10 @@ import { EventsModule } from './events/events.module';
 import { SubmissionController } from './submission/submission.controller';
 import { SubmissionService } from './submission/submission.service';
 import { SubmissionRepository } from './submission/submission.repository';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
-  imports: [WebsitesModule, TagGroupModule, EventsModule],
+  imports: [WebsitesModule, TagGroupModule, EventsModule, SettingsModule],
   controllers: [AccountController, SubmissionController],
   providers: [
     FileSubmissionService,

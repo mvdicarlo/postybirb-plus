@@ -1,10 +1,9 @@
-import axios from '../utils/http';
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { TagGroup } from '../../../electron-app/src/tag-group/tag-group.interface';
 import TagGroupService from '../services/tag-group.service';
 
-export enum TagGroupEvent {
+enum TagGroupEvent {
   REMOVED = '[TAG GROUP] REMOVED',
   UPDATED = '[TAG GROUP] UPDATED',
   ADDED = '[TAG GROUP] ADDED'

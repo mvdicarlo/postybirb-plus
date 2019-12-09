@@ -6,6 +6,6 @@ import { WebsiteProvider } from './website-provider.service';
 @Module({
   controllers: [WeasylController],
   providers: [Weasyl, WebsiteProvider],
-  exports: [WebsiteProvider]
+  exports: [WebsiteProvider],
 })
 export class WebsitesModule {}

@@ -8,6 +8,8 @@ const {
 } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const log = require('electron-log');
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync')
 
 process.env.PORT = 9247;
 process.env.DEVMODE = !!process.argv.find(
@@ -22,7 +24,26 @@ if (!hasLock) {
 
 let nest;
 
-app.disableHardwareAcceleration(); // TODO setting
+global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
+
+const adapter = new FileSync(`${BASE_DIRECTORY}/data/settings.json`);
+const settings = low(adapter);
+settings.defaults({
+    advertise: true,
+    emptyQueueOnFailedPost: true,
+    postInterval: 0,
+    postRetries: 0,
+    openOnStartup: true,
+    useHardwareAcceleration: process.platform === 'win32' || process.platform === 'darwin',
+}).write();
+
+global.settingsDB = settings;
+
+if (!settings.getState().useHardwareAcceleration || !(process.platform === 'win32' || process.platform === 'darwin')) {
+    log.info('Hardware acceleration disabled');
+    app.disableHardwareAcceleration();
+}
+
 app.on('second-instance', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
@@ -35,6 +56,8 @@ let initializedOnce = false;
 
 async function initialize() {
     if (!hasLock) return;
+
+    let shouldDisplayWindow = true;
     if (!initializedOnce) {
         await nest();
         const menu = Menu.buildFromTemplate(require('./menu'));
@@ -42,7 +65,10 @@ async function initialize() {
         const image = buildAppImage();
         buildTray(image);
         initializedOnce = true;
+        shouldDisplayWindow = settings.getState().openOnStartup;
     }
+
+    if (!shouldDisplayWindow) return; // observe user setting
 
     const mainWindowState = windowStateKeeper({
         defaultWidth: 992,

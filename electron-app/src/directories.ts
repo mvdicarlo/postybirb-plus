@@ -1,7 +1,6 @@
 import * as path from 'path';
-import { app } from 'electron';
 
-export const BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
+export const BASE_DIRECTORY = (global as any).BASE_DIRECTORY;
 export const SUBMISSION_FILE_DIRECTORY = path.join(
   BASE_DIRECTORY,
   'submission files',
