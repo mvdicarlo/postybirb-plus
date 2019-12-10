@@ -12,6 +12,7 @@ import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
 import { Icon, Layout, Menu, Drawer, Select, BackTop } from 'antd';
+import DescriptionTemplates from '../description-templates/DescriptionTemplates';
 
 const { Content, Sider } = Layout;
 
@@ -22,6 +23,7 @@ interface Props {
 interface State {
   currentNavActive: string;
   accountsVisible: boolean;
+  descriptionTemplateVisible: boolean;
   settingsVisible: boolean;
   tagGroupVisible: boolean;
 }
@@ -32,6 +34,7 @@ export default class App extends React.Component<Props, State> {
   public state: any = {
     currentNavActive: '1',
     accountsVisible: false,
+    descriptionTemplateVisible: false,
     settingsVisible: false,
     tagGroupVisible: false
   };
@@ -92,6 +95,7 @@ export default class App extends React.Component<Props, State> {
             mode="inline"
             selectedKeys={[this.state.currentNavActive]}
             onSelect={this.handleNavSelectChange}
+            defaultOpenKeys={['templates']}
           >
             <Menu.Item key="home">
               <Link to="/">
@@ -109,14 +113,45 @@ export default class App extends React.Component<Props, State> {
                 <span>Submissions</span>
               </Link>
             </Menu.Item>
-            <Menu.Item key="tag-groups">
-              <span onClick={() => this.setState({ tagGroupVisible: true })}>
-                <Icon type="tags" />
-                <span>Tag Groups</span>
-              </span>
-            </Menu.Item>
-            <Menu.Item key="setting">
-              <span onClick={() => this.setState({ settingsVisible: true })}>
+            <Menu.SubMenu
+              key="templates"
+              title={
+                <span>
+                  <Icon type="snippets" />
+                  Templates
+                </span>
+              }
+            >
+              <Menu.Item key="tag-groups">
+                <span onClick={() => this.setState({ tagGroupVisible: true })}>
+                  <Icon type="tags" />
+                  <span>Tag Groups</span>
+                </span>
+              </Menu.Item>
+
+              <Menu.Item key="description-templates" onClick={() => this.setState({ descriptionTemplateVisible: true })}>
+                <span>
+                  <span>
+                    <i aria-label="icon: description-template" className="anticon description-template">
+                      <svg
+                        viewBox="0 0 20 20"
+                        focusable="false"
+                        data-icon="description-template"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                        aria-hidden={true}
+                      >
+                        <path d="M19 19v-1H5v1h14zM9 16v-4a5 5 0 1 1 6 0v4h4a2 2 0 0 1 2 2v3H3v-3c0-1.1.9-2 2-2h4zm4 0v-5l.8-.6a3 3 0 1 0-3.6 0l.8.6v5h2z"></path>
+                      </svg>
+                    </i>
+                  </span>
+                  <span>Description</span>
+                </span>
+              </Menu.Item>
+            </Menu.SubMenu>
+            <Menu.Item key="setting" onClick={() => this.setState({ settingsVisible: true })}>
+              <span>
                 <Icon type="setting" />
                 <span>Settings</span>
               </span>
@@ -130,6 +165,15 @@ export default class App extends React.Component<Props, State> {
             width="50vw"
           >
             <TagGroups />
+          </Drawer>
+          <Drawer
+            title="Description Templates"
+            visible={this.state.descriptionTemplateVisible}
+            destroyOnClose={true}
+            onClose={() => this.setState({ descriptionTemplateVisible: false })}
+            width="50vw"
+          >
+            <DescriptionTemplates />
           </Drawer>
           <Drawer
             title={

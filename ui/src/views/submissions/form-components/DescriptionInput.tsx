@@ -1,16 +1,21 @@
 import React from 'react';
 import * as sanitize from 'sanitize-html';
+import { inject, observer } from 'mobx-react';
 import { Editor } from '@tinymce/tinymce-react';
 import { DescriptionData } from '../../.././../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Form, Switch } from 'antd';
+import { DescriptionTemplateStore } from '../../../stores/description-template.store';
 
 interface Props {
   defaultValue: DescriptionData;
   label?: string;
   hideOverwrite?: boolean;
   onChange: (change: DescriptionData) => void;
+  descriptionTemplateStore?: DescriptionTemplateStore;
 }
 
+@inject('descriptionTemplateStore')
+@observer
 export default class DescriptionInput extends React.Component<Props> {
   private data: DescriptionData = {
     overwriteDefault: false,
@@ -108,7 +113,7 @@ export default class DescriptionInput extends React.Component<Props> {
           <div className="relative">
             <Editor
               value={this.props.defaultValue.value}
-              init={this.tinyMCESettings}
+              init={{...this.tinyMCESettings, templates: this.props.descriptionTemplateStore!.templates}}
               onEditorChange={this.handleDescriptionChange}
             />
             <div className="absolute bottom-0 text-gray-600 mr-1 right-0 pointer-events-none">

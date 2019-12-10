@@ -16,12 +16,13 @@ interface Props {
 @inject('tagGroupStore')
 @observer
 export default class TagGroups extends React.Component<Props> {
-  createNewGroup = () =>
+  createNewGroup() {
     TagGroupService.create({
-      id: Date.now.toString(),
+      id: Date.now().toString(),
       alias: 'New Tag Group',
       tags: []
     });
+  }
 
   render() {
     const groups = this.props.tagGroupStore!.groups;
@@ -106,7 +107,9 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
   };
 
   onDelete = () => {
-    TagGroupService.deleteTagGroup(this.props.id);
+    TagGroupService.deleteTagGroup(this.props.id)
+      .then(() => message.success('Tag group removed.'))
+      .catch(() => message.error('Failed to remove tag group.'));
   };
 
   render() {
