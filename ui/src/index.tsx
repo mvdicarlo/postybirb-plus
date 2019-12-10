@@ -5,6 +5,19 @@ import App from './App';
 import { HashRouter as Router } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 
+declare global {
+  interface Window {
+    electron: {
+      clipboard: {
+        availableFormats: () => string[];
+        read: () => File;
+      };
+    };
+    PORT: number;
+    appVersion: string;
+  }
+}
+
 ReactDOM.render(
   <Router basename="/">
     <App />

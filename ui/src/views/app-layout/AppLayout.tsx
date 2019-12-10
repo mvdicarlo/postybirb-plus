@@ -88,6 +88,7 @@ export default class App extends React.Component<Props, State> {
               }}
             >
               PostyBirb
+              <span className="text-xs">{window.appVersion}</span>
             </div>
           </Link>
           <Menu

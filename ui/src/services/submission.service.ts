@@ -2,11 +2,17 @@ import axios from '../utils/http';
 import { SubmissionUpdate } from '../../../electron-app/src/submission/interfaces/submission-update.interface';
 import { FormSubmissionPart } from '../views/submissions/interfaces/form-submission-part.interface';
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { SubmissionType } from '../shared/enums/submission-type.enum';
 
 export default class SubmissionService {
-
   static checkProblems(parts: Array<FormSubmissionPart<any>>) {
     return axios.post<Problems>('/submission/dryValidate', parts);
+  }
+
+  static createFromClipboard() {
+    const formData: FormData = new FormData();
+    formData.set('file', window.electron.clipboard.read());
+    return axios.post(`/submission/create/${SubmissionType.FILE}`, formData);
   }
 
   static deleteFileSubmission(id: string) {

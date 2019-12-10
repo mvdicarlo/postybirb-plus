@@ -7,25 +7,34 @@ import { inject, observer } from 'mobx-react';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import './SubmissionsView.css';
 
-import { Upload, Icon, message, Tabs } from 'antd';
+import { Upload, Icon, message, Tabs, Button, Badge } from 'antd';
+import SubmissionService from '../../services/submission.service';
 const { Dragger } = Upload;
 
 interface Props {
   submissionStore?: SubmissionStore;
 }
 
+interface State {
+  canCopyClipboard: boolean;
+}
+
 @inject('submissionStore')
 @observer
-export default class SubmissionView extends React.Component<Props> {
+export default class SubmissionView extends React.Component<Props, State> {
+  state: State = {
+    canCopyClipboard: window.electron.clipboard.availableFormats().includes('image/png')
+  };
+
   private uploadProps = {
     name: 'file',
     multiple: true,
     showUploadList: false,
     action: (file: RcFile) =>
       Promise.resolve(
-        `http://localhost:${window['PORT']}/submission/create/${SubmissionType.FILE}?path=${encodeURIComponent(
-          file['path']
-        )}`
+        `http://localhost:${window['PORT']}/submission/create/${
+          SubmissionType.FILE
+        }?path=${encodeURIComponent(file['path'])}`
       ),
     onChange(info) {
       const { status } = info.file;
@@ -36,6 +45,31 @@ export default class SubmissionView extends React.Component<Props> {
       }
     }
   };
+
+  private clipboardCheckInterval: any;
+
+  constructor(props) {
+    super(props);
+    this.clipboardCheckInterval = setInterval(() => {
+      if (window.electron.clipboard.availableFormats().includes('image/png')) {
+        if (!this.state.canCopyClipboard) {
+          this.setState({ canCopyClipboard: true });
+        }
+      } else if (this.state.canCopyClipboard) {
+        this.setState({ canCopyClipboard: false });
+      }
+    }, 2000);
+  }
+
+  createFromClipboard() {
+    SubmissionService.createFromClipboard()
+      .then(() => message.success('Submission created.'))
+      .catch(() => message.error('Failed to create submission.'));
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.clipboardCheckInterval);
+  }
 
   render() {
     headerStore.updateHeaderState({
@@ -48,15 +82,31 @@ export default class SubmissionView extends React.Component<Props> {
       ]
     });
 
+    const submissions = this.props.submissionStore!.all.filter(
+      s => s.submission.type === SubmissionType.FILE
+    );
+
     return (
       <Tabs>
-        <Tabs.TabPane tab="Submissions" key="submissions">
+        <Tabs.TabPane
+          tab={
+            <div>
+              <span className="mr-1">Submissions</span>
+              <Badge
+                count={
+                  submissions.filter(
+                    s => !s.submission.isPosting && !s.submission.schedule.isScheduled
+                  ).length
+                }
+              />
+            </div>
+          }
+          key="submissions"
+        >
           <div className="submission-view">
             <Submissions
               isLoading={this.props.submissionStore!.isLoading}
-              submissions={this.props.submissionStore!.all.filter(
-                s => s.submission.type === SubmissionType.FILE
-              )}
+              submissions={submissions}
             />
             <div className="uploader">
               <Dragger {...this.uploadProps}>
@@ -67,13 +117,45 @@ export default class SubmissionView extends React.Component<Props> {
                   Click or drag file to this area to create a submission
                 </p>
               </Dragger>
+              <div className="mt-1">
+                <Button
+                  disabled={!this.state.canCopyClipboard}
+                  onClick={this.createFromClipboard.bind(this)}
+                  block
+                >
+                  <Icon type="copy" />
+                  Copy from clipboard
+                </Button>
+              </div>
             </div>
           </div>
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Scheduled" key="scheduled">
+        <Tabs.TabPane
+          tab={
+            <div>
+              <span className="mr-1">Scheduled</span>
+              <Badge
+                count={
+                  submissions.filter(
+                    s => !s.submission.isPosting && s.submission.schedule.isScheduled
+                  ).length
+                }
+              />
+            </div>
+          }
+          key="scheduled"
+        >
           TBD
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Posting" key="posting">
+        <Tabs.TabPane
+          tab={
+            <div>
+              <span className="mr-1">Posting</span>
+              <Badge count={submissions.filter(s => s.submission.isPosting).length} />
+            </div>
+          }
+          key="posting"
+        >
           TBD
         </Tabs.TabPane>
       </Tabs>

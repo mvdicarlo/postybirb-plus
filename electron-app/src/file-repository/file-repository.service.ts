@@ -17,7 +17,7 @@ export class FileRepositoryService {
     file: UploadedFile,
     path: string,
   ): Promise<{ thumbnailLocation: string; submissionLocation: string }> {
-    this.logger.debug(`Uploading file ${path} ${file.originalname}`);
+    this.logger.debug(`Uploading file ${path || 'from clipboard'} ${file.originalname}`);
 
     const idName = `${id}-${shortid.generate()}.${file.originalname.split('.').pop()}`;
     const submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${idName}`;
