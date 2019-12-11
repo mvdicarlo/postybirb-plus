@@ -9,6 +9,7 @@ import './SubmissionsView.css';
 
 import { Upload, Icon, message, Tabs, Button, Badge } from 'antd';
 import SubmissionService from '../../services/submission.service';
+import ScheduledSubmissions from './ScheduledSubmissions';
 const { Dragger } = Upload;
 
 interface Props {
@@ -83,6 +84,15 @@ export default class SubmissionView extends React.Component<Props, State> {
     });
 
     const submissions = this.props.submissionStore!.fileSubmissions;
+    const editableSubmissions = submissions.filter(
+      s => !s.submission.isPosting && !s.submission.schedule.isScheduled
+    );
+
+    const scheduledSubmissions = submissions.filter(
+      s => !s.submission.isPosting && s.submission.schedule.isScheduled
+    );
+
+    const queuedSubmissions = submissions.filter(s => s.submission.isPosting);
 
     return (
       <Tabs>
@@ -90,13 +100,7 @@ export default class SubmissionView extends React.Component<Props, State> {
           tab={
             <div>
               <span className="mr-1">Submissions</span>
-              <Badge
-                count={
-                  submissions.filter(
-                    s => !s.submission.isPosting && !s.submission.schedule.isScheduled
-                  ).length
-                }
-              />
+              <Badge count={editableSubmissions.length} />
             </div>
           }
           key="submissions"
@@ -104,7 +108,7 @@ export default class SubmissionView extends React.Component<Props, State> {
           <div className="submission-view">
             <Submissions
               isLoading={this.props.submissionStore!.isLoading}
-              submissions={submissions}
+              submissions={editableSubmissions}
             />
             <div className="uploader">
               <Dragger {...this.uploadProps}>
@@ -132,24 +136,20 @@ export default class SubmissionView extends React.Component<Props, State> {
           tab={
             <div>
               <span className="mr-1">Scheduled</span>
-              <Badge
-                count={
-                  submissions.filter(
-                    s => !s.submission.isPosting && s.submission.schedule.isScheduled
-                  ).length
-                }
-              />
+              <Badge count={scheduledSubmissions.length} />
             </div>
           }
           key="scheduled"
         >
-          TBD
+          <div className="scheduled-view">
+            <ScheduledSubmissions submissions={scheduledSubmissions} />
+          </div>
         </Tabs.TabPane>
         <Tabs.TabPane
           tab={
             <div>
               <span className="mr-1">Posting</span>
-              <Badge count={submissions.filter(s => s.submission.isPosting).length} />
+              <Badge count={queuedSubmissions.length} />
             </div>
           }
           key="posting"

@@ -37,9 +37,10 @@ export default class SubmissionSelect extends React.Component<Props> {
     if (this.props.validOnly) {
       submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
     }
-    
+
     return (
       <Select
+        allowClear={this.props.multiple}
         className={this.props.className}
         defaultValue={this.props.selectAll ? submissions.map(s => s.submission.id) : []}
         mode={this.props.multiple ? 'multiple' : 'default'}

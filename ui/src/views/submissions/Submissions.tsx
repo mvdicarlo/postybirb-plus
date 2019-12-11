@@ -25,6 +25,7 @@ import {
 import moment from 'moment';
 import SubmissionSelectModal from './submission-select/SubmissionSelectModal';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 
 interface Props {
   submissions: SubmissionPackage<any>[];
@@ -115,7 +116,9 @@ export class Submissions extends React.Component<Props, State> {
                   )}
                   onClose={() => this.setState({ postModalVisible: false })}
                   onOk={this.postSubmissions.bind(this)}
-                />
+                >
+                  <p>Submissions that have a schedule time will be scheduled</p>
+                </SubmissionSelectModal>
               </div>
             }
             footer={this.props.children}
@@ -123,9 +126,7 @@ export class Submissions extends React.Component<Props, State> {
             itemLayout="vertical"
             loading={this.props.isLoading}
             dataSource={submissions}
-            renderItem={(item: SubmissionPackage<FileSubmission>) => (
-              <ListItem item={item}></ListItem>
-            )}
+            renderItem={(item: SubmissionPackage<Submission>) => <ListItem item={item} />}
           ></List>
         </div>
       </div>
@@ -134,10 +135,15 @@ export class Submissions extends React.Component<Props, State> {
 }
 
 interface ListItemProps {
-  item: SubmissionPackage<FileSubmission>;
+  item: SubmissionPackage<Submission>;
 }
 
-class ListItem extends React.Component<ListItemProps, any> {
+interface ListItemState {
+  previewVisible: boolean;
+  showScheduler: boolean;
+}
+
+class ListItem extends React.Component<ListItemProps, ListItemState> {
   state: any = {
     previewVisible: false,
     showScheduler: false
@@ -192,6 +198,11 @@ class ListItem extends React.Component<ListItemProps, any> {
               problemCount > 0 || !item.submission.schedule.postAt ? 'disabled' : ''
             }`}
             key="submission-schedule"
+            onClick={() =>
+              SubmissionService.schedule(item.submission.id, true)
+                .then(() => message.success('Submission scheduled.'))
+                .catch(() => message.error('Failed to schedule submission.'))
+            }
           >
             Schedule
           </span>,
@@ -218,17 +229,26 @@ class ListItem extends React.Component<ListItemProps, any> {
       >
         <List.Item.Meta
           avatar={
-            <div className="cursor-zoom-in" onClick={this.showPreview.bind(this)}>
-              <Avatar src={item.submission.primary.preview} shape="square" />
+            <div>
+              {item.submission.type === SubmissionType.FILE ? (
+                <div className="cursor-zoom-in" onClick={this.showPreview.bind(this)}>
+                  <Avatar
+                    src={(item.submission as FileSubmission).primary.preview}
+                    shape="square"
+                  />
+                </div>
+              ) : (
+                <Avatar icon="notification" shape="square" />
+              )}
             </div>
           }
           title={SubmissionUtil.getFileSubmissionTitle(item)}
           description={
             <div>
-              <span className="ml-1">
+              <span>
                 <Icon type="calendar" />
               </span>
-              <span className="ml-1">
+              <span className="mx-1">
                 {item.submission.schedule.postAt
                   ? new Date(item.submission.schedule.postAt).toLocaleString()
                   : 'Unscheduled'}
@@ -239,22 +259,24 @@ class ListItem extends React.Component<ListItemProps, any> {
             </div>
           }
         ></List.Item.Meta>
-        <Modal
-          visible={this.state.previewVisible}
-          footer={null}
-          onCancel={this.hidePreview.bind(this)}
-          destroyOnClose={true}
-        >
-          <img
-            alt="preview"
-            style={{ width: '100%' }}
-            src={
-              item.submission.primary.type === 'IMAGE'
-                ? item.submission.primary.location
-                : item.submission.primary.preview
-            }
-          />
-        </Modal>
+        {item.submission.type === SubmissionType.FILE ? (
+          <Modal
+            visible={this.state.previewVisible}
+            footer={null}
+            onCancel={this.hidePreview.bind(this)}
+            destroyOnClose={true}
+          >
+            <img
+              alt="preview"
+              style={{ width: '100%' }}
+              src={
+                (item.submission as FileSubmission).primary.type === 'IMAGE'
+                  ? (item.submission as FileSubmission).primary.location
+                  : (item.submission as FileSubmission).primary.preview
+              }
+            />
+          </Modal>
+        ) : null}
 
         <Modal
           title="Set Schedule"

@@ -35,6 +35,7 @@ export default class SubmissionSelectModal extends React.Component<Props, State>
         visible={this.props.visible}
       >
         <div>
+          {this.props.children ? <div className="mb-2">{this.props.children}</div> : null}
           <SubmissionSelect
             className="w-full"
             multiple={this.props.multiple}

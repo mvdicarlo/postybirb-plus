@@ -6,3 +6,17 @@
   max-height: 50vh;
   overflow: auto;
 }
+
+.calendar-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calendar-events .ant-badge-status {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}

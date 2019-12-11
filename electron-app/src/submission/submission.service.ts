@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, NotImplementedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  NotImplementedException,
+} from '@nestjs/common';
 import * as _ from 'lodash';
 import * as shortid from 'shortid';
 import { EventsGateway } from 'src/events/events.gateway';
@@ -134,6 +139,9 @@ export class SubmissionService {
     const { id, parts, postAt, removedParts } = update;
     const submissionToUpdate = (await this.get(id)) as Submission;
     submissionToUpdate.schedule.postAt = postAt;
+    if (!postAt) {
+      submissionToUpdate.schedule.isScheduled = false;
+    }
     await this.repository.update(id, { schedule: submissionToUpdate.schedule });
 
     await Promise.all(removedParts.map(partId => this.partService.removeSubmissionPart(partId)));
@@ -143,6 +151,21 @@ export class SubmissionService {
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
 
     return packaged;
+  }
+
+  async scheduleSubmission(id: string, isScheduled: boolean): Promise<void> {
+    const submissionToSchedule = (await this.get(id)) as Submission;
+    if (!submissionToSchedule.schedule.postAt) {
+      throw new BadRequestException(
+        'Submission cannot be scheduled because it does not have a postAt value',
+      );
+    }
+
+    const copy = _.cloneDeep(submissionToSchedule);
+    copy.schedule.isScheduled = isScheduled;
+    await this.repository.update(id, { schedule: copy.schedule });
+
+    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, Promise.all([this.validate(copy)]));
   }
 
   async setPart(
@@ -167,7 +190,10 @@ export class SubmissionService {
     const submission = (await this.get(id)) as Submission;
     submission.schedule.postAt = postAt;
     await this.repository.update(id, { schedule: submission.schedule });
-    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, Promise.all([this.validate(submission)]));
+    this.eventEmitter.emitOnComplete(
+      SubmissionEvent.UPDATED,
+      Promise.all([this.validate(submission)]),
+    );
   }
 
   async duplicate(originalId: string): Promise<Submission> {

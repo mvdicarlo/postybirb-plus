@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Patch,
+  NotImplementedException,
 } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
 import { SubmissionType } from './enums/submission-type.enum';
@@ -57,24 +58,34 @@ export class SubmissionController {
     });
   }
 
-  @Post('/update')
+  @Post('update')
   async update(@Body() submissionPackage: SubmissionUpdate) {
     return this.service.updateSubmission(submissionPackage);
   }
 
-  @Patch('/set/postAt/:id')
+  @Patch('set/postAt/:id')
   async setPostAt(@Body() body: { time: number | undefined }, @Param('id') id: string) {
     return this.service.setPostAt(id, body.time);
   }
 
-  @Post('/dryValidate')
+  @Post('dryValidate')
   async dryValidate(@Body() parts: Array<SubmissionPart<any>>) {
     return this.service.dryValidate(parts || []);
   }
 
-  @Post('/duplicate/:id')
+  @Post('duplicate/:id')
   async duplicate(@Param('id') id: string) {
     return this.service.duplicate(id);
+  }
+
+  @Post('post/:id')
+  async queueSubmission(@Param('id') id: string) {
+    throw new NotImplementedException('Post not implemented yet');
+  }
+
+  @Post('schedule/:id')
+  async scheduleSubmission(@Body() data: { isScheduled: boolean }, @Param('id') id: string) {
+    return this.service.scheduleSubmission(id, data.isScheduled);
   }
 
   // File Submission File Actions

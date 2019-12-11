@@ -30,7 +30,7 @@ export default class TagInput extends React.Component<Props> {
   private data: TagData = {
     extendDefault: true,
     value: []
-  }
+  };
 
   options: TagOptions = {
     maxTags: 200,
@@ -105,22 +105,30 @@ export default class TagInput extends React.Component<Props> {
     return (
       <Form.Item label={this.props.label} required={!!this.options.minTags}>
         {tagSwitch}
-        <Select
-          mode="tags"
-          style={{ width: '100%' }}
-          tokenSeparators={[',']}
-          onChange={this.handleTagChange}
-          value={this.props.defaultValue.value}
-          placeholder="Separate tags with ,"
-          allowClear={true}
-          onInputKeyDown={this.onKeyDown}
-        >
-          {this.props.defaultValue.value.map(tag => (
-            <Select.Option key="tag" value={tag}>
-              {tag}
-            </Select.Option>
-          ))}
-        </Select>
+        <div className="flex">
+          <Select
+            mode="tags"
+            style={{ flex: 10 }}
+            tokenSeparators={[',']}
+            onChange={this.handleTagChange}
+            value={this.props.defaultValue.value}
+            placeholder="Separate tags with ,"
+            allowClear={true}
+            onInputKeyDown={this.onKeyDown}
+          >
+            {this.props.defaultValue.value.map(tag => (
+              <Select.Option key="tag" value={tag}>
+                {tag}
+              </Select.Option>
+            ))}
+          </Select>
+          <div className="m-auto">
+            <Typography.Text
+              copyable={{ text: this.props.defaultValue.value.join(', ') }}
+            ></Typography.Text>
+          </div>
+        </div>
+
         <div className="flex">
           {this.props.hideTagGroup ? null : (
             <TagGroupSelect

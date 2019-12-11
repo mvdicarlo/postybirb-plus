@@ -119,21 +119,27 @@ export default class App extends React.Component<Props, State> {
               title={
                 <span>
                   <Icon type="snippets" />
-                  Templates
+                  <span>Templates</span>
                 </span>
               }
             >
-              <Menu.Item key="tag-groups">
-                <span onClick={() => this.setState({ tagGroupVisible: true })}>
+              <Menu.Item key="tag-groups" onClick={() => this.setState({ tagGroupVisible: true })}>
+                <span>
                   <Icon type="tags" />
                   <span>Tag Groups</span>
                 </span>
               </Menu.Item>
 
-              <Menu.Item key="description-templates" onClick={() => this.setState({ descriptionTemplateVisible: true })}>
+              <Menu.Item
+                key="description-templates"
+                onClick={() => this.setState({ descriptionTemplateVisible: true })}
+              >
                 <span>
                   <span>
-                    <i aria-label="icon: description-template" className="anticon description-template">
+                    <i
+                      aria-label="icon: description-template"
+                      className="anticon description-template"
+                    >
                       <svg
                         viewBox="0 0 20 20"
                         focusable="false"
