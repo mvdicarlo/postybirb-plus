@@ -82,9 +82,7 @@ export default class SubmissionView extends React.Component<Props, State> {
       ]
     });
 
-    const submissions = this.props.submissionStore!.all.filter(
-      s => s.submission.type === SubmissionType.FILE
-    );
+    const submissions = this.props.submissionStore!.fileSubmissions;
 
     return (
       <Tabs>

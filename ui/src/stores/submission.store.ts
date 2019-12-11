@@ -5,6 +5,7 @@ import { observable, computed, action } from 'mobx';
 import { SubmissionEvent } from '../shared/enums/submission.events.enum';
 import { Submission } from '../../../electron-app/src/submission/interfaces/submission.interface';
 import SubmissionService from '../services/submission.service';
+import { SubmissionType } from '../shared/enums/submission-type.enum';
 
 export interface SubmissionState {
   loading: boolean;
@@ -27,7 +28,21 @@ export class SubmissionStore {
 
   @computed
   get all(): SubmissionPackage<Submission>[] {
-    return [...this.state.submissions].sort((a, b) => a.submission.order - b.submission.order);
+    return [...this.state.submissions].sort((a, b) => a.submission.created - b.submission.created);
+  }
+
+  @computed
+  get fileSubmissions(): SubmissionPackage<Submission>[] {
+    return [...this.state.submissions]
+      .filter(s => s.submission.type === SubmissionType.FILE)
+      .sort((a, b) => a.submission.created - b.submission.created);
+  }
+
+  @computed
+  get statusSubmissions(): SubmissionPackage<Submission>[] {
+    return [...this.state.submissions]
+      .filter(s => s.submission.type === SubmissionType.STATUS)
+      .sort((a, b) => a.submission.created - b.submission.created);
   }
 
   @computed

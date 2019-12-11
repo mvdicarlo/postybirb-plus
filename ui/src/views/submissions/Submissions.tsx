@@ -1,27 +1,30 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import SubmissionService from '../../services/submission.service';
-import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import SubmissionUtil from '../../utils/submission.util';
 import _ from 'lodash';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { Link } from 'react-router-dom';
 import { Problems } from '../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { loginStatusStore } from '../../stores/login-status.store';
 
 import {
-  List,
   Avatar,
-  Popconfirm,
-  Modal,
-  Input,
-  Typography,
-  Tooltip,
+  Button,
+  DatePicker,
   Icon,
+  Input,
+  List,
+  Modal,
+  Popconfirm,
+  Tooltip,
   Tree,
-  message,
-  DatePicker
+  Typography,
+  message
 } from 'antd';
 import moment from 'moment';
+import SubmissionSelectModal from './submission-select/SubmissionSelectModal';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
 
 interface Props {
   submissions: SubmissionPackage<any>[];
@@ -30,14 +33,29 @@ interface Props {
 
 interface State {
   search: string;
+  deleteModalVisible: boolean;
+  postModalVisible: boolean;
 }
 
 export class Submissions extends React.Component<Props, State> {
   state: State = {
-    search: ''
+    search: '',
+    deleteModalVisible: false,
+    postModalVisible: false
   };
 
   handleSearch = ({ target }) => this.setState({ search: target.value.toLowerCase() });
+
+  deleteSubmissions(submissions: SubmissionPackage<any>[]) {
+    this.setState({ deleteModalVisible: false });
+    Promise.all(submissions.map(s => SubmissionService.deleteSubmission(s.submission.id))).finally(
+      () => message.success('Submissions deleted.')
+    );
+  }
+
+  postSubmissions(submissions: SubmissionPackage<any>[]) {
+    this.setState({ postModalVisible: false });
+  }
 
   render() {
     const submissions = this.props.submissions.filter(s =>
@@ -49,7 +67,57 @@ export class Submissions extends React.Component<Props, State> {
       <div>
         <div className="submission-list">
           <List
-            header={<Input.Search onChange={this.handleSearch} style={{ width: 200 }} />}
+            header={
+              <div className="flex">
+                <div style={{ flex: 10 }}>
+                  <Input.Search onChange={this.handleSearch} style={{ width: 200 }} />
+                </div>
+                <div className="text-right">
+                  <Button
+                    type="primary"
+                    className="mr-1"
+                    onClick={() => this.setState({ postModalVisible: true })}
+                    disabled={!submissions.length}
+                  >
+                    Post Many
+                  </Button>
+                  <Button
+                    type="danger"
+                    onClick={() => this.setState({ deleteModalVisible: true })}
+                    disabled={!submissions.length}
+                  >
+                    Delete Many
+                  </Button>
+                </div>
+                <SubmissionSelectModal
+                  visible={this.state.deleteModalVisible}
+                  title="Delete"
+                  multiple={true}
+                  selectAll={true}
+                  submissionType={_.get(
+                    this.props.submissions[0],
+                    'submission.type',
+                    SubmissionType.FILE
+                  )}
+                  onClose={() => this.setState({ deleteModalVisible: false })}
+                  onOk={this.deleteSubmissions.bind(this)}
+                />
+                <SubmissionSelectModal
+                  visible={this.state.postModalVisible}
+                  validOnly={true}
+                  title="Post"
+                  multiple={true}
+                  selectAll={true}
+                  submissionType={_.get(
+                    this.props.submissions[0],
+                    'submission.type',
+                    SubmissionType.FILE
+                  )}
+                  onClose={() => this.setState({ postModalVisible: false })}
+                  onOk={this.postSubmissions.bind(this)}
+                />
+              </div>
+            }
             footer={this.props.children}
             bordered
             itemLayout="vertical"
@@ -116,10 +184,7 @@ class ListItem extends React.Component<ListItemProps, any> {
     return (
       <List.Item
         actions={[
-          <span
-            className={`text-link ${problemCount > 0 ? 'disabled' : ''}`}
-            key="submission-post"
-          >
+          <span className={`text-link ${problemCount > 0 ? 'disabled' : ''}`} key="submission-post">
             Post
           </span>,
           <span
@@ -144,7 +209,7 @@ class ListItem extends React.Component<ListItemProps, any> {
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
-            onConfirm={() => SubmissionService.deleteFileSubmission(item.submission.id)}
+            onConfirm={() => SubmissionService.deleteSubmission(item.submission.id)}
           >
             <Typography.Text type="danger">Delete</Typography.Text>
           </Popconfirm>,
@@ -200,7 +265,9 @@ class ListItem extends React.Component<ListItemProps, any> {
         >
           <DatePicker
             className="w-full"
-            defaultValue={this.props.item.submission.schedule.postAt ? moment(this.state.postAt) : undefined}
+            defaultValue={
+              this.props.item.submission.schedule.postAt ? moment(this.state.postAt) : undefined
+            }
             format="YYYY-MM-DD HH:mm"
             showTime={{ format: 'HH:mm' }}
             placeholder="Unscheduled"

@@ -15,8 +15,8 @@ export default class SubmissionService {
     return axios.post(`/submission/create/${SubmissionType.FILE}`, formData);
   }
 
-  static deleteFileSubmission(id: string) {
-    axios.delete(`/submission/${id}`);
+  static deleteSubmission(id: string) {
+    return axios.delete(`/submission/${id}`);
   }
 
   static duplicate(id: string) {
