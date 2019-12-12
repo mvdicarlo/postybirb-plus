@@ -33,7 +33,8 @@ import {
   Card,
   Upload,
   Icon,
-  DatePicker
+  DatePicker,
+  Popconfirm
 } from 'antd';
 import moment from 'moment';
 
@@ -109,7 +110,6 @@ class SubmissionEditForm extends React.Component<Props, State> {
     updateParts.forEach(p => (parts[p.accountId] = p));
     const isTouched: boolean = !_.isEqual(parts, this.original.parts);
     this.setState({ parts, touched: isTouched });
-    uiStore.setPendingChanges(isTouched);
     this.checkProblems();
   };
 
@@ -147,7 +147,6 @@ class SubmissionEditForm extends React.Component<Props, State> {
             touched: false
           });
           message.success('Submission was successfully saved.');
-          uiStore.setPendingChanges(false);
         })
         .catch(() => {
           this.setState({ loading: false });
@@ -183,19 +182,23 @@ class SubmissionEditForm extends React.Component<Props, State> {
   }
 
   getWebsiteTreeData(): TreeNode[] {
-    const websiteData: { [key: string]: any } = {};
+    const websiteData: { [key: string]: TreeNode } = {};
     this.props.loginStatusStore!.statuses.forEach(status => {
       websiteData[status.website] = websiteData[status.website] || { children: [] };
       websiteData[status.website].title = status.website;
       websiteData[status.website].key = status.website;
-      websiteData[status.website].children.push({
+      websiteData[status.website].value = status.website;
+      (websiteData[status.website].children as any[]).push({
         key: status.id,
         value: status.id,
-        title: `${status.website}: ${status.alias}`
+        title: `${status.website}: ${status.alias}`,
+        isLeaf: true
       });
     });
-
-    return Object.values(websiteData);
+    console.log(websiteData);
+    return Object.values(websiteData).sort((a, b) =>
+      (a.title as string).localeCompare(b.title as string)
+    );
   }
 
   getSelectedWebsiteIds(): string[] {
@@ -270,6 +273,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   handleWebsiteSelect = (accountIds: string[]) => {
     const existingParts = Object.values(this.state.parts).map(p => p.accountId);
     const addedParts = accountIds.filter(id => !existingParts.includes(id));
+    console.log(addedParts);
 
     const removedParts = Object.values(this.state.parts)
       .filter(p => !p.isDefault)
@@ -290,9 +294,15 @@ class SubmissionEditForm extends React.Component<Props, State> {
       };
     });
 
+    const isTouched: boolean = !_.isEqual(
+      Object.values(parts).filter(p => !removedParts.includes(p.accountId)),
+      Object.values(this.original.parts)
+    );
+
     this.setState({
       removedParts,
-      parts
+      parts,
+      touched: isTouched
     });
 
     this.checkProblems();
@@ -423,8 +433,14 @@ class SubmissionEditForm extends React.Component<Props, State> {
     uiStore.setPendingChanges(false);
   }
 
+  formHasChanges(): boolean {
+    return this.state.touched || this.scheduleHasChanged();
+  }
+
   render() {
     if (!this.state.loading) {
+      uiStore.setPendingChanges(this.formHasChanges());
+
       this.defaultOptions = this.state.parts.default.data;
       const submission = this.state.submission!;
 
@@ -446,7 +462,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
         <div>
           <Spin spinning={this.state.loading} delay={500}>
             <div className="flex">
-              <Form layout="vertical" style={{ flex: 10, flexBasis: '75%' }}>
+              <Form layout="vertical" style={{ flex: 10 }}>
                 <Form.Item>
                   <Typography.Title level={3}>
                     Files
@@ -579,6 +595,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
                     multiple
                     treeCheckable={true}
                     treeDefaultExpandAll={true}
+                    treeNodeFilterProp="title"
                     allowClear={true}
                     value={this.getSelectedWebsiteIds()}
                     treeData={this.getWebsiteTreeData()}
@@ -590,7 +607,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
                 <WebsiteSections {...this.state} onUpdate={this.onUpdate.bind(this)} />
               </Form>
 
-              <div className="ml-1">
+              <div className="ml-1" style={{ maxWidth: '125px' }}>
                 <Anchor
                   onClick={this.handleNavClick}
                   getContainer={() => document.getElementById('primary-container') || window}
@@ -629,11 +646,24 @@ class SubmissionEditForm extends React.Component<Props, State> {
                 submissionType={this.state.submission!.type}
                 onPropsSelect={this.importData.bind(this)}
               />
-              <Button
-                onClick={this.onSubmit}
-                type="primary"
-                disabled={!(this.state.touched || this.scheduleHasChanged())}
+              <Popconfirm
+                disabled={!this.formHasChanges()}
+                title="Are you sure? This will revert all recent changes you have made."
+                onConfirm={() =>
+                  this.setState({
+                    parts: _.cloneDeep(this.original.parts),
+                    removedParts: [],
+                    postAt: this.original.submission.schedule.postAt,
+                    touched: false
+                  })
+                }
               >
+                <Button className="mr-1" disabled={!this.formHasChanges()}>
+                  Undo Changes
+                </Button>
+              </Popconfirm>
+
+              <Button onClick={this.onSubmit} type="primary" disabled={!this.formHasChanges()}>
                 Save
               </Button>
             </div>

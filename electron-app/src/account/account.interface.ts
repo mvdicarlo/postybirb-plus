@@ -12,4 +12,5 @@ export interface UserAccountDto {
   website: string;
   loggedIn: boolean;
   username: string;
+  data: any;
 }

@@ -1,6 +1,6 @@
 {
   "name": "electron-app",
-  "version": "0.0.1",
+  "version": "3.0.0",
   "description": "",
   "main": "main.js",
   "author": "Michael DiCarlo",

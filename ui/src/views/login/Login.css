@@ -14,3 +14,11 @@
   height: calc(100% - 55px);
   padding: 0 !important;
 }
+
+.login-card + .login-card {
+  margin-top: .5rem;
+}
+
+.login-card .ant-list-empty-text {
+  padding: 0 !important;
+}

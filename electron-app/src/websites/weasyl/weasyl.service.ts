@@ -24,7 +24,6 @@ export class Weasyl extends WebsiteService {
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
 
   readonly defaultStatusOptions: any = {};
-
   readonly defaultFileSubmissionOptions: DefaultWeasylSubmissionOptions = DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   parseDescription(text: string): string {

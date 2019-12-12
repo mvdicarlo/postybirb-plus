@@ -55,6 +55,7 @@ export class UIStore {
   setPendingChanges(pending: boolean) {
     this.state.hasPendingChanges = pending;
   }
+
 }
 
 export const uiStore = new UIStore();

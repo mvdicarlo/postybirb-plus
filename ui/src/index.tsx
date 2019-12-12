@@ -12,6 +12,9 @@ declare global {
         availableFormats: () => string[];
         read: () => File;
       };
+      shell: {
+        openInBrowser(url: string): Promise<void>;
+      }
     };
     PORT: number;
     appVersion: string;

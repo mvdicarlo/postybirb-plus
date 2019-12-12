@@ -34,6 +34,7 @@ export class AccountService {
             website: result.website,
             loggedIn: false,
             username: null,
+            data: result.data,
           });
         });
       })
@@ -71,11 +72,20 @@ export class AccountService {
       website: createAccountDto.website,
       loggedIn: false,
       username: null,
+      data: createAccountDto.data,
     });
 
     this.eventEmitter.emit(AccountEvent.CREATED, createAccountDto.id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
     this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.findAll());
+  }
+
+  async get(id: string): Promise<UserAccount> {
+    const account = await this.repository.find(id);
+    if (!account) {
+      throw new NotFoundException(`Account ${id} does not exist.`);
+    }
+    return account;
   }
 
   getAll(): Promise<UserAccount[]> {
@@ -123,16 +133,21 @@ export class AccountService {
       alias: account.alias,
       loggedIn: response.loggedIn,
       username: response.username,
+      data: account.data,
     };
 
-    this.insertOrUpdateLoginStatus(login, response.data);
+    this.insertOrUpdateLoginStatus(login);
     return login;
   }
 
-  private async insertOrUpdateLoginStatus(login: UserAccountDto, data: any): Promise<void> {
+  async setData(id: string, data: any): Promise<void> {
+    await this.get(id);
+    await this.repository.update(id, { data });
+  }
+
+  private async insertOrUpdateLoginStatus(login: UserAccountDto): Promise<void> {
     const index: number = this.loginStatuses.findIndex(s => s.id === login.id);
     this.loginStatuses[index] = login;
-    await this.repository.update(login.id, { data });
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
   }
 }

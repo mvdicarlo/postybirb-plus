@@ -65,4 +65,8 @@ ul {
   color: #666;
 }
 
+.ant-back-top {
+  right: 75px !important;
+}
+
 @tailwind utilities;

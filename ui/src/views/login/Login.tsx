@@ -32,9 +32,20 @@ export class Login extends React.Component<Props> {
   private readonly entries = Object.entries(WebsiteRegistry.websites);
 
   render() {
-    const websitesToDisplay = this.entries.filter(
-      ([key, website]) => !this.props.uiStore!.websiteFilter.includes(key)
-    );
+    const websitesToDisplay = this.entries
+      .filter(([key, website]) => !this.props.uiStore!.websiteFilter.includes(key))
+      .sort((a, b) => {
+        const aLoggedIn = this.props.loginStatusStore!.hasLoggedInAccounts(a[0]);
+        const bLoggedIn = this.props.loginStatusStore!.hasLoggedInAccounts(b[0]);
+
+        if (aLoggedIn === bLoggedIn) {
+          return a[1].name.localeCompare(b[1].name);
+        } else {
+          if (aLoggedIn && !bLoggedIn) return -1;
+          else return 1;
+        }
+      });
+
     return (
       <ConfigProvider renderEmpty={() => <div></div>}>
         <div className="h-100 w-100">
@@ -90,6 +101,7 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
     return (
       <Card
         size="small"
+        className="login-card"
         title={this.props.website.name}
         extra={
           <Button type="primary" onClick={this.showAddAccount}>
@@ -100,7 +112,9 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
         <List
           size="small"
           dataSource={this.props.accounts}
-          renderItem={item => <AccountInfo accountInfo={item} website={this.props.website} />}
+          renderItem={item => (
+            <AccountInfo accountInfo={item} data={item.data} website={this.props.website} />
+          )}
         />
         <Modal
           visible={this.state.showAddAccount}
@@ -120,6 +134,7 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
 
 interface AccountInfoProps {
   accountInfo: UserAccountDto;
+  data: any;
   website: Website;
 }
 
@@ -142,7 +157,8 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
   render() {
     const { accountInfo } = this.props;
     const LoginDialog = this.props.website.LoginDialog({
-      account: this.props.accountInfo
+      account: this.props.accountInfo,
+      data: this.props.accountInfo.data
     });
     return (
       <List.Item

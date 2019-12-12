@@ -1,4 +1,4 @@
-const { remote, clipboard } = require('electron');
+const { remote, clipboard, shell } = require('electron');
 const { app } = remote;
 
 window.PORT = remote.getCurrentWindow().PORT;
@@ -12,5 +12,10 @@ window.electron = {
             const blob = new Blob([arr], { type: 'image/png' });
             return new File([blob], 'Clipboard Image', { lastModified: Date.now() , type: 'image/png' });
         }
+    },
+    shell: {
+        openInBrowser(url) {
+            return shell.openExternal(url);
+        }
     }
-}
+};

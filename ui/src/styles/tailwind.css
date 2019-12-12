@@ -107,6 +107,10 @@ ul {
   color: #666;
 }
 
+.ant-back-top {
+  right: 75px !important;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

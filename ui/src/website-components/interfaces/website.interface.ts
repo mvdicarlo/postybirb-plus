@@ -5,6 +5,7 @@ import { FileSubmissionSectionProps } from '../../views/submissions/interfaces/f
 export interface LoginDialogProps {
     account: UserAccountDto;
     url?: string;
+    data?: any;
 }
 
 export interface Website {
