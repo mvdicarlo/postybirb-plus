@@ -47,6 +47,7 @@ if (!settings.getState().useHardwareAcceleration || !(process.platform === 'win3
 }
 
 app.on('second-instance', show);
+app.on('activate', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
     nest = require('./dist/main');
