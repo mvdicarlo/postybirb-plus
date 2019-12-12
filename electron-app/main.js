@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs-extra');
 const {
     app,
     BrowserWindow,
@@ -26,6 +27,7 @@ let nest;
 
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
 
+fs.ensureFileSync(`${BASE_DIRECTORY}/data/settings.json`);
 const adapter = new FileSync(`${BASE_DIRECTORY}/data/settings.json`);
 const settings = low(adapter);
 settings.defaults({
@@ -118,7 +120,8 @@ function buildAppImage() {
             height: 16,
         });
     }
-    image.setTemplateImage(true);
+
+    // image.setTemplateImage(true);
     return image;
 }
 
@@ -132,8 +135,6 @@ function buildTray(image) {
         {
             label: 'Quit',
             click() {
-                console.log('me')
-                processes.forEach(proc => proc.kill());
                 app.quit();
             },
         },
