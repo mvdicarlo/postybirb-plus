@@ -11,7 +11,7 @@ const log = require('electron-log');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync')
 
-process.env.PORT = 9247;
+process.env.PORT = process.env.PORT || 9247;
 process.env.DEVMODE = !!process.argv.find(
     arg => arg === '-d' || arg === '--develop',
 );

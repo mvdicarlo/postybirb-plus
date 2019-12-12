@@ -8,6 +8,7 @@ interface UIState {
   navCollapsed: boolean;
   websiteFilter: string[];
   hasPendingChanges: boolean;
+  remoteURI?: string;
 }
 
 export class UIStore {
@@ -54,6 +55,11 @@ export class UIStore {
   @action
   setPendingChanges(pending: boolean) {
     this.state.hasPendingChanges = pending;
+  }
+
+  @action
+  setRemoteURI(uri: string) {
+    this.state.remoteURI = uri;
   }
 
 }

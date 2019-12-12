@@ -195,7 +195,6 @@ class SubmissionEditForm extends React.Component<Props, State> {
         isLeaf: true
       });
     });
-    console.log(websiteData);
     return Object.values(websiteData).sort((a, b) =>
       (a.title as string).localeCompare(b.title as string)
     );
@@ -273,7 +272,6 @@ class SubmissionEditForm extends React.Component<Props, State> {
   handleWebsiteSelect = (accountIds: string[]) => {
     const existingParts = Object.values(this.state.parts).map(p => p.accountId);
     const addedParts = accountIds.filter(id => !existingParts.includes(id));
-    console.log(addedParts);
 
     const removedParts = Object.values(this.state.parts)
       .filter(p => !p.isDefault)
