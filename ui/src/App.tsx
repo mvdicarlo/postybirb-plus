@@ -8,6 +8,8 @@ import { loginStatusStore } from './stores/login-status.store';
 import { tagGroupStore } from './stores/tag-group.store';
 import { settingsStore } from './stores/settings.store';
 import { descriptionTemplateStore } from './stores/description-template.store';
+import { updateStore } from './stores/update.store';
+
 export default class App extends React.Component {
   render() {
     return (
@@ -19,6 +21,7 @@ export default class App extends React.Component {
         tagGroupStore={tagGroupStore}
         descriptionTemplateStore={descriptionTemplateStore}
         settingsStore={settingsStore}
+        updateStore={updateStore}
       >
         <AppLayout></AppLayout>
       </Provider>
