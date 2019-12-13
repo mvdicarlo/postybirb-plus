@@ -2,7 +2,8 @@
   margin-bottom: 1em;
 }
 
-.submission-list .ant-list-items {
+.submission-list .ant-light-list-items,
+.submission-list .ant-dark-list-items  {
   max-height: 50vh;
   overflow: auto;
 }

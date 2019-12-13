@@ -1,4 +1,5 @@
-.login-modal .ant-modal {
+.login-modal .ant-light-modal,
+.login-modal .ant-dark-modal {
   padding: 0;
   margin: 0;
   top: 0 !important;
@@ -6,11 +7,13 @@
   height: 100vh;
 }
 
-.login-modal .ant-modal-content {
+.login-modal .ant-light-modal-content,
+.login-modal .ant-dark-modal-content {
   height: 100%;
 }
 
-.login-modal .ant-modal-body {
+.login-modal .ant-light-modal-body,
+.login-modal .ant-dark-modal-body {
   height: calc(100% - 55px);
   padding: 0 !important;
 }
@@ -19,6 +22,8 @@
   margin-top: .5rem;
 }
 
-.login-card .ant-list-empty-text {
+.login-card .ant-light-list-empty-text,
+.login-card .ant-dark-list-empty-text {
   padding: 0 !important;
+  display: none;
 }

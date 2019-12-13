@@ -5,7 +5,6 @@ import { DescriptionTemplateStore } from '../../stores/description-template.stor
 import DescriptionTemplateService from '../../services/description-template.service';
 import { Empty, Button, Form, message, Spin, Card, Input, Icon, Popconfirm } from 'antd';
 import { DescriptionTemplate } from '../../../../electron-app/src/description-template/description-template.interface';
-import TextArea from 'antd/lib/input/TextArea';
 import DescriptionInput from '../submissions/form-components/DescriptionInput';
 
 interface Props {
@@ -140,8 +139,8 @@ class DescriptionTemplateEditor extends React.Component<EditorProps, EditorState
               ]}
             >
               <Form.Item label="Info">
-                <TextArea
-                  rows={2}
+                <Input
+                  className="w-full"
                   defaultValue={this.state.template.description}
                   onBlur={this.handleStringChange.bind(this, 'description')}
                 />

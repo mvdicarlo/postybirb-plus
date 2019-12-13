@@ -5,7 +5,6 @@ import { headerStore } from '../../stores/header.store';
 import { SubmissionStore } from '../../stores/submission.store';
 import { inject, observer } from 'mobx-react';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
-import './SubmissionsView.css';
 
 import { Upload, Icon, message, Tabs, Button, Badge } from 'antd';
 import SubmissionService from '../../services/submission.service';
@@ -112,10 +111,10 @@ export default class SubmissionView extends React.Component<Props, State> {
             />
             <div className="uploader">
               <Dragger {...this.uploadProps}>
-                <p className="ant-upload-drag-icon">
+                <p className="ant-light-upload-drag-icon ant-dark-upload-drag-icon">
                   <Icon type="inbox" />
                 </p>
-                <p className="ant-upload-text">
+                <p className="ant-light-upload-text ant-dark-upload-text">
                   Click or drag file to this area to create a submission
                 </p>
               </Dragger>

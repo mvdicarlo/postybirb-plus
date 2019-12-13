@@ -2,9 +2,8 @@
 
 @tailwind components;
 
-.form-action-bar {
-  margin: 0 -.75rem;
-  @apply shadow py-2 px-3 text-right z-10 sticky bg-white bottom-0;
+ul {
+  margin-bottom: 0;
 }
 
 .disabled {
@@ -22,8 +21,25 @@
   color: #096dd9;
 }
 
-.primary-layout-container {
+.form-action-bar {
+  margin: 0 -.75rem;
+  @apply shadow py-2 px-3 text-right z-10 sticky bottom-0;
+}
+
+.ant-light-layout .form-action-bar {
+  @apply bg-white;
+}
+
+.ant-dark-layout .form-action-bar {
+  background-color: #141414;
+}
+
+.ant-light-layout .primary-layout-container {
   background-color: white;
+}
+
+.ant-dark-layout .primary-layout-container {
+  background-color: #141414;
 }
 
 .full-size-spinner {
@@ -34,38 +50,41 @@
   @apply h-full w-full;
 }
 
-.ant-form-item {
+.ant-light-form-item,
+.ant-dark-form-item {
   margin-bottom: 0px;
 }
 
-.ant-form-item + .ant-form-item {
+.ant-light-form-item + .ant-light-form-item,
+.ant-dark-form-item + .ant-dark-form-item {
   margin-top: 10px;
 }
 
-.ant-drawer-header {
-  @apply z-10 sticky bg-white top-0;
+.ant-light-drawer-header,
+.ant-dark-drawer-header {
+  @apply z-10 sticky top-0;
 }
 
-.ant-card-cover {
+.ant-light-card-cover,
+.ant-dark-card-cover {
   max-width: 250px;
   margin: auto;
 }
 
-ul {
-  margin-bottom: 0;
-}
-
-.ant-upload-select-picture-card i {
+.ant-light-upload-select-picture-card i,
+.ant-dark-upload-select-picture-card i {
   font-size: 32px;
   color: #999;
 }
 
-.ant-upload-select-picture-card .ant-upload-text {
+.ant-light-upload-select-picture-card .ant-light-upload-text,
+.ant-dark-upload-select-picture-card .ant-dark-upload-text {
   margin-top: 8px;
   color: #666;
 }
 
-.ant-back-top {
+.ant-dark-back-top,
+.ant-dark-back-top {
   right: 75px !important;
 }
 

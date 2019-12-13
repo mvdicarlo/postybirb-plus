@@ -1,9 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './styles/tailwind.css';
 import App from './App';
 import { HashRouter as Router } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
+
+import './styles/light.css';
+import './styles/dark.css';
+import './styles/submission.css';
+import './styles/scrollbar.css';
+import './styles/tailwind.css';
 
 declare global {
   interface Window {

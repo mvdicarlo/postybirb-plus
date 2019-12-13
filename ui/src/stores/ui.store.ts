@@ -3,7 +3,7 @@ import { observable, action, autorun, computed } from 'mobx';
 const STORE_KEY: string = 'UIState';
 
 interface UIState {
-  theme: 'light' | 'dark' | undefined;
+  theme: 'light' | 'dark';
   navId: number;
   navCollapsed: boolean;
   websiteFilter: string[];
@@ -13,7 +13,7 @@ interface UIState {
 
 export class UIStore {
   @observable state: UIState = {
-    theme: 'dark',
+    theme: 'light',
     navId: 0,
     navCollapsed: false,
     websiteFilter: [],
@@ -38,7 +38,7 @@ export class UIStore {
   }
 
   @action
-  changeTheme(theme: 'light' | 'dark' | undefined) {
+  changeTheme(theme: 'light' | 'dark') {
     this.state.theme = theme;
   }
 

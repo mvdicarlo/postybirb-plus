@@ -8,24 +8,30 @@
   font-size: 1.5em;
 }
 
-.ant-layout-sider-collapsed .logo {
+.ant-light-layout-sider-collapsed .logo,
+.ant-dark-layout-sider-collapsed .logo {
   color: transparent;
   background-position: center;
   font-size: 0 !important;
 }
 
-.ant-page-header,
-.ant-page-header-content {
-  padding: 0;
+.ant-light-page-header,
+.ant-light-page-header-content,
+.ant-dark-page-header,
+.ant-dark-page-header-content {
+  padding: 0 !important;
 }
 
 .header {
   position: sticky;
   top: 0;
-  z-index: 1000;
-  background-color: #f0f2f5;
+  z-index: 20;
 }
 
-.header > * {
+.ant-light-layout .header > * {
   border-bottom: 1px solid #e0e0e0;
+}
+
+.ant-dark-layout .header > * {
+  border-bottom: 1px solid #030303;
 }

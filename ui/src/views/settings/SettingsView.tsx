@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { SettingsStore } from '../../stores/settings.store';
 import SettingsService from '../../services/settings.service';
 import { Settings } from '../../../../electron-app/src/settings/interfaces/settings.interface';
-import { Form, Collapse, Switch, Tooltip, InputNumber, Input } from 'antd';
+import { Form, Collapse, Switch, Tooltip, InputNumber, Input, Radio } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 
 interface Props {
@@ -23,7 +23,7 @@ export default class SettingsView extends React.Component<Props> {
     const settings = this.props.settingsStore!.settings;
     return (
       <Form layout="vertical">
-        <Collapse bordered={false} defaultActiveKey={['1', '2', '3', '4', '5']}>
+        <Collapse bordered={false}>
           <Collapse.Panel header="Posting" key="1">
             <Form.Item label="Help Advertise Postybirb">
               <Tooltip
@@ -69,8 +69,16 @@ export default class SettingsView extends React.Component<Props> {
               </Tooltip>
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Data" key="2">
-            No settings yet.
+          <Collapse.Panel header="Display" key="2">
+            <Form.Item label="Theme">
+              <Radio.Group
+                value={this.props.uiStore!.state.theme}
+                onChange={value => this.props.uiStore!.changeTheme(value.target.value)}
+              >
+                <Radio.Button value="light">Light</Radio.Button>
+                <Radio.Button value="dark">Dark</Radio.Button>
+              </Radio.Group>
+            </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Performance" key="3">
             <Form.Item label="Use hardware acceleration">
@@ -115,9 +123,7 @@ export default class SettingsView extends React.Component<Props> {
               <Tooltip title="Remote URI">
                 <Input
                   defaultValue={this.props.uiStore!.state.remoteURI}
-                  onBlur={({ target }) =>
-                    this.props.uiStore!.setRemoteURI(target.value)
-                  }
+                  onBlur={({ target }) => this.props.uiStore!.setRemoteURI(target.value)}
                   placeholder={`http://localhost:${window.PORT}`}
                 />
               </Tooltip>

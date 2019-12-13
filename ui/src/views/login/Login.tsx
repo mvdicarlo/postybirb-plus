@@ -14,7 +14,6 @@ import {
   Modal,
   Input,
   message,
-  ConfigProvider,
   Popconfirm,
   Icon,
   Typography,
@@ -47,19 +46,17 @@ export class Login extends React.Component<Props> {
       });
 
     return (
-      <ConfigProvider renderEmpty={() => <div></div>}>
-        <div className="h-100 w-100">
-          {websitesToDisplay.map(([key, website]) => (
-            <LoginPanel
-              key={key}
-              website={website}
-              accounts={this.props.loginStatusStore!.statuses.filter(
-                status => status.website === website.name
-              )}
-            />
-          ))}
-        </div>
-      </ConfigProvider>
+      <div className="h-100 w-100">
+        {websitesToDisplay.map(([key, website]) => (
+          <LoginPanel
+            key={key}
+            website={website}
+            accounts={this.props.loginStatusStore!.statuses.filter(
+              status => status.website === website.name
+            )}
+          />
+        ))}
+      </div>
     );
   }
 }

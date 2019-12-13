@@ -547,7 +547,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
                         {(this.state.submission!.additional || []).length < 8 ? (
                           <div>
                             <Icon type="plus" />
-                            <div className="ant-upload-text">Add</div>
+                            <div className="ant-light-upload-text ant-dark-upload-text">Add</div>
                           </div>
                         ) : null}
                       </Upload>
