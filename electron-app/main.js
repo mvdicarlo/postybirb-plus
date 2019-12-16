@@ -13,7 +13,8 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync')
 
 process.env.PORT = process.env.PORT || 9247;
-process.env.DEVMODE = !!process.argv.find(
+
+global.DEBUG_MODE = !!process.argv.find(
     arg => arg === '-d' || arg === '--develop',
 );
 
@@ -88,7 +89,7 @@ async function initialize() {
         icon: path.join(__dirname, '/build/assets/icons/minnowicon.png'),
         title: 'PostyBirb',
         webPreferences: {
-            devTools: process.env.DEVMODE,
+            devTools: global.DEBUG_MODE,
             allowRunningInsecureContent: false,
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js'),
@@ -99,7 +100,7 @@ async function initialize() {
     });
 
     window.PORT = process.env.PORT;
-    if (process.env.DEVMODE) {
+    if (global.DEBUG_MODE) {
         window.webContents.openDevTools();
     } else {
         mainWindowState.manage(window);

@@ -3,11 +3,12 @@ import { EventsGateway } from 'src/events/events.gateway';
 import { autoUpdater } from 'electron-updater';
 import { BrowserWindow } from 'electron';
 import * as logger from 'electron-log';
+import { AppGlobal } from 'src/app-global.interface';
 
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
   BLOCKED = '[UPDATE] BLOCKED RESTART',
-  ERROR = '[UPDATE] ERROR'
+  ERROR = '[UPDATE] ERROR',
 }
 
 interface UpdateInfo {
@@ -22,7 +23,7 @@ interface UpdateInfo {
 @Injectable()
 export class UpdateService {
   private readonly logger: Logger = new Logger(UpdateService.name);
-  private DEBUG_MODE: boolean = !!process.env.DEVMODE;
+  private DEBUG_MODE: boolean = (global as AppGlobal).DEBUG_MODE;
 
   private isUpdating: boolean = false;
   private updateAvailable: UpdateInfo = {
@@ -38,12 +39,15 @@ export class UpdateService {
     logger.transports.file.level = 'info';
     autoUpdater.logger = logger;
     autoUpdater.autoDownload = false;
+    autoUpdater.fullChangelog = true;
 
     autoUpdater.on('checking-for-update', () => this.logger.log('Checking for update...'));
 
     autoUpdater.on('update-available', info => {
       this.updateAvailable.available = true;
-      this.updateAvailable.releaseNotes = info.releaseNotes;
+      this.updateAvailable.releaseNotes = info.releaseNotes.map(
+        note => `<h2>${note.version}</h2>${note.note}`,
+      );
       this.updateAvailable.version = info.version;
       this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
     });
