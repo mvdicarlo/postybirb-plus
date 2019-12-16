@@ -13,6 +13,7 @@ import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
 import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider } from 'antd';
 import DescriptionTemplates from '../description-templates/DescriptionTemplates';
+import AppUpdate from '../update/AppUpdate';
 
 const { Content, Sider } = Layout;
 
@@ -81,17 +82,23 @@ export default class App extends React.Component<Props, State> {
           }}
         >
           <Sider collapsible collapsed={state.navCollapsed} onCollapse={this.handleCollapsedChange}>
-            <Link to="/">
-              <div
-                className="logo"
-                style={{
-                  backgroundImage: `url("${process.env.PUBLIC_URL}/assets/icons/minnowicon.png")`
-                }}
-              >
-                PostyBirb
-                <span className="text-xs">{window.appVersion}</span>
+            <div>
+              <Link to="/">
+                <div
+                  className="logo"
+                  style={{
+                    backgroundImage: `url("${process.env.PUBLIC_URL}/assets/icons/minnowicon.png")`
+                  }}
+                >
+                  PostyBirb
+                  <span className="text-xs">{window.appVersion}</span>
+                </div>
+              </Link>
+              <div className="text-center mx-1">
+                <AppUpdate />
               </div>
-            </Link>
+            </div>
+
             <Menu
               mode="inline"
               theme="dark"

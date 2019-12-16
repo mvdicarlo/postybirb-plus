@@ -2,19 +2,23 @@ import socket from '../utils/websocket';
 import { observable, action } from 'mobx';
 import UpdateService from '../services/update.service';
 import { notification } from 'antd';
+import React from 'react';
 
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
   BLOCKED = '[UPDATE] BLOCKED RESTART',
   ERROR = '[UPDATE] ERROR',
-  PROGRESS = '[UPDATE] PROGRESS'
+  PROGRESS = '[UPDATE] PROGRESS',
+  UPDATING = '[UPDATE] UPDATING'
 }
 
 interface UpdateState {
-  percent: number;
-  releaseNotes: string;
   available: boolean;
   error: string;
+  isUpdating: boolean;
+  percent: number;
+  releaseNotes: string;
+  version: string;
 }
 
 export class UpdateStore {
@@ -22,7 +26,9 @@ export class UpdateStore {
     available: false,
     error: '',
     percent: 0,
-    releaseNotes: ''
+    releaseNotes: '',
+    isUpdating: false,
+    version: ''
   };
 
   constructor() {
@@ -35,11 +41,7 @@ export class UpdateStore {
 
   @action
   updateAvailable(data: any) {
-    Object.assign(this.state, {
-      ...data,
-      percent: 0,
-      error: ''
-    });
+    Object.assign(this.state, data);
   }
 
   @action
@@ -51,6 +53,11 @@ export class UpdateStore {
   setPercent(percent: number) {
     this.state.percent = percent || 0;
   }
+
+  @action
+  setUpdating(isUpdating: boolean) {
+    this.state.isUpdating = isUpdating;
+  }
 }
 
 export const updateStore = new UpdateStore();
@@ -59,7 +66,24 @@ socket.on(UpdateEvent.AVAILABLE, (data: any) => updateStore.updateAvailable(data
 
 socket.on(UpdateEvent.PROGRESS, (percent: number) => updateStore.setPercent(percent));
 
-socket.on(UpdateEvent.ERROR, (err: string) => updateStore.setError(err));
+socket.on(UpdateEvent.ERROR, (err: string) => {
+  updateStore.setError(err);
+  notification.error({
+    message: 'PostyBirb Update Failed',
+    description: (
+      <div>
+        <div className="mb-6">
+          PostyBirb Failed to Update.
+          <br />
+          It is suggested that you go to the website and update using the latest download.
+        </div>
+        <div>{err}</div>
+      </div>
+    )
+  });
+});
+
+socket.on(UpdateEvent.UPDATING, (isUpdating: boolean) => updateStore.setUpdating(isUpdating));
 
 socket.on(UpdateEvent.BLOCKED, () => {
   notification.warning({

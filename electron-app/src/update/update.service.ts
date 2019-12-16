@@ -9,13 +9,32 @@ enum UpdateEvent {
   BLOCKED = '[UPDATE] BLOCKED RESTART',
   ERROR = '[UPDATE] ERROR',
   PROGRESS = '[UPDATE] PROGRESS',
+  UPDATING = '[UPDATE] UPDATING',
+}
+
+interface UpdateInfo {
+  available: boolean;
+  error: string;
+  isUpdating: boolean;
+  percent: number;
+  releaseNotes: string;
+  version: string;
 }
 
 @Injectable()
 export class UpdateService {
   private readonly logger: Logger = new Logger(UpdateService.name);
-  private updateAvailable: any;
   private DEBUG_MODE: boolean = !!process.env.DEVMODE;
+
+  private isUpdating: boolean = false;
+  private updateAvailable: UpdateInfo = {
+    available: false,
+    error: '',
+    isUpdating: false,
+    percent: 0,
+    releaseNotes: '',
+    version: '',
+  };
 
   constructor(private readonly eventEmitter: EventsGateway) {
     logger.transports.file.level = 'info';
@@ -25,11 +44,9 @@ export class UpdateService {
     autoUpdater.on('checking-for-update', () => this.logger.log('Checking for update...'));
 
     autoUpdater.on('update-available', info => {
-      this.updateAvailable = true;
-      this.updateAvailable = {
-        releaseNotes: info.releaseNotes,
-        version: info.version,
-      };
+      this.updateAvailable.available = true;
+      this.updateAvailable.releaseNotes = info.releaseNotes;
+      this.updateAvailable.version = info.version;
       this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
     });
 
@@ -39,14 +56,23 @@ export class UpdateService {
     });
 
     autoUpdater.on('error', err => {
+      this.isUpdating = false;
+      this.updateAvailable.isUpdating = false;
+      this.updateAvailable.error = err;
+      this.updateAvailable.percent = 0;
+
       logger.error(err);
       this.logger.error(err);
+
+      this.eventEmitter.emit(UpdateEvent.UPDATING, false);
       this.eventEmitter.emit(UpdateEvent.ERROR, err);
-      this.updateAvailable.error = err;
     });
 
     autoUpdater.on('update-downloaded', () => {
       this.eventEmitter.emit(UpdateEvent.PROGRESS, 100);
+      this.updateAvailable.percent = 100;
+      this.updateAvailable.isUpdating = false;
+      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
       // TODO need to check for posting status
       const isPosting: boolean = false;
       if (!isPosting) {
@@ -73,6 +99,10 @@ export class UpdateService {
       throw new BadRequestException('No update available');
     }
 
+    if (this.isUpdating) {
+      throw new BadRequestException('Already updating');
+    }
+
     // TODO need to check for posting status
     const isPosting: boolean = false;
     if (isPosting) {
@@ -81,11 +111,16 @@ export class UpdateService {
     }
 
     this.logger.log('Updating PostyBirb...');
+
+    this.isUpdating = true;
+    this.updateAvailable.isUpdating = true;
+
+    this.eventEmitter.emit(UpdateEvent.UPDATING, true);
     autoUpdater.downloadUpdate();
   }
 
   private checkForUpdate() {
-    if (this.updateAvailable || this.DEBUG_MODE) {
+    if (this.updateAvailable.available || this.DEBUG_MODE || this.isUpdating) {
       return;
     }
 

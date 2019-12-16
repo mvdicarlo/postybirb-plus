@@ -8,6 +8,19 @@
   font-size: 1.5em;
 }
 
+.update .ant-light-progress-text,
+.update .ant-dark-progress-text {
+  color: hsla(0, 0%, 100%, 0.65) !important;
+}
+
+.ant-light-modal-body .release-notes * {
+  color: rgba(0,0,0,.85);
+}
+
+.ant-dark-modal-body .release-notes * {
+  color: hsla(0,0%,100%,.85);
+}
+
 .ant-light-layout-sider-collapsed .logo,
 .ant-dark-layout-sider-collapsed .logo {
   color: transparent;

@@ -16,7 +16,6 @@ import { SubmissionRepository } from './submission/submission.repository';
 import { SettingsModule } from './settings/settings.module';
 import { DescriptionTemplateModule } from './description-template/description-template.module';
 import { UpdateModule } from './update/update.module';
-import { AppGlobal } from './app-global.interface';
 
 @Module({
   imports: [
