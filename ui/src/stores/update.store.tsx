@@ -7,9 +7,7 @@ import React from 'react';
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
   BLOCKED = '[UPDATE] BLOCKED RESTART',
-  ERROR = '[UPDATE] ERROR',
-  PROGRESS = '[UPDATE] PROGRESS',
-  UPDATING = '[UPDATE] UPDATING'
+  ERROR = '[UPDATE] ERROR'
 }
 
 interface UpdateState {
@@ -49,22 +47,11 @@ export class UpdateStore {
     this.state.error = err || '';
   }
 
-  @action
-  setPercent(percent: number) {
-    this.state.percent = percent || 0;
-  }
-
-  @action
-  setUpdating(isUpdating: boolean) {
-    this.state.isUpdating = isUpdating;
-  }
 }
 
 export const updateStore = new UpdateStore();
 
 socket.on(UpdateEvent.AVAILABLE, (data: any) => updateStore.updateAvailable(data));
-
-socket.on(UpdateEvent.PROGRESS, (percent: number) => updateStore.setPercent(percent));
 
 socket.on(UpdateEvent.ERROR, (err: string) => {
   updateStore.setError(err);
@@ -82,8 +69,6 @@ socket.on(UpdateEvent.ERROR, (err: string) => {
     )
   });
 });
-
-socket.on(UpdateEvent.UPDATING, (isUpdating: boolean) => updateStore.setUpdating(isUpdating));
 
 socket.on(UpdateEvent.BLOCKED, () => {
   notification.warning({

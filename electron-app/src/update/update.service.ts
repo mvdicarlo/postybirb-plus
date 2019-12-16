@@ -7,9 +7,7 @@ import * as logger from 'electron-log';
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
   BLOCKED = '[UPDATE] BLOCKED RESTART',
-  ERROR = '[UPDATE] ERROR',
-  PROGRESS = '[UPDATE] PROGRESS',
-  UPDATING = '[UPDATE] UPDATING',
+  ERROR = '[UPDATE] ERROR'
 }
 
 interface UpdateInfo {
@@ -51,8 +49,8 @@ export class UpdateService {
     });
 
     autoUpdater.on('download-progress', ({ percent }) => {
-      this.eventEmitter.emit(UpdateEvent.PROGRESS, percent);
       this.updateAvailable.percent = percent;
+      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
     });
 
     autoUpdater.on('error', err => {
@@ -64,12 +62,11 @@ export class UpdateService {
       logger.error(err);
       this.logger.error(err);
 
-      this.eventEmitter.emit(UpdateEvent.UPDATING, false);
+      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
       this.eventEmitter.emit(UpdateEvent.ERROR, err);
     });
 
     autoUpdater.on('update-downloaded', () => {
-      this.eventEmitter.emit(UpdateEvent.PROGRESS, 100);
       this.updateAvailable.percent = 100;
       this.updateAvailable.isUpdating = false;
       this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
@@ -115,7 +112,7 @@ export class UpdateService {
     this.isUpdating = true;
     this.updateAvailable.isUpdating = true;
 
-    this.eventEmitter.emit(UpdateEvent.UPDATING, true);
+    this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
     autoUpdater.downloadUpdate();
   }
 
