@@ -106,29 +106,6 @@ export default class SettingsView extends React.Component<Props> {
               />
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Remote" key="6">
-            <Form.Item
-              label="Remote PostyBirb (requires restart)"
-              extra={
-                <p>
-                  URI for PostyBirb to use for API calls.
-                  <br />
-                  SHOULD ONLY BE USED FOR CONNECTING TO A POSTYBIRB ON A REMOTE SERVER.
-                  <br />
-                  HTTPS SHOULD BE ENFORCED BY SERVER AS THIS MAY EXPOSE OAUTH DATA KEYS ACROSS
-                  UNENCRYPTED CHANNELS.
-                </p>
-              }
-            >
-              <Tooltip title="Remote URI">
-                <Input
-                  defaultValue={this.props.uiStore!.state.remoteURI}
-                  onBlur={({ target }) => this.props.uiStore!.setRemoteURI(target.value)}
-                  placeholder={`http://localhost:${window.PORT}`}
-                />
-              </Tooltip>
-            </Form.Item>
-          </Collapse.Panel>
         </Collapse>
       </Form>
     );
