@@ -11,7 +11,7 @@ import SettingsView from '../settings/SettingsView';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
-import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider } from 'antd';
+import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider, Modal, Tabs } from 'antd';
 import DescriptionTemplates from '../description-templates/DescriptionTemplates';
 import AppUpdate from '../update/AppUpdate';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
@@ -124,6 +124,42 @@ export default class App extends React.Component<Props, State> {
     const state = uiStore!.state;
     return (
       <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>
+        <Modal
+          title="User Agreement"
+          visible={!this.props.uiStore!.state.agreementAccepted}
+          destroyOnClose={true}
+          maskClosable={false}
+          closable={false}
+          cancelText="No"
+          onOk={() => this.props.uiStore!.agreementAccepted()}
+          onCancel={window.electron.kill}
+        >
+          <Tabs>
+            <Tabs.TabPane tab="Terms of Use" key="tou">
+              <p>
+                By using PostyBirb you agree to the Terms of Service and Rules of the websites that
+                you are posting to.
+              </p>
+              <p>
+                <strong>You are responsible for everything you post.</strong>
+              </p>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="License" key="license">
+              <p className="text-justify">
+                THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+                EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+                OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+                SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+                INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+                TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+                BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+                CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+                ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+                DAMAGE.
+              </p>
+            </Tabs.TabPane>
+          </Tabs>
+        </Modal>
         <Layout
           style={{
             height: '100vh'

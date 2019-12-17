@@ -17,5 +17,6 @@ window.electron = {
         openInBrowser(url) {
             return shell.openExternal(url);
         }
-    }
+    },
+    kill: () => app.quit()
 };

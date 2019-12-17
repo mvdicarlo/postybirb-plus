@@ -19,7 +19,8 @@ declare global {
       };
       shell: {
         openInBrowser(url: string): Promise<void>;
-      }
+      };
+      kill: () => void;
     };
     PORT: number;
     appVersion: string;

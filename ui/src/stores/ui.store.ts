@@ -3,20 +3,22 @@ import { observable, action, autorun, computed } from 'mobx';
 const STORE_KEY: string = 'UIState';
 
 interface UIState {
-  theme: 'light' | 'dark';
-  navId: number;
-  navCollapsed: boolean;
-  websiteFilter: string[];
+  agreementAccepted: boolean;
   hasPendingChanges: boolean;
+  navCollapsed: boolean;
+  navId: number;
+  theme: 'light' | 'dark';
+  websiteFilter: string[];
 }
 
 export class UIStore {
   @observable state: UIState = {
-    theme: 'light',
-    navId: 0,
+    agreementAccepted: false,
+    hasPendingChanges: false,
     navCollapsed: false,
+    navId: 0,
+    theme: 'light',
     websiteFilter: [],
-    hasPendingChanges: false
   };
 
   constructor() {
@@ -54,6 +56,11 @@ export class UIStore {
   @action
   setPendingChanges(pending: boolean) {
     this.state.hasPendingChanges = pending;
+  }
+
+  @action
+  agreementAccepted() {
+    this.state.agreementAccepted = true;
   }
 
 }
