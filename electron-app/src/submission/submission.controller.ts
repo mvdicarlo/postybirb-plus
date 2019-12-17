@@ -48,7 +48,7 @@ export class SubmissionController {
 
   @Post('create/:type')
   @UseInterceptors(FileInterceptor('file'))
-  async create(@UploadedFile() file, @Param('type') type: SubmissionType, @Query() query) {
+  async create(@UploadedFile() file, @Param('type') type: SubmissionType, @Query() query: any) {
     return this.service.create({
       type,
       data: {

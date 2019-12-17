@@ -115,25 +115,27 @@ export default class ImportDataSelect extends React.Component<Props, State> {
                 <Select.OptGroup label="Submissions">
                   {_.sortBy(
                     this.props.submissionStore!.all.filter(
-                      s => s.submission.id !== this.props.ignoreId
+                      s =>
+                        s.submission.id !== this.props.ignoreId &&
+                        s.submission.type === this.props.submissionType
                     ),
-                    s => SubmissionUtil.getFileSubmissionTitle(s)
+                    s => SubmissionUtil.getSubmissionTitle(s)
                   ).map(s => (
                     <Select.Option value={s.submission.id}>
-                      {SubmissionUtil.getFileSubmissionTitle(s)}
+                      {SubmissionUtil.getSubmissionTitle(s)}
                     </Select.Option>
                   ))}
                 </Select.OptGroup>
               </Select>
             </Form.Item>
 
-            <Form.Item label="Data To Import">
+            <Form.Item label="Sections To Import">
               <TreeSelect
                 allowClear={true}
                 disabled={!this.state.selected}
                 multiple={true}
                 onChange={value => this.setState({ selectedFields: value })}
-                style={{ width: '100%' }}
+                className="w-full"
                 treeCheckable={true}
                 treeData={this.getFieldTree()}
                 treeDefaultExpandAll={true}

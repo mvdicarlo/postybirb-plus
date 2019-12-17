@@ -37,7 +37,7 @@ export abstract class WebsiteService implements Website {
     switch (submissionType) {
       case SubmissionType.FILE:
         return _.cloneDeep(this.defaultFileSubmissionOptions);
-      case SubmissionType.STATUS:
+      case SubmissionType.NOTIFICATION:
         return _.cloneDeep(this.defaultStatusOptions);
     }
   }

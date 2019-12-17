@@ -4,13 +4,14 @@ import {
   DefaultOptions,
   SubmissionPart
 } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
-import { FileSubmissionSectionProps } from '../interfaces/file-submission-section.interface';
+import { SubmissionSectionProps } from '../interfaces/submission-section.interface';
 import TagInput from '../form-components/TagInput';
 import DescriptionInput from '../form-components/DescriptionInput';
 import { Form, Input, Radio, Alert } from 'antd';
+import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
 
 export default class DefaultFormSection extends React.Component<
-  FileSubmissionSectionProps<DefaultOptions>
+  SubmissionSectionProps<Submission, DefaultOptions>
 > {
   handleChange(fieldName: string, { target }) {
     const part: SubmissionPart<DefaultOptions> = _.cloneDeep(this.props.part);

@@ -1,14 +1,17 @@
 import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmissionSectionProps } from '../../views/submissions/interfaces/file-submission-section.interface';
+import {
+  SubmissionSectionProps
+} from '../../views/submissions/interfaces/submission-section.interface';
 import { DefaultDiscordSubmissionOptions } from '../../../../electron-app/src/websites/discord/discord.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
 import { SubmissionPart } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Alert, Form, Input, Checkbox } from 'antd';
 import DiscordLogin from './DiscordLogin';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 
 const defaultOptions: DefaultDiscordSubmissionOptions = {
   embed: true,
@@ -27,39 +30,25 @@ const defaultOptions: DefaultDiscordSubmissionOptions = {
 
 export class Discord implements Website {
   name: string = 'Discord';
-  LoginDialog = (props: LoginDialogProps) => (
-    <DiscordLogin {...props} />
-  );
+  LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
-  FileSubmissionForm = (props: FileSubmissionSectionProps<any>) => (
-    <DiscordFileSubmissionForm key={props.part.accountId} {...props} />
-  );
+  FileSubmissionForm = (
+    props: SubmissionSectionProps<FileSubmission, DefaultDiscordSubmissionOptions>
+  ) => <DiscordFileSubmissionForm key={props.part.accountId} {...props} />;
+
+  NotificationSubmissionForm = (
+    props: SubmissionSectionProps<Submission, DefaultDiscordSubmissionOptions>
+  ) => <DiscordFileSubmissionForm key={props.part.accountId} {...props} />;
 
   getDefaults() {
     return _.cloneDeep(defaultOptions);
   }
 }
 
-interface DiscordFileSubmissionState {
-  problems: string[];
-}
-
 export class DiscordFileSubmissionForm extends React.Component<
-  FileSubmissionSectionProps<DefaultDiscordSubmissionOptions>,
-  DiscordFileSubmissionState
+  SubmissionSectionProps<Submission, DefaultDiscordSubmissionOptions>
 > {
-  state: DiscordFileSubmissionState = {
-    problems: [],
-  };
-
   private readonly defaultOptions: DefaultDiscordSubmissionOptions = _.cloneDeep(defaultOptions);
-
-  constructor(props: FileSubmissionSectionProps<DefaultDiscordSubmissionOptions>) {
-    super(props);
-    this.state = {
-      problems: props.problems || []
-    };
-  }
 
   handleChange(fieldName: string, { target }) {
     const part: SubmissionPart<DefaultDiscordSubmissionOptions> = _.cloneDeep(this.props.part);

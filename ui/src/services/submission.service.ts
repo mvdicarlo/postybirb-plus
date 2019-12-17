@@ -9,6 +9,10 @@ export default class SubmissionService {
     return axios.post<Problems>('/submission/dryValidate', parts);
   }
 
+  static create(type: SubmissionType, title: string) {
+    return axios.post(`/submission/create/${type}?title=${title ? encodeURIComponent(title) : ''}`);
+  }
+
   static createFromClipboard() {
     const formData: FormData = new FormData();
     formData.set('file', window.electron.clipboard.read());

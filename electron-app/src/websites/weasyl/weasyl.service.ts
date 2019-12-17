@@ -126,6 +126,6 @@ export class Weasyl extends WebsiteService {
   }
 
   validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[] {
-    throw new NotImplementedException('Method not implemented.');
+    return [];
   }
 }

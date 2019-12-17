@@ -1,24 +1,25 @@
 import React from 'react';
 import _ from 'lodash';
-import { WebsiteRegistry } from '../../website-components/website-registry';
-import DefaultFormSection from './form-sections/DefaultFormSection';
-import SubmissionService from '../../services/submission.service';
-import SubmissionUtil from '../../utils/submission.util';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { LoginStatusStore, loginStatusStore } from '../../stores/login-status.store';
+import { WebsiteRegistry } from '../../../website-components/website-registry';
+import DefaultFormSection from '../form-sections/DefaultFormSection';
+import SubmissionService from '../../../services/submission.service';
+import SubmissionUtil from '../../../utils/submission.util';
+import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { LoginStatusStore } from '../../../stores/login-status.store';
 import { Match, withRouter, history } from 'react-router-dom';
-import { headerStore } from '../../stores/header.store';
+import { headerStore } from '../../../stores/header.store';
 import { inject, observer } from 'mobx-react';
-import { uiStore } from '../../stores/ui.store';
-import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { uiStore } from '../../../stores/ui.store';
+import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
-import ImportDataSelect from './form-components/ImportDataSelect';
-import { FormSubmissionPart } from './interfaces/form-submission-part.interface';
+import ImportDataSelect from '../form-components/ImportDataSelect';
+import WebsiteSections from '../form-sections/WebsiteSections';
+import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
 import {
   SubmissionPart,
   DefaultOptions
-} from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+} from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import {
   Form,
   Button,
@@ -27,8 +28,6 @@ import {
   message,
   TreeSelect,
   Tabs,
-  Badge,
-  Empty,
   Anchor,
   Card,
   Upload,
@@ -37,15 +36,17 @@ import {
   Popconfirm
 } from 'antd';
 import moment from 'moment';
+import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
 
 interface Props {
-  match?: Match;
+  match: Match;
   loginStatusStore?: LoginStatusStore;
   history: history;
 }
 
-interface State {
-  submission: FileSubmission | null;
+export interface SubmissionEditFormState {
+  submission: Submission | null;
   parts: { [key: string]: FormSubmissionPart<any> };
   problems: { [key: string]: any };
   loading: boolean;
@@ -53,13 +54,15 @@ interface State {
   removedParts: string[];
   additionalFileList: any[];
   postAt: number | undefined;
+  submissionType: SubmissionType;
 }
 
 @inject('loginStatusStore')
 @observer
-class SubmissionEditForm extends React.Component<Props, State> {
+class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState> {
   private id: string;
-  private original!: SubmissionPackage<FileSubmission>;
+  private original!: SubmissionPackage<Submission>;
+  private headerSet: boolean = false;
   private defaultOptions: DefaultOptions = {
     tags: {
       extendDefault: false,
@@ -74,7 +77,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
     useThumbnail: true
   };
 
-  state: State = {
+  state: SubmissionEditFormState = {
     submission: null,
     problems: {},
     parts: {},
@@ -82,12 +85,13 @@ class SubmissionEditForm extends React.Component<Props, State> {
     touched: false,
     removedParts: [],
     additionalFileList: [],
-    postAt: undefined
+    postAt: undefined,
+    submissionType: SubmissionType.FILE
   };
 
   constructor(props: Props) {
     super(props);
-    this.id = props.match!.params.id;
+    this.id = props.match.params.id;
     SubmissionService.getSubmission(this.id, true)
       .then(({ data }) => {
         this.original = _.cloneDeep(data);
@@ -96,7 +100,8 @@ class SubmissionEditForm extends React.Component<Props, State> {
           ...data,
           additionalFileList: this.getAdditionalFileList(data.submission.additional),
           loading: false,
-          postAt: data.submission.schedule.postAt
+          postAt: data.submission.schedule.postAt,
+          submissionType: data.submission.type
         });
       })
       .catch(() => {
@@ -183,18 +188,28 @@ class SubmissionEditForm extends React.Component<Props, State> {
 
   getWebsiteTreeData(): TreeNode[] {
     const websiteData: { [key: string]: TreeNode } = {};
-    this.props.loginStatusStore!.statuses.forEach(status => {
-      websiteData[status.website] = websiteData[status.website] || { children: [] };
-      websiteData[status.website].title = status.website;
-      websiteData[status.website].key = status.website;
-      websiteData[status.website].value = status.website;
-      (websiteData[status.website].children as any[]).push({
-        key: status.id,
-        value: status.id,
-        title: `${status.website}: ${status.alias}`,
-        isLeaf: true
+    this.props
+      .loginStatusStore!.statuses.filter(status => {
+        const website = WebsiteRegistry.websites[status.website];
+        if (this.state.submissionType === SubmissionType.FILE) {
+          return true; // always can expect having a file form
+        } else {
+          // assume notification
+          return !!website.NotificationSubmissionForm;
+        }
+      })
+      .forEach(status => {
+        websiteData[status.website] = websiteData[status.website] || { children: [] };
+        websiteData[status.website].title = status.website;
+        websiteData[status.website].key = status.website;
+        websiteData[status.website].value = status.website;
+        (websiteData[status.website].children as any[]).push({
+          key: status.id,
+          value: status.id,
+          title: `${status.website}: ${status.alias}`,
+          isLeaf: true
+        });
       });
-    });
     return Object.values(websiteData).sort((a, b) =>
       (a.title as string).localeCompare(b.title as string)
     );
@@ -224,49 +239,6 @@ class SubmissionEditForm extends React.Component<Props, State> {
   getSelectedWebsites(): string[] {
     const parts = this.getSelectedWebsiteParts();
     return Object.keys(_.groupBy(parts, 'website')).sort();
-  }
-
-  getWebsiteSections(): JSX.Element[] {
-    const defaultPart = this.state.parts.default;
-    const sections: JSX.Element[] = [];
-
-    const parts = this.getSelectedWebsiteParts();
-    const groups = _.groupBy(parts, 'website');
-
-    Object.keys(groups).forEach(website => {
-      const sortedChildren: Array<SubmissionPart<any>> = _.sortBy(groups[website], 'alias');
-
-      const childrenSections = sortedChildren.map(child => {
-        return {
-          alias: this.props.loginStatusStore!.getAliasForAccountId(child.accountId),
-          problems: _.get(this.state.problems[child.accountId], 'problems', []),
-          key: child.accountId,
-          form: WebsiteRegistry.websites[child.website].FileSubmissionForm({
-            defaultData: defaultPart.data,
-            part: child,
-            onUpdate: this.onUpdate,
-            problems: _.get(this.state.problems[child.accountId], 'problems', []),
-            submission: this.state.submission!
-          })
-        };
-      });
-      const label = sections.push(
-        <Form.Item className="mt-2">
-          <Typography.Title style={{ marginBottom: '0' }} level={3}>
-            {website}
-          </Typography.Title>
-          <Tabs>
-            {childrenSections.map(section => (
-              <Tabs.TabPane tab={section.alias} key={section.key}>
-                {section.form}
-              </Tabs.TabPane>
-            ))}
-          </Tabs>
-        </Form.Item>
-      );
-    });
-
-    return sections;
   }
 
   handleWebsiteSelect = (accountIds: string[]) => {
@@ -395,7 +367,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
   };
 
   removeThumbnail() {
-    if (this.state.submission!.thumbnail) {
+    if ((this.state.submission as FileSubmission).thumbnail) {
       SubmissionService.removeThumbnail(this.state.submission!.id)
         .then(({ data }) => {
           this.setState({ submission: data.submission, problems: data.problems });
@@ -435,6 +407,30 @@ class SubmissionEditForm extends React.Component<Props, State> {
     return this.state.touched || this.scheduleHasChanged();
   }
 
+  setHeaders() {
+    if (this.headerSet) return;
+
+    this.headerSet = true;
+    const name = _.capitalize(this.state.submissionType);
+    headerStore.updateHeaderState({
+      title: `Edit ${name} Submission`,
+      routes: [
+        {
+          path: `/${this.state.submissionType}`,
+          breadcrumbName: `${name} Submissions`
+        },
+        {
+          path: `/edit/submission/${this.id}`,
+          breadcrumbName: SubmissionUtil.getSubmissionTitle(this.state)
+        }
+      ]
+    });
+  }
+
+  isFileSubmission(submission: Submission): submission is FileSubmission {
+    return submission.type === SubmissionType.FILE;
+  }
+
   render() {
     if (!this.state.loading) {
       uiStore.setPendingChanges(this.formHasChanges());
@@ -442,118 +438,109 @@ class SubmissionEditForm extends React.Component<Props, State> {
       this.defaultOptions = this.state.parts.default.data;
       const submission = this.state.submission!;
 
-      headerStore.updateHeaderState({
-        title: 'Edit Submission',
-        routes: [
-          {
-            path: '/submissions',
-            breadcrumbName: 'Submissions'
-          },
-          {
-            path: `/edit/submission/${this.id}`,
-            breadcrumbName: SubmissionUtil.getFileSubmissionTitle(this.state)
-          }
-        ]
-      });
+      this.setHeaders();
 
       return (
         <div>
           <Spin spinning={this.state.loading} delay={500}>
             <div className="flex">
               <Form layout="vertical" style={{ flex: 10 }}>
-                <Form.Item>
-                  <Typography.Title level={3}>
-                    Files
-                    <a className="nav-section-anchor" href="#Files" id="#Files"></a>
-                  </Typography.Title>
-                  <div className="flex">
-                    <Card
-                      className="flex-1"
-                      title="Primary"
-                      size="small"
-                      cover={
-                        <img
-                          alt={submission.primary.name}
-                          title={submission.primary.name}
-                          src={submission.primary.preview}
-                        />
-                      }
-                      extra={
-                        <Upload
-                          accept="image/jpeg,image/jpg,image/png"
-                          showUploadList={false}
-                          onChange={this.fileUploadChange}
-                          action={this.primaryFileChangeAction}
-                        >
-                          <span className="text-link">Change</span>
-                        </Upload>
-                      }
-                      bodyStyle={{ padding: '0' }}
-                    ></Card>
-                    <Card
-                      className="flex-1 ml-2"
-                      title="Thumbnail"
-                      size="small"
-                      cover={
-                        submission.thumbnail ? (
+                {this.isFileSubmission(submission) ? (
+                  <Form.Item>
+                    <Typography.Title level={3}>
+                      Files
+                      <a className="nav-section-anchor" href="#Files" id="#Files"></a>
+                    </Typography.Title>
+                    <div className="flex">
+                      <Card
+                        className="flex-1"
+                        title="Primary"
+                        size="small"
+                        cover={
                           <img
-                            alt={submission.thumbnail.name}
-                            title={submission.thumbnail.name}
-                            src={submission.thumbnail.preview}
+                            alt={submission.primary.name}
+                            title={submission.primary.name}
+                            src={submission.primary.preview}
                           />
-                        ) : null
-                      }
-                      extra={
-                        submission.thumbnail ? (
-                          <span className="text-link" onClick={this.removeThumbnail.bind(this)}>
-                            Remove
-                          </span>
-                        ) : (
+                        }
+                        extra={
                           <Upload
                             accept="image/jpeg,image/jpg,image/png"
                             showUploadList={false}
-                            beforeUpload={file => {
-                              return file.type.includes('image/');
-                            }}
                             onChange={this.fileUploadChange}
-                            action={this.thumbnailFileChangeAction}
+                            action={this.primaryFileChangeAction}
                           >
-                            <span className="text-link">Set</span>
+                            <span className="text-link">Change</span>
                           </Upload>
-                        )
-                      }
-                      bodyStyle={!submission.thumbnail ? {} : { padding: '0' }}
-                    >
-                      <Card.Meta
-                        description={submission.thumbnail ? null : 'No thumbnail provided'}
-                      />
-                    </Card>
-                  </div>
-                  <div>
-                    <Card title="Additional Files" size="small" className="mt-2">
-                      <Upload
-                        onChange={this.additionalFileUploadChange}
-                        action={this.additionalFileChangeAction}
-                        multiple={false}
-                        listType="picture-card"
-                        showUploadList={{
-                          showRemoveIcon: true,
-                          showDownloadIcon: false,
-                          showPreviewIcon: false
-                        }}
-                        fileList={this.state.additionalFileList}
-                        onRemove={this.removeAdditionalFile.bind(this)}
+                        }
+                        bodyStyle={{ padding: '0' }}
+                      ></Card>
+                      <Card
+                        className="flex-1 ml-2"
+                        title="Thumbnail"
+                        size="small"
+                        cover={
+                          submission.thumbnail ? (
+                            <img
+                              alt={submission.thumbnail.name}
+                              title={submission.thumbnail.name}
+                              src={submission.thumbnail.preview}
+                            />
+                          ) : null
+                        }
+                        extra={
+                          submission.thumbnail ? (
+                            <span className="text-link" onClick={this.removeThumbnail.bind(this)}>
+                              Remove
+                            </span>
+                          ) : (
+                            <Upload
+                              accept="image/jpeg,image/jpg,image/png"
+                              showUploadList={false}
+                              beforeUpload={file => {
+                                return file.type.includes('image/');
+                              }}
+                              onChange={this.fileUploadChange}
+                              action={this.thumbnailFileChangeAction}
+                            >
+                              <span className="text-link">Set</span>
+                            </Upload>
+                          )
+                        }
+                        bodyStyle={!submission.thumbnail ? {} : { padding: '0' }}
                       >
-                        {(this.state.submission!.additional || []).length < 8 ? (
-                          <div>
-                            <Icon type="plus" />
-                            <div className="ant-light-upload-text ant-dark-upload-text">Add</div>
-                          </div>
-                        ) : null}
-                      </Upload>
-                    </Card>
-                  </div>
-                </Form.Item>
+                        <Card.Meta
+                          description={submission.thumbnail ? null : 'No thumbnail provided'}
+                        />
+                      </Card>
+                    </div>
+                    <div>
+                      <Card title="Additional Files" size="small" className="mt-2">
+                        <Upload
+                          onChange={this.additionalFileUploadChange}
+                          action={this.additionalFileChangeAction}
+                          multiple={false}
+                          listType="picture-card"
+                          showUploadList={{
+                            showRemoveIcon: true,
+                            showDownloadIcon: false,
+                            showPreviewIcon: false
+                          }}
+                          fileList={this.state.additionalFileList}
+                          onRemove={this.removeAdditionalFile.bind(this)}
+                        >
+                          {((this.state.submission as FileSubmission).additional || []).length <
+                          8 ? (
+                            <div>
+                              <Icon type="plus" />
+                              <div className="ant-light-upload-text ant-dark-upload-text">Add</div>
+                            </div>
+                          ) : null}
+                        </Upload>
+                      </Card>
+                    </div>
+                  </Form.Item>
+                ) : null}
 
                 <Form.Item>
                   <Typography.Title level={3}>
@@ -611,7 +598,9 @@ class SubmissionEditForm extends React.Component<Props, State> {
                   getContainer={() => document.getElementById('primary-container') || window}
                   getCurrentAnchor={this.getHighestInViewport}
                 >
-                  <Anchor.Link title="Files" href="#Files" />
+                  {this.state.submissionType === SubmissionType.FILE ? (
+                    <Anchor.Link title="Files" href="#Files" />
+                  ) : null}
                   <Anchor.Link title="Schedule" href="#Schedule" />
                   <Anchor.Link
                     title={
@@ -641,7 +630,7 @@ class SubmissionEditForm extends React.Component<Props, State> {
               <ImportDataSelect
                 className="mr-1"
                 ignoreId={this.id}
-                submissionType={this.state.submission!.type}
+                submissionType={this.state.submissionType}
                 onPropsSelect={this.importData.bind(this)}
               />
               <Popconfirm
@@ -674,71 +663,3 @@ class SubmissionEditForm extends React.Component<Props, State> {
 }
 
 export default withRouter(SubmissionEditForm);
-
-interface WebsiteSectionsProps extends State {
-  onUpdate: (update: any) => void;
-}
-
-const WebsiteSections: React.FC<WebsiteSectionsProps> = props => {
-  const defaultPart = props.parts.default;
-  const sections: JSX.Element[] = [];
-
-  const parts = _.sortBy(
-    Object.values(props.parts)
-      .filter(p => !p.isDefault)
-      .filter(p => !props.removedParts.includes(p.accountId)),
-    'website'
-  );
-
-  const groups = _.groupBy(parts, 'website');
-
-  Object.keys(groups).forEach(website => {
-    const sortedChildren: Array<SubmissionPart<any>> = _.sortBy(groups[website], 'alias');
-
-    const childrenSections = sortedChildren.map(child => {
-      return {
-        alias: loginStatusStore!.getAliasForAccountId(child.accountId),
-        problems: _.get(props.problems[child.accountId], 'problems', []),
-        key: child.accountId,
-        form: WebsiteRegistry.websites[child.website].FileSubmissionForm({
-          defaultData: defaultPart.data,
-          part: child,
-          onUpdate: props.onUpdate,
-          problems: _.get(props.problems[child.accountId], 'problems', []),
-          submission: props.submission!
-        })
-      };
-    });
-    const label = sections.push(
-      <Form.Item>
-        <Typography.Title style={{ marginBottom: '0' }} level={3}>
-          {website}
-          <a className="nav-section-anchor" href={`#${website}`} id={`#${website}`}></a>
-        </Typography.Title>
-        <Tabs>
-          {childrenSections.map(section => (
-            <Tabs.TabPane
-              tab={
-                <span>
-                  <span className="mr-1">{section.alias}</span>
-                  {section.problems.length ? <Badge count={section.problems.length} /> : null}
-                </span>
-              }
-              key={section.key}
-            >
-              {loginStatusStore.getWebsiteLoginStatusForAccountId(section.key) ? (
-                section.form
-              ) : (
-                <Empty
-                  description={<Typography.Text type="danger">Not logged in.</Typography.Text>}
-                />
-              )}
-            </Tabs.TabPane>
-          ))}
-        </Tabs>
-      </Form.Item>
-    );
-  });
-
-  return <div className="mt-2">{sections}</div>;
-};

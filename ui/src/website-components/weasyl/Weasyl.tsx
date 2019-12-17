@@ -2,14 +2,17 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmissionSectionProps } from '../../views/submissions/interfaces/file-submission-section.interface';
+import { SubmissionSectionProps } from '../../views/submissions/interfaces/submission-section.interface';
 import { DefaultWeasylSubmissionOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
-import { SubmissionPart } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart, DefaultOptions } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Alert, Form, Input, Radio, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 
 const defaultOptions: DefaultWeasylSubmissionOptions = {
   title: undefined,
@@ -35,8 +38,12 @@ export class Weasyl implements Website {
     <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
   );
 
-  FileSubmissionForm = (props: FileSubmissionSectionProps<any>) => (
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>) => (
     <WeasylFileSubmissionForm key={props.part.accountId} {...props} />
+  );
+
+  NotificationSubmissionForm = (props: SubmissionSectionProps<Submission, DefaultOptions>) => (
+    <GenericSubmissionSection key={props.part.accountId} {...props} />
   );
 
   getDefaults() {
@@ -50,7 +57,7 @@ interface WeasylFileSubmissionState {
 }
 
 export class WeasylFileSubmissionForm extends React.Component<
-  FileSubmissionSectionProps<DefaultWeasylSubmissionOptions>,
+  SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>,
   WeasylFileSubmissionState
 > {
   state: WeasylFileSubmissionState = {
@@ -155,7 +162,7 @@ export class WeasylFileSubmissionForm extends React.Component<
     ]
   };
 
-  constructor(props: FileSubmissionSectionProps<DefaultWeasylSubmissionOptions>) {
+  constructor(props: SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>) {
     super(props);
     this.state = {
       problems: props.problems || [],

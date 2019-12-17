@@ -1,4 +1,3 @@
-import axios from '../utils/http';
 import socket from '../utils/websocket';
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { observable, computed, action } from 'mobx';
@@ -39,9 +38,9 @@ export class SubmissionStore {
   }
 
   @computed
-  get statusSubmissions(): SubmissionPackage<Submission>[] {
+  get notificationSubmissions(): SubmissionPackage<Submission>[] {
     return [...this.state.submissions]
-      .filter(s => s.submission.type === SubmissionType.STATUS)
+      .filter(s => s.submission.type === SubmissionType.NOTIFICATION)
       .sort((a, b) => a.submission.created - b.submission.created);
   }
 

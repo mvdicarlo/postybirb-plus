@@ -2,7 +2,7 @@ import { SubmissionPackage } from '../../../electron-app/src/submission/interfac
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 
 export default class SubmissionUtil {
-  static getFileSubmissionTitle(submissionPackage: SubmissionPackage<any>): string {
+  static getSubmissionTitle(submissionPackage: SubmissionPackage<any>): string {
     return submissionPackage.parts.default.data.title || submissionPackage.submission.title;
   }
 

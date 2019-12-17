@@ -44,7 +44,7 @@ export class ValidatorService {
     switch (submission.type) {
       case SubmissionType.FILE:
         return website.validateFileSubmission(submission, parsedPart, defaultPart);
-      case SubmissionType.STATUS:
+      case SubmissionType.NOTIFICATION:
         return website.validateStatusSubmission(submission, parsedPart, defaultPart);
     }
   }

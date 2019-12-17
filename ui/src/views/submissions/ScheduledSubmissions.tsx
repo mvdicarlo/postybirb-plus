@@ -48,11 +48,11 @@ export default class ScheduledSubmissions extends React.Component<Props> {
               text={
                 <span
                   className="text-xs"
-                  title={`${SubmissionUtil.getFileSubmissionTitle(s)} [${new Date(
+                  title={`${SubmissionUtil.getSubmissionTitle(s)} [${new Date(
                     s.submission.schedule.postAt!
                   ).toLocaleTimeString()}]`}
                 >
-                  <span className="mr-1">{SubmissionUtil.getFileSubmissionTitle(s)}</span>
+                  <span className="mr-1">{SubmissionUtil.getSubmissionTitle(s)}</span>
                   <span>{new Date(s.submission.schedule.postAt!).toLocaleTimeString()}</span>
                 </span>
               }
@@ -133,11 +133,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     showScheduler: false,
     postAt: undefined
   };
-
-  constructor(props: ListItemProps) {
-    super(props);
-  }
-
+  
   hideScheduler() {
     this.setState({ showScheduler: false, postAt: undefined });
   }
@@ -188,7 +184,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
               )}
             </span>
           }
-          title={SubmissionUtil.getFileSubmissionTitle(item)}
+          title={SubmissionUtil.getSubmissionTitle(item)}
           description={
             <span>
               <Icon type="calendar" />

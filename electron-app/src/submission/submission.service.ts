@@ -67,7 +67,7 @@ export class SubmissionService {
     const id = shortid.generate();
     const submission: Submission = {
       id,
-      title: id,
+      title: createDto.data.title || id,
       schedule: {},
       type: createDto.type,
       order: await this.repository.count(),
@@ -82,8 +82,9 @@ export class SubmissionService {
           createDto.data,
         );
         break;
-      case SubmissionType.STATUS:
-        throw new NotImplementedException('Type is not implemented yet');
+      case SubmissionType.NOTIFICATION:
+        completedSubmission = submission;
+        break;
     }
 
     await this.repository.create(completedSubmission);
@@ -125,8 +126,7 @@ export class SubmissionService {
       case SubmissionType.FILE:
         await this.fileSubmissionService.cleanupSubmission(submission as FileSubmission);
         break;
-      case SubmissionType.STATUS:
-        throw new NotImplementedException('Unimplemented');
+      case SubmissionType.NOTIFICATION:
         break;
     }
 
@@ -211,8 +211,8 @@ export class SubmissionService {
           duplicate as FileSubmission,
         );
         break;
-      case SubmissionType.STATUS:
-        throw new NotImplementedException('Unimplemented');
+      case SubmissionType.NOTIFICATION:
+        break;
     }
 
     // Duplicate parts

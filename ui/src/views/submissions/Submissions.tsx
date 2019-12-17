@@ -60,7 +60,7 @@ export class Submissions extends React.Component<Props, State> {
 
   render() {
     const submissions = this.props.submissions.filter(s =>
-      SubmissionUtil.getFileSubmissionTitle(s)
+      SubmissionUtil.getSubmissionTitle(s)
         .toLowerCase()
         .includes(this.state.search)
     );
@@ -242,7 +242,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
               )}
             </div>
           }
-          title={SubmissionUtil.getFileSubmissionTitle(item)}
+          title={SubmissionUtil.getSubmissionTitle(item)}
           description={
             <div>
               <span>

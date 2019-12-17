@@ -2,7 +2,7 @@ import React from 'react';
 import './AppLayout.css';
 import AppHeader from '../app-header/AppHeader';
 import Home from '../home/Home';
-import SubmissionEditForm from '../submissions/SubmissionEditForm';
+import SubmissionEditForm from '../submissions/forms/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
 import TagGroups from '../tag-groups/TagGroups';
 import { Link, Route, Prompt } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { inject, observer } from 'mobx-react';
 import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider } from 'antd';
 import DescriptionTemplates from '../description-templates/DescriptionTemplates';
 import AppUpdate from '../update/AppUpdate';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
 
 const { Content, Sider } = Layout;
 
@@ -33,7 +34,7 @@ interface State {
 @observer
 export default class App extends React.Component<Props, State> {
   public state: any = {
-    currentNavActive: '1',
+    currentNavActive: 'home',
     accountsVisible: false,
     descriptionTemplateVisible: false,
     settingsVisible: false,
@@ -49,8 +50,12 @@ export default class App extends React.Component<Props, State> {
 
   getCurrentNavId(): string {
     const baseUrl = location.hash; // eslint-disable-line no-restricted-globals
-    if (baseUrl.includes('submission')) {
-      return 'submissions';
+    if (baseUrl.includes(SubmissionType.FILE)) {
+      return 'file-submissions';
+    }
+
+    if (baseUrl.includes(SubmissionType.NOTIFICATION)) {
+      return 'notification-submissions';
     }
 
     return 'home';
@@ -104,7 +109,7 @@ export default class App extends React.Component<Props, State> {
               theme="dark"
               selectedKeys={[this.state.currentNavActive]}
               onSelect={this.handleNavSelectChange}
-              defaultOpenKeys={['templates']}
+              defaultOpenKeys={['submissions', 'templates']}
             >
               <Menu.Item key="home">
                 <Link to="/">
@@ -116,12 +121,30 @@ export default class App extends React.Component<Props, State> {
                 <Icon type="user" />
                 <span>Accounts</span>
               </Menu.Item>
-              <Menu.Item key="submissions">
-                <Link to="/submissions">
-                  <Icon type="upload" />
-                  <span>Submissions</span>
-                </Link>
-              </Menu.Item>
+              <Menu.SubMenu
+                key="submissions"
+                title={
+                  <span>
+                    <Icon type="upload" />
+                    <span>Submissions</span>
+                  </span>
+                }
+              >
+                <Menu.Item key="file-submissions">
+                  <Link to={`/${SubmissionType.FILE}`}>
+                    <Icon type="file" />
+                    <span>File</span>
+                  </Link>
+                </Menu.Item>
+
+                <Menu.Item key="notification-submissions">
+                  <Link to={`/${SubmissionType.NOTIFICATION}`}>
+                    <Icon type="notification" />
+                    <span>Notification</span>
+                  </Link>
+                </Menu.Item>
+              </Menu.SubMenu>
+
               <Menu.SubMenu
                 key="templates"
                 title={
@@ -273,7 +296,8 @@ export default class App extends React.Component<Props, State> {
             <Content className="container primary-layout-container">
               <div className="pt-3 px-3 h-full overflow-y-auto" id="primary-container">
                 <Route exact path="/" component={Home} />
-                <Route path="/submissions" component={SubmissionsView} />
+                <Route path={`/${SubmissionType.FILE}`} component={SubmissionsView} />
+                <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
                 <Route path="/edit/submission/:id" component={SubmissionEditForm} />
                 <BackTop target={() => document.getElementById('primary-container') || window} />
                 <Prompt

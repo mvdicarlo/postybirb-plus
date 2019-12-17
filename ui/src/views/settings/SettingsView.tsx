@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { SettingsStore } from '../../stores/settings.store';
 import SettingsService from '../../services/settings.service';
 import { Settings } from '../../../../electron-app/src/settings/interfaces/settings.interface';
-import { Form, Collapse, Switch, Tooltip, InputNumber, Input, Radio } from 'antd';
+import { Form, Collapse, Switch, Tooltip, InputNumber, Radio } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 
 interface Props {

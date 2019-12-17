@@ -55,7 +55,7 @@ export default class SubmissionSelect extends React.Component<Props> {
                 <Avatar icon="notification" shape="square" />
               )}
             </span>
-            {SubmissionUtil.getFileSubmissionTitle(s)}
+            {SubmissionUtil.getSubmissionTitle(s)}
           </Select.Option>
         ))}
       </Select>
