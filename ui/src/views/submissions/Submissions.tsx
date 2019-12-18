@@ -185,7 +185,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
 
   render() {
     const { item } = this.props;
-    const problems: Problems = JSON.parse(JSON.stringify(item.problems));
+    const problems: Problems = item.problems;
     const problemCount: number = SubmissionUtil.getProblemCount(problems);
     return (
       <List.Item

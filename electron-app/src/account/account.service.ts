@@ -9,6 +9,7 @@ import { session } from 'electron';
 import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
 import { AccountEvent } from './account.events.enum';
 import { SubmissionService } from 'src/submission/submission.service';
+import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
 
 @Injectable()
 export class AccountService {
@@ -23,6 +24,7 @@ export class AccountService {
     private readonly websiteProvider: WebsiteProvider,
     private readonly submissionPartService: SubmissionPartService,
     private readonly submissionService: SubmissionService,
+    private readonly submissionTemplateService: SubmissionTemplateService,
   ) {
     this.repository
       .findAll()
@@ -112,7 +114,11 @@ export class AccountService {
       .clearStorageData()
       .then(() => this.logger.debug(`Session data for ${id} cleared`, 'Account'));
 
-    await this.submissionPartService.removeAllSubmissionPartsForAccount(id);
+    await Promise.all([
+      this.submissionPartService.removeAllSubmissionPartsForAccount(id),
+      this.submissionTemplateService.removePartsForAccount(id),
+    ]);
+
     this.submissionService.verifyAll();
   }
 

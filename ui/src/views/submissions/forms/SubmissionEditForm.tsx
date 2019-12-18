@@ -122,7 +122,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     SubmissionService.checkProblems(
       Object.values(this.state.parts).filter(p => !this.state.removedParts.includes(p.accountId))
     ).then(({ data }) => this.setState({ problems: data }));
-  }, 2000);
+  }, 1250);
 
   onSubmit = () => {
     if (this.state.touched || this.scheduleHasChanged()) {

@@ -1,26 +1,28 @@
 import React from 'react';
 import AppLayout from './views/app-layout/AppLayout';
 import { Provider } from 'mobx-react';
-import { uiStore } from './stores/ui.store';
-import { submissionStore } from './stores/submission.store';
+import { descriptionTemplateStore } from './stores/description-template.store';
 import { headerStore } from './stores/header.store';
 import { loginStatusStore } from './stores/login-status.store';
-import { tagGroupStore } from './stores/tag-group.store';
 import { settingsStore } from './stores/settings.store';
-import { descriptionTemplateStore } from './stores/description-template.store';
+import { submissionStore } from './stores/submission.store';
+import { submissionTemplateStore } from './stores/submission-template.store';
+import { tagGroupStore } from './stores/tag-group.store';
+import { uiStore } from './stores/ui.store';
 import { updateStore } from './stores/update.store';
 
 export default class App extends React.Component {
   render() {
     return (
       <Provider
-        uiStore={uiStore}
-        submissionStore={submissionStore}
+        descriptionTemplateStore={descriptionTemplateStore}
         headerStore={headerStore}
         loginStatusStore={loginStatusStore}
-        tagGroupStore={tagGroupStore}
-        descriptionTemplateStore={descriptionTemplateStore}
         settingsStore={settingsStore}
+        submissionStore={submissionStore}
+        submissionTemplateStore={submissionTemplateStore}
+        tagGroupStore={tagGroupStore}
+        uiStore={uiStore}
         updateStore={updateStore}
       >
         <AppLayout></AppLayout>

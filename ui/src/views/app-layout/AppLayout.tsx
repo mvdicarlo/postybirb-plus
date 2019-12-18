@@ -1,20 +1,21 @@
 import React from 'react';
 import './AppLayout.css';
 import AppHeader from '../app-header/AppHeader';
+import AppUpdate from '../update/AppUpdate';
+import DescriptionTemplates from '../description-templates/DescriptionTemplates';
 import Home from '../home/Home';
+import SettingsView from '../settings/SettingsView';
 import SubmissionEditForm from '../submissions/forms/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
+import SubmissionTemplates from '../submission-templates/SubmissionTemplates';
 import TagGroups from '../tag-groups/TagGroups';
+import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider, Modal, Tabs } from 'antd';
 import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
-import SettingsView from '../settings/SettingsView';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
-import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider, Modal, Tabs } from 'antd';
-import DescriptionTemplates from '../description-templates/DescriptionTemplates';
-import AppUpdate from '../update/AppUpdate';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
 
 const { Content, Sider } = Layout;
 
@@ -56,6 +57,10 @@ export default class App extends React.Component<Props, State> {
 
     if (baseUrl.includes(SubmissionType.NOTIFICATION)) {
       return 'notification-submissions';
+    }
+
+    if (baseUrl.includes('submission-template')) {
+      return 'submission-template';
     }
 
     return 'home';
@@ -234,16 +239,6 @@ export default class App extends React.Component<Props, State> {
                 }
               >
                 <Menu.Item
-                  key="tag-groups"
-                  onClick={() => this.setState({ tagGroupVisible: true })}
-                >
-                  <span>
-                    <Icon type="tags" />
-                    <span>Tag Groups</span>
-                  </span>
-                </Menu.Item>
-
-                <Menu.Item
                   key="description-templates"
                   onClick={() => this.setState({ descriptionTemplateVisible: true })}
                 >
@@ -268,6 +263,21 @@ export default class App extends React.Component<Props, State> {
                     </span>
                     <span>Description</span>
                   </span>
+                </Menu.Item>
+                <Menu.Item
+                  key="tag-groups"
+                  onClick={() => this.setState({ tagGroupVisible: true })}
+                >
+                  <span>
+                    <Icon type="tags" />
+                    <span>Tag Groups</span>
+                  </span>
+                </Menu.Item>
+                <Menu.Item key="submission-templates">
+                  <Link to="/submission-templates">
+                    <Icon type="form" />
+                    <span>Submission</span>
+                  </Link>
                 </Menu.Item>
               </Menu.SubMenu>
 
@@ -361,6 +371,7 @@ export default class App extends React.Component<Props, State> {
                 <Route exact path="/" component={Home} />
                 <Route path={`/${SubmissionType.FILE}`} component={SubmissionsView} />
                 <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
+                <Route path={'/submission-templates'} component={SubmissionTemplates} />
                 <Route path="/edit/submission/:id" component={SubmissionEditForm} />
                 <BackTop target={() => document.getElementById('primary-container') || window} />
                 <Prompt
