@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   NotImplementedException,
+  Logger,
 } from '@nestjs/common';
 import * as _ from 'lodash';
 import * as shortid from 'shortid';
@@ -24,6 +25,8 @@ import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 
 @Injectable()
 export class SubmissionService {
+  private readonly logger = new Logger(SubmissionService.name);
+
   constructor(
     private readonly repository: SubmissionRepository,
     private readonly partService: SubmissionPartService,
@@ -74,7 +77,7 @@ export class SubmissionService {
       created: Date.now(),
     };
 
-    let completedSubmission;
+    let completedSubmission = null;
     switch (createDto.type) {
       case SubmissionType.FILE:
         completedSubmission = await this.fileSubmissionService.createSubmission(
@@ -121,6 +124,7 @@ export class SubmissionService {
   }
 
   async deleteSubmission(id: string): Promise<number> {
+    this.logger.log(id, 'Delete Submission');
     const submission = (await this.get(id)) as Submission;
     switch (submission.type) {
       case SubmissionType.FILE:
@@ -136,6 +140,7 @@ export class SubmissionService {
   }
 
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<any>> {
+    this.logger.log(update.id, 'Update Submission');
     const { id, parts, postAt, removedParts } = update;
     const submissionToUpdate = (await this.get(id)) as Submission;
     submissionToUpdate.schedule.postAt = postAt;
@@ -154,6 +159,7 @@ export class SubmissionService {
   }
 
   async scheduleSubmission(id: string, isScheduled: boolean): Promise<void> {
+    this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
     const submissionToSchedule = (await this.get(id)) as Submission;
     if (!submissionToSchedule.schedule.postAt) {
       throw new BadRequestException(
@@ -187,6 +193,7 @@ export class SubmissionService {
   }
 
   async setPostAt(id: string, postAt: number | undefined): Promise<void> {
+    this.logger.debug(`${id}: ${new Date(postAt).toLocaleString()}`, 'Update Submission Post At');
     const submission = (await this.get(id)) as Submission;
     submission.schedule.postAt = postAt;
     await this.repository.update(id, { schedule: submission.schedule });
@@ -197,6 +204,7 @@ export class SubmissionService {
   }
 
   async duplicate(originalId: string): Promise<Submission> {
+    this.logger.log(originalId, 'Duplicate Submission');
     const original = (await this.get(originalId)) as Submission;
     const id = shortid.generate();
 
@@ -236,6 +244,7 @@ export class SubmissionService {
   // File Submission Actions
   // NOTE: Might be good to pull these out into a different place
   async removeFileSubmissionThumbnail(id: string): Promise<SubmissionPackage<FileSubmission>> {
+    this.logger.debug(id, 'Remove Submission Thumbnail');
     const submission: FileSubmission = (await this.get(id)) as FileSubmission;
     const updated = await this.fileSubmissionService.removeThumbnail(submission);
     await this.repository.update(id, { thumbnail: null });
@@ -249,6 +258,7 @@ export class SubmissionService {
     id: string,
     location: string,
   ): Promise<SubmissionPackage<FileSubmission>> {
+    this.logger.debug(location, 'Remove Submission Additional File');
     const submission: FileSubmission = (await this.get(id)) as FileSubmission;
     const updated = await this.fileSubmissionService.removeAdditionalFile(submission, location);
     await this.repository.update(id, { additional: updated.additional });
@@ -263,6 +273,7 @@ export class SubmissionService {
     id: string,
     path: string,
   ): Promise<SubmissionPackage<FileSubmission>> {
+    this.logger.debug(path, 'Change Submission Thumbnail');
     const submission: FileSubmission = (await this.get(id)) as FileSubmission;
     const updated = await this.fileSubmissionService.changeThumbnailFile(submission, file, path);
     await this.repository.update(id, { thumbnail: updated.thumbnail });
@@ -291,6 +302,7 @@ export class SubmissionService {
     id: string,
     path: string,
   ): Promise<SubmissionPackage<FileSubmission>> {
+    this.logger.debug(path, 'Add Additional File');
     const submission: FileSubmission = (await this.get(id)) as FileSubmission;
     const updated = await this.fileSubmissionService.addAdditionalFile(submission, file, path);
     await this.repository.update(id, { additional: updated.additional });

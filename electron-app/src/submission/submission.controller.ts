@@ -1,6 +1,5 @@
 import {
   Controller,
-  Logger,
   Get,
   Query,
   Body,
@@ -20,8 +19,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('submission')
 export class SubmissionController {
-  private readonly logger = new Logger(SubmissionController.name);
-
   constructor(private readonly service: SubmissionService) {}
 
   private isTrue(value: string): boolean {

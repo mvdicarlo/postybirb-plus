@@ -14,6 +14,7 @@ import { SubmissionTemplateService } from 'src/submission/submission-template/su
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
+
   private readonly loginStatuses: UserAccountDto[] = [];
   private readonly loginCheckTimers: { [key: number]: any } = [];
   private readonly loginCheckMap: { [key: number]: string[] } = [];
@@ -61,6 +62,8 @@ export class AccountService {
   }
 
   async createAccount(createAccountDto: CreateAccountDto) {
+    this.logger.log(createAccountDto, 'Create Account');
+
     const existing: UserAccount = await this.repository.find(createAccountDto.id);
     if (existing) {
       throw new BadRequestException(`Account with Id ${createAccountDto.id} already exists.`);
@@ -99,6 +102,8 @@ export class AccountService {
   }
 
   async removeAccount(id: string): Promise<void> {
+    this.logger.log(id, 'Delete Account');
+
     await this.repository.remove(id);
     const index: number = this.loginStatuses.findIndex(s => s.id === id);
     if (index !== -1) {
@@ -129,7 +134,7 @@ export class AccountService {
       throw new NotFoundException(`Account ID ${userAccount} does not exist.`);
     }
 
-    this.logger.debug(`Checking login for ${account.id}`, 'Login Check');
+    this.logger.debug(account.id, 'Login Check');
     const website = this.websiteProvider.getWebsiteModule(account.website);
     const response: LoginResponse = await website.checkLoginStatus(account);
 
@@ -147,6 +152,7 @@ export class AccountService {
   }
 
   async setData(id: string, data: any): Promise<void> {
+    this.logger.debug(id, 'Update Account Data');
     await this.get(id);
     await this.repository.update(id, { data });
   }

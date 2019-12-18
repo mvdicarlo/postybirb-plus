@@ -2,12 +2,7 @@ import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { DescriptionTemplate } from '../../../electron-app/src/description-template/description-template.interface';
 import DescriptionTemplateService from '../services/description-template.service';
-
-export enum DescriptionTemplateEvent {
-  CREATED = '[DESCRIPTION TEMPLATE] CREATED',
-  REMOVED = '[DESCRIPTION TEMPLATE] REMOVED',
-  UPDATED = '[DESCRIPTION TEMPLATE] UPDATED'
-}
+import { DescriptionTemplateEvent } from '../shared/enums/description-template.events.enum';
 
 export interface DescriptionTemplateState {
   templates: DescriptionTemplate[];

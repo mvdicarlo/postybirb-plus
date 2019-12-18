@@ -3,7 +3,7 @@ import { UserAccountDto } from '../../../electron-app/src/account/account.interf
 
 export default class LoginService {
   static checkLogin(id: string) {
-    return axios.get<UserAccountDto>(`/account/checkLogin/${id}`);
+    return axios.get<UserAccountDto>(`/account/check/${id}`);
   }
 
   static createAccount(id: string, website: string, alias: string, data?: any) {
@@ -17,6 +17,10 @@ export default class LoginService {
 
   static deleteAccount(id: string) {
     return axios.delete(`/account/${id}`);
+  }
+
+  static getStatuses() {
+    return axios.get('/account/statuses').then(({ data }) => data);
   }
 
   static setAccountData(id: string, data: any) {

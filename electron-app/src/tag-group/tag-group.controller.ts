@@ -12,12 +12,12 @@ export class TagGroupController {
     return this.service.getAll();
   }
 
-  @Post()
+  @Post('create')
   async create(@Body() tagGroup: TagGroupDto): Promise<TagGroup> {
     return this.service.create(tagGroup);
   }
 
-  @Patch()
+  @Patch('update')
   async update(@Body() tagGroup: TagGroupDto) {
     return this.service.update(tagGroup);
   }

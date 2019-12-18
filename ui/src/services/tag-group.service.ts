@@ -11,10 +11,10 @@ export default class TagGroupService {
   }
 
   static update(tagGroup: TagGroup) {
-    return axios.patch('/tag-group', tagGroup);
+    return axios.patch('/tag-group/update', tagGroup);
   }
 
   static create(tagGroup: TagGroup) {
-    return axios.post<TagGroup>('/tag-group', tagGroup);
+    return axios.post<TagGroup>('/tag-group/create', tagGroup);
   }
 }

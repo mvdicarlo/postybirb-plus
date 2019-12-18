@@ -11,12 +11,12 @@ export class DescriptionTemplateController {
     return this.service.getAll();
   }
 
-  @Post()
+  @Post('create')
   async create(@Body() descriptionTemplateDto: DescriptionTemplateDto) {
     return this.service.create(descriptionTemplateDto);
   }
 
-  @Patch()
+  @Patch('update')
   async update(@Body() tagGroup: DescriptionTemplateDto) {
     return this.service.update(tagGroup);
   }

@@ -3,12 +3,8 @@ import { observable, action } from 'mobx';
 import UpdateService from '../services/update.service';
 import { notification } from 'antd';
 import React from 'react';
-
-enum UpdateEvent {
-  AVAILABLE = '[UPDATE] AVAILABLE',
-  BLOCKED = '[UPDATE] BLOCKED RESTART',
-  ERROR = '[UPDATE] ERROR'
-}
+import { UpdateEvent } from '../shared/enums/update.events.enum';
+import { uiStore } from './ui.store';
 
 interface UpdateState {
   available: boolean;
@@ -38,7 +34,7 @@ export class UpdateStore {
   }
 
   @action
-  updateAvailable(data: any) {
+  updateAvailable(data: UpdateState) {
     Object.assign(this.state, data);
   }
 
@@ -46,12 +42,11 @@ export class UpdateStore {
   setError(err: any) {
     this.state.error = err || '';
   }
-
 }
 
 export const updateStore = new UpdateStore();
 
-socket.on(UpdateEvent.AVAILABLE, (data: any) => updateStore.updateAvailable(data));
+socket.on(UpdateEvent.AVAILABLE, (data: UpdateState) => updateStore.updateAvailable(data));
 
 socket.on(UpdateEvent.ERROR, (err: string) => {
   updateStore.setError(err);
@@ -66,7 +61,8 @@ socket.on(UpdateEvent.ERROR, (err: string) => {
         </div>
         <div>{err}</div>
       </div>
-    )
+    ),
+    prefixCls: `ant-${uiStore.state.theme}-notification`
   });
 });
 

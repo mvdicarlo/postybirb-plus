@@ -196,8 +196,8 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
           }
           description={
             <div>
-              <p>{_.capitalize(this.props.type)}</p>
-              <p>Created {new Date(this.props.created).toLocaleString()}</p>
+              <div>{_.capitalize(this.props.type)}</div>
+              <div>Created {new Date(this.props.created).toLocaleString()}</div>
             </div>
           }
         ></List.Item.Meta>

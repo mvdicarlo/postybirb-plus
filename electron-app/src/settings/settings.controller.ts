@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Body, Get, Patch } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { SettingsUpdateDto } from './settings.dto';
 
@@ -11,7 +11,7 @@ export class SettingsController {
     return this.service.getSettings();
   }
 
-  @Post()
+  @Patch('update')
   updateSetting(@Body() update: SettingsUpdateDto) {
     this.service.setValue(update.key, update.value);
   }

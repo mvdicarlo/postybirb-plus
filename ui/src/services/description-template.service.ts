@@ -11,10 +11,10 @@ export default class DescriptionTemplateService {
   }
 
   static update(template: DescriptionTemplate) {
-    return axios.patch('/description-template', template);
+    return axios.patch('/description-template/update', template);
   }
 
   static create(template: DescriptionTemplate) {
-    return axios.post<DescriptionTemplate>('/description-template', template);
+    return axios.post<DescriptionTemplate>('/description-template/create', template);
   }
 }

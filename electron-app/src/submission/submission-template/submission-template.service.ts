@@ -32,7 +32,7 @@ export class SubmissionTemplateService {
   }
 
   async create(createDto: CreateSubmissionTemplateDto): Promise<SubmissionTemplate> {
-    this.logger.log(`Creating submission template ${createDto.alias} [${createDto.type}]`);
+    this.logger.log(createDto, 'Create Submission Template');
     const id = shortid.generate();
 
     const defaultPart: DefaultOptions = {
@@ -72,13 +72,13 @@ export class SubmissionTemplateService {
   }
 
   async remove(id: string): Promise<void> {
-    this.logger.log(`Removing submission template ${id}`);
+    this.logger.log(id, 'Delete Submission Template');
     await this.repository.remove(id);
     this.eventEmitter.emit(SubmissionTemplateEvent.REMOVED, id);
   }
 
   async update(updateDto: UpdateSubmissionTemplateDto): Promise<SubmissionTemplate> {
-    this.logger.log(`Updating submission template ${updateDto.id}`);
+    this.logger.log(updateDto.id, 'Update Submission Template');
     const existing = await this.get(updateDto.id);
     existing.parts = _.groupBy(updateDto.parts, 'accountId') as any;
     await this.repository.update(updateDto.id, { parts: existing.parts });
@@ -88,6 +88,7 @@ export class SubmissionTemplateService {
 
   async updateAlias(id: string, alias: string): Promise<SubmissionTemplate> {
     const existing = await this.repository.find(id);
+    this.logger.verbose(`[${id}] ${existing.alias} -> ${alias}`, 'Rename Submission Template');
     existing.alias = alias.trim();
     await this.repository.update(id, { alias: existing.alias });
     this.eventEmitter.emit(SubmissionTemplateEvent.UPDATED, existing);
@@ -95,7 +96,7 @@ export class SubmissionTemplateService {
   }
 
   async removePartsForAccount(accountId: string): Promise<void> {
-    this.logger.log(`Removing template parts for account ${accountId}`);
+    this.logger.log(accountId, 'Delete Submission Template Parts For Account');
     const all = await this.getAll();
     all.forEach(async template => {
       if (template.parts[accountId]) {

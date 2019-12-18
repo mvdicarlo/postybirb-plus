@@ -2,12 +2,7 @@ import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { TagGroup } from '../../../electron-app/src/tag-group/tag-group.interface';
 import TagGroupService from '../services/tag-group.service';
-
-enum TagGroupEvent {
-  REMOVED = '[TAG GROUP] REMOVED',
-  UPDATED = '[TAG GROUP] UPDATED',
-  ADDED = '[TAG GROUP] ADDED'
-}
+import { TagGroupEvent } from '../shared/enums/tag-group.events.enum';
 
 export interface TagGroupState {
   groups: TagGroup[];
@@ -42,7 +37,7 @@ export class TagGroupStore {
 
 export const tagGroupStore = new TagGroupStore();
 
-socket.on(TagGroupEvent.ADDED, (data: TagGroup) => {
+socket.on(TagGroupEvent.CREATED, (data: TagGroup) => {
   tagGroupStore.addOrUpdateTagGroup(data);
 });
 

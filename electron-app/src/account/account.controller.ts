@@ -27,12 +27,12 @@ export class AccountController {
     return this.service.removeAccount(id);
   }
 
-  @Get('checkLogin/:id')
+  @Get('check/:id')
   async checkLogin(@Param('id') id: string): Promise<UserAccountDto> {
     return this.service.checkLogin(id);
   }
 
-  @Get('loginStatuses')
+  @Get('statuses')
   loginStatuses(): UserAccountDto[] {
     return this.service.getLoginStatuses();
   }

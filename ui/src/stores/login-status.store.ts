@@ -1,14 +1,8 @@
 import { observable, computed, action } from 'mobx';
 import socket from '../utils/websocket';
-import axios from '../utils/http';
 import { UserAccountDto } from '../../../electron-app/src/account/account.interface';
-
-export enum AccountEvent {
-  CREATED = '[ACCOUNT] CREATED',
-  DELETED = '[ACCOUNT] DELETED',
-  UPDATED = '[ACCOUNTS] UPDATED',
-  STATUS_UPDATED = '[ACCOUNTS] STATUS UPDATED'
-}
+import LoginService from '../services/login.service';
+import { AccountEvent } from '../shared/enums/account.events.enum';
 
 export interface LoginStatusState {
   statuses: UserAccountDto[];
@@ -20,9 +14,7 @@ export class LoginStatusStore {
   };
 
   constructor() {
-    axios.get('/account/loginStatuses').then(({ data }) => {
-      this.state.statuses = data || [];
-    });
+    LoginService.getStatuses().then(statuses => (this.state.statuses = statuses || []));
   }
 
   @computed

@@ -46,7 +46,7 @@ ul {
   @apply h-full w-full;
 }
 
-.full-size-spinner .ant-spin-container {
+.full-size-spinner > div {
   @apply h-full w-full;
 }
 

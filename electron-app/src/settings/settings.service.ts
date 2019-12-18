@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as lowdb from 'lowdb';
-import { SettingEvent } from './enums/settings.events.enum';
-import { Settings } from './interfaces/settings.interface';
+import { SettingEvent } from './settings.events.enum';
+import { Settings } from './settings.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { AppGlobal } from 'src/app-global.interface';
 
 @Injectable()
 export class SettingsService {
+  private readonly logger = new Logger(SettingsService.name);
   private readonly settings: lowdb.LowdbSync<Settings> = (global as AppGlobal).settingsDB;
 
   constructor(private readonly eventEmitter: EventsGateway) {}
@@ -20,6 +21,7 @@ export class SettingsService {
   }
 
   setValue(setting: keyof Settings, value: any): void {
+    this.logger.debug(`${setting} -> ${value}`, 'Update Setting');
     this.settings.set(setting, value).write();
     this.eventEmitter.emit(SettingEvent.UPDATED, this.settings.getState());
   }

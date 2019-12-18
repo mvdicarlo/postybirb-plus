@@ -52,7 +52,7 @@ export class ValidatorService {
   private validateDefaultPart(
     submission: Submission,
     defaultPart: SubmissionPart<DefaultOptions>,
-    allParts: Array<SubmissionPart<any>>
+    allParts: Array<SubmissionPart<any>>,
   ): string[] {
     const problems: string[] = [];
     if (!defaultPart.data.rating) {

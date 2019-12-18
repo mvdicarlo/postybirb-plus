@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { Settings } from './interfaces/settings.interface';
+import { Settings } from './settings.interface';
 
 export class SettingsUpdateDto {
   @IsNotEmpty()

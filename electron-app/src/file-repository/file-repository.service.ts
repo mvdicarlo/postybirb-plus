@@ -17,11 +17,11 @@ export class FileRepositoryService {
     file: UploadedFile,
     path: string,
   ): Promise<{ thumbnailLocation: string; submissionLocation: string }> {
-    this.logger.debug(`Uploading file ${path || 'from clipboard'} ${file.originalname}`);
+    this.logger.debug(file.originalname, `Uploading file ${path ? 'From File' : 'From Clipboard'}`);
 
     const idName = `${id}-${shortid.generate()}.${file.originalname.split('.').pop()}`;
     const submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${idName}`;
-    const insertSubmissionFile = await fs.outputFile(submissionFilePath, file.buffer);
+    await fs.outputFile(submissionFilePath, file.buffer);
 
     let thumbnail: Buffer = null;
     const thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${idName}.jpeg`;
@@ -42,7 +42,7 @@ export class FileRepositoryService {
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
 
-    const insertThumbnailFile = await fs.outputFile(thumbnailFilePath, thumbnail);
+    await fs.outputFile(thumbnailFilePath, thumbnail);
 
     return {
       thumbnailLocation: thumbnailFilePath,
@@ -51,7 +51,7 @@ export class FileRepositoryService {
   }
 
   async removeSubmissionFiles(submission: FileSubmission) {
-    this.logger.debug(`Removing files for ${submission.id}`);
+    this.logger.debug(submission.id, 'Removing Files');
     const files = [submission.primary, submission.thumbnail, ...(submission.additional || [])];
     const promises = _.flatten(
       files.filter(f => !!f).map(f => [fs.remove(f.location), fs.remove(f.preview)]),
@@ -73,13 +73,13 @@ export class FileRepositoryService {
   }
 
   async removeSubmissionFile(record: FileRecord): Promise<void> {
-    this.logger.debug(`Removing submission file ${record.location}`);
+    this.logger.debug(record.location, 'Remove Submission File');
     await fs.remove(record.location);
     await fs.remove(record.preview);
   }
 
   async copyFileWithNewId(id: string, file: FileRecord): Promise<FileRecord> {
-    this.logger.debug(`Copying file ${file.location} with name ${id}`);
+    this.logger.debug(`Copying file ${file.location} with name ${id}`, 'Copy File');
     const pathParts = file.location.split('/');
     pathParts.pop();
     const extension = file.location.split('.').pop();

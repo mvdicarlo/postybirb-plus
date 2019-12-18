@@ -9,7 +9,18 @@ import SubmissionEditForm from '../submissions/forms/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
 import SubmissionTemplates from '../submission-templates/SubmissionTemplates';
 import TagGroups from '../tag-groups/TagGroups';
-import { Icon, Layout, Menu, Drawer, Select, BackTop, ConfigProvider, Modal, Tabs } from 'antd';
+import {
+  Icon,
+  Layout,
+  Menu,
+  Drawer,
+  Select,
+  BackTop,
+  ConfigProvider,
+  Modal,
+  Tabs,
+  message,
+} from 'antd';
 import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
@@ -127,6 +138,7 @@ export default class App extends React.Component<Props, State> {
   render() {
     const { uiStore } = this.props;
     const state = uiStore!.state;
+    message.config({ prefixCls: `ant-${this.props.uiStore!.state.theme}-message` });
     return (
       <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>
         <Modal
