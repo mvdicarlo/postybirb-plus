@@ -50,6 +50,10 @@ export class LoginStatusStore {
   hasLoggedInAccounts(website: string): boolean {
     return !!this.statuses.filter(status => status.website === website && status.loggedIn).length;
   }
+
+  accountExists(accountId: string): boolean {
+    return !!this.state.statuses.find(s => s.id === accountId);
+  }
 }
 
 export const loginStatusStore = new LoginStatusStore();

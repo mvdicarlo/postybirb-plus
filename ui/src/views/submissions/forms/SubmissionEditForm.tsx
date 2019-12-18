@@ -251,18 +251,20 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       .filter(id => !accountIds.includes(id));
 
     const parts = _.cloneDeep(this.state.parts);
-    addedParts.forEach(accountId => {
-      parts[accountId] = {
-        accountId,
-        submissionId: this.id,
-        id: _.uniqueId('New Part'),
-        website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
-        data: WebsiteRegistry.websites[
-          this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
-        ].getDefaults(),
-        isNew: true
-      };
-    });
+    addedParts
+      .filter(accountId => this.props.loginStatusStore!.accountExists(accountId))
+      .forEach(accountId => {
+        parts[accountId] = {
+          accountId,
+          submissionId: this.id,
+          id: _.uniqueId('New Part'),
+          website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
+          data: WebsiteRegistry.websites[
+            this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
+          ].getDefaults(),
+          isNew: true
+        };
+      });
 
     const isTouched: boolean = !_.isEqual(
       Object.values(parts).filter(p => !removedParts.includes(p.accountId)),
@@ -407,6 +409,21 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     return this.state.touched || this.scheduleHasChanged();
   }
 
+  removeDeletedAccountParts() {
+    const removed = Object.values(this.state.parts)
+      .filter(p => !p.isDefault)
+      .filter(p => !this.props.loginStatusStore!.accountExists(p.accountId));
+    const copy = { ...this.state.parts };
+    if (removed.length) {
+      removed.forEach(p => {
+        delete this.original.parts[p.accountId];
+        delete copy[p.accountId];
+        this.setState({ parts: copy });
+        this.checkProblems();
+      });
+    }
+  }
+
   setHeaders() {
     if (this.headerSet) return;
 
@@ -433,6 +450,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   render() {
     if (!this.state.loading) {
+      this.removeDeletedAccountParts();
       uiStore.setPendingChanges(this.formHasChanges());
 
       this.defaultOptions = this.state.parts.default.data;
