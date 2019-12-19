@@ -27,13 +27,13 @@ import {
   Spin,
   message,
   TreeSelect,
-  Tabs,
   Anchor,
   Card,
   Upload,
   Icon,
   DatePicker,
-  Popconfirm
+  Popconfirm,
+  Alert
 } from 'antd';
 import moment from 'moment';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
@@ -46,15 +46,16 @@ interface Props {
 }
 
 export interface SubmissionEditFormState {
-  submission: Submission | null;
-  parts: { [key: string]: FormSubmissionPart<any> };
-  problems: { [key: string]: any };
-  loading: boolean;
-  touched: boolean;
-  removedParts: string[];
   additionalFileList: any[];
+  loading: boolean;
+  parts: { [key: string]: FormSubmissionPart<any> };
   postAt: number | undefined;
+  problems: { [key: string]: any };
+  removedParts: string[];
+  submission?: Submission;
   submissionType: SubmissionType;
+  touched: boolean;
+  hasError: boolean;
 }
 
 @inject('loginStatusStore')
@@ -78,7 +79,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   };
 
   state: SubmissionEditFormState = {
-    submission: null,
+    submission: undefined,
     problems: {},
     parts: {},
     loading: true,
@@ -86,7 +87,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     removedParts: [],
     additionalFileList: [],
     postAt: undefined,
-    submissionType: SubmissionType.FILE
+    submissionType: SubmissionType.FILE,
+    hasError: false
   };
 
   constructor(props: Props) {
@@ -120,6 +122,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   checkProblems = _.debounce(() => {
     SubmissionService.checkProblems(
+      this.id,
       Object.values(this.state.parts).filter(p => !this.state.removedParts.includes(p.accountId))
     ).then(({ data }) => this.setState({ problems: data }));
   }, 1250);
@@ -173,11 +176,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   importData(parts: Array<SubmissionPart<any>>) {
     parts.forEach(p => {
       const existing = Object.values(this.state.parts).find(part => part.accountId === p.accountId);
+      p.submissionId = this.id;
       if (existing) {
         p._id = existing._id;
         p.id = existing.id;
       } else {
-        p.submissionId = this.id;
         p._id = undefined;
         p.id = `${this.id}-${p.accountId}`;
       }
@@ -438,10 +441,19 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         },
         {
           path: `/edit/submission/${this.id}`,
-          breadcrumbName: SubmissionUtil.getSubmissionTitle(this.state)
+          breadcrumbName: SubmissionUtil.getSubmissionTitle({
+            submission: this.state.submission!,
+            parts: this.state.parts,
+            problems: {}
+          })
         }
       ]
     });
+  }
+
+  static getDerivedStateFromError(error) {
+    console.error(error);
+    return { hasError: true };
   }
 
   isFileSubmission(submission: Submission): submission is FileSubmission {
@@ -449,6 +461,17 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   }
 
   render() {
+    if (this.state.hasError) {
+      return (
+        <div>
+          <Alert
+            type="error"
+            message="An error has occured and the submission template is unreadable."
+          ></Alert>
+        </div>
+      );
+    }
+    
     if (!this.state.loading) {
       this.removeDeletedAccountParts();
       uiStore.setPendingChanges(this.formHasChanges());
@@ -460,223 +483,229 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
       return (
         <div>
-          <Spin spinning={this.state.loading} delay={500}>
-            <div className="flex">
-              <Form layout="vertical" style={{ flex: 10 }}>
-                {this.isFileSubmission(submission) ? (
-                  <Form.Item>
-                    <Typography.Title level={3}>
-                      Files
-                      <a className="nav-section-anchor" href="#Files" id="#Files"></a>
-                    </Typography.Title>
-                    <div className="flex">
-                      <Card
-                        className="flex-1"
-                        title="Primary"
-                        size="small"
-                        cover={
+          <div className="flex">
+            <Form layout="vertical" style={{ flex: 10 }}>
+              {this.isFileSubmission(submission) ? (
+                <Form.Item>
+                  <Typography.Title level={3}>
+                    Files
+                    <a className="nav-section-anchor" href="#Files" id="#Files"></a>
+                  </Typography.Title>
+                  <div className="flex">
+                    <Card
+                      className="flex-1"
+                      title="Primary"
+                      size="small"
+                      cover={
+                        <img
+                          alt={submission.primary.name}
+                          title={submission.primary.name}
+                          src={submission.primary.preview}
+                        />
+                      }
+                      extra={
+                        <Upload
+                          accept="image/jpeg,image/jpg,image/png"
+                          showUploadList={false}
+                          onChange={this.fileUploadChange}
+                          action={this.primaryFileChangeAction}
+                        >
+                          <span className="text-link">Change</span>
+                        </Upload>
+                      }
+                      bodyStyle={{ padding: '0' }}
+                    ></Card>
+                    <Card
+                      className="flex-1 ml-2"
+                      title="Thumbnail"
+                      size="small"
+                      cover={
+                        submission.thumbnail ? (
                           <img
-                            alt={submission.primary.name}
-                            title={submission.primary.name}
-                            src={submission.primary.preview}
+                            alt={submission.thumbnail.name}
+                            title={submission.thumbnail.name}
+                            src={submission.thumbnail.preview}
                           />
-                        }
-                        extra={
+                        ) : null
+                      }
+                      extra={
+                        submission.thumbnail ? (
+                          <span className="text-link" onClick={this.removeThumbnail.bind(this)}>
+                            Remove
+                          </span>
+                        ) : (
                           <Upload
                             accept="image/jpeg,image/jpg,image/png"
                             showUploadList={false}
+                            beforeUpload={file => {
+                              return file.type.includes('image/');
+                            }}
                             onChange={this.fileUploadChange}
-                            action={this.primaryFileChangeAction}
+                            action={this.thumbnailFileChangeAction}
                           >
-                            <span className="text-link">Change</span>
+                            <span className="text-link">Set</span>
                           </Upload>
-                        }
-                        bodyStyle={{ padding: '0' }}
-                      ></Card>
-                      <Card
-                        className="flex-1 ml-2"
-                        title="Thumbnail"
-                        size="small"
-                        cover={
-                          submission.thumbnail ? (
-                            <img
-                              alt={submission.thumbnail.name}
-                              title={submission.thumbnail.name}
-                              src={submission.thumbnail.preview}
-                            />
-                          ) : null
-                        }
-                        extra={
-                          submission.thumbnail ? (
-                            <span className="text-link" onClick={this.removeThumbnail.bind(this)}>
-                              Remove
-                            </span>
-                          ) : (
-                            <Upload
-                              accept="image/jpeg,image/jpg,image/png"
-                              showUploadList={false}
-                              beforeUpload={file => {
-                                return file.type.includes('image/');
-                              }}
-                              onChange={this.fileUploadChange}
-                              action={this.thumbnailFileChangeAction}
-                            >
-                              <span className="text-link">Set</span>
-                            </Upload>
-                          )
-                        }
-                        bodyStyle={!submission.thumbnail ? {} : { padding: '0' }}
+                        )
+                      }
+                      bodyStyle={!submission.thumbnail ? {} : { padding: '0' }}
+                    >
+                      <Card.Meta
+                        description={submission.thumbnail ? null : 'No thumbnail provided'}
+                      />
+                    </Card>
+                  </div>
+                  <div>
+                    <Card title="Additional Files" size="small" className="mt-2">
+                      <Upload
+                        onChange={this.additionalFileUploadChange}
+                        action={this.additionalFileChangeAction}
+                        multiple={false}
+                        listType="picture-card"
+                        showUploadList={{
+                          showRemoveIcon: true,
+                          showDownloadIcon: false,
+                          showPreviewIcon: false
+                        }}
+                        fileList={this.state.additionalFileList}
+                        onRemove={this.removeAdditionalFile.bind(this)}
                       >
-                        <Card.Meta
-                          description={submission.thumbnail ? null : 'No thumbnail provided'}
-                        />
-                      </Card>
-                    </div>
-                    <div>
-                      <Card title="Additional Files" size="small" className="mt-2">
-                        <Upload
-                          onChange={this.additionalFileUploadChange}
-                          action={this.additionalFileChangeAction}
-                          multiple={false}
-                          listType="picture-card"
-                          showUploadList={{
-                            showRemoveIcon: true,
-                            showDownloadIcon: false,
-                            showPreviewIcon: false
-                          }}
-                          fileList={this.state.additionalFileList}
-                          onRemove={this.removeAdditionalFile.bind(this)}
-                        >
-                          {((this.state.submission as FileSubmission).additional || []).length <
-                          8 ? (
-                            <div>
-                              <Icon type="plus" />
-                              <div className="ant-light-upload-text ant-dark-upload-text">Add</div>
-                            </div>
-                          ) : null}
-                        </Upload>
-                      </Card>
-                    </div>
-                  </Form.Item>
+                        {((this.state.submission as FileSubmission).additional || []).length < 8 ? (
+                          <div>
+                            <Icon type="plus" />
+                            <div className="ant-light-upload-text ant-dark-upload-text">Add</div>
+                          </div>
+                        ) : null}
+                      </Upload>
+                    </Card>
+                  </div>
+                </Form.Item>
+              ) : null}
+
+              <Form.Item>
+                <Typography.Title level={3}>
+                  Schedule
+                  <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
+                </Typography.Title>
+                <DatePicker
+                  value={this.state.postAt ? moment(this.state.postAt) : undefined}
+                  format="YYYY-MM-DD HH:mm"
+                  showTime={{ format: 'HH:mm' }}
+                  placeholder="Unscheduled"
+                  onChange={value => this.setState({ postAt: value ? value.valueOf() : undefined })}
+                />
+              </Form.Item>
+
+              <Form.Item>
+                <Typography.Title level={3}>
+                  Defaults
+                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
+                </Typography.Title>
+                <DefaultFormSection
+                  part={this.state.parts.default}
+                  problems={this.state.problems.default.problems}
+                  onUpdate={this.onUpdate}
+                  submission={this.state.submission!}
+                />
+              </Form.Item>
+
+              <Form.Item>
+                <Typography.Title level={3}>
+                  Websites
+                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                </Typography.Title>
+                <TreeSelect
+                  multiple
+                  treeCheckable={true}
+                  treeDefaultExpandAll={true}
+                  treeNodeFilterProp="title"
+                  allowClear={true}
+                  value={this.getSelectedWebsiteIds()}
+                  treeData={this.getWebsiteTreeData()}
+                  onChange={this.handleWebsiteSelect}
+                  placeholder="Select websites to post to"
+                />
+              </Form.Item>
+
+              <WebsiteSections
+                {...this.state}
+                problems={this.state.problems}
+                submission={this.state.submission}
+                submissionType={this.state.submissionType}
+                onUpdate={this.onUpdate.bind(this)}
+                removedParts={this.state.removedParts}
+                parts={this.state.parts}
+              />
+            </Form>
+
+            <div className="ml-1" style={{ maxWidth: '125px' }}>
+              <Anchor
+                onClick={this.handleNavClick}
+                getContainer={() => document.getElementById('primary-container') || window}
+                getCurrentAnchor={this.getHighestInViewport}
+              >
+                {this.state.submissionType === SubmissionType.FILE ? (
+                  <Anchor.Link title="Files" href="#Files" />
                 ) : null}
-
-                <Form.Item>
-                  <Typography.Title level={3}>
-                    Schedule
-                    <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
-                  </Typography.Title>
-                  <DatePicker
-                    value={this.state.postAt ? moment(this.state.postAt) : undefined}
-                    format="YYYY-MM-DD HH:mm"
-                    showTime={{ format: 'HH:mm' }}
-                    placeholder="Unscheduled"
-                    onChange={value =>
-                      this.setState({ postAt: value ? value.valueOf() : undefined })
-                    }
-                  />
-                </Form.Item>
-
-                <Form.Item>
-                  <Typography.Title level={3}>
-                    Defaults
-                    <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
-                  </Typography.Title>
-                  <DefaultFormSection
-                    part={this.state.parts.default}
-                    problems={this.state.problems.default.problems}
-                    onUpdate={this.onUpdate}
-                    submission={this.state.submission!}
-                  />
-                </Form.Item>
-
-                <Form.Item>
-                  <Typography.Title level={3}>
-                    Websites
-                    <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
-                  </Typography.Title>
-                  <TreeSelect
-                    multiple
-                    treeCheckable={true}
-                    treeDefaultExpandAll={true}
-                    treeNodeFilterProp="title"
-                    allowClear={true}
-                    value={this.getSelectedWebsiteIds()}
-                    treeData={this.getWebsiteTreeData()}
-                    onChange={this.handleWebsiteSelect}
-                    placeholder="Select websites to post to"
-                  />
-                </Form.Item>
-
-                <WebsiteSections {...this.state} onUpdate={this.onUpdate.bind(this)} />
-              </Form>
-
-              <div className="ml-1" style={{ maxWidth: '125px' }}>
-                <Anchor
-                  onClick={this.handleNavClick}
-                  getContainer={() => document.getElementById('primary-container') || window}
-                  getCurrentAnchor={this.getHighestInViewport}
-                >
-                  {this.state.submissionType === SubmissionType.FILE ? (
-                    <Anchor.Link title="Files" href="#Files" />
-                  ) : null}
-                  <Anchor.Link title="Schedule" href="#Schedule" />
+                <Anchor.Link title="Schedule" href="#Schedule" />
+                <Anchor.Link
+                  title={
+                    <span>
+                      {this.websiteHasProblems('default') ? <Icon type="warning" /> : null} Defaults
+                    </span>
+                  }
+                  href="#Defaults"
+                />
+                <Anchor.Link title="Websites" href="#Websites" />
+                {this.getSelectedWebsites().map(website => (
                   <Anchor.Link
                     title={
                       <span>
-                        {this.websiteHasProblems('default') ? <Icon type="warning" /> : null}{' '}
-                        Defaults
+                        {this.websiteHasProblems(website) ? <Icon type="warning" /> : null}{' '}
+                        {website}
                       </span>
                     }
-                    href="#Defaults"
+                    href={`#${website}`}
                   />
-                  <Anchor.Link title="Websites" href="#Websites" />
-                  {this.getSelectedWebsites().map(website => (
-                    <Anchor.Link
-                      title={
-                        <span>
-                          {this.websiteHasProblems(website) ? <Icon type="warning" /> : null}{' '}
-                          {website}
-                        </span>
-                      }
-                      href={`#${website}`}
-                    />
-                  ))}
-                </Anchor>
-              </div>
+                ))}
+              </Anchor>
             </div>
-            <div className="form-action-bar">
-              <ImportDataSelect
-                className="mr-1"
-                ignoreId={this.id}
-                submissionType={this.state.submissionType}
-                onPropsSelect={this.importData.bind(this)}
-              />
-              <Popconfirm
-                disabled={!this.formHasChanges()}
-                title="Are you sure? This will revert all recent changes you have made."
-                onConfirm={() =>
-                  this.setState({
-                    parts: _.cloneDeep(this.original.parts),
-                    removedParts: [],
-                    postAt: this.original.submission.schedule.postAt,
-                    touched: false
-                  })
-                }
-              >
-                <Button className="mr-1" disabled={!this.formHasChanges()}>
-                  Undo Changes
-                </Button>
-              </Popconfirm>
-
-              <Button onClick={this.onSubmit} type="primary" disabled={!this.formHasChanges()}>
-                Save
+          </div>
+          <div className="form-action-bar">
+            <ImportDataSelect
+              className="mr-1"
+              ignoreId={this.id}
+              submissionType={this.state.submissionType}
+              onPropsSelect={this.importData.bind(this)}
+            />
+            <Popconfirm
+              disabled={!this.formHasChanges()}
+              title="Are you sure? This will revert all recent changes you have made."
+              onConfirm={() =>
+                this.setState({
+                  parts: _.cloneDeep(this.original.parts),
+                  removedParts: [],
+                  postAt: this.original.submission.schedule.postAt,
+                  touched: false
+                })
+              }
+            >
+              <Button className="mr-1" disabled={!this.formHasChanges()}>
+                Undo Changes
               </Button>
-            </div>
-          </Spin>
+            </Popconfirm>
+
+            <Button onClick={this.onSubmit} type="primary" disabled={!this.formHasChanges()}>
+              Save
+            </Button>
+          </div>
         </div>
       );
     }
-    return <div></div>;
+    return (
+      <Spin spinning={this.state.loading} delay={500}>
+        <div></div>
+      </Spin>
+    );
   }
 }
 

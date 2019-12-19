@@ -15,7 +15,7 @@ import { Submission } from './interfaces/submission.interface';
 import { SubmissionCreate } from './interfaces/submission-create.interface';
 import { SubmissionEvent } from './enums/submission.events.enum';
 import { SubmissionPackage } from './interfaces/submission-package.interface';
-import { SubmissionPart } from './interfaces/submission-part.interface';
+import { SubmissionPart, Parts } from './interfaces/submission-part.interface';
 import { SubmissionPartService } from './submission-part/submission-part.service';
 import { SubmissionRepository } from './submission.repository';
 import { SubmissionType } from './enums/submission-type.enum';
@@ -99,7 +99,7 @@ export class SubmissionService {
   private async validate(submission: Submission): Promise<SubmissionPackage<any>> {
     const parts = await this.partService.getPartsForSubmission(submission.id);
     const problems: Problems = this.validatorService.validateParts(submission, parts);
-    const mappedParts: { [key: string]: SubmissionPart<any> } = {};
+    const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part));
     return {
       submission,
@@ -112,10 +112,10 @@ export class SubmissionService {
     this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAll(true));
   }
 
-  async dryValidate(parts: Array<SubmissionPart<any>>): Promise<Problems> {
+  async dryValidate(id: string, parts: Array<SubmissionPart<any>>): Promise<Problems> {
     if (parts.length) {
       return this.validatorService.validateParts(
-        await this.repository.find(parts[0].submissionId),
+        await this.repository.find(id),
         parts,
       );
     }
@@ -178,12 +178,13 @@ export class SubmissionService {
     submission: Submission,
     submissionPart: SubmissionPart<any>,
   ): Promise<SubmissionPart<any>> {
+    // TODO combine with existing to ensure id?
     const p: SubmissionPart<any> = {
       _id: submissionPart._id,
       id: submissionPart.id,
       data: submissionPart.data,
       accountId: submissionPart.accountId,
-      submissionId: submissionPart.submissionId,
+      submissionId: submission.id,
       website: submissionPart.website,
       isDefault: submissionPart.isDefault,
     };

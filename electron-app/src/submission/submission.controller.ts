@@ -66,8 +66,8 @@ export class SubmissionController {
   }
 
   @Post('dryValidate')
-  async dryValidate(@Body() parts: Array<SubmissionPart<any>>) {
-    return this.service.dryValidate(parts || []);
+  async dryValidate(@Body() body: { id: string, parts: Array<SubmissionPart<any>>}) {
+    return this.service.dryValidate(body.id, body.parts || []);
   }
 
   @Post('duplicate/:id')

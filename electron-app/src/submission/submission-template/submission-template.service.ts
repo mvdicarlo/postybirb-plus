@@ -7,7 +7,7 @@ import { SubmissionTemplateEvent } from './submission-template.events.enum';
 import { CreateSubmissionTemplateDto } from './models/create-template.dto';
 import { UpdateSubmissionTemplateDto } from './models/update-template.dto';
 import { SubmissionTemplate } from './submission-template.interface';
-import { DefaultOptions } from '../interfaces/submission-part.interface';
+import { DefaultOptions, Parts } from '../interfaces/submission-part.interface';
 
 @Injectable()
 export class SubmissionTemplateService {
@@ -80,7 +80,19 @@ export class SubmissionTemplateService {
   async update(updateDto: UpdateSubmissionTemplateDto): Promise<SubmissionTemplate> {
     this.logger.log(updateDto.id, 'Update Submission Template');
     const existing = await this.get(updateDto.id);
-    existing.parts = _.groupBy(updateDto.parts, 'accountId') as any;
+    const newParts: Parts = {};
+    Object.entries(updateDto.parts).forEach(([key, value]) => {
+      const { id, data, accountId, submissionId, website, isDefault } = value;
+      newParts[key] = {
+        id,
+        data,
+        accountId,
+        submissionId,
+        website,
+        isDefault,
+      };
+    });
+    existing.parts = newParts;
     await this.repository.update(updateDto.id, { parts: existing.parts });
     this.eventEmitter.emit(SubmissionTemplateEvent.UPDATED, existing);
     return existing;

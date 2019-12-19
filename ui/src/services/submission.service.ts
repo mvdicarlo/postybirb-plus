@@ -5,8 +5,8 @@ import { Problems } from '../../../electron-app/src/submission/validator/interfa
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 
 export default class SubmissionService {
-  static checkProblems(parts: Array<FormSubmissionPart<any>>) {
-    return axios.post<Problems>('/submission/dryValidate', parts);
+  static checkProblems(id: string, parts: Array<FormSubmissionPart<any>>) {
+    return axios.post<Problems>('/submission/dryValidate', { id, parts });
   }
 
   static create(type: SubmissionType, title: string) {

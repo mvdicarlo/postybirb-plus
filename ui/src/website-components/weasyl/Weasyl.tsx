@@ -6,7 +6,10 @@ import { SubmissionSectionProps } from '../../views/submissions/interfaces/submi
 import { DefaultWeasylSubmissionOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
-import { SubmissionPart, DefaultOptions } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import {
+  SubmissionPart,
+  DefaultOptions
+} from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Alert, Form, Input, Radio, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
@@ -38,9 +41,9 @@ export class Weasyl implements Website {
     <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
   );
 
-  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>) => (
-    <WeasylFileSubmissionForm key={props.part.accountId} {...props} />
-  );
+  FileSubmissionForm = (
+    props: SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>
+  ) => <WeasylFileSubmissionForm key={props.part.accountId} {...props} />;
 
   NotificationSubmissionForm = (props: SubmissionSectionProps<Submission, DefaultOptions>) => (
     <GenericSubmissionSection key={props.part.accountId} {...props} />
@@ -296,9 +299,17 @@ export class WeasylFileSubmissionForm extends React.Component<
                     value={data.category}
                     onSelect={this.handleSelectChange.bind(this, 'category')}
                   >
-                    {this.categoryMap[this.props.submission.primary.type].map(item => (
-                      <Select.Option value={item.id}>{item.name}</Select.Option>
-                    ))}
+                    {this.props.submission
+                      ? this.categoryMap[this.props.submission.primary.type].map(item => (
+                          <Select.Option value={item.id}>{item.name}</Select.Option>
+                        ))
+                      : Object.entries(this.categoryMap).map(([key, values]) => (
+                          <Select.OptGroup label={key}>
+                            {values.map(item => (
+                              <Select.Option value={item.id}>{item.name}</Select.Option>
+                            ))}
+                          </Select.OptGroup>
+                        ))}
                   </Select>
                 </Form.Item>
                 <Form.Item label="Folder">

@@ -9,6 +9,13 @@ import SubmissionEditForm from '../submissions/forms/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
 import SubmissionTemplates from '../submission-templates/SubmissionTemplates';
 import TagGroups from '../tag-groups/TagGroups';
+import SubmissionTemplateEditForm from '../submissions/forms/SubmissionTemplateEditForm';
+import { Link, Route, Prompt } from 'react-router-dom';
+import { Login } from '../login/Login';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { UIStore } from '../../stores/ui.store';
+import { WebsiteRegistry } from '../../website-components/website-registry';
+import { inject, observer } from 'mobx-react';
 import {
   Icon,
   Layout,
@@ -19,14 +26,8 @@ import {
   ConfigProvider,
   Modal,
   Tabs,
-  message,
+  message
 } from 'antd';
-import { Link, Route, Prompt } from 'react-router-dom';
-import { Login } from '../login/Login';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
-import { UIStore } from '../../stores/ui.store';
-import { WebsiteRegistry } from '../../website-components/website-registry';
-import { inject, observer } from 'mobx-react';
 
 const { Content, Sider } = Layout;
 
@@ -385,6 +386,10 @@ export default class App extends React.Component<Props, State> {
                 <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
                 <Route path={'/submission-templates'} component={SubmissionTemplates} />
                 <Route path="/edit/submission/:id" component={SubmissionEditForm} />
+                <Route
+                  path="/edit/submission-template/:id"
+                  component={SubmissionTemplateEditForm}
+                />
                 <BackTop target={() => document.getElementById('primary-container') || window} />
                 <Prompt
                   when={this.props.uiStore!.state.hasPendingChanges}

@@ -10,8 +10,12 @@ export interface SubmissionPart<T extends DefaultOptions> {
   isDefault?: boolean;
 }
 
+export interface Parts {
+  [key: string]: SubmissionPart<any>;  // key is part.accountId
+}
+
 export interface DefaultOptions {
-  title?: string|undefined;
+  title?: string | undefined;
   tags: TagData;
   description: DescriptionData;
   rating: SubmissionRating;

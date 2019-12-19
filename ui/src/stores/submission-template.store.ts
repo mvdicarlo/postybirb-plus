@@ -48,6 +48,10 @@ export class SubmissionTemplateStore {
     const index: number = this.state.templates.findIndex(s => s.id === id);
     if (index !== -1) this.state.templates.splice(index, 1);
   }
+
+  getSubmissionTemplate(id: string): SubmissionTemplate | undefined {
+    return this.state.templates.find(t => t.id === id);
+  }
 }
 
 export const submissionTemplateStore = new SubmissionTemplateStore();
