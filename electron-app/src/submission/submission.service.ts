@@ -22,6 +22,7 @@ import { SubmissionType } from './enums/submission-type.enum';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { ValidatorService } from './validator/validator.service';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
+import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 
 @Injectable()
 export class SubmissionService {
@@ -114,10 +115,7 @@ export class SubmissionService {
 
   async dryValidate(id: string, parts: Array<SubmissionPart<any>>): Promise<Problems> {
     if (parts.length) {
-      return this.validatorService.validateParts(
-        await this.repository.find(id),
-        parts,
-      );
+      return this.validatorService.validateParts(await this.repository.find(id), parts);
     }
 
     return {};
@@ -158,6 +156,20 @@ export class SubmissionService {
     return packaged;
   }
 
+  async overwriteSubmissionParts(submissionOverwrite: SubmissionOverwrite) {
+    const submission = (await this.get(submissionOverwrite.id, false)) as Submission;
+
+    const allParts = await this.partService.getPartsForSubmission(submission.id);
+    const keepIds = submissionOverwrite.parts.map(p => p.accountId);
+    const removeParts = allParts.filter(p => !keepIds.includes(p.accountId));
+
+    await Promise.all(submissionOverwrite.parts.map(part => this.setPart(submission, part)));
+    await Promise.all(removeParts.map(p => this.partService.removeSubmissionPart(p.id)));
+
+    const packaged: SubmissionPackage<any> = await this.validate(submission);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
+  }
+
   async scheduleSubmission(id: string, isScheduled: boolean): Promise<void> {
     this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
     const submissionToSchedule = (await this.get(id)) as Submission;
@@ -178,19 +190,31 @@ export class SubmissionService {
     submission: Submission,
     submissionPart: SubmissionPart<any>,
   ): Promise<SubmissionPart<any>> {
-    // TODO combine with existing to ensure id?
-    const p: SubmissionPart<any> = {
-      _id: submissionPart._id,
-      id: submissionPart.id,
-      data: submissionPart.data,
-      accountId: submissionPart.accountId,
-      submissionId: submission.id,
-      website: submissionPart.website,
-      isDefault: submissionPart.isDefault,
-    };
+    // This might be slower, but it ensures some kind of safety against corruption
+    const existingPart = await this.partService.getSubmissionPart(
+      submission.id,
+      submissionPart.accountId,
+    );
 
-    const part = await this.partService.createOrUpdateSubmissionPart(p, submission.type);
-    return part;
+    let part: SubmissionPart<any>;
+    if (existingPart) {
+      part = {
+        ...existingPart,
+        data: submissionPart.data,
+      };
+    } else {
+      part = {
+        _id: submissionPart._id,
+        id: submissionPart.id,
+        data: submissionPart.data,
+        accountId: submissionPart.accountId,
+        submissionId: submission.id,
+        website: submissionPart.website,
+        isDefault: submissionPart.isDefault,
+      };
+    }
+
+    return await this.partService.createOrUpdateSubmissionPart(part, submission.type);
   }
 
   async setPostAt(id: string, postAt: number | undefined): Promise<void> {

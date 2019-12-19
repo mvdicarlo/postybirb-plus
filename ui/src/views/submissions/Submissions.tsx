@@ -82,6 +82,18 @@ export class Submissions extends React.Component<Props, State> {
                   >
                     Post Many
                   </Button>
+                  <Link
+                    className={submissions.length ? 'pointer-none' : ''}
+                    to={`/edit/multiple-submissions/${_.get(
+                      submissions,
+                      '[0].submission.type',
+                      SubmissionType.FILE
+                    )}`}
+                  >
+                    <Button type="default" disabled={!submissions.length} className="mr-1">
+                      Edit Many
+                    </Button>
+                  </Link>
                   <Button
                     type="danger"
                     onClick={() => this.setState({ deleteModalVisible: true })}

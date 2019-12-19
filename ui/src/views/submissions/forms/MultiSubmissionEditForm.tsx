@@ -1,0 +1,451 @@
+import React from 'react';
+import _ from 'lodash';
+import { WebsiteRegistry } from '../../../website-components/website-registry';
+import DefaultFormSection from '../form-sections/DefaultFormSection';
+import { LoginStatusStore } from '../../../stores/login-status.store';
+import { Match, withRouter, history } from 'react-router-dom';
+import { headerStore } from '../../../stores/header.store';
+import { inject, observer } from 'mobx-react';
+import { uiStore } from '../../../stores/ui.store';
+import { TreeNode } from 'antd/lib/tree-select';
+import ImportDataSelect from '../form-components/ImportDataSelect';
+import WebsiteSections from '../form-sections/WebsiteSections';
+import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
+import {
+  SubmissionPart,
+  DefaultOptions
+} from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import {
+  Form,
+  Button,
+  Typography,
+  Spin,
+  message,
+  TreeSelect,
+  Anchor,
+  Popconfirm,
+  Alert
+} from 'antd';
+import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import SubmissionSelectModal from '../submission-select/SubmissionSelectModal';
+import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import SubmissionService from '../../../services/submission.service';
+import SubmissionUtil from '../../../utils/submission.util';
+
+interface Props {
+  match: Match;
+  loginStatusStore?: LoginStatusStore;
+  history: history;
+}
+
+export interface MultiSubmissionEditFormState {
+  parts: { [key: string]: FormSubmissionPart<any> };
+  loading: boolean;
+  touched: boolean;
+  removedParts: string[];
+  hasError: boolean;
+  saveVisible: boolean;
+}
+
+@inject('loginStatusStore')
+@observer
+class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEditFormState> {
+  private original!: { [key: string]: FormSubmissionPart<any> };
+  private headerSet: boolean = false;
+  private submissionType: SubmissionType = SubmissionType.FILE;
+  private defaultOptions: DefaultOptions = {
+    tags: {
+      extendDefault: false,
+      value: []
+    },
+    description: {
+      overwriteDefault: false,
+      value: ''
+    },
+    rating: null,
+    title: '',
+    useThumbnail: true
+  };
+
+  state: MultiSubmissionEditFormState = {
+    parts: {
+      default: {
+        data: this.defaultOptions,
+        id: 'default',
+        accountId: 'default',
+        submissionId: 'multi',
+        website: 'default',
+        isDefault: true
+      }
+    },
+    loading: false,
+    touched: false,
+    removedParts: [],
+    hasError: false,
+    saveVisible: false
+  };
+
+  constructor(props: Props) {
+    super(props);
+    this.submissionType = props.match.params.id;
+    this.original = _.cloneDeep(this.state.parts);
+  }
+
+  onUpdate = (updatePart: SubmissionPart<any> | Array<SubmissionPart<any>>) => {
+    const parts = _.cloneDeep(this.state.parts);
+    const updateParts = Array.isArray(updatePart) ? updatePart : [updatePart];
+    updateParts.forEach(p => (parts[p.accountId] = p));
+    const isTouched: boolean = !_.isEqual(parts, this.original);
+    this.setState({ parts, touched: isTouched });
+  };
+
+  onSubmit = (selected: SubmissionPackage<any>[]) => {
+    this.setState({ loading: true, saveVisible: false });
+    const updatedParts = _.cloneDeep(this.state.parts);
+    this.state.removedParts.forEach(accountId => delete updatedParts[accountId]);
+    Promise.all(
+      selected.map(submission =>
+        SubmissionService.overwriteSubmissionParts({
+          id: submission.submission.id,
+          parts: Object.values(updatedParts)
+        })
+          .then(() => {
+            message.success(
+              `Successfully updated ${SubmissionUtil.getSubmissionTitle(submission)}.`
+            );
+          })
+          .catch(() => {
+            message.error(`Failed to update ${SubmissionUtil.getSubmissionTitle(submission)}.`);
+          })
+      )
+    ).finally(() => this.setState({ loading: false, touched: false }));
+  };
+
+  importData(parts: Array<SubmissionPart<any>>) {
+    parts.forEach(p => {
+      const existing = Object.values(this.state.parts).find(part => part.accountId === p.accountId);
+      p.submissionId = 'multi';
+      if (existing) {
+        p._id = existing._id;
+        p.id = existing.id;
+      } else {
+        p._id = undefined;
+        p.id = `multi-${p.accountId}`;
+      }
+    });
+
+    this.onUpdate(parts);
+  }
+
+  getWebsiteTreeData(): TreeNode[] {
+    const websiteData: { [key: string]: TreeNode } = {};
+    this.props
+      .loginStatusStore!.statuses.filter(status => {
+        const website = WebsiteRegistry.websites[status.website];
+        if (this.submissionType === SubmissionType.FILE) {
+          return true; // always can expect having a file form
+        } else {
+          // assume notification
+          return !!website.NotificationSubmissionForm;
+        }
+      })
+      .forEach(status => {
+        websiteData[status.website] = websiteData[status.website] || { children: [] };
+        websiteData[status.website].title = status.website;
+        websiteData[status.website].key = status.website;
+        websiteData[status.website].value = status.website;
+        (websiteData[status.website].children as any[]).push({
+          key: status.id,
+          value: status.id,
+          title: `${status.website}: ${status.alias}`,
+          isLeaf: true
+        });
+      });
+    return Object.values(websiteData).sort((a, b) =>
+      (a.title as string).localeCompare(b.title as string)
+    );
+  }
+
+  getSelectedWebsiteIds(): string[] {
+    return _.sortBy(
+      [
+        ...Object.values(this.state.parts)
+          .filter(p => !p.isDefault)
+          .filter(p => !this.state.removedParts.includes(p.accountId))
+          .map(p => p.accountId)
+      ],
+      'title'
+    );
+  }
+
+  getSelectedWebsiteParts(): Array<SubmissionPart<any>> {
+    return _.sortBy(
+      Object.values(this.state.parts)
+        .filter(p => !p.isDefault)
+        .filter(p => !this.state.removedParts.includes(p.accountId)),
+      'website'
+    );
+  }
+
+  getSelectedWebsites(): string[] {
+    const parts = this.getSelectedWebsiteParts();
+    return Object.keys(_.groupBy(parts, 'website')).sort();
+  }
+
+  handleWebsiteSelect = (accountIds: string[]) => {
+    const existingParts = Object.values(this.state.parts).map(p => p.accountId);
+    const addedParts = accountIds.filter(id => !existingParts.includes(id));
+
+    const removedParts = Object.values(this.state.parts)
+      .filter(p => !p.isDefault)
+      .map(p => p.accountId)
+      .filter(id => !accountIds.includes(id));
+
+    const parts = _.cloneDeep(this.state.parts);
+    addedParts
+      .filter(accountId => this.props.loginStatusStore!.accountExists(accountId))
+      .forEach(accountId => {
+        parts[accountId] = {
+          accountId,
+          submissionId: 'multi',
+          id: _.uniqueId('New Part'),
+          website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
+          data: WebsiteRegistry.websites[
+            this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
+          ].getDefaults(),
+          isNew: true
+        };
+      });
+
+    const isTouched: boolean = !_.isEqual(
+      Object.values(parts).filter(p => !removedParts.includes(p.accountId)),
+      Object.values(this.original)
+    );
+
+    this.setState({
+      removedParts,
+      parts,
+      touched: isTouched
+    });
+  };
+
+  handleNavClick = (
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
+    link: {
+      title: React.ReactNode;
+      href: string;
+    }
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById(link!.href)!.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  isInViewport(elem: Element | null) {
+    if (!elem) return false;
+    const bounding = elem.getBoundingClientRect();
+    return (
+      bounding.top >= 0 &&
+      bounding.left >= 0 &&
+      bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  getHighestInViewport = (): string => {
+    const anchorElements = document.getElementsByClassName('nav-section-anchor');
+    if (anchorElements.length) {
+      for (let i = 0; i <= anchorElements.length; i++) {
+        const item = anchorElements.item(i);
+        if (item && this.isInViewport(anchorElements.item(i))) {
+          return item.id;
+        }
+      }
+
+      return anchorElements.item(anchorElements.length - 1)!.id;
+    }
+    return '#Defaults';
+  };
+
+  static getDerivedStateFromError(error) {
+    console.error(error);
+    return { hasError: true };
+  }
+
+  componentWillUnmount() {
+    uiStore.setPendingChanges(false);
+  }
+
+  formHasChanges(): boolean {
+    return this.state.touched;
+  }
+
+  removeDeletedAccountParts() {
+    const removed = Object.values(this.state.parts)
+      .filter(p => !p.isDefault)
+      .filter(p => !this.props.loginStatusStore!.accountExists(p.accountId));
+    const copy = { ...this.state.parts };
+    if (removed.length) {
+      removed.forEach(p => {
+        delete this.original[p.accountId];
+        delete copy[p.accountId];
+        this.setState({ parts: copy });
+      });
+    }
+  }
+
+  setHeaders() {
+    if (this.headerSet) return;
+
+    this.headerSet = true;
+    const name = _.capitalize(this.props.match.params.id);
+    headerStore.updateHeaderState({
+      title: `Edit Multiple ${name} Submissions`,
+      routes: [
+        {
+          path: `/${this.props.match.params.id}`,
+          breadcrumbName: `${name} Submissions`
+        },
+        {
+          path: `/edit/multiple-submissions/${this.props.match.params.id}`,
+          breadcrumbName: 'Edit Multiple'
+        }
+      ]
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div>
+          <Alert
+            type="error"
+            message="An error has occured and the form is unable to be displayed."
+          ></Alert>
+        </div>
+      );
+    }
+
+    if (!this.state.loading) {
+      this.removeDeletedAccountParts();
+      uiStore.setPendingChanges(this.formHasChanges());
+
+      this.defaultOptions = this.state.parts.default.data;
+
+      this.setHeaders();
+
+      return (
+        <div>
+          <div className="flex">
+            <Form layout="vertical" style={{ flex: 10 }}>
+              <Form.Item>
+                <Typography.Title level={3}>
+                  Defaults
+                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
+                </Typography.Title>
+                <DefaultFormSection
+                  part={this.state.parts.default}
+                  problems={[]}
+                  onUpdate={this.onUpdate}
+                  submission={{} as any}
+                />
+              </Form.Item>
+
+              <Form.Item>
+                <Typography.Title level={3}>
+                  Websites
+                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                </Typography.Title>
+                <TreeSelect
+                  multiple
+                  treeCheckable={true}
+                  treeDefaultExpandAll={true}
+                  treeNodeFilterProp="title"
+                  allowClear={true}
+                  value={this.getSelectedWebsiteIds()}
+                  treeData={this.getWebsiteTreeData()}
+                  onChange={this.handleWebsiteSelect}
+                  placeholder="Select websites to post to"
+                />
+              </Form.Item>
+
+              <WebsiteSections
+                removedParts={this.state.removedParts}
+                problems={{}}
+                onUpdate={this.onUpdate.bind(this)}
+                submissionType={this.submissionType}
+                parts={this.state.parts}
+              />
+            </Form>
+
+            <div className="ml-1" style={{ maxWidth: '125px' }}>
+              <Anchor
+                onClick={this.handleNavClick}
+                getContainer={() => document.getElementById('primary-container') || window}
+                getCurrentAnchor={this.getHighestInViewport}
+              >
+                <Anchor.Link title="Defaults" href="#Defaults" />
+                <Anchor.Link title="Websites" href="#Websites" />
+                {this.getSelectedWebsites().map(website => (
+                  <Anchor.Link title={<span>{website}</span>} href={`#${website}`} />
+                ))}
+              </Anchor>
+            </div>
+          </div>
+          <div className="form-action-bar">
+            <ImportDataSelect
+              className="mr-1"
+              submissionType={this.submissionType}
+              onPropsSelect={this.importData.bind(this)}
+            />
+            <Popconfirm
+              title="Are you sure?."
+              onConfirm={() =>
+                this.setState({
+                  parts: _.cloneDeep(this.original),
+                  removedParts: [],
+                  touched: false
+                })
+              }
+            >
+              <Button className="mr-1">New</Button>
+            </Popconfirm>
+
+            <Button onClick={() => this.setState({ saveVisible: true })} type="primary">
+              Save To Many
+            </Button>
+
+            <SubmissionSelectModal
+              visible={this.state.saveVisible}
+              multiple={true}
+              submissionType={this.submissionType}
+              title="Save to Many"
+              selectAll={false}
+              onClose={() => this.setState({ saveVisible: false })}
+              onOk={this.onSubmit}
+            >
+              <Alert
+                type="warning"
+                message={
+                  <div>
+                    Saving will completely remove and overwrite each submission's sections.
+                    <br />
+                    <br />
+                    All website sections not set in this form will be removed.
+                  </div>
+                }
+              ></Alert>
+            </SubmissionSelectModal>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <Spin spinning={this.state.loading} delay={500}>
+        <div></div>
+      </Spin>
+    );
+  }
+}
+
+export default withRouter(MultiSubmissionEditForm);

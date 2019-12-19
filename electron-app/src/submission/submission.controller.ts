@@ -14,6 +14,7 @@ import {
 import { SubmissionService } from './submission.service';
 import { SubmissionType } from './enums/submission-type.enum';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
+import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { SubmissionPart } from './interfaces/submission-part.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -55,9 +56,14 @@ export class SubmissionController {
     });
   }
 
-  @Post('update')
+  @Patch('update')
   async update(@Body() submissionPackage: SubmissionUpdate) {
     return this.service.updateSubmission(submissionPackage);
+  }
+
+  @Post('overwrite')
+  async overwriteSubmissionParts(@Body() submissionOverwrite: SubmissionOverwrite) {
+    return this.service.overwriteSubmissionParts(submissionOverwrite);
   }
 
   @Patch('set/postAt/:id')

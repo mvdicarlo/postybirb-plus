@@ -1,5 +1,6 @@
 import axios from '../utils/http';
 import { SubmissionUpdate } from '../../../electron-app/src/submission/interfaces/submission-update.interface';
+import { SubmissionOverwrite } from '../../../electron-app/src/submission/interfaces/submission-overwrite.interface';
 import { FormSubmissionPart } from '../views/submissions/interfaces/form-submission-part.interface';
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
@@ -35,6 +36,10 @@ export default class SubmissionService {
     return axios.get(`/submission/${id}?packaged=${packaged}`);
   }
 
+  static overwriteSubmissionParts(overwrite: SubmissionOverwrite) {
+    return axios.post('/submission/overwrite', overwrite);
+  }
+
   static removeAdditionalFile(id: string, location: string) {
     return axios.delete(`/submission/remove/additional/${id}/${encodeURIComponent(location)}`);
   }
@@ -52,6 +57,6 @@ export default class SubmissionService {
   }
 
   static updateSubmission(submissionPackage: SubmissionUpdate) {
-    return axios.post('/submission/update', submissionPackage);
+    return axios.patch('/submission/update', submissionPackage);
   }
 }

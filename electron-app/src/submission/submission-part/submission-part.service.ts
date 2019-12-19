@@ -29,7 +29,7 @@ export class SubmissionPartService {
 
     let update = {};
 
-    const existing = await this.repository.find(copy.id);
+    const existing = await this.repository.find(this.getPartId(part.submissionId, copy.accountId));
     if (existing) {
       this.logger.log(`${copy.submissionId}: ${copy.accountId}`, 'Update Submission Part');
       update = {
@@ -47,7 +47,7 @@ export class SubmissionPartService {
       await this.repository.create({
         ...copy,
         data: update,
-        id: `${copy.submissionId}-${copy.accountId}`,
+        id: this.getPartId(copy.submissionId, copy.accountId),
       });
     }
 
@@ -71,7 +71,7 @@ export class SubmissionPartService {
     };
 
     await this.repository.create({
-      id: `${submission.id}-default`,
+      id: this.getPartId(submission.id, 'default'),
       submissionId: submission.id,
       website: 'default',
       accountId: 'default',
@@ -82,6 +82,17 @@ export class SubmissionPartService {
 
   getPartsForSubmission(submissionId: string): Promise<Array<SubmissionPart<any>>> {
     return this.repository.findAllBySubmissionId(submissionId);
+  }
+
+  async getSubmissionPart(
+    submissionId: string,
+    accountId: string,
+  ): Promise<SubmissionPart<any> | undefined> {
+    return (await this.repository.findAll({ accountId, submissionId }))[0];
+  }
+
+  getPartId(submissionId: string, accountId: string) {
+    return `${submissionId}-${accountId}`;
   }
 
   removeSubmissionPart(id: string): Promise<number> {

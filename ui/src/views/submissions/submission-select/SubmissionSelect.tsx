@@ -23,6 +23,21 @@ interface Props {
 @inject('submissionStore')
 @observer
 export default class SubmissionSelect extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props);
+    if (props.selectAll) {
+      let submissions = this.props
+        .submissionStore!.all.filter(s => s.submission.type === this.props.submissionType)
+        .filter(s => s.submission.id !== this.props.ignoreId);
+
+      if (this.props.validOnly) {
+        submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
+      }
+      
+      this.onChange(submissions.map(s => s.submission.id));
+    }
+  }
+
   onChange(ids: string[]) {
     this.props.onSelect(
       _.cloneDeep(this.props.submissionStore!.all.filter(s => ids.includes(s.submission.id)))

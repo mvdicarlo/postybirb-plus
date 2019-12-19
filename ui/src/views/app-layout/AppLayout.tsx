@@ -10,6 +10,7 @@ import SubmissionsView from '../submissions/SubmissionsView';
 import SubmissionTemplates from '../submission-templates/SubmissionTemplates';
 import TagGroups from '../tag-groups/TagGroups';
 import SubmissionTemplateEditForm from '../submissions/forms/SubmissionTemplateEditForm';
+import MultiSubmissionEditForm from '../submissions/forms/MultiSubmissionEditForm';
 import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
@@ -386,6 +387,7 @@ export default class App extends React.Component<Props, State> {
                 <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
                 <Route path={'/submission-templates'} component={SubmissionTemplates} />
                 <Route path="/edit/submission/:id" component={SubmissionEditForm} />
+                <Route path="/edit/multiple-submissions/:id" component={MultiSubmissionEditForm} />
                 <Route
                   path="/edit/submission-template/:id"
                   component={SubmissionTemplateEditForm}
