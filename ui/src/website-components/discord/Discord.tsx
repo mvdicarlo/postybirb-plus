@@ -30,9 +30,9 @@ export class Discord implements Website {
   name: string = 'Discord';
   LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
-  FileSubmissionForm = (
-    props: SubmissionSectionProps<FileSubmission, DefaultDiscordOptions>
-  ) => <DiscordFileSubmissionForm key={props.part.accountId} {...props} />;
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultDiscordOptions>) => (
+    <DiscordFileSubmissionForm key={props.part.accountId} {...props} />
+  );
 
   NotificationSubmissionForm = (
     props: SubmissionSectionProps<Submission, DefaultDiscordOptions>
@@ -81,6 +81,18 @@ export class DiscordFileSubmissionForm extends React.Component<
               <ul>
                 {this.props.problems.map(problem => (
                   <li>{problem}</li>
+                ))}
+              </ul>
+            }
+          />
+        ) : null}
+        {this.props.warnings.length ? (
+          <Alert
+            type="warning"
+            message={
+              <ul>
+                {this.props.warnings.map(warning => (
+                  <li>{warning}</li>
                 ))}
               </ul>
             }

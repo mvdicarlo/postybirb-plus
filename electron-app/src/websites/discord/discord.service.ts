@@ -9,6 +9,7 @@ import { Submission } from 'src/submission/interfaces/submission.interface';
 import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 
 interface DiscordLoginData {
   name: string;
@@ -53,18 +54,22 @@ export class Discord extends WebsiteService {
     submission: FileSubmission,
     submissionPart: SubmissionPart<DefaultDiscordOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[] {
+  ): ValidationParts {
     const problems: string[] = [];
+    const warnings: string[] = [];
 
     const { size } = submission.primary;
     if (WebsiteValidator.MBtoBytes(8) < size) {
       problems.push(`Discord limits files to 8MB`);
     }
 
-    return problems;
+    return { problems, warnings };
   }
 
-  validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[] {
-    return [];
+  validateStatusSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<any>,
+  ): ValidationParts {
+    return { problems: [], warnings: [] };
   }
 }

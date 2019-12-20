@@ -7,6 +7,7 @@ import {
   DefaultFileOptions,
   DefaultOptions,
 } from 'src/submission/interfaces/default-options.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 
 export interface Website {
   readonly BASE_URL: string;
@@ -35,10 +36,10 @@ export interface Website {
     submission: Submission,
     submissionPart: SubmissionPart<DefaultFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[];
+  ): ValidationParts;
   validateStatusSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[];
+  ): ValidationParts;
 }

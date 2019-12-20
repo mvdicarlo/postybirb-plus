@@ -39,9 +39,9 @@ export class Weasyl implements Website {
     <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
   );
 
-  FileSubmissionForm = (
-    props: SubmissionSectionProps<FileSubmission, DefaultWeasylOptions>
-  ) => <WeasylFileSubmissionForm key={props.part.accountId} {...props} />;
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultWeasylOptions>) => (
+    <WeasylFileSubmissionForm key={props.part.accountId} {...props} />
+  );
 
   NotificationSubmissionForm = (props: SubmissionSectionProps<Submission, DefaultOptions>) => (
     <GenericSubmissionSection key={props.part.accountId} {...props} />
@@ -221,6 +221,18 @@ export class WeasylFileSubmissionForm extends React.Component<
               <ul>
                 {this.props.problems.map(problem => (
                   <li>{problem}</li>
+                ))}
+              </ul>
+            }
+          />
+        ) : null}
+        {this.props.warnings.length ? (
+          <Alert
+            type="warning"
+            message={
+              <ul>
+                {this.props.warnings.map(warning => (
+                  <li>{warning}</li>
                 ))}
               </ul>
             }

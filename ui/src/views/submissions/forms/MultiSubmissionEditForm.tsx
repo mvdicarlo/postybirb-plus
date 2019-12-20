@@ -343,6 +343,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
                 <DefaultFormSection
                   part={this.state.parts.default}
                   problems={[]}
+                  warnings={[]}
                   onUpdate={this.onUpdate}
                   submission={{} as any}
                 />

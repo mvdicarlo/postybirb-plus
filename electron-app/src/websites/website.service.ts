@@ -6,6 +6,7 @@ import { SubmissionPart } from 'src/submission/interfaces/submission-part.interf
 import * as _ from 'lodash';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 
 export abstract class WebsiteService implements Website {
   abstract readonly defaultStatusOptions?: any;
@@ -65,11 +66,11 @@ export abstract class WebsiteService implements Website {
     submission: Submission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[];
+  ): ValidationParts;
 
   abstract validateStatusSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[];
+  ): ValidationParts;
 }

@@ -53,6 +53,7 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
                   part: child,
                   onUpdate: props.onUpdate,
                   problems: _.get(props.problems[child.accountId], 'problems', []),
+                  warnings: _.get(props.problems[child.accountId], 'warnings', []),
                   submission: props.submission! as FileSubmission
                 })
               : WebsiteRegistry.websites[child.website].NotificationSubmissionForm!({
@@ -60,6 +61,7 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
                   part: child,
                   onUpdate: props.onUpdate,
                   problems: _.get(props.problems[child.accountId], 'problems', []),
+                  warnings: _.get(props.problems[child.accountId], 'warnings', []),
                   submission: props.submission!
                 })
         };

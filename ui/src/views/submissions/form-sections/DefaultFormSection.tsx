@@ -45,6 +45,18 @@ export default class DefaultFormSection extends React.Component<
             }
           />
         ) : null}
+        {this.props.warnings.length ? (
+          <Alert
+            type="warning"
+            message={
+              <ul>
+                {this.props.warnings.map(warning => (
+                  <li>{warning}</li>
+                ))}
+              </ul>
+            }
+          />
+        ) : null}
         <Form.Item label="Title">
           <Input value={data.title} onChange={this.handleChange.bind(this, 'title')} />
         </Form.Item>

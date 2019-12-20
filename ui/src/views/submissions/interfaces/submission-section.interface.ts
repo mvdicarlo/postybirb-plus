@@ -7,5 +7,6 @@ export interface SubmissionSectionProps<T extends Submission, K extends DefaultO
   defaultData?: DefaultOptions;
   part: SubmissionPart<K>;
   problems: string[];
+  warnings: string[];
   submission: T;
 }

@@ -170,6 +170,12 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     );
   };
 
+  websitehasWarnings = (website: string | undefined | null): boolean => {
+    return !!Object.values(this.state.problems).find(
+      p => p.website === website && p.warnings.length
+    );
+  };
+
   importData(parts: Array<SubmissionPart<any>>) {
     parts.forEach(p => {
       const existing = Object.values(this.state.parts).find(part => part.accountId === p.accountId);
@@ -600,6 +606,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 <DefaultFormSection
                   part={this.state.parts.default}
                   problems={this.state.problems.default.problems}
+                  warnings={this.state.problems.default.warnings}
                   onUpdate={this.onUpdate}
                   submission={this.state.submission!}
                 />
@@ -647,7 +654,16 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 <Anchor.Link
                   title={
                     <span>
-                      {this.websiteHasProblems('default') ? <Icon type="warning" /> : null} Defaults
+                      {this.websiteHasProblems('default') ? (
+                        <Typography.Text className="mr-1" type="danger">
+                          <Icon type="warning" />
+                        </Typography.Text>
+                      ) : this.websitehasWarnings('default') ? (
+                        <Typography.Text className="mr-1" type="warning">
+                          <Icon type="exclamation" />
+                        </Typography.Text>
+                      ) : null}
+                      Defaults
                     </span>
                   }
                   href="#Defaults"
@@ -657,7 +673,15 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                   <Anchor.Link
                     title={
                       <span>
-                        {this.websiteHasProblems(website) ? <Icon type="warning" /> : null}{' '}
+                        {this.websiteHasProblems(website) ? (
+                          <Typography.Text className="mr-1" type="danger">
+                            <Icon type="warning" />
+                          </Typography.Text>
+                        ) : this.websitehasWarnings(website) ? (
+                          <Typography.Text className="mr-1" type="warning">
+                            <Icon type="exclamation" />
+                          </Typography.Text>
+                        ) : null}
                         {website}
                       </span>
                     }

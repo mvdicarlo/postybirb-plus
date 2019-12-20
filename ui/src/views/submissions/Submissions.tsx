@@ -319,7 +319,7 @@ interface ProblemTreeProps {
 
 const IssueState: React.FC<{ problems: Problems; problemCount: number }> = props => {
   return props.problemCount ? (
-    <span className="text-warning">
+    <Typography.Text type="danger">
       <Tooltip
         overlayStyle={{ maxWidth: 'unset' }}
         title={<div className="bg-red-100">{<ProblemTree problems={props.problems} />}</div>}
@@ -327,7 +327,7 @@ const IssueState: React.FC<{ problems: Problems; problemCount: number }> = props
         <Icon type="warning" />
         <span className="ml-2">{props.problemCount}</span>
       </Tooltip>
-    </span>
+    </Typography.Text>
   ) : (
     <span className="text-success">
       <Icon type="check-circle" />

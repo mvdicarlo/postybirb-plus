@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { Problems } from './interfaces/problems.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
 import { DefaultOptions } from '../interfaces/default-options.interface';
+import { ValidationParts } from './interfaces/validation-parts.interface';
 
 @Injectable()
 export class ValidatorService {
@@ -19,7 +20,7 @@ export class ValidatorService {
       .filter(p => !p.isDefault)
       .forEach(p => {
         websiteProblems[p.accountId] = {
-          problems: this.validatePart(submission, p, defaultPart),
+          ...this.validatePart(submission, p, defaultPart),
           website: p.website,
           accountId: p.accountId,
         };
@@ -27,7 +28,7 @@ export class ValidatorService {
 
     return {
       [defaultPart.accountId]: {
-        problems: this.validateDefaultPart(submission, defaultPart, parts),
+        ...this.validateDefaultPart(submission, defaultPart, parts),
         website: defaultPart.website,
         accountId: defaultPart.accountId,
       },
@@ -39,7 +40,7 @@ export class ValidatorService {
     submission: Submission,
     part: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[] {
+  ): ValidationParts {
     const website: Website = this.websiteProvider.getWebsiteModule(part.website);
     const parsedPart = this.parsePart(part, defaultPart);
     switch (submission.type) {
@@ -54,7 +55,7 @@ export class ValidatorService {
     submission: Submission,
     defaultPart: SubmissionPart<DefaultOptions>,
     allParts: Array<SubmissionPart<any>>,
-  ): string[] {
+  ): ValidationParts {
     const problems: string[] = [];
     if (!defaultPart.data.rating) {
       problems.push('Please provide a rating.');
@@ -64,7 +65,7 @@ export class ValidatorService {
       problems.push('Please add one or more websites to post to.');
     }
 
-    return problems;
+    return { problems, warnings: [] };
   }
 
   private parsePart(

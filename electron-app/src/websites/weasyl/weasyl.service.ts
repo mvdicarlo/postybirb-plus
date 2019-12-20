@@ -13,6 +13,7 @@ import { WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
 import { DefaultWeasylOptions } from './weasyl.interface';
 import { Folder } from 'src/websites/interfaces/folder.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 
 @Injectable()
 export class Weasyl extends WebsiteService {
@@ -91,8 +92,9 @@ export class Weasyl extends WebsiteService {
     submission: FileSubmission,
     submissionPart: SubmissionPart<DefaultWeasylOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): string[] {
+  ): ValidationParts {
     const problems: string[] = [];
+    const warnings: string[] = [];
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       problems.push(`Weasyl does not support file format: ${submission.primary.mimetype}.`);
@@ -118,10 +120,13 @@ export class Weasyl extends WebsiteService {
       problems.push(`Weasyl limits ${type} to ${maxMB}MB`);
     }
 
-    return problems;
+    return { problems, warnings };
   }
 
-  validateStatusSubmission(submission: Submission, submissionPart: SubmissionPart<any>): string[] {
-    return [];
+  validateStatusSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<any>,
+  ): ValidationParts {
+    return { problems: [], warnings: [] };
   }
 }

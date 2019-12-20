@@ -343,6 +343,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
                 <DefaultFormSection
                   part={this.state.parts.default}
                   problems={[]}
+                  warnings={[]}
                   onUpdate={this.onUpdate}
                   submission={{} as any}
                 />
