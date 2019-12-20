@@ -7,7 +7,8 @@ import { SubmissionTemplateEvent } from './submission-template.events.enum';
 import { CreateSubmissionTemplateDto } from './models/create-template.dto';
 import { UpdateSubmissionTemplateDto } from './models/update-template.dto';
 import { SubmissionTemplate } from './submission-template.interface';
-import { DefaultOptions, Parts } from '../interfaces/submission-part.interface';
+import { Parts } from '../interfaces/submission-part.interface';
+import { DefaultOptions } from '../interfaces/default-options.interface';
 
 @Injectable()
 export class SubmissionTemplateService {
@@ -38,7 +39,6 @@ export class SubmissionTemplateService {
     const defaultPart: DefaultOptions = {
       title: '',
       rating: null,
-      useThumbnail: true,
       description: {
         overwriteDefault: false,
         value: '',

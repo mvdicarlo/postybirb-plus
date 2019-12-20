@@ -16,10 +16,11 @@ import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import {
-  SubmissionPart,
-  DefaultOptions
-} from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import moment from 'moment';
+import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
+import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
 import {
   Form,
   Button,
@@ -35,9 +36,6 @@ import {
   Popconfirm,
   Alert
 } from 'antd';
-import moment from 'moment';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
 
 interface Props {
   match: Match;
@@ -74,8 +72,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       value: ''
     },
     rating: null,
-    title: '',
-    useThumbnail: true
+    title: ''
   };
 
   state: SubmissionEditFormState = {
@@ -471,7 +468,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         </div>
       );
     }
-    
+
     if (!this.state.loading) {
       this.removeDeletedAccountParts();
       uiStore.setPendingChanges(this.formHasChanges());

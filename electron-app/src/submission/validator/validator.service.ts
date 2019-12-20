@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
-import { SubmissionPart, DefaultOptions } from '../interfaces/submission-part.interface';
+import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { Submission } from '../interfaces/submission.interface';
 import { Website } from 'src/websites/interfaces/website.interface';
 import * as _ from 'lodash';
 import { Problems } from './interfaces/problems.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
+import { DefaultOptions } from '../interfaces/default-options.interface';
 
 @Injectable()
 export class ValidatorService {

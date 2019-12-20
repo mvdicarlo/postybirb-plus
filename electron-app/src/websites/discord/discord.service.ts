@@ -1,17 +1,14 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { WebsiteService } from '../website.service';
-import { DefaultDiscordSubmissionOptions } from './discord.interface';
-import { DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
+import { DefaultDiscordOptions } from './discord.interface';
+import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import {
-  SubmissionPart,
-  DefaultOptions,
-} from 'src/submission/interfaces/submission-part.interface';
-import { DefaultWeasylSubmissionOptions } from '../weasyl/weasyl.interface';
+import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import WebsiteValidator from '../utils/website-validator.util';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
+import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 
 interface DiscordLoginData {
   name: string;
@@ -26,7 +23,7 @@ export class Discord extends WebsiteService {
   readonly acceptsFiles: string[] = []; // accepts all
 
   readonly defaultStatusOptions: any = {};
-  readonly defaultFileSubmissionOptions: DefaultDiscordSubmissionOptions = DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   async checkLoginStatus(data: UserAccount): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -54,7 +51,7 @@ export class Discord extends WebsiteService {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultWeasylSubmissionOptions>,
+    submissionPart: SubmissionPart<DefaultDiscordOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): string[] {
     const problems: string[] = [];

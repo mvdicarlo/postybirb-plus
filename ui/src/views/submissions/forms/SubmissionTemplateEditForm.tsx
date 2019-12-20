@@ -11,10 +11,11 @@ import { TreeNode } from 'antd/lib/tree-select';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import {
-  SubmissionPart,
-  DefaultOptions
-} from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionTemplate } from '../../../../../electron-app/src/submission/submission-template/submission-template.interface';
+import SubmissionTemplateService from '../../../services/submission-template.service';
+import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
 import {
   Form,
   Button,
@@ -26,9 +27,6 @@ import {
   Popconfirm,
   Alert
 } from 'antd';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import { SubmissionTemplate } from '../../../../../electron-app/src/submission/submission-template/submission-template.interface';
-import SubmissionTemplateService from '../../../services/submission-template.service';
 
 interface Props {
   match: Match;
@@ -61,8 +59,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
       value: ''
     },
     rating: null,
-    title: '',
-    useThumbnail: true
+    title: ''
   };
 
   state: SubmissionTemplateEditFormState = {

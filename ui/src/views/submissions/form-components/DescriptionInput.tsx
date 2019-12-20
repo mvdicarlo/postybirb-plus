@@ -2,9 +2,9 @@ import React from 'react';
 import * as sanitize from 'sanitize-html';
 import { inject, observer } from 'mobx-react';
 import { Editor } from '@tinymce/tinymce-react';
-import { DescriptionData } from '../../.././../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Form, Switch } from 'antd';
 import { DescriptionTemplateStore } from '../../../stores/description-template.store';
+import { DescriptionData } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
 
 interface Props {
   defaultValue: DescriptionData;

@@ -3,21 +3,19 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/interfaces/submission-section.interface';
-import { DefaultWeasylSubmissionOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
+import { DefaultWeasylOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
-import {
-  SubmissionPart,
-  DefaultOptions
-} from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Alert, Form, Input, Radio, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { DefaultOptions } from '../../../../electron-app/src/submission/interfaces/default-options.interface';
 
-const defaultOptions: DefaultWeasylSubmissionOptions = {
+const defaultOptions: DefaultWeasylOptions = {
   title: undefined,
   useThumbnail: true,
   notify: true,
@@ -42,7 +40,7 @@ export class Weasyl implements Website {
   );
 
   FileSubmissionForm = (
-    props: SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>
+    props: SubmissionSectionProps<FileSubmission, DefaultWeasylOptions>
   ) => <WeasylFileSubmissionForm key={props.part.accountId} {...props} />;
 
   NotificationSubmissionForm = (props: SubmissionSectionProps<Submission, DefaultOptions>) => (
@@ -60,15 +58,13 @@ interface WeasylFileSubmissionState {
 }
 
 export class WeasylFileSubmissionForm extends React.Component<
-  SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>,
+  SubmissionSectionProps<FileSubmission, DefaultWeasylOptions>,
   WeasylFileSubmissionState
 > {
   state: WeasylFileSubmissionState = {
     problems: [],
     folders: []
   };
-
-  private readonly defaultOptions: DefaultWeasylSubmissionOptions = _.cloneDeep(defaultOptions);
 
   private categoryMap = {
     IMAGE: [
@@ -165,7 +161,7 @@ export class WeasylFileSubmissionForm extends React.Component<
     ]
   };
 
-  constructor(props: SubmissionSectionProps<FileSubmission, DefaultWeasylSubmissionOptions>) {
+  constructor(props: SubmissionSectionProps<FileSubmission, DefaultWeasylOptions>) {
     super(props);
     this.state = {
       problems: props.problems || [],
@@ -185,31 +181,31 @@ export class WeasylFileSubmissionForm extends React.Component<
   }
 
   handleChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DefaultWeasylSubmissionOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DefaultWeasylOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.value;
     this.props.onUpdate(part);
   }
 
   handleTagChange(update: any) {
-    const part: SubmissionPart<DefaultWeasylSubmissionOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DefaultWeasylOptions> = _.cloneDeep(this.props.part);
     part.data.tags = update;
     this.props.onUpdate(part);
   }
 
   handleDescriptionChange(update) {
-    const part: SubmissionPart<DefaultWeasylSubmissionOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DefaultWeasylOptions> = _.cloneDeep(this.props.part);
     part.data.description = update;
     this.props.onUpdate(part);
   }
 
   handleSelectChange(fieldName: string, value: any) {
-    const part: SubmissionPart<DefaultWeasylSubmissionOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DefaultWeasylOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = value;
     this.props.onUpdate(part);
   }
 
   handleCheckboxChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DefaultWeasylSubmissionOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DefaultWeasylOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.checked;
     this.props.onUpdate(part);
   }

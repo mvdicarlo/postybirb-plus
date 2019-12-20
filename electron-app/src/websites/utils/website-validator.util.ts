@@ -1,6 +1,6 @@
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { TagData, DescriptionData } from 'src/submission/interfaces/submission-part.interface';
 import * as _ from 'lodash';
+import { TagData, DescriptionData } from 'src/submission/interfaces/default-options.interface';
 
 export default class WebsiteValidator {
   static supportsFileType(fileInfo: FileRecord, supportedFileTypes: string[]): boolean {
@@ -9,6 +9,7 @@ export default class WebsiteValidator {
     if (fileInfo.name) {
       extension = fileInfo.name.split('.').pop();
     }
+
     for (let i = 0; i < supportedFileTypes.length; i++) {
       if (
         (fileInfo.type && supportedFileTypes[i].includes(fileInfo.type)) ||

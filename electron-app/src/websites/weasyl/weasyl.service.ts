@@ -3,18 +3,16 @@ import Http from 'src/http/http.util';
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import {
-  SubmissionPart,
-  DefaultOptions,
-} from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import { UserAccount } from 'src/account/account.interface';
 import { WebsiteService } from 'src/websites/website.service';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import { DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
-import { DefaultWeasylSubmissionOptions } from './weasyl.interface';
+import { WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
+import { DefaultWeasylOptions } from './weasyl.interface';
 import { Folder } from 'src/websites/interfaces/folder.interface';
+import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 
 @Injectable()
 export class Weasyl extends WebsiteService {
@@ -24,7 +22,7 @@ export class Weasyl extends WebsiteService {
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
 
   readonly defaultStatusOptions: any = {};
-  readonly defaultFileSubmissionOptions: DefaultWeasylSubmissionOptions = DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly defaultFileSubmissionOptions: DefaultWeasylOptions = WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   parseDescription(text: string): string {
     throw new NotImplementedException('Method not implemented.');
@@ -66,34 +64,32 @@ export class Weasyl extends WebsiteService {
     const convertedFolders: Folder[] = [];
 
     const folders = res.body.folders || [];
-    for (let i = 0; i < folders.length; i++) {
-      const folder = folders[i];
-      const _folder: Folder = {
-        title: folder.title,
-        id: folder.folder_id,
+    folders.forEach(f => {
+      const folder: Folder = {
+        title: f.title,
+        id: f.folder_id,
       };
 
-      convertedFolders.push(_folder);
+      convertedFolders.push(folder);
 
-      if (folder.subfolders) {
-        for (let j = 0; j < folder.subfolders.length; j++) {
-          const subfolder = folder.subfolders[j];
-          const _subfolder: Folder = {
-            title: `${_folder.title} / ${subfolder.title}`,
-            id: subfolder.folder_id,
+      if (f.subfolders) {
+        f.subfolders.forEach(sf => {
+          const subfolder: Folder = {
+            title: `${folder.title} / ${sf.title}`,
+            id: sf.folder_id,
           };
 
-          convertedFolders.push(_subfolder);
-        }
+          convertedFolders.push(subfolder);
+        });
       }
-    }
+    });
 
     this.accountInformation.set(id, { folders: convertedFolders });
   }
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultWeasylSubmissionOptions>,
+    submissionPart: SubmissionPart<DefaultWeasylOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): string[] {
     const problems: string[] = [];

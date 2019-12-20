@@ -1,6 +1,6 @@
-import { DefaultOptions } from '../../submission/interfaces/submission-part.interface';
+import { DefaultFileOptions } from '../../submission/interfaces/default-options.interface';
 
-export interface DefaultDiscordSubmissionOptions extends DefaultOptions {
+export interface DefaultDiscordOptions extends DefaultFileOptions {
   embed: boolean;
   spoiler: boolean;
 }

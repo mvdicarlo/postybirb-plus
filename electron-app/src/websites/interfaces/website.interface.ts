@@ -1,11 +1,12 @@
 import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from './login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import {
-  SubmissionPart,
-  DefaultOptions,
-} from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
+import {
+  DefaultFileOptions,
+  DefaultOptions,
+} from 'src/submission/interfaces/default-options.interface';
 
 export interface Website {
   readonly BASE_URL: string;
@@ -30,9 +31,9 @@ export interface Website {
     options?: { minLength?: number; maxLength?: number; spaceReplace?: string },
   ): any;
   checkLoginStatus(data: UserAccount): Promise<LoginResponse>;
-  validateFileSubmission(
+  validateFileSubmission<T>(
     submission: Submission,
-    submissionPart: SubmissionPart<any>,
+    submissionPart: SubmissionPart<DefaultFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): string[];
   validateStatusSubmission(

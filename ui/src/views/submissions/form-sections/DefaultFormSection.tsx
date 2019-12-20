@@ -1,14 +1,12 @@
 import React from 'react';
 import _ from 'lodash';
-import {
-  DefaultOptions,
-  SubmissionPart
-} from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { SubmissionSectionProps } from '../interfaces/submission-section.interface';
 import TagInput from '../form-components/TagInput';
 import DescriptionInput from '../form-components/DescriptionInput';
 import { Form, Input, Radio, Alert } from 'antd';
 import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
+import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
 
 export default class DefaultFormSection extends React.Component<
   SubmissionSectionProps<Submission, DefaultOptions>

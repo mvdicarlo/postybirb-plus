@@ -6,8 +6,8 @@ import { TagGroupStore } from '../../stores/tag-group.store';
 import { TagGroup } from '../../../../electron-app/src/tag-group/tag-group.interface';
 import TagGroupService from '../../services/tag-group.service';
 import TagInput from '../submissions/form-components/TagInput';
-import { TagData } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
 import { Input, Button, message, Popconfirm, Spin, Empty, Card, Icon } from 'antd';
+import { TagData } from '../../../../electron-app/src/submission/interfaces/default-options.interface';
 
 interface Props {
   tagGroupStore?: TagGroupStore;

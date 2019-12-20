@@ -11,10 +11,13 @@ import { TreeNode } from 'antd/lib/tree-select';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import {
-  SubmissionPart,
-  DefaultOptions
-} from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import SubmissionSelectModal from '../submission-select/SubmissionSelectModal';
+import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import SubmissionService from '../../../services/submission.service';
+import SubmissionUtil from '../../../utils/submission.util';
+import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
 import {
   Form,
   Button,
@@ -26,11 +29,6 @@ import {
   Popconfirm,
   Alert
 } from 'antd';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import SubmissionSelectModal from '../submission-select/SubmissionSelectModal';
-import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
-import SubmissionService from '../../../services/submission.service';
-import SubmissionUtil from '../../../utils/submission.util';
 
 interface Props {
   match: Match;
@@ -63,8 +61,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
       value: ''
     },
     rating: null,
-    title: '',
-    useThumbnail: true
+    title: ''
   };
 
   state: MultiSubmissionEditFormState = {

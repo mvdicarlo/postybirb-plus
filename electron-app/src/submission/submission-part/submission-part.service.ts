@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SubmissionPartRepository } from './submission-part.repository';
-import { SubmissionPart, DefaultOptions } from '../interfaces/submission-part.interface';
+import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { Submission } from '../interfaces/submission.interface';
 import { Website } from 'src/websites/interfaces/website.interface';
 import * as _ from 'lodash';
 import { SubmissionType } from '../enums/submission-type.enum';
+import { DefaultOptions } from '../interfaces/default-options.interface';
 
 @Injectable()
 export class SubmissionPartService {
@@ -59,7 +60,6 @@ export class SubmissionPartService {
     const defaultPart: DefaultOptions = {
       title: title || submission.title,
       rating: null,
-      useThumbnail: true,
       description: {
         overwriteDefault: false,
         value: '',
