@@ -23,7 +23,8 @@ const defaultOptions: DefaultDiscordOptions = {
     value: ''
   },
   rating: null,
-  useThumbnail: true
+  useThumbnail: true,
+  autoScale: true
 };
 
 export class Discord implements Website {
@@ -120,6 +121,14 @@ export class DiscordFileSubmissionForm extends React.Component<
           <Form.Item>
             <div className="flex">
               <div className="w-full">
+                <div>
+                  <Checkbox
+                    checked={data.useThumbnail}
+                    onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
+                  >
+                    Downscale images to fit size limit
+                  </Checkbox>
+                </div>
                 <div>
                   <Checkbox
                     checked={data.embed}

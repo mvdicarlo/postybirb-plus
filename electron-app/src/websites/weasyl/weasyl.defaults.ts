@@ -15,4 +15,5 @@ export const WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS: DefaultWeasylOptions = {
   },
   rating: null,
   useThumbnail: true,
+  autoScale: true,
 };

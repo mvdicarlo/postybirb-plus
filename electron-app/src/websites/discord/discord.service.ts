@@ -10,6 +10,7 @@ import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 
 interface DiscordLoginData {
   name: string;
@@ -57,11 +58,24 @@ export class Discord extends WebsiteService {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
+    const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const { size } = submission.primary;
-    if (WebsiteValidator.MBtoBytes(8) < size) {
-      problems.push(`Discord limits files to 8MB`);
-    }
+    const files = [submission.primary, ...(submission.additional || [])];
+    files
+      .filter(file => !WebsiteValidator.supportsFileType(file, this.acceptsFiles))
+      .forEach(file => problems.push(`Does not support file format: (${file.name}) ${file.mimetype}.`));
+
+    files.forEach(file => {
+      const { type, size, name } = file;
+      const maxMB: number = 8;
+      if (WebsiteValidator.MBtoBytes(maxMB) < size) {
+        if (isAutoscaling && type === FileSubmissionType.IMAGE) {
+          warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+        } else {
+          problems.push(`Discord limits ${file.mimetype} to ${maxMB}MB`);
+        }
+      }
+    });
 
     return { problems, warnings };
   }

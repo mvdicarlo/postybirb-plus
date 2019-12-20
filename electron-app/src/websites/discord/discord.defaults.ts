@@ -13,4 +13,5 @@ export const DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS: DefaultDiscordOptions = {
   },
   rating: null,
   useThumbnail: true,
+  autoScale: true,
 };

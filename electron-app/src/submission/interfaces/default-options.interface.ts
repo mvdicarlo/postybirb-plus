@@ -9,6 +9,7 @@ export interface DefaultOptions {
 
 export interface DefaultFileOptions extends DefaultOptions {
   useThumbnail: boolean;
+  autoScale: boolean;
 }
 
 export interface TagData {

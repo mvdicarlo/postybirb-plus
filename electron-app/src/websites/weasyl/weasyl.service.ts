@@ -95,30 +95,49 @@ export class Weasyl extends WebsiteService {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
-
-    if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(`Weasyl does not support file format: ${submission.primary.mimetype}.`);
-    }
+    const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (WebsiteValidator.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
-      problems.push('Weasyl requires at least 2 tags.');
+      problems.push('Requires at least 2 tags.');
     }
 
-    const { type, size, name } = submission.primary;
-    let maxMB: number = 10;
-    if (type === FileSubmissionType.VIDEO || type === FileSubmissionType.AUDIO) {
-      maxMB = 15;
-    } else if (type === FileSubmissionType.TEXT) {
-      if (name.includes('.md') || name.includes('.md')) {
-        maxMB = 2;
-      } else {
-        maxMB = 10; // assume pdf
+    if (submissionPart.data.folder) {
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(submissionPart.accountId),
+        'folders',
+        [],
+      );
+      if (folders.find(f => f.id === submissionPart.data.folder)) {
+        warnings.push('Folder not found.');
       }
     }
 
-    if (WebsiteValidator.MBtoBytes(maxMB) < size) {
-      problems.push(`Weasyl limits ${type} to ${maxMB}MB`);
-    }
+    const files = [submission.primary, ...(submission.additional || [])];
+    files
+      .filter(file => !WebsiteValidator.supportsFileType(file, this.acceptsFiles))
+      .forEach(file => problems.push(`Does not support file format: (${file.name}) ${file.mimetype}.`));
+
+    files.forEach(file => {
+      const { type, size, name } = file;
+      let maxMB: number = 10;
+      if (type === FileSubmissionType.VIDEO || type === FileSubmissionType.AUDIO) {
+        maxMB = 15;
+      } else if (type === FileSubmissionType.TEXT) {
+        if (name.includes('.md') || name.includes('.md')) {
+          maxMB = 2;
+        } else {
+          maxMB = 10; // assume pdf
+        }
+      }
+
+      if (WebsiteValidator.MBtoBytes(maxMB) < size) {
+        if (isAutoscaling && type === FileSubmissionType.IMAGE) {
+          warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+        } else {
+          problems.push(`Weasyl limits ${file.mimetype} to ${maxMB}MB`);
+        }
+      }
+    });
 
     return { problems, warnings };
   }

@@ -18,10 +18,12 @@ import { DefaultOptions } from '../../../../electron-app/src/submission/interfac
 const defaultOptions: DefaultWeasylOptions = {
   title: undefined,
   useThumbnail: true,
+  autoScale: true,
   notify: true,
   critique: false,
   folder: null,
   category: null,
+  rating: null,
   tags: {
     extendDefault: true,
     value: []
@@ -29,8 +31,7 @@ const defaultOptions: DefaultWeasylOptions = {
   description: {
     overwriteDefault: false,
     value: ''
-  },
-  rating: null
+  }
 };
 
 export class Weasyl implements Website {
@@ -275,6 +276,14 @@ export class WeasylFileSubmissionForm extends React.Component<
           <Form.Item>
             <div className="flex">
               <div className="w-1/2">
+                <div>
+                  <Checkbox
+                    checked={data.useThumbnail}
+                    onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
+                  >
+                    Downscale images to fit size limit
+                  </Checkbox>
+                </div>
                 <div>
                   <Checkbox
                     checked={data.useThumbnail}
