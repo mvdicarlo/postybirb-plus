@@ -20,7 +20,9 @@ import {
   Tooltip,
   Tree,
   Typography,
-  message
+  message,
+  Form,
+  InputNumber
 } from 'antd';
 import moment from 'moment';
 import SubmissionSelectModal from './submission-select/SubmissionSelectModal';
@@ -36,13 +38,22 @@ interface State {
   search: string;
   deleteModalVisible: boolean;
   postModalVisible: boolean;
+  scheduleManyModalVisible: boolean;
 }
 
 export class Submissions extends React.Component<Props, State> {
   state: State = {
     search: '',
     deleteModalVisible: false,
-    postModalVisible: false
+    postModalVisible: false,
+    scheduleManyModalVisible: false
+  };
+
+  scheduleManyPeriod: any = {
+    d: 0,
+    h: 0,
+    m: 1,
+    time: moment()
   };
 
   handleSearch = ({ target }) => this.setState({ search: target.value.toLowerCase() });
@@ -74,14 +85,6 @@ export class Submissions extends React.Component<Props, State> {
                   <Input.Search onChange={this.handleSearch} style={{ width: 200 }} />
                 </div>
                 <div className="text-right">
-                  <Button
-                    type="primary"
-                    className="mr-1"
-                    onClick={() => this.setState({ postModalVisible: true })}
-                    disabled={!submissions.length}
-                  >
-                    Post Many
-                  </Button>
                   <Link
                     className={submissions.length ? 'pointer-none' : ''}
                     to={`/edit/multiple-submissions/${_.get(
@@ -95,11 +98,27 @@ export class Submissions extends React.Component<Props, State> {
                     </Button>
                   </Link>
                   <Button
+                    className="mr-1"
                     type="danger"
                     onClick={() => this.setState({ deleteModalVisible: true })}
                     disabled={!submissions.length}
                   >
                     Delete Many
+                  </Button>
+                  <Button
+                    type="primary"
+                    className="mr-1"
+                    onClick={() => this.setState({ scheduleManyModalVisible: true })}
+                    disabled={!submissions.length}
+                  >
+                    Schedule Many
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={() => this.setState({ postModalVisible: true })}
+                    disabled={!submissions.length}
+                  >
+                    Post Many
                   </Button>
                 </div>
                 <SubmissionSelectModal
@@ -131,6 +150,60 @@ export class Submissions extends React.Component<Props, State> {
                 >
                   <p>Submissions that have a schedule time will be scheduled</p>
                 </SubmissionSelectModal>
+                <SubmissionSelectModal
+                  visible={this.state.scheduleManyModalVisible}
+                  validOnly={true}
+                  title="Schedule"
+                  multiple={true}
+                  selectAll={true}
+                  submissionType={_.get(
+                    this.props.submissions[0],
+                    'submission.type',
+                    SubmissionType.FILE
+                  )}
+                  onClose={() => this.setState({ scheduleManyModalVisible: false })}
+                  onOk={this.postSubmissions.bind(this)}
+                >
+                  <Form layout="vertical">
+                    <Form.Item label="Starting At" required>
+                      <DatePicker
+                        className="w-full"
+                        defaultValue={this.scheduleManyPeriod.time}
+                        format="YYYY-MM-DD HH:mm"
+                        showTime={{ format: 'HH:mm' }}
+                        onChange={value =>
+                          (this.scheduleManyPeriod.time = value ? value.valueOf() : undefined)
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item label="Time Between">
+                      <Form.Item label="Days">
+                        <InputNumber
+                          defaultValue={this.scheduleManyPeriod.d}
+                          min={0}
+                          onChange={value => (this.scheduleManyPeriod.d = value)}
+                          precision={0}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Hours">
+                        <InputNumber
+                          defaultValue={this.scheduleManyPeriod.h}
+                          min={0}
+                          onChange={value => (this.scheduleManyPeriod.h = value)}
+                          precision={0}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Minutes">
+                        <InputNumber
+                          defaultValue={this.scheduleManyPeriod.m}
+                          min={0}
+                          onChange={value => (this.scheduleManyPeriod.m = value)}
+                          precision={0}
+                        />
+                      </Form.Item>
+                    </Form.Item>
+                  </Form>
+                </SubmissionSelectModal>
               </div>
             }
             footer={this.props.children}
@@ -139,7 +212,7 @@ export class Submissions extends React.Component<Props, State> {
             loading={this.props.isLoading}
             dataSource={submissions}
             renderItem={(item: SubmissionPackage<Submission>) => <ListItem item={item} />}
-          ></List>
+          />
         </div>
       </div>
     );
