@@ -409,7 +409,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
               }
             >
               <Button className="mr-1" disabled={!this.formHasChanges()}>
-                Undo Changes
+                Undo
               </Button>
             </Popconfirm>
 

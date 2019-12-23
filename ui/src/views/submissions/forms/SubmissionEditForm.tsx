@@ -34,7 +34,8 @@ import {
   Icon,
   DatePicker,
   Popconfirm,
-  Alert
+  Alert,
+  Tooltip
 } from 'antd';
 
 interface Props {
@@ -601,6 +602,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               <Form.Item>
                 <Typography.Title level={3}>
                   Defaults
+                  <Tooltip title="The default fields are used by all selected websites. You can override these defaults inside of each website section.">
+                    <Icon className="text-sm ml-1 text-primary" type="question-circle" />
+                  </Tooltip>
                   <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
                 </Typography.Title>
                 <DefaultFormSection
@@ -711,7 +715,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               }
             >
               <Button className="mr-1" disabled={!this.formHasChanges()}>
-                Undo Changes
+                Undo
               </Button>
             </Popconfirm>
 
