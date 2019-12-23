@@ -3,6 +3,7 @@ import { observable, action, autorun, computed } from 'mobx';
 const STORE_KEY: string = 'UIState';
 
 interface UIState {
+  activeNav: string;
   agreementAccepted: boolean;
   hasPendingChanges: boolean;
   navCollapsed: boolean;
@@ -19,6 +20,7 @@ export class UIStore {
     navId: 0,
     theme: 'light',
     websiteFilter: [],
+    activeNav: 'home'
   };
 
   constructor() {
@@ -63,6 +65,12 @@ export class UIStore {
     this.state.agreementAccepted = true;
   }
 
+  @action
+  setActiveNav(nav: string) {
+    if (nav !== this.state.activeNav) {
+      this.state.activeNav = nav;
+    }
+  }
 }
 
 export const uiStore = new UIStore();

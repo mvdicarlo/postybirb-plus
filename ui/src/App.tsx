@@ -25,7 +25,7 @@ export default class App extends React.Component {
         uiStore={uiStore}
         updateStore={updateStore}
       >
-        <AppLayout></AppLayout>
+        <AppLayout />
       </Provider>
     );
   }

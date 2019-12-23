@@ -10,6 +10,7 @@ import { Match } from 'react-router-dom';
 import { Upload, Icon, message, Tabs, Button, Badge, Modal, Input } from 'antd';
 import SubmissionService from '../../services/submission.service';
 import ScheduledSubmissions from './ScheduledSubmissions';
+import { uiStore } from '../../stores/ui.store';
 const { Dragger } = Upload;
 
 interface Props {
@@ -21,9 +22,12 @@ interface Props {
 @observer
 export default class SubmissionView extends React.Component<Props> {
   type: SubmissionType = SubmissionType.FILE;
+  defaultKey: string = 'submissions';
 
   constructor(props: Props) {
     super(props);
+    this.defaultKey = props.match.params.view || 'submissions';
+    uiStore.setActiveNav('update'); // force an update
     switch (props.match.path.split('/').pop()) {
       case SubmissionType.FILE:
         this.type = SubmissionType.FILE;
@@ -61,7 +65,7 @@ export default class SubmissionView extends React.Component<Props> {
     const queuedSubmissions = submissions.filter(s => s.submission.isPosting);
 
     return (
-      <Tabs>
+      <Tabs defaultActiveKey={this.defaultKey}>
         <Tabs.TabPane
           tab={
             <div>

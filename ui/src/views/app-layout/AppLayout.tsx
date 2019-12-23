@@ -37,7 +37,6 @@ interface Props {
 }
 
 interface State {
-  currentNavActive: string;
   accountsVisible: boolean;
   descriptionTemplateVisible: boolean;
   settingsVisible: boolean;
@@ -46,9 +45,8 @@ interface State {
 
 @inject('uiStore')
 @observer
-export default class App extends React.Component<Props, State> {
+export default class AppLayout extends React.Component<Props, State> {
   public state: any = {
-    currentNavActive: 'home',
     accountsVisible: false,
     descriptionTemplateVisible: false,
     settingsVisible: false,
@@ -59,7 +57,7 @@ export default class App extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state.currentNavActive = this.getCurrentNavId();
+    props.uiStore!.setActiveNav(this.getCurrentNavId())
   }
 
   getCurrentNavId(): string {
@@ -91,7 +89,7 @@ export default class App extends React.Component<Props, State> {
   };
 
   handleNavSelectChange = ({ key }) => {
-    if (key !== '-1') this.setState({ currentNavActive: key });
+    this.props.uiStore!.setActiveNav(key);
   };
 
   getDiscordIcon() {
@@ -141,6 +139,7 @@ export default class App extends React.Component<Props, State> {
     const { uiStore } = this.props;
     const state = uiStore!.state;
     message.config({ prefixCls: `ant-${this.props.uiStore!.state.theme}-message` });
+    this.props.uiStore!.setActiveNav(this.getCurrentNavId());
     return (
       <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>
         <Modal
@@ -205,7 +204,7 @@ export default class App extends React.Component<Props, State> {
             <Menu
               mode="inline"
               theme="dark"
-              selectedKeys={[this.state.currentNavActive]}
+              selectedKeys={[this.props.uiStore!.state.activeNav]}
               onSelect={this.handleNavSelectChange}
               defaultOpenKeys={['submissions', 'templates']}
             >
@@ -383,7 +382,7 @@ export default class App extends React.Component<Props, State> {
             <Content className="container primary-layout-container">
               <div className="pt-3 px-3 h-full overflow-y-auto" id="primary-container">
                 <Route exact path="/" component={Home} />
-                <Route path={`/${SubmissionType.FILE}`} component={SubmissionsView} />
+                <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
                 <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
                 <Route path={'/submission-templates'} component={SubmissionTemplates} />
                 <Route path="/edit/submission/:id" component={SubmissionEditForm} />

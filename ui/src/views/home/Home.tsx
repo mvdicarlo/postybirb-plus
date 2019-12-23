@@ -34,22 +34,28 @@ export default class Home extends React.Component<Props> {
           >
             <Card.Meta description="Create and manage multimedia submissions to be sent to multiple websites." />
             {this.props.submissionStore!.fileSubmissions.length ? (
-              <Descriptions layout="vertical">
-                <Descriptions.Item label="Incomplete">
+              <Descriptions className="mt-2" colon={false} layout="vertical">
+                <Descriptions.Item
+                  label={<Link to={`/${SubmissionType.FILE}/submissions`}>Incomplete</Link>}
+                >
                   {
                     this.props.submissionStore!.fileSubmissions.filter(
                       s => !s.submission.isPosting && !s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
-                <Descriptions.Item label="Scheduled">
+                <Descriptions.Item
+                  label={<Link to={`/${SubmissionType.FILE}/scheduled`}>Scheduled</Link>}
+                >
                   {
                     this.props.submissionStore!.fileSubmissions.filter(
                       s => !s.submission.isPosting && s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
-                <Descriptions.Item label="Posting">
+                <Descriptions.Item
+                  label={<Link to={`/${SubmissionType.FILE}/posting`}>Posting</Link>}
+                >
                   {
                     this.props.submissionStore!.fileSubmissions.filter(s => s.submission.isPosting)
                       .length
@@ -65,22 +71,28 @@ export default class Home extends React.Component<Props> {
           >
             <Card.Meta description="Create and manage text based submissions used to send blog, journal, or status posts to multiple websites." />
             {this.props.submissionStore!.notificationSubmissions.length ? (
-              <Descriptions layout="vertical">
-                <Descriptions.Item label="Incomplete">
+              <Descriptions className="mt-2" colon={false} layout="vertical">
+                <Descriptions.Item
+                  label={<Link to={`/${SubmissionType.NOTIFICATION}/submissions`}>Incomplete</Link>}
+                >
                   {
                     this.props.submissionStore!.notificationSubmissions.filter(
                       s => !s.submission.isPosting && !s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
-                <Descriptions.Item label="Scheduled">
+                <Descriptions.Item
+                  label={<Link to={`/${SubmissionType.NOTIFICATION}/scheduled`}>Scheduled</Link>}
+                >
                   {
                     this.props.submissionStore!.notificationSubmissions.filter(
                       s => !s.submission.isPosting && s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
-                <Descriptions.Item label="Posting">
+                <Descriptions.Item
+                  label={<Link to={`/${SubmissionType.NOTIFICATION}/posting`}>Posting</Link>}
+                >
                   {
                     this.props.submissionStore!.notificationSubmissions.filter(
                       s => s.submission.isPosting
