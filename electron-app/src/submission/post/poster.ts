@@ -4,6 +4,11 @@ import { Submission } from '../interfaces/submission.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { Website } from '../../websites/interfaces/website.interface';
 import { AccountService } from '../../account/account.service';
+import { PostData } from './interfaces/post-data.interface';
+import { DefaultOptions, DefaultFileOptions } from '../interfaces/default-options.interface';
+import WebsiteValidator from 'src/websites/utils/website-validator.util';
+import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
+import { FilePostData } from './interfaces/file-post-data.interface';
 
 export default class Poster extends EventEmitter {
   cancelled: boolean = false;
@@ -17,17 +22,22 @@ export default class Poster extends EventEmitter {
     private website: Website,
     private submission: Submission,
     private part: SubmissionPart<any>,
+    private defaultPart: SubmissionPart<DefaultOptions>,
     private waitForExternalStart: boolean,
     private timeToPost: number,
   ) {
     super();
     this.postAtTimeout = setTimeout(this.post, timeToPost);
-    // TODO sources from submission
+    this.sources = [...submission.sources];
   }
 
   private post() {
     this.isReady = true;
-    this.emit('ready', { id: this.submission.id, accountId: this.part.accountId });
+    this.emit('ready', {
+      id: this.submission.id,
+      accountId: this.part.accountId,
+      at: this.waitForExternalStart,
+    });
     if (!this.waitForExternalStart) {
       this.performPost();
     }
@@ -58,14 +68,64 @@ export default class Poster extends EventEmitter {
       }
 
       // TODO create post object
+      const data: PostData<Submission> = {
+        description: WebsiteValidator.getDescription(
+          this.defaultPart.data.description,
+          this.part.data.description,
+        ),
+        options: this.part.data,
+        part: this.part,
+        rating: this.part.data.rating || this.defaultPart.data.rating,
+        sources: this.sources,
+        submission: this.submission,
+        tags: WebsiteValidator.getTags(this.defaultPart.data.tags, this.part.data.tags),
+        title: this.part.data.title || this.defaultPart.data.title || this.submission.title,
+      };
 
-      if (this.cancelled) {
-        this.emit('cancelled', {
-          id: this.submission.id,
-          accountId: this.part.accountId,
-          cancelled: this.cancelled,
-        });
-        return;
+      if (this.isFileSubmission(this.submission)) {
+        const fileData: FilePostData = data as FilePostData;
+        fileData.primary = {
+          buffer: await fs.readFile(this.submission.primary.location),
+          options: {
+            contentType: this.submission.primary.mimetype,
+            filename: this.submission.primary.name,
+          },
+        };
+
+        if (this.submission.thumbnail && (this.part.data as DefaultFileOptions).useThumbnail) {
+          fileData.thumbnail = {
+            buffer: await fs.readFile(this.submission.thumbnail.location),
+            options: {
+              contentType: this.submission.thumbnail.mimetype,
+              filename: this.submission.thumbnail.name,
+            },
+          };
+        }
+
+        const additional = (this.submission.additional || []).filter(
+          record => !record.ignoredAccounts!.includes(this.part.accountId),
+        );
+
+        fileData.additional = await Promise.all(
+          additional.map(async record => {
+            return {
+              buffer: await fs.readFile(record.location),
+              options: {
+                contentType: record.mimetype,
+                filename: record.name,
+              },
+            };
+          }),
+        );
+
+        if (this.cancelled) {
+          this.emit('cancelled', {
+            id: this.submission.id,
+            accountId: this.part.accountId,
+            cancelled: this.cancelled,
+          });
+          return;
+        }
       }
 
       this.isPosting = true;
@@ -73,8 +133,10 @@ export default class Poster extends EventEmitter {
         id: this.submission.id,
         accountId: this.part.accountId,
       });
-      // TODO do post
+
+      // TODO post
     } catch (err) {
+      // TODO better error emit for better message
       this.emit('error', err);
       this.emit('done', {
         id: this.submission.id,
@@ -84,6 +146,10 @@ export default class Poster extends EventEmitter {
         cancelled: this.cancelled,
       });
     }
+  }
+
+  private isFileSubmission(submission: Submission): submission is FileSubmission {
+    return !!(submission as FileSubmission).primary;
   }
 
   addSource(source: string) {

@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef, BadRequestException } from '@nestjs/common';
 import * as _ from 'lodash';
 import { SubmissionService } from '../submission.service';
 import { Submission } from '../interfaces/submission.interface';
@@ -7,6 +7,9 @@ import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import Poster from './poster';
+import { AccountService } from 'src/account/account.service';
+import { DefaultOptions } from '../interfaces/default-options.interface';
+import { SubmissionPart } from '../interfaces/submission-part.interface';
 
 @Injectable()
 export class PostService {
@@ -27,11 +30,13 @@ export class PostService {
     [SubmissionType.NOTIFICATION]: [],
   };
 
+  // TODO save this somewhere
   private accountPostTimeMap: { [key: string]: number } = {};
 
   constructor(
     @Inject(forwardRef(() => SubmissionService))
     private readonly submissionService: SubmissionService,
+    private readonly accountService: AccountService,
     private readonly websites: WebsiteProvider,
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
@@ -95,10 +100,31 @@ export class PostService {
 
     if (isValid) {
       const parts = await this.partService.getPartsForSubmission(submission.id);
-      // TODO create poster parts and listen
+      const [defaultPart] = parts.filter(p => p.isDefault);
+      // TODO add listeners to posters
+      this.postingParts[submission.type] = parts
+        .filter(p => !p.isDefault)
+        .map(p => this.createPoster(submission, p, defaultPart));
     } else {
-      // TODO throw
+      throw new BadRequestException('Submission has problems');
     }
+  }
+
+  private createPoster(
+    submission: Submission,
+    part: SubmissionPart<any>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): Poster {
+    // TODO create real time waiter
+    return new Poster(
+      this.accountService,
+      this.websites.getWebsiteModule(part.website),
+      submission,
+      part,
+      defaultPart,
+      this.websites.getWebsiteModule(part.website).acceptsSourceUrls,
+      4000,
+    );
   }
 
   private notifyPostingStateChanged = _.debounce(

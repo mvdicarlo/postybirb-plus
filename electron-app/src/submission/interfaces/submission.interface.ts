@@ -8,6 +8,7 @@ export interface Submission {
   isQueued?: boolean;
   order: number;
   schedule: SubmissionSchedule;
+  sources: string[];
   title: string;
   type: SubmissionType;
 }

@@ -4,6 +4,7 @@ import { autoUpdater } from 'electron-updater';
 import { BrowserWindow } from 'electron';
 import * as logger from 'electron-log';
 import { AppGlobal } from 'src/app-global.interface';
+import { PostService } from 'src/submission/post/post.service';
 
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
@@ -35,7 +36,10 @@ export class UpdateService {
     version: '',
   };
 
-  constructor(private readonly eventEmitter: EventsGateway) {
+  constructor(
+    private readonly eventEmitter: EventsGateway,
+    private readonly postService: PostService,
+  ) {
     logger.transports.file.level = 'info';
     autoUpdater.logger = logger;
     autoUpdater.autoDownload = false;
@@ -74,9 +78,8 @@ export class UpdateService {
       this.updateAvailable.percent = 100;
       this.updateAvailable.isUpdating = false;
       this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
-      // TODO need to check for posting status
-      const isPosting: boolean = false;
-      if (!isPosting) {
+
+      if (!this.postService.isCurrentlyPostingToAny()) {
         BrowserWindow.getAllWindows().forEach(w => {
           w.destroy();
         });
