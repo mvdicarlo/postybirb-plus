@@ -4,6 +4,7 @@ import { SubmissionOverwrite } from '../../../electron-app/src/submission/interf
 import { FormSubmissionPart } from '../views/submissions/interfaces/form-submission-part.interface';
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
+import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
 
 export default class SubmissionService {
   static checkProblems(id: string, parts: Array<FormSubmissionPart<any>>) {
@@ -54,6 +55,10 @@ export default class SubmissionService {
 
   static setPostAt(id: string, time: number | undefined) {
     return axios.patch(`/submission/set/postAt/${id}`, { time });
+  }
+
+  static updateAdditionalFileIgnoredAccounts(id: string, record: FileRecord) {
+    return axios.patch(`/submission/update/additional/${id}`, record);
   }
 
   static updateSubmission(submissionPackage: SubmissionUpdate) {

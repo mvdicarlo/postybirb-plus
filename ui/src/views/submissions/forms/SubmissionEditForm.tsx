@@ -21,6 +21,8 @@ import moment from 'moment';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
+import { FileRecord } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
+
 import {
   Form,
   Button,
@@ -45,7 +47,6 @@ interface Props {
 }
 
 export interface SubmissionEditFormState {
-  additionalFileList: any[];
   loading: boolean;
   parts: { [key: string]: FormSubmissionPart<any> };
   postAt: number | undefined;
@@ -77,16 +78,15 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   };
 
   state: SubmissionEditFormState = {
-    submission: undefined,
-    problems: {},
-    parts: {},
+    hasError: false,
     loading: true,
-    touched: false,
-    removedParts: [],
-    additionalFileList: [],
+    parts: {},
     postAt: undefined,
+    problems: {},
+    removedParts: [],
+    submission: undefined,
     submissionType: SubmissionType.FILE,
-    hasError: false
+    touched: false
   };
 
   constructor(props: Props) {
@@ -98,7 +98,6 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         this.setState({
           ...this.state,
           ...data,
-          additionalFileList: this.getAdditionalFileList(data.submission.additional),
           loading: false,
           postAt: data.submission.schedule.postAt,
           submissionType: data.submission.type
@@ -346,22 +345,6 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       }/${encodeURIComponent(file['path'])}`
     );
 
-  additionalFileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
-    const { status } = info.file;
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-      this.setState({
-        submission: info.file.response.submission,
-        problems: info.file.response.problems,
-        additionalFileList: this.getAdditionalFileList(info.file.response.submission.additional)
-      });
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    } else {
-      this.setState({ additionalFileList: info.fileList });
-    }
-  };
-
   fileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
     const { status } = info.file;
     if (status === 'done') {
@@ -387,8 +370,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     }
   }
 
-  removeAdditionalFile(file: any) {
-    SubmissionService.removeAdditionalFile(this.state.submission!.id, file.uid)
+  removeAdditionalFile(file: FileRecord) {
+    SubmissionService.removeAdditionalFile(this.state.submission!.id, file.location)
       .then(({ data }) => {
         this.setState({ submission: data.submission, problems: data.problems });
       })
@@ -397,16 +380,17 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       });
   }
 
-  getAdditionalFileList(additional: any[] = []): any[] {
-    return additional.map(f => ({
-      uid: f.location,
-      name: f.name,
-      status: 'done',
-      url: f.preview,
-      size: f.size,
-      type: f.type
-    }));
+  handleAdditionalIgnoredAccounts(record: FileRecord, value: string[]) {
+    record.ignoredAccounts = value;
+    this.updateAdditionalIgnoredAccounts(record);
   }
+
+  updateAdditionalIgnoredAccounts = _.debounce((record: FileRecord) => {
+    SubmissionService.updateAdditionalFileIgnoredAccounts(
+      this.state.submission!.id,
+      record
+    ).finally(this.checkProblems);
+  }, 1000);
 
   componentWillUnmount() {
     uiStore.setPendingChanges(false);
@@ -559,27 +543,49 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     </Card>
                   </div>
                   <div>
-                    <Card title="Additional Files" size="small" className="mt-2">
-                      <Upload
-                        onChange={this.additionalFileUploadChange}
-                        action={this.additionalFileChangeAction}
-                        multiple={false}
-                        listType="picture-card"
-                        showUploadList={{
-                          showRemoveIcon: true,
-                          showDownloadIcon: false,
-                          showPreviewIcon: false
-                        }}
-                        fileList={this.state.additionalFileList}
-                        onRemove={this.removeAdditionalFile.bind(this)}
-                      >
-                        {((this.state.submission as FileSubmission).additional || []).length < 8 ? (
-                          <div>
-                            <Icon type="plus" />
-                            <div className="ant-light-upload-text ant-dark-upload-text">Add</div>
-                          </div>
-                        ) : null}
-                      </Upload>
+                    <Card
+                      title="Additional Files"
+                      size="small"
+                      className="mt-2"
+                      extra={
+                        <Upload
+                          onChange={this.fileUploadChange}
+                          action={this.additionalFileChangeAction}
+                          multiple={false}
+                          showUploadList={false}
+                        >
+                          <span className="text-link">Add</span>
+                        </Upload>
+                      }
+                    >
+                      <div className="flex flex-wrap">
+                        {((this.state.submission! as FileSubmission).additional || []).map(f => {
+                          return (
+                            <Card
+                              size="small"
+                              className="w-1/4"
+                              type="inner"
+                              actions={[
+                                <Icon type="delete" onClick={() => this.removeAdditionalFile(f)} />
+                              ]}
+                              cover={<img alt={f.name} src={f.preview} />}
+                            >
+                              <TreeSelect
+                                multiple
+                                treeCheckable={true}
+                                treeDefaultExpandAll={true}
+                                treeNodeFilterProp="title"
+                                allowClear={true}
+                                defaultValue={f.ignoredAccounts}
+                                treeData={this.getWebsiteTreeData()}
+                                onChange={value => this.handleAdditionalIgnoredAccounts(f, value)}
+                                placeholder="Ignored accounts"
+                                maxTagCount={0}
+                              />
+                            </Card>
+                          );
+                        })}
+                      </div>
                     </Card>
                   </div>
                 </Form.Item>

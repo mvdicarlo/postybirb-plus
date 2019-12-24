@@ -9,4 +9,5 @@ export interface FileRecord {
   preview: string;
   size: number;
   type: FileSubmissionType;
+  ignoredAccounts?: string[];
 }

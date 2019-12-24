@@ -23,6 +23,7 @@ import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { ValidatorService } from './validator/validator.service';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
+import { FileRecord } from './file-submission/interfaces/file-record.interface';
 
 @Injectable()
 export class SubmissionService {
@@ -335,5 +336,24 @@ export class SubmissionService {
     const validated = await this.validate(updated);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
     return validated;
+  }
+
+  async updateFileSubmissionAdditionalFile(id: string, record: FileRecord) {
+    this.logger.debug(record, 'Updating Additional File');
+    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    if (submission.additional) {
+      const recordToUpdate: FileRecord = submission.additional.find(
+        r => r.location === record.location,
+      );
+      if (recordToUpdate) {
+        recordToUpdate.ignoredAccounts = record.ignoredAccounts || [];
+        this.repository.update(id, { additional: submission.additional });
+
+        this.eventEmitter.emitOnComplete(
+          SubmissionEvent.UPDATED,
+          Promise.all([this.validate(submission)]),
+        );
+      }
+    }
   }
 }

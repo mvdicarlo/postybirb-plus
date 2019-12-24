@@ -136,6 +136,7 @@ export class FileSubmissionService {
       preview: locations.thumbnailLocation,
       size: file.buffer.length,
       type: getSubmissionType(file.mimetype, file.originalname),
+      ignoredAccounts: [],
     });
 
     return copy;

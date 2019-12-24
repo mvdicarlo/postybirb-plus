@@ -60,10 +60,17 @@ export class Discord extends WebsiteService {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const files = [submission.primary, ...(submission.additional || [])];
+    const files = [
+      submission.primary,
+      ...(submission.additional || []).filter(
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+      ),
+    ];
     files
       .filter(file => !WebsiteValidator.supportsFileType(file, this.acceptsFiles))
-      .forEach(file => problems.push(`Does not support file format: (${file.name}) ${file.mimetype}.`));
+      .forEach(file =>
+        problems.push(`Does not support file format: (${file.name}) ${file.mimetype}.`),
+      );
 
     files.forEach(file => {
       const { type, size, name } = file;

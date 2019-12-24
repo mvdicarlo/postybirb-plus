@@ -17,6 +17,7 @@ import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { SubmissionPart } from './interfaces/submission-part.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { FileRecord } from './file-submission/interfaces/file-record.interface';
 
 @Controller('submission')
 export class SubmissionController {
@@ -118,5 +119,10 @@ export class SubmissionController {
   @UseInterceptors(FileInterceptor('file'))
   async addAdditionalFile(@UploadedFile() file, @Param() params) {
     return this.service.addFileSubmissionAdditionalFile(file, params.id, params.path);
+  }
+
+  @Patch('update/additional/:id')
+  async updateAdditionalFileData(@Body() record: FileRecord, @Param('id') id: string) {
+    return this.service.updateFileSubmissionAdditionalFile(id, record);
   }
 }
