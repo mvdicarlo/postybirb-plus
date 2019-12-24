@@ -69,6 +69,22 @@ export class Submissions extends React.Component<Props, State> {
     this.setState({ postModalVisible: false });
   }
 
+  scheduleSubmissions(submissions: SubmissionPackage<any>[]) {
+    const postAt = moment(this.scheduleManyPeriod.time.valueOf());
+    this.setState({ scheduleManyModalVisible: false });
+    Promise.all(
+      submissions.map(s => {
+        const promise = SubmissionService.schedule(s.submission.id, true, postAt.valueOf());
+        postAt.add(this.scheduleManyPeriod.d, 'days');
+        postAt.add(this.scheduleManyPeriod.h, 'hours');
+        postAt.add(this.scheduleManyPeriod.m, 'minutes');
+        return promise;
+      })
+    ).finally(() => {
+      message.success('Submissions scheduled.');
+    });
+  }
+
   render() {
     const submissions = this.props.submissions.filter(s =>
       SubmissionUtil.getSubmissionTitle(s)
@@ -162,7 +178,7 @@ export class Submissions extends React.Component<Props, State> {
                     SubmissionType.FILE
                   )}
                   onClose={() => this.setState({ scheduleManyModalVisible: false })}
-                  onOk={this.postSubmissions.bind(this)}
+                  onOk={this.scheduleSubmissions.bind(this)}
                 >
                   <Form layout="vertical">
                     <Form.Item label="Starting At" required>

@@ -88,8 +88,8 @@ export class SubmissionController {
   }
 
   @Post('schedule/:id')
-  async scheduleSubmission(@Body() data: { isScheduled: boolean }, @Param('id') id: string) {
-    return this.service.scheduleSubmission(id, data.isScheduled);
+  async scheduleSubmission(@Body() data: { isScheduled: boolean, postAt?: number }, @Param('id') id: string) {
+    return this.service.scheduleSubmission(id, data.isScheduled, data.postAt);
   }
 
   // File Submission File Actions

@@ -171,9 +171,14 @@ export class SubmissionService {
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
   }
 
-  async scheduleSubmission(id: string, isScheduled: boolean): Promise<void> {
+  async scheduleSubmission(id: string, isScheduled: boolean, postAt?: number): Promise<void> {
     this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
     const submissionToSchedule = (await this.get(id)) as Submission;
+
+    if (postAt) {
+      submissionToSchedule.schedule.postAt = postAt;
+    }
+
     if (!submissionToSchedule.schedule.postAt) {
       throw new BadRequestException(
         'Submission cannot be scheduled because it does not have a postAt value',

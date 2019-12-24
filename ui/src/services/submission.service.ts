@@ -49,8 +49,8 @@ export default class SubmissionService {
     return axios.delete(`/submission/remove/thumbnail/${id}`);
   }
 
-  static schedule(id: string, value: boolean) {
-    return axios.post(`/submission/schedule/${id}`, { isScheduled: value });
+  static schedule(id: string, isScheduled: boolean, postAt?: number) {
+    return axios.post(`/submission/schedule/${id}`, { isScheduled, postAt });
   }
 
   static setPostAt(id: string, time: number | undefined) {
