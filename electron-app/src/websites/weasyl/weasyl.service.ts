@@ -5,7 +5,7 @@ import { LoginResponse } from 'src/websites/interfaces/login-response.interface'
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import { UserAccount } from 'src/account/account.interface';
-import { WebsiteService } from 'src/websites/website.service';
+import { WebsiteService } from 'src/websites/website.base';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
@@ -24,6 +24,13 @@ export class Weasyl extends WebsiteService {
 
   readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultWeasylOptions = WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS;
+
+  readonly usernameShortcuts = [
+    {
+      key: 'ws',
+      url: 'https://weasyl.com/~$1',
+    },
+  ];
 
   parseDescription(text: string): string {
     throw new NotImplementedException('Method not implemented.');

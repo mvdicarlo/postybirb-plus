@@ -3,6 +3,7 @@ import { LoginResponse } from './login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
+import { UsernameShortcut } from './username-shortcut.interface';
 import {
   DefaultFileOptions,
   DefaultOptions,
@@ -11,16 +12,17 @@ import { ValidationParts } from 'src/submission/validator/interfaces/validation-
 
 export interface Website {
   readonly BASE_URL: string;
-  readonly enableAdvertisement: boolean;
-  readonly refreshInterval: number;
-  readonly refreshBeforePost: boolean;
-  readonly waitBetweenPostsInterval: number;
   readonly acceptsAdditionalFiles: boolean;
-  readonly acceptsSourceUrls: boolean;
   readonly acceptsFiles: string[];
-  readonly defaultStatusOptions?: any;
-  readonly defaultFileSubmissionOptions: any;
+  readonly acceptsSourceUrls: boolean;
   readonly accountInformation: Map<string, any>;
+  readonly defaultFileSubmissionOptions: any;
+  readonly defaultStatusOptions?: any;
+  readonly enableAdvertisement: boolean;
+  readonly refreshBeforePost: boolean;
+  readonly refreshInterval: number;
+  readonly usernameShortcuts: UsernameShortcut[];
+  readonly waitBetweenPostsInterval: number;
 
   getAccountInfo(id: string): any;
   getDefaultOptions(submissionType: SubmissionType): any;

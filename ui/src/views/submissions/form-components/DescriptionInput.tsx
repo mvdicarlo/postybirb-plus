@@ -2,9 +2,11 @@ import React from 'react';
 import * as sanitize from 'sanitize-html';
 import { inject, observer } from 'mobx-react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Form, Switch } from 'antd';
+import { Form, Switch, Button, Popover, Typography } from 'antd';
 import { DescriptionTemplateStore } from '../../../stores/description-template.store';
 import { DescriptionData } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
+import WebsiteService from '../../../services/website.service';
+import { WebsiteRegistry } from '../../../website-components/website-registry';
 
 interface Props {
   defaultValue: DescriptionData;
@@ -14,9 +16,17 @@ interface Props {
   descriptionTemplateStore?: DescriptionTemplateStore;
 }
 
+interface State {
+  shortcutsHovered: boolean;
+}
+
 @inject('descriptionTemplateStore')
 @observer
-export default class DescriptionInput extends React.Component<Props> {
+export default class DescriptionInput extends React.Component<Props, State> {
+  state: State = {
+    shortcutsHovered: false
+  };
+
   private data: DescriptionData = {
     overwriteDefault: false,
     value: ''
@@ -107,13 +117,57 @@ export default class DescriptionInput extends React.Component<Props> {
     );
 
     return (
-      <Form.Item label={this.props.label}>
+      <Form.Item
+        label={this.props.label}
+        extra={
+          <div>
+            <Popover
+              title="Username Shortcuts"
+              visible={this.state.shortcutsHovered}
+              trigger="hover"
+              onVisibleChange={visible => this.setState({ shortcutsHovered: visible })}
+              content={
+                <div>
+                  <em>
+                    Example: :twminnownade: -> https://twitter.com/minnownade (would appear as
+                    @minnownade on Twitter)
+                  </em>
+                  {Object.entries(WebsiteService.usernameShortcuts)
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([key, value]) => {
+                      return (
+                        <div>
+                          <strong>{WebsiteRegistry.websites[key].name}</strong>
+                          <ul>
+                            {value.map(val => {
+                              return (
+                                <li>
+                                  <span>{val.key} - </span>
+                                  <Typography.Text type="secondary">{val.url}</Typography.Text>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                </div>
+              }
+            >
+              <Button size="small">Username Shortcuts</Button>
+            </Popover>
+          </div>
+        }
+      >
         {overwriteSwitch}
         {this.props.defaultValue.overwriteDefault || this.props.hideOverwrite ? (
           <div className="relative">
             <Editor
               value={this.props.defaultValue.value}
-              init={{...this.tinyMCESettings, templates: this.props.descriptionTemplateStore!.templates}}
+              init={{
+                ...this.tinyMCESettings,
+                templates: this.props.descriptionTemplateStore!.templates
+              }}
               onEditorChange={this.handleDescriptionChange}
             />
             <div className="absolute bottom-0 text-gray-600 mr-1 right-0 pointer-events-none">

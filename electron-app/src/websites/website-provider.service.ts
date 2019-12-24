@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Weasyl } from './weasyl/weasyl.service';
 import { Website } from './interfaces/website.interface';
-import { WebsiteService } from './website.service';
+import { WebsiteService } from './website.base';
 import { Discord } from './discord/discord.service';
 
 @Injectable()

@@ -1,7 +1,18 @@
 import axios from '../utils/http';
+import { UsernameShortcut } from '../../../electron-app/src/websites/interfaces/username-shortcut.interface';
 
 export default class WebsiteService {
+  static usernameShortcuts: { [key: string]: UsernameShortcut[] } = {};
+
   static getAccountInformation(website: string, id: string) {
     return axios.get(`${website.toLowerCase()}/info/${id}`);
   }
+
+  static getUsernameShortcuts() {
+    return axios.get('/websites/username-shortcuts').then(({ data }) => data);
+  }
 }
+
+WebsiteService.getUsernameShortcuts().then(
+  shortcuts => (WebsiteService.usernameShortcuts = shortcuts)
+);

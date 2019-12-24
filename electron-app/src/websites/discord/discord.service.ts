@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { WebsiteService } from '../website.service';
+import { WebsiteService } from '../website.base';
 import { DefaultDiscordOptions } from './discord.interface';
 import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
@@ -26,6 +26,8 @@ export class Discord extends WebsiteService {
 
   readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
+
+  readonly usernameShortcuts = [];
 
   async checkLoginStatus(data: UserAccount): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };

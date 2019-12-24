@@ -7,20 +7,21 @@ import * as _ from 'lodash';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 
 export abstract class WebsiteService implements Website {
-  abstract readonly defaultStatusOptions?: any;
-  abstract readonly defaultFileSubmissionOptions: any;
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
-
-  readonly enableAdvertisement: boolean = true;
-  readonly refreshInterval: number = 1800000;
-  readonly refreshBeforePost: boolean = false;
-  readonly waitBetweenPostsInterval: number = 4000;
+  abstract readonly defaultFileSubmissionOptions: any;
+  abstract readonly defaultStatusOptions?: any;
+  abstract readonly usernameShortcuts: UsernameShortcut[] = [];
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
   readonly accountInformation: Map<string, any> = new Map();
+  readonly enableAdvertisement: boolean = true;
+  readonly refreshBeforePost: boolean = false;
+  readonly refreshInterval: number = 1800000;
+  readonly waitBetweenPostsInterval: number = 4000;
 
   abstract parseDescription(text: string): string;
 
