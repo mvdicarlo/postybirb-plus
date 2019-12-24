@@ -5,6 +5,7 @@ export interface Submission {
   created: number;
   id: string;
   isPosting?: boolean;
+  isQueued?: boolean;
   order: number;
   schedule: SubmissionSchedule;
   title: string;

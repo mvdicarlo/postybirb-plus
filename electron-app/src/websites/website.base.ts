@@ -9,7 +9,7 @@ import { DefaultOptions } from 'src/submission/interfaces/default-options.interf
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 
-export abstract class WebsiteService implements Website {
+export abstract class WebsiteBase implements Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
   abstract readonly defaultFileSubmissionOptions: any;

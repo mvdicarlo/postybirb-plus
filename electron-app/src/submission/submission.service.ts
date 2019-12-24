@@ -24,25 +24,30 @@ import { ValidatorService } from './validator/validator.service';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
+import { PostService } from './post/post.service';
 
 @Injectable()
 export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
 
+  // TODO handle posting state
   constructor(
     private readonly repository: SubmissionRepository,
     private readonly partService: SubmissionPartService,
     private fileSubmissionService: FileSubmissionService,
     private readonly validatorService: ValidatorService,
     private readonly eventEmitter: EventsGateway,
+    private readonly postService: PostService,
   ) {}
 
-  // TODO isPosting flags
   async get(id: string, packaged?: boolean): Promise<Submission | SubmissionPackage<any>> {
     const submission = await this.repository.find(id);
     if (!submission) {
       throw new NotFoundException(`Submission ${id} could not be found`);
     }
+
+    submission.isPosting = this.postService.isCurrentlyPosting(submission);
+    submission.isQueued = this.postService.isCurrentlyQueued(submission);
 
     return packaged ? await this.validate(submission) : submission;
   }
@@ -62,6 +67,10 @@ export class SubmissionService {
     } else {
       return submissions;
     }
+  }
+
+  postingStateChanged(): void {
+    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAll(true));
   }
 
   async create(createDto: SubmissionCreate): Promise<Submission> {
@@ -98,7 +107,7 @@ export class SubmissionService {
     return completedSubmission;
   }
 
-  private async validate(submission: Submission): Promise<SubmissionPackage<any>> {
+  async validate(submission: Submission): Promise<SubmissionPackage<any>> {
     const parts = await this.partService.getPartsForSubmission(submission.id);
     const problems: Problems = this.validatorService.validateParts(submission, parts);
     const mappedParts: Parts = {};

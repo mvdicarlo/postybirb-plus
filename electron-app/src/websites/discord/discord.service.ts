@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { WebsiteService } from '../website.base';
+import { WebsiteBase } from '../website.base';
 import { DefaultDiscordOptions } from './discord.interface';
 import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
@@ -18,7 +18,7 @@ interface DiscordLoginData {
 }
 
 @Injectable()
-export class Discord extends WebsiteService {
+export class Discord extends WebsiteBase {
   private readonly logger = new Logger(Discord.name);
 
   readonly BASE_URL: string = '';

@@ -12,10 +12,12 @@ import { ValidatorService } from './validator/validator.service';
 import { SubmissionTemplateController } from './submission-template/submission-template.controller';
 import { SubmissionTemplateService } from './submission-template/submission-template.service';
 import { SubmissionTemplateRepository } from './submission-template/submission-template.repository';
+import { PostController } from './post/post.controller';
+import { PostService } from './post/post.service';
 
 @Module({
   imports: [FileRepositoryModule, WebsitesModule],
-  controllers: [SubmissionController, SubmissionTemplateController],
+  controllers: [SubmissionController, SubmissionTemplateController, PostController],
   providers: [
     FileSubmissionService,
     SubmissionPartRepository,
@@ -25,6 +27,7 @@ import { SubmissionTemplateRepository } from './submission-template/submission-t
     ValidatorService,
     SubmissionTemplateService,
     SubmissionTemplateRepository,
+    PostService,
   ],
   exports: [SubmissionService, SubmissionPartService, SubmissionTemplateService],
 })
