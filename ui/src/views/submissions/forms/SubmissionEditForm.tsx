@@ -428,7 +428,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           breadcrumbName: `${name} Submissions`
         },
         {
-          path: `/edit/submission/${this.id}`,
+          path: `/edit/submission/${this.state.submissionType}/${this.id}`,
           breadcrumbName: SubmissionUtil.getSubmissionTitle({
             submission: this.state.submission!,
             parts: this.state.parts,

@@ -291,7 +291,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
           >
             Schedule
           </span>,
-          <Link to={`/edit/submission/${item.submission.id}`}>
+          <Link to={`/edit/submission/${item.submission.type}/${item.submission.id}`}>
             <span key="submission-edit">Edit</span>
           </Link>,
           <span

@@ -385,7 +385,7 @@ export default class AppLayout extends React.Component<Props, State> {
                 <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
                 <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
                 <Route path={'/submission-templates'} component={SubmissionTemplates} />
-                <Route path="/edit/submission/:id" component={SubmissionEditForm} />
+                <Route path="/edit/submission/:type/:id" component={SubmissionEditForm} />
                 <Route path="/edit/multiple-submissions/:id" component={MultiSubmissionEditForm} />
                 <Route
                   path="/edit/submission-template/:id"
