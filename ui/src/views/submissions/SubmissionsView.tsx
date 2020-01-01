@@ -134,7 +134,7 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
     showUploadList: false,
     action: (file: RcFile) =>
       Promise.resolve(
-        `http://localhost:${window['PORT']}/submission/create/${
+        `https://localhost:${window['PORT']}/submission/create/${
           SubmissionType.FILE
         }?path=${encodeURIComponent(file['path'])}`
       ),

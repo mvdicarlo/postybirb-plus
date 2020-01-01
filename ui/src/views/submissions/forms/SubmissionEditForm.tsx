@@ -326,21 +326,21 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   primaryFileChangeAction = (file: RcFile) =>
     Promise.resolve(
-      `http://localhost:${window['PORT']}/submission/change/primary/${
+      `https://localhost:${window['PORT']}/submission/change/primary/${
         this.state.submission!.id
       }/${encodeURIComponent(file['path'])}`
     );
 
   thumbnailFileChangeAction = (file: RcFile) =>
     Promise.resolve(
-      `http://localhost:${window['PORT']}/submission/change/thumbnail/${
+      `https://localhost:${window['PORT']}/submission/change/thumbnail/${
         this.state.submission!.id
       }/${encodeURIComponent(file['path'])}`
     );
 
   additionalFileChangeAction = (file: RcFile) =>
     Promise.resolve(
-      `http://localhost:${window['PORT']}/submission/add/additional/${
+      `https://localhost:${window['PORT']}/submission/add/additional/${
         this.state.submission!.id
       }/${encodeURIComponent(file['path'])}`
     );

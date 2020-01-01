@@ -13,7 +13,6 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync')
 
 process.env.PORT = process.env.PORT || 9247;
-
 global.DEBUG_MODE = !!process.argv.find(
     arg => arg === '-d' || arg === '--develop',
 );
@@ -53,6 +52,13 @@ app.on('window-all-closed', () => {});
 app.on('ready', () => {
     nest = require('./dist/main');
     initialize()
+});
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+    if (certificate.issuerName === 'postybirb.com' && certificate.subject.organizations[0] === 'PostyBirb' && certificate.issuer.country === 'US') {
+        callback(true);
+    } else {
+        callback(false);
+    }
 });
 
 let window = null;
