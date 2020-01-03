@@ -1,14 +1,21 @@
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, OnGatewayInit } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { AppGlobal } from 'src/app-global.interface';
 
 @WebSocketGateway()
-export class EventsGateway {
+export class EventsGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
+
+  afterInit(server: Server) {
+    server.use((socket, next) => {
+      if (socket.handshake.headers.authorization === (global as AppGlobal).AUTH_ID) {
+        return next();
+      }
+
+      return next(new Error('authentication error'));
+    });
+  }
 
   public emit(event: string, data: any) {
     this.server.emit(event, data);

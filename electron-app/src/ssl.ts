@@ -8,7 +8,6 @@ import * as path from 'path';
 export class SSL {
   static getOrCreate(): { key: any; cert: any } {
     if (fs.existsSync(path.join(app.getPath('userData'), 'data', 'cert.pem'))) {
-        console.log('ssl exists')
       return {
         key: fs.readFileSync(path.join(app.getPath('userData'), 'data', 'key.pem')),
         cert: fs.readFileSync(path.join(app.getPath('userData'), 'data', 'cert.pem')),
@@ -16,8 +15,8 @@ export class SSL {
     }
 
     const pki = forge.pki;
-    var keys = pki.rsa.generateKeyPair(2048);
-    var cert = pki.createCertificate();
+    const keys = pki.rsa.generateKeyPair(2048);
+    const cert = pki.createCertificate();
 
     cert.publicKey = keys.publicKey;
     cert.serialNumber = '01';
@@ -25,7 +24,7 @@ export class SSL {
     cert.validity.notAfter = new Date();
     cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
 
-    var attrs = [
+    const attrs = [
       { name: 'commonName', value: 'postybirb.com' },
       { name: 'countryName', value: 'US' },
       { shortName: 'ST', value: 'Virginia' },

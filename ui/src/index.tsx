@@ -22,6 +22,7 @@ declare global {
       };
       kill: () => void;
     };
+    AUTH_ID: string;
     PORT: number;
     appVersion: string;
   }

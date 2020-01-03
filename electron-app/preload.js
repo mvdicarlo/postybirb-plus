@@ -2,6 +2,7 @@ const { remote, clipboard, shell } = require('electron');
 const { app } = remote;
 
 window.PORT = remote.getCurrentWindow().PORT;
+window.AUTH_ID = remote.getCurrentWindow().AUTH_ID;
 window.appVersion = app.getVersion();
 window.electron = {
     clipboard: {

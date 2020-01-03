@@ -497,6 +497,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           showUploadList={false}
                           onChange={this.fileUploadChange}
                           action={this.primaryFileChangeAction}
+                          headers={{ Authorization: window.AUTH_ID }}
                         >
                           <span className="text-link">Change</span>
                         </Upload>
@@ -530,6 +531,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                             }}
                             onChange={this.fileUploadChange}
                             action={this.thumbnailFileChangeAction}
+                            headers={{ Authorization: window.AUTH_ID }}
                           >
                             <span className="text-link">Set</span>
                           </Upload>
@@ -553,6 +555,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           action={this.additionalFileChangeAction}
                           multiple={false}
                           showUploadList={false}
+                          headers={{ Authorization: window.AUTH_ID }}
                         >
                           <span className="text-link">Add</span>
                         </Upload>
