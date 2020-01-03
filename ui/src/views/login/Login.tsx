@@ -19,6 +19,7 @@ import {
   Typography,
   Badge
 } from 'antd';
+import RemoteService from '../../services/remote.service';
 
 interface Props {
   loginStatusStore?: LoginStatusStore;
@@ -147,7 +148,13 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
   showModal = () => this.setState({ modalVisible: true });
   hideModal = () => {
     this.setState({ modalVisible: false });
-    LoginService.checkLogin(this.props.accountInfo.id);
+    if (RemoteService.isRemote()) {
+      RemoteService.updateCookies(this.props.accountInfo.id).finally(() => {
+        LoginService.checkLogin(this.props.accountInfo.id);
+      });
+    } else {
+      LoginService.checkLogin(this.props.accountInfo.id);
+    }
   };
   deleteAccount = (id: string) => LoginService.deleteAccount(id);
 

@@ -17,6 +17,9 @@ declare global {
         availableFormats: () => string[];
         read: () => File;
       };
+      session: {
+        getCookies(accountId: string): Promise<any[]>;
+      };
       shell: {
         openInBrowser(url: string): Promise<void>;
       };

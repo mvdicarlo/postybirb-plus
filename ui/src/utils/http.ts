@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios';
 
 const instance: AxiosInstance = axios.create({
-  baseURL: `https://localhost:${window['PORT']}`,
+  baseURL: localStorage.getItem('REMOTE_URI') || `https://localhost:${window['PORT']}`,
   headers: {
-    Authorization: window.AUTH_ID
+    Authorization: localStorage.getItem('REMOTE_AUTH') || window.AUTH_ID
   }
 });
 

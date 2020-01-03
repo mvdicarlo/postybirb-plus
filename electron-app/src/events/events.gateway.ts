@@ -13,7 +13,7 @@ export class EventsGateway implements OnGatewayInit {
         return next();
       }
 
-      return next(new Error('authentication error'));
+      return next(new Error('Authentication Error'));
     });
   }
 

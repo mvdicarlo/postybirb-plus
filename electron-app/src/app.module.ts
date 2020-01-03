@@ -8,6 +8,7 @@ import { DescriptionTemplateModule } from './description-template/description-te
 import { UpdateModule } from './update/update.module';
 import { SubmissionModule } from './submission/submission.module';
 import { AccountModule } from './account/account.module';
+import { RemoteModule } from './remote/remote.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AccountModule } from './account/account.module';
     UpdateModule,
     SubmissionModule,
     AccountModule,
+    RemoteModule,
   ],
   controllers: [],
   providers: [],

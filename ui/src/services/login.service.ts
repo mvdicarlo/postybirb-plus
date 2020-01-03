@@ -26,4 +26,5 @@ export default class LoginService {
   static setAccountData(id: string, data: any) {
     return axios.patch(`/account/data/${id}`, { data });
   }
+
 }

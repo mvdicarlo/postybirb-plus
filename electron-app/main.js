@@ -77,11 +77,12 @@ let window = null;
 let initializedOnce = false;
 
 async function initialize() {
-  if (!hasLock || SERVER_ONLY_MODE) return;
+  if (!hasLock) return;
 
   let shouldDisplayWindow = true;
   if (!initializedOnce) {
     await nest();
+    console.log(`THE AUTH ID IS: ${global.AUTH_ID}`);
     const menu = Menu.buildFromTemplate(require('./menu'));
     Menu.setApplicationMenu(menu);
     const image = buildAppImage();
@@ -91,6 +92,7 @@ async function initialize() {
   }
 
   if (!shouldDisplayWindow) return; // observe user setting
+  if (SERVER_ONLY_MODE) return;
 
   const mainWindowState = windowStateKeeper({
     defaultWidth: 992,

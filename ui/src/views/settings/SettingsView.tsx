@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { SettingsStore } from '../../stores/settings.store';
 import SettingsService from '../../services/settings.service';
 import { Settings } from '../../../../electron-app/src/settings/settings.interface';
-import { Form, Collapse, Switch, Tooltip, InputNumber, Radio } from 'antd';
+import { Form, Collapse, Switch, Tooltip, InputNumber, Radio, Input } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 
 interface Props {
@@ -103,6 +103,30 @@ export default class SettingsView extends React.Component<Props> {
                 disabled={/Linux/.test(navigator.platform)}
                 checked={settings.useHardwareAcceleration}
                 onChange={value => this.updateSetting('useHardwareAcceleration', value)}
+              />
+            </Form.Item>
+          </Collapse.Panel>
+          <Collapse.Panel header="Remote" key="6">
+            <p>
+              Connect to a PostyBirb client over the internet.
+              <br />
+              <strong>
+                Any changes to these settings will require you to refresh the application (ctrl+r or
+                application restart).
+              </strong>
+            </p>
+            <Form.Item label="URL">
+              <Input
+                placeholder={`https://localhost:${window.PORT}`}
+                defaultValue={localStorage.getItem('REMOTE_URI') || ''}
+                onBlur={({ target }) => localStorage.setItem('REMOTE_URI', target.value)}
+              />
+            </Form.Item>
+            <Form.Item label="Authorization (You will need to get this from the other PostyBirb instance)">
+              <Input
+                placeholder={window.AUTH_ID}
+                defaultValue={localStorage.getItem('REMOTE_AUTH') || ''}
+                onBlur={({ target }) => localStorage.setItem('REMOTE_AUTH', target.value)}
               />
             </Form.Item>
           </Collapse.Panel>

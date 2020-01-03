@@ -1,10 +1,10 @@
 import io from 'socket.io-client';
 
-const socket = io(`https://localhost:${window['PORT']}`, {
+const socket = io(localStorage.getItem('REMOTE_URI') || `https://localhost:${window['PORT']}`, {
   transportOptions: {
     polling: {
       extraHeaders: {
-        Authorization: window.AUTH_ID
+        Authorization: localStorage.getItem('REMOTE_AUTH') || window.AUTH_ID
       }
     }
   }

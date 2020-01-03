@@ -32,11 +32,11 @@ export default class Http {
     partitionId: string,
     options: GetOptions = {},
   ): Promise<HttpResponse<T>> {
-    const _session = session.fromPartition(`persist:${partitionId}`);
+    const ses = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
     if (!headers.cookie) {
-      const cookies = await _session.cookies.get({
+      const cookies = await ses.cookies.get({
         url: new URL(uri).origin,
       });
 
@@ -49,7 +49,7 @@ export default class Http {
       },
       options.requestOptions,
     );
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       Http.Request.get(uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           response,
@@ -67,11 +67,11 @@ export default class Http {
     partitionId: string,
     options: PostOptions,
   ): Promise<HttpResponse<T>> {
-    const _session = session.fromPartition(`persist:${partitionId}`);
+    const ses = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
     if (!headers.cookie) {
-      const cookies = await _session.cookies.get({
+      const cookies = await ses.cookies.get({
         url: new URL(uri).origin,
       });
 
@@ -96,7 +96,7 @@ export default class Http {
       opts.body = options.data;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       Http.Request.get(uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           error,
