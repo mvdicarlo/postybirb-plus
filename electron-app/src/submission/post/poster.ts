@@ -128,7 +128,7 @@ export default class Poster extends EventEmitter {
           record => !record.ignoredAccounts!.includes(this.part.accountId),
         );
 
-        fileData.additional = await Promise.all(
+        fileData.additional = this.website.acceptsAdditionalFiles ? await Promise.all(
           additional.map(async record => {
             return {
               buffer: await fs.readFile(record.location),
@@ -138,7 +138,7 @@ export default class Poster extends EventEmitter {
               },
             };
           }),
-        );
+        ) : [];
 
         if (this.cancelled) {
           this.emit('cancelled', {
