@@ -1,4 +1,3 @@
-import { Website } from './interfaces/website.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
 import { UserAccount } from 'src/account/account.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
@@ -9,7 +8,7 @@ import { DefaultOptions } from 'src/submission/interfaces/default-options.interf
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 
-export abstract class WebsiteBase implements Website {
+export abstract class Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
   abstract readonly defaultFileSubmissionOptions: any;

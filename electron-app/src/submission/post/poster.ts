@@ -2,13 +2,13 @@ import * as fs from 'fs-extra';
 import { EventEmitter } from 'events';
 import { Submission } from '../interfaces/submission.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
-import { Website } from '../../websites/interfaces/website.interface';
 import { AccountService } from '../../account/account.service';
 import { PostData } from './interfaces/post-data.interface';
 import { DefaultOptions, DefaultFileOptions } from '../interfaces/default-options.interface';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
 import { FilePostData } from './interfaces/file-post-data.interface';
+import { Website } from 'src/websites/website.base';
 
 export default class Poster extends EventEmitter {
   cancelled: boolean = false;

@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Weasyl } from './weasyl/weasyl.service';
-import { Website } from './interfaces/website.interface';
-import { WebsiteBase } from './website.base';
+import { Website } from './website.base';
 import { Discord } from './discord/discord.service';
 
 @Injectable()
@@ -10,7 +9,7 @@ export class WebsiteProvider {
   private readonly websiteModules: Website[] = [];
 
   constructor(private moduleRef: ModuleRef, readonly weasyl: Weasyl, readonly discord: Discord) {
-    this.websiteModules = [...arguments].filter(arg => arg instanceof WebsiteBase);
+    this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
   }
 
   getWebsiteModule(name: string): Website {

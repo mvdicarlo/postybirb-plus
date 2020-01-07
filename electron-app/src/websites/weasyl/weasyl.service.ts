@@ -5,7 +5,7 @@ import { LoginResponse } from 'src/websites/interfaces/login-response.interface'
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import { UserAccount } from 'src/account/account.interface';
-import { WebsiteBase } from 'src/websites/website.base';
+import { Website } from 'src/websites/website.base';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
@@ -16,7 +16,7 @@ import { DefaultOptions } from 'src/submission/interfaces/default-options.interf
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 
 @Injectable()
-export class Weasyl extends WebsiteBase {
+export class Weasyl extends Website {
   private readonly logger = new Logger(Weasyl.name);
 
   readonly BASE_URL: string = 'https://www.weasyl.com';
