@@ -11,6 +11,7 @@ import { AccountService } from 'src/account/account.service';
 import { DefaultOptions } from '../interfaces/default-options.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { WebsitesService } from 'src/websites/websites.service';
+import { Website } from 'src/websites/website.base';
 
 @Injectable()
 export class PostService {
@@ -117,7 +118,6 @@ export class PostService {
     part: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): Poster {
-    // TODO create real time waiter
     return new Poster(
       this.accountService,
       this.settings,
@@ -127,8 +127,24 @@ export class PostService {
       part,
       defaultPart,
       this.websites.getWebsiteModule(part.website).acceptsSourceUrls,
-      4000,
+      this.getWaitTime(part.accountId, this.websites.getWebsiteModule(part.website)),
     );
+  }
+
+  private getWaitTime(accountId: string, website: Website): number {
+    const lastPosted = _.get(
+      this.accountPostTimeMap,
+      `${accountId}-${website.constructor.name}`,
+      0,
+    );
+    const timeToWait = website.waitBetweenPostsInterval || 0;
+    const timeDifference = Date.now() - lastPosted;
+    if (timeDifference >= timeToWait) {
+      // when the time since the last post is already greater than the specified wait time
+      return 4000;
+    } else {
+      return Math.max(Math.abs(timeDifference - timeToWait), 4000);
+    }
   }
 
   private notifyPostingStateChanged = _.debounce(

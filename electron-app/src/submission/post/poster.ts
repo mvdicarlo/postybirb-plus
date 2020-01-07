@@ -30,10 +30,10 @@ export default class Poster extends EventEmitter {
     private part: SubmissionPart<any>,
     private defaultPart: SubmissionPart<DefaultOptions>,
     private waitForExternalStart: boolean,
-    private timeToPost: number,
+    private timeUntilPost: number,
   ) {
     super();
-    this.postAtTimeout = setTimeout(this.post, timeToPost);
+    this.postAtTimeout = setTimeout(this.post, timeUntilPost);
     this.sources = [...submission.sources];
   }
 
