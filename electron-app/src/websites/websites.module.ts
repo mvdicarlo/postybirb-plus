@@ -10,6 +10,6 @@ import { WebsitesService } from './websites.service';
 @Module({
   controllers: [WeasylController, DiscordController, WebsitesController],
   providers: [Weasyl, WebsiteProvider, Discord, WebsitesService],
-  exports: [WebsiteProvider],
+  exports: [WebsiteProvider, WebsitesService],
 })
 export class WebsitesModule {}

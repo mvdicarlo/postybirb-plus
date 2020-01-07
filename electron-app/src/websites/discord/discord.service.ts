@@ -11,6 +11,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 
 interface DiscordLoginData {
   name: string;
@@ -26,6 +27,7 @@ export class Discord extends Website {
 
   readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly defaultDescriptionParser = PlaintextParser.parse;
 
   readonly usernameShortcuts = [];
 
@@ -41,16 +43,36 @@ export class Discord extends Website {
     return status;
   }
 
-  parseDescription(text: string): string {
-    throw new NotImplementedException('Method not implemented.');
-  }
-
   postStatusSubmission(data: any): Promise<any> {
     throw new NotImplementedException('Method not implemented.');
   }
 
   postFileSubmission(data: any): Promise<any> {
     throw new NotImplementedException('Method not implemented.');
+  }
+
+  preparseDescription(text: string): string {
+    return text
+      .replace(/(<b>|<strong>)/gm, '**')
+      .replace(/(<\/b>|<\/strong>)/gm, '**')
+      .replace(/(<i>|<em>)/gm, '*')
+      .replace(/(<\/i>|<\/em>)/gm, '*');
+  }
+
+  parseDescription(text: string): string {
+    const links =
+      text.match(
+        /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gm,
+      ) || [];
+    const seenLinks = [];
+    links.forEach(link => {
+      if (seenLinks.includes(link)) {
+        return;
+      }
+      seenLinks.push(link);
+      text = text.replace(new RegExp(link, 'gi'), `<${link}>`);
+    });
+    return text;
   }
 
   validateFileSubmission(
@@ -85,6 +107,15 @@ export class Discord extends Website {
         }
       }
     });
+
+    const description = this.defaultDescriptionParser(WebsiteValidator.getDescription(
+      defaultPart.data.description,
+      submissionPart.data.description,
+    ));
+
+    if (description.length > 2000) {
+      warnings.push('Max description length allowed is 2,000 characters.');
+    }
 
     return { problems, warnings };
   }

@@ -7,6 +7,7 @@ import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
+import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 
 export abstract class Website {
   abstract readonly BASE_URL: string;
@@ -22,11 +23,22 @@ export abstract class Website {
   readonly refreshInterval: number = 1800000;
   readonly waitBetweenPostsInterval: number = 4000;
 
-  abstract parseDescription(text: string): string;
+  readonly defaultDescriptionParser = HTMLFormatParser.parse;
 
   abstract postStatusSubmission(data: any): Promise<any>;
 
   abstract postFileSubmission(data: any): Promise<any>;
+
+  preparseDescription(text: string): string {
+    if (!text) {
+      return '';
+    }
+    return text;
+  }
+
+  parseDescription(text: string): string {
+    return this.defaultDescriptionParser(text);
+  }
 
   getAccountInfo(id: string) {
     return this.accountInformation.get(id) || {};

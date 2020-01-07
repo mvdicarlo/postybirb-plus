@@ -14,6 +14,7 @@ import { DefaultWeasylOptions } from './weasyl.interface';
 import { Folder } from 'src/websites/interfaces/folder.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -32,8 +33,18 @@ export class Weasyl extends Website {
     },
   ];
 
+  preparseDescription(text: string): string {
+    return UsernameParser.replaceText(text, 'ws', '<!~$1>');
+  }
+
   parseDescription(text: string): string {
-    throw new NotImplementedException('Method not implemented.');
+    return text
+      .replace(/<p/gm, '<div')
+      .replace(/<\/p>/gm, '</div>')
+      .replace(/style="text-align:center"/g, 'class="align-center"')
+      .replace(/style="text-align:right"/g, 'class="align-right"')
+      .replace(/<\/div>\n<br>/g, '</div><br>')
+      .replace(/<\/div><br>/g, '</div><div><br></div>');
   }
 
   postStatusSubmission(data: any): Promise<any> {

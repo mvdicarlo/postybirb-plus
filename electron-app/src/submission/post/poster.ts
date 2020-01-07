@@ -9,6 +9,10 @@ import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
 import { FilePostData } from './interfaces/file-post-data.interface';
 import { Website } from 'src/websites/website.base';
+import { SettingsService } from 'src/settings/settings.service';
+import { AdInsertParser } from 'src/description-parsing/miscellaneous/ad.parser';
+import { WebsitesService } from 'src/websites/websites.service';
+import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 
 export default class Poster extends EventEmitter {
   cancelled: boolean = false;
@@ -19,6 +23,8 @@ export default class Poster extends EventEmitter {
 
   constructor(
     private accountService: AccountService,
+    private settingsService: SettingsService,
+    private websitesService: WebsitesService,
     private website: Website,
     private submission: Submission,
     private part: SubmissionPart<any>,
@@ -67,12 +73,28 @@ export default class Poster extends EventEmitter {
         throw new Error('Not logged in');
       }
 
-      // TODO create post object
-      const data: PostData<Submission> = {
-        description: WebsiteValidator.getDescription(
+      let description = this.website.preparseDescription(
+        WebsiteValidator.getDescription(
           this.defaultPart.data.description,
           this.part.data.description,
         ),
+      );
+
+      Object.values(this.websitesService.getUsernameShortcuts()).forEach(shortcuts => {
+        shortcuts.forEach(sc => (description = UsernameParser.parse(description, sc.key, sc.url)));
+      });
+
+      description = this.website.parseDescription(description);
+      if (this.website.enableAdvertisement) {
+        if (this.settingsService.getValue<boolean>('advertise')) {
+          description = AdInsertParser.parse(description, this.website.defaultDescriptionParser);
+        }
+      }
+
+      // TODO create post object
+      // TODO figure out how to do multi post to websites that don't support it
+      const data: PostData<Submission> = {
+        description,
         options: this.part.data,
         part: this.part,
         rating: this.part.data.rating || this.defaultPart.data.rating,

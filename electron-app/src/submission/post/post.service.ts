@@ -10,6 +10,7 @@ import Poster from './poster';
 import { AccountService } from 'src/account/account.service';
 import { DefaultOptions } from '../interfaces/default-options.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
+import { WebsitesService } from 'src/websites/websites.service';
 
 @Injectable()
 export class PostService {
@@ -38,6 +39,7 @@ export class PostService {
     private readonly submissionService: SubmissionService,
     private readonly accountService: AccountService,
     private readonly websites: WebsiteProvider,
+    private readonly websitesService: WebsitesService,
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
   ) {}
@@ -118,6 +120,8 @@ export class PostService {
     // TODO create real time waiter
     return new Poster(
       this.accountService,
+      this.settings,
+      this.websitesService,
       this.websites.getWebsiteModule(part.website),
       submission,
       part,
