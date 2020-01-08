@@ -10,4 +10,5 @@ export interface FileRecord {
   size: number;
   type: FileSubmissionType;
   ignoredAccounts?: string[];
+  buffer?: Buffer;
 }

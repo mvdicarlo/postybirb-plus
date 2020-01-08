@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra';
+import * as _ from 'lodash';
 import { EventEmitter } from 'events';
 import { Submission } from '../interfaces/submission.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
@@ -13,13 +13,79 @@ import { SettingsService } from 'src/settings/settings.service';
 import { AdInsertParser } from 'src/description-parsing/miscellaneous/ad.parser';
 import { WebsitesService } from 'src/websites/websites.service';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
+import { PostResponse } from './interfaces/post-response.interface';
 
-export default class Poster extends EventEmitter {
+export interface Poster {
+  on(
+    event: 'cancelled',
+    listener: (data: { submission: Submission; part: SubmissionPart<any> }) => void,
+  ): this;
+
+  on(
+    event: 'ready',
+    listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
+  ): this;
+
+  on(
+    event: 'posting',
+    listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
+  ): this;
+
+  on(
+    event: 'done',
+    listener: (
+      data: {
+        submission: Submission;
+        part: SubmissionPart<any>;
+        success: boolean;
+        sources: string[];
+      },
+      response: PostResponse,
+    ) => void,
+  ): this;
+
+  on(event: 'error', listener: (data: any) => void): this;
+
+  once(
+    event: 'cancelled',
+    listener: (data: { submission: Submission; part: SubmissionPart<any> }) => void,
+  ): this;
+
+  once(
+    event: 'posting',
+    listener: (data: { submission: Submission; part: SubmissionPart<any> }) => void,
+  ): this;
+
+  once(
+    event: 'done',
+    listener: (
+      data: {
+        submission: Submission;
+        part: SubmissionPart<any>;
+        success: boolean;
+        sources: string[];
+      },
+      response: PostResponse,
+    ) => void,
+  ): this;
+
+  once(
+    event: 'ready',
+    listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
+  ): this;
+
+  once(event: 'error', listener: (error: PostResponse) => void): this;
+}
+
+export class Poster extends EventEmitter {
   cancelled: boolean = false;
   isPosting: boolean = false;
   isReady: boolean = false;
+  isDone: boolean = false;
+  response: PostResponse;
   postAtTimeout: NodeJS.Timeout;
   sources: string[] = [];
+  postAt: number;
 
   constructor(
     private accountService: AccountService,
@@ -27,22 +93,23 @@ export default class Poster extends EventEmitter {
     private websitesService: WebsitesService,
     private website: Website,
     private submission: Submission,
-    private part: SubmissionPart<any>,
+    public part: SubmissionPart<any>,
     private defaultPart: SubmissionPart<DefaultOptions>,
     private waitForExternalStart: boolean,
-    private timeUntilPost: number,
+    timeUntilPost: number,
   ) {
     super();
     this.postAtTimeout = setTimeout(this.post, timeUntilPost);
+    this.postAt = Date.now() + timeUntilPost;
     this.sources = [...submission.sources];
   }
 
   private post() {
     this.isReady = true;
     this.emit('ready', {
-      id: this.submission.id,
-      accountId: this.part.accountId,
-      at: this.waitForExternalStart,
+      submission: this.submission,
+      part: this.part,
+      at: this.postAt,
     });
     if (!this.waitForExternalStart) {
       this.performPost();
@@ -51,10 +118,10 @@ export default class Poster extends EventEmitter {
 
   private async performPost() {
     if (this.cancelled) {
+      this.isDone = true;
       this.emit('cancelled', {
-        id: this.submission.id,
-        accountId: this.part.accountId,
-        cancelled: this.cancelled,
+        submission: this.submission,
+        part: this.part,
       });
       return;
     }
@@ -62,10 +129,10 @@ export default class Poster extends EventEmitter {
     try {
       const loginStatus = await this.accountService.checkLogin(this.part.accountId);
       if (this.cancelled) {
+        this.isDone = true;
         this.emit('cancelled', {
-          id: this.submission.id,
-          accountId: this.part.accountId,
-          cancelled: this.cancelled,
+          submission: this.submission,
+          part: this.part,
         });
         return;
       }
@@ -91,7 +158,6 @@ export default class Poster extends EventEmitter {
         }
       }
 
-      // TODO create post object
       // TODO figure out how to do multi post to websites that don't support it
       const data: PostData<Submission> = {
         description,
@@ -107,16 +173,19 @@ export default class Poster extends EventEmitter {
       if (this.isFileSubmission(this.submission)) {
         const fileData: FilePostData = data as FilePostData;
         fileData.primary = {
-          buffer: await fs.readFile(this.submission.primary.location),
-          options: {
-            contentType: this.submission.primary.mimetype,
-            filename: this.submission.primary.name,
+          type: this.submission.primary.type,
+          file: {
+            buffer: this.submission.primary.buffer,
+            options: {
+              contentType: this.submission.primary.mimetype,
+              filename: this.submission.primary.name,
+            },
           },
         };
 
         if (this.submission.thumbnail && (this.part.data as DefaultFileOptions).useThumbnail) {
           fileData.thumbnail = {
-            buffer: await fs.readFile(this.submission.thumbnail.location),
+            buffer: this.submission.thumbnail.buffer,
             options: {
               contentType: this.submission.thumbnail.mimetype,
               filename: this.submission.thumbnail.name,
@@ -128,23 +197,26 @@ export default class Poster extends EventEmitter {
           record => !record.ignoredAccounts!.includes(this.part.accountId),
         );
 
-        fileData.additional = this.website.acceptsAdditionalFiles ? await Promise.all(
-          additional.map(async record => {
-            return {
-              buffer: await fs.readFile(record.location),
-              options: {
-                contentType: record.mimetype,
-                filename: record.name,
-              },
-            };
-          }),
-        ) : [];
+        fileData.additional = this.website.acceptsAdditionalFiles
+          ? additional.map(record => {
+              return {
+                type: record.type,
+                file: {
+                  buffer: record.buffer,
+                  options: {
+                    contentType: record.mimetype,
+                    filename: record.name,
+                  },
+                },
+              };
+            })
+          : [];
 
         if (this.cancelled) {
+          this.isDone = true;
           this.emit('cancelled', {
-            id: this.submission.id,
-            accountId: this.part.accountId,
-            cancelled: this.cancelled,
+            submission: this.submission,
+            part: this.part,
           });
           return;
         }
@@ -152,22 +224,43 @@ export default class Poster extends EventEmitter {
 
       this.isPosting = true;
       this.emit('posting', {
-        id: this.submission.id,
-        accountId: this.part.accountId,
+        submission: this.submission,
+        part: this.part,
       });
 
       // TODO post
+      const random = _.random(0, 100);
+      if (random > 50) {
+        this.done(true, { website: this.part.website });
+      } else {
+        throw new Error('Fake Failure');
+      }
     } catch (err) {
-      // TODO better error emit for better message
-      this.emit('error', err);
-      this.emit('done', {
-        id: this.submission.id,
-        accountId: this.part.accountId,
-        success: false,
-        sources: this.sources,
-        cancelled: this.cancelled,
-      });
+      const error: Error | PostResponse = err;
+      const errorMsg: PostResponse = {
+        website: this.part.website,
+        time: new Date().toLocaleString(),
+      };
+      if (error instanceof Error) {
+        errorMsg.stack = error.stack;
+        errorMsg.error = error.message;
+      } else {
+        Object.assign(errorMsg, error);
+      }
+      this.emit('error', errorMsg);
+      this.done(false, errorMsg);
     }
+  }
+
+  private done(success: boolean, response: PostResponse) {
+    this.isDone = true;
+    this.response = response;
+    this.emit('done', {
+      submission: this.submission,
+      part: this.part,
+      success,
+      sources: this.sources,
+    });
   }
 
   private isFileSubmission(submission: Submission): submission is FileSubmission {

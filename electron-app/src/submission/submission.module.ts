@@ -16,10 +16,13 @@ import { PostController } from './post/post.controller';
 import { PostService } from './post/post.service';
 import { AccountModule } from 'src/account/account.module';
 import { SettingsModule } from 'src/settings/settings.module';
+import { LogController } from './log/log.controller';
+import { LogService } from './log/log.service';
+import { SubmissionLogRepository } from './log/log.repository';
 
 @Module({
   imports: [FileRepositoryModule, WebsitesModule, SettingsModule, forwardRef(() => AccountModule)],
-  controllers: [SubmissionController, SubmissionTemplateController, PostController],
+  controllers: [SubmissionController, SubmissionTemplateController, PostController, LogController],
   providers: [
     FileSubmissionService,
     SubmissionPartRepository,
@@ -30,6 +33,8 @@ import { SettingsModule } from 'src/settings/settings.module';
     SubmissionTemplateService,
     SubmissionTemplateRepository,
     PostService,
+    LogService,
+    SubmissionLogRepository,
   ],
   exports: [SubmissionService, SubmissionPartService, SubmissionTemplateService, PostService],
 })

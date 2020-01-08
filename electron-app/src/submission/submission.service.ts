@@ -33,6 +33,7 @@ export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
 
   // TODO handle posting state
+  // TODO cron for scheduled
   constructor(
     private readonly repository: SubmissionRepository,
     private readonly partService: SubmissionPartService,

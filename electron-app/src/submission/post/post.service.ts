@@ -1,4 +1,5 @@
 import { Injectable, Logger, Inject, forwardRef, BadRequestException } from '@nestjs/common';
+import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import { SubmissionService } from '../submission.service';
 import { Submission } from '../interfaces/submission.interface';
@@ -6,12 +7,15 @@ import { SubmissionType } from '../enums/submission-type.enum';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
-import Poster from './poster';
 import { AccountService } from 'src/account/account.service';
 import { DefaultOptions } from '../interfaces/default-options.interface';
 import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { WebsitesService } from 'src/websites/websites.service';
 import { Website } from 'src/websites/website.base';
+import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
+import { FileRecord } from '../file-submission/interfaces/file-record.interface';
+import { Poster } from './poster';
+import { LogService } from '../log/log.service';
 
 @Injectable()
 export class PostService {
@@ -43,6 +47,7 @@ export class PostService {
     private readonly websitesService: WebsitesService,
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
+    private readonly logService: LogService,
   ) {}
 
   queue(submission: Submission) {
@@ -56,6 +61,7 @@ export class PostService {
 
   cancel(submission: Submission) {
     if (this.isCurrentlyPosting(submission)) {
+      // Need to handle cancel event
       this.postingParts[submission.type].forEach(poster => poster.cancel());
     } else if (this.isCurrentlyQueued(submission)) {
       this.submissionQueue[submission.type].splice(
@@ -95,21 +101,69 @@ export class PostService {
 
   private async post(submission: Submission) {
     this.logger.log(submission.id, 'Posting');
-    this.posting[submission.type] = submission;
-    this.notifyPostingStateChanged();
 
     const validationPackage = await this.submissionService.validate(submission);
     const isValid: boolean = !!_.flatMap(validationPackage.problems, p => p.problems).length;
 
     if (isValid) {
+      this.posting[submission.type] = submission;
+      this.notifyPostingStateChanged();
       const parts = await this.partService.getPartsForSubmission(submission.id);
       const [defaultPart] = parts.filter(p => p.isDefault);
-      // TODO add listeners to posters
+      if (this.isFileSubmission(submission)) {
+        await this.preloadFiles(submission);
+      }
       this.postingParts[submission.type] = parts
         .filter(p => !p.isDefault)
         .map(p => this.createPoster(submission, p, defaultPart));
+
+      this.postingParts[submission.type].forEach(poster => {
+        poster.once('cancelled', data => this.checkForCompletion(data.submission));
+        // TODO handle done behavior for logging and saving
+        poster.once('done', data => {
+          this.checkForCompletion(data.submission);
+        });
+        // TODO handle 'error' 'posting'
+      });
     } else {
+      this.posting[submission.type] = null;
       throw new BadRequestException('Submission has problems');
+    }
+  }
+
+  private checkForCompletion(submission: Submission) {
+    if (this.postingParts[submission.type].filter(poster => !poster.isDone).length) {
+      // TODO not done (send socket change event)
+    } else {
+      this.logService
+        .addLog(
+          submission,
+          this.postingParts[submission.type].map(poster => ({
+            part: poster.part,
+            response: poster.response,
+          })),
+        )
+        .finally(() => {
+          // TODO emit notification to UI and OS
+          this.submissionService.deleteSubmission(submission.id);
+        });
+
+      this.clearAndPostNext(submission.type);
+    }
+  }
+
+  private clearAndPostNext(type: SubmissionType) {
+    const [next] = this.submissionQueue[type].splice(0, 1);
+    this.postingParts[type] = [];
+    this.posting[type] = null;
+    if (next) {
+      try {
+        this.post(next);
+      } catch (err) {
+        this.clearAndPostNext(type); // keep searching until there is a valid submission to post
+      }
+    } else {
+      this.notifyPostingStateChanged();
     }
   }
 
@@ -145,6 +199,28 @@ export class PostService {
     } else {
       return Math.max(Math.abs(timeDifference - timeToWait), 4000);
     }
+  }
+
+  private isFileSubmission(submission: Submission): submission is FileSubmission {
+    return !!(submission as FileSubmission).primary;
+  }
+
+  private async preloadFiles(submission: FileSubmission): Promise<void> {
+    const files: FileRecord[] = _.compact([
+      submission.primary,
+      submission.thumbnail,
+      ...submission.additional,
+    ]);
+    await Promise.all(
+      files.map(record => {
+        return fs
+          .readFile(record.location)
+          .then(buffer => (record.buffer = buffer))
+          .catch(err => {
+            this.logger.error(err, 'Preload File Failure');
+          });
+      }),
+    );
   }
 
   private notifyPostingStateChanged = _.debounce(

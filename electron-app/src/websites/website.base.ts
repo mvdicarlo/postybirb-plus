@@ -14,13 +14,14 @@ export abstract class Website {
   abstract readonly acceptsFiles: string[];
   abstract readonly defaultFileSubmissionOptions: any;
   abstract readonly defaultStatusOptions?: any;
-  abstract readonly usernameShortcuts: UsernameShortcut[] = [];
+
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
   readonly accountInformation: Map<string, any> = new Map();
   readonly enableAdvertisement: boolean = true;
   readonly refreshBeforePost: boolean = false;
   readonly refreshInterval: number = 1800000;
+  readonly usernameShortcuts: UsernameShortcut[] = [];
   readonly waitBetweenPostsInterval: number = 4000;
 
   readonly defaultDescriptionParser = HTMLFormatParser.parse;
