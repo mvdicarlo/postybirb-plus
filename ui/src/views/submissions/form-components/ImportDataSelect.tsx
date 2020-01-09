@@ -5,7 +5,6 @@ import { LoginStatusStore } from '../../../stores/login-status.store';
 import { SubmissionStore } from '../../../stores/submission.store';
 import { Modal, Select, Button, Form, TreeSelect } from 'antd';
 import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
-import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../website-components/website-registry';
 import SubmissionUtil from '../../../utils/submission.util';

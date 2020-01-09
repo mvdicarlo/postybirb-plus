@@ -9,7 +9,7 @@ export interface SubmissionPart<T extends DefaultOptions> {
   website: string;
   isDefault?: boolean;
   postedTo?: string;
-  postStatus: 'SUCCESS' | 'FAILED' | 'UNPOSTED';
+  postStatus?: 'SUCCESS' | 'FAILED' | 'UNPOSTED';
 }
 
 export interface Parts {

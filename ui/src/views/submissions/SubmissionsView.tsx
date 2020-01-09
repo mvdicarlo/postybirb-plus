@@ -1,5 +1,6 @@
 import React from 'react';
 import * as _ from 'lodash';
+import SubmissionLogs from './SubmissionLogs';
 import { Submissions } from './Submissions';
 import { RcFile } from 'antd/lib/upload';
 import { headerStore } from '../../stores/header.store';
@@ -112,6 +113,9 @@ export default class SubmissionView extends React.Component<Props> {
           key="posting"
         >
           TBD
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Logs" key="logs">
+          <SubmissionLogs type={this.type}/>
         </Tabs.TabPane>
       </Tabs>
     );

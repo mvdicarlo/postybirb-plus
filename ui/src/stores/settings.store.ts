@@ -8,7 +8,6 @@ export class SettingsStore {
   @observable state: Settings = {
     advertise: true,
     emptyQueueOnFailedPost: true,
-    postInterval: 0,
     postRetries: 1,
     openOnStartup: true,
     useHardwareAcceleration: false

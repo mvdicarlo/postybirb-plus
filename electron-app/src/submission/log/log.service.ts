@@ -12,10 +12,12 @@ export class LogService {
   constructor(private readonly repository: SubmissionLogRepository) {}
 
   async getLogs(type?: SubmissionType): Promise<SubmissionLog[]> {
+    let logs = [];
     if (type) {
-      return (await this.repository.findAll()).filter(log => log.submission.type === type);
+      logs = (await this.repository.findAll()).filter(log => log.submission.type === type);
     }
-    return this.repository.findAll();
+    logs = await this.repository.findAll();
+    return logs.sort((a, b) => a.created - b.created).reverse();
   }
 
   async addLog(submission: Submission, parts: PartWithResponse[]): Promise<void> {

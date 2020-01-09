@@ -37,7 +37,6 @@ settings
   .defaults({
     advertise: true,
     emptyQueueOnFailedPost: true,
-    postInterval: 0,
     postRetries: 0,
     openOnStartup: true,
     useHardwareAcceleration: process.platform === 'win32' || process.platform === 'darwin',

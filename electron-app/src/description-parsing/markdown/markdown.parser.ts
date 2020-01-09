@@ -1,4 +1,4 @@
-import Turndown from 'turndown';
+import * as Turndown from 'turndown';
 
 export class MarkdownParser {
   public static parser: Turndown = new Turndown();

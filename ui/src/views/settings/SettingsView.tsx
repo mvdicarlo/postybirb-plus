@@ -57,17 +57,6 @@ export default class SettingsView extends React.Component<Props> {
                 />
               </Tooltip>
             </Form.Item>
-            <Form.Item label="Time Between Posts">
-              <Tooltip title="# of minutes between each post.">
-                <InputNumber
-                  min={0}
-                  value={settings.postInterval}
-                  onBlur={({ target }) =>
-                    this.updateSetting('postInterval', Math.max(0, Number(target.value)))
-                  }
-                />
-              </Tooltip>
-            </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Display" key="2">
             <Form.Item label="Theme">

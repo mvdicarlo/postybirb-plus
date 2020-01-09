@@ -83,6 +83,7 @@ export class Poster extends EventEmitter {
   postAtTimeout: NodeJS.Timeout;
   sources: string[] = [];
   postAt: number;
+  retries: number = 0;
 
   constructor(
     private accountService: AccountService,
@@ -98,6 +99,7 @@ export class Poster extends EventEmitter {
     super();
     this.postAtTimeout = setTimeout(this.post, timeUntilPost);
     this.postAt = Date.now() + timeUntilPost;
+    this.retries = settingsService.getValue<number>('postRetries') || 0;
   }
 
   private post() {
@@ -153,7 +155,6 @@ export class Poster extends EventEmitter {
         }
       }
 
-      // TODO figure out how to do multi post to websites that don't support it
       const data: PostData<Submission> = {
         description,
         options: this.part.data,
@@ -224,6 +225,7 @@ export class Poster extends EventEmitter {
       });
 
       // TODO post
+      // TODO post w/ retries
       const random = _.random(0, 100);
       if (random > 50) {
         this.done(true, { website: this.part.website });

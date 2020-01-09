@@ -45,6 +45,7 @@ export class SubmissionService {
 
   @Interval(60000)
   async queueScheduledSubmissions() {
+    this.logger.log('Schedule Post Check', 'Schedule Check');
     const submissions: Array<SubmissionPackage<any>> = (await this.getAll(true) as Array<SubmissionPackage<any>>);
     const now = Date.now();
     submissions

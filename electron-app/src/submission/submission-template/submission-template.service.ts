@@ -61,6 +61,7 @@ export class SubmissionTemplateService {
           accountId: 'default',
           data: defaultPart,
           isDefault: true,
+          postStatus: 'UNPOSTED',
         },
       },
       created: Date.now(),
