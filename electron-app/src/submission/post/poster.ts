@@ -38,13 +38,11 @@ export interface Poster {
         submission: Submission;
         part: SubmissionPart<any>;
         success: boolean;
-        sources: string[];
+        source: string;
       },
       response: PostResponse,
     ) => void,
   ): this;
-
-  on(event: 'error', listener: (data: any) => void): this;
 
   once(
     event: 'cancelled',
@@ -63,7 +61,7 @@ export interface Poster {
         submission: Submission;
         part: SubmissionPart<any>;
         success: boolean;
-        sources: string[];
+        source: string;
       },
       response: PostResponse,
     ) => void,
@@ -73,12 +71,11 @@ export interface Poster {
     event: 'ready',
     listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
   ): this;
-
-  once(event: 'error', listener: (error: PostResponse) => void): this;
 }
 
 export class Poster extends EventEmitter {
   cancelled: boolean = false;
+  success: boolean = false;
   isPosting: boolean = false;
   isReady: boolean = false;
   isDone: boolean = false;
@@ -95,13 +92,12 @@ export class Poster extends EventEmitter {
     private submission: Submission,
     public part: SubmissionPart<any>,
     private defaultPart: SubmissionPart<DefaultOptions>,
-    private waitForExternalStart: boolean,
+    public waitForExternalStart: boolean,
     timeUntilPost: number,
   ) {
     super();
     this.postAtTimeout = setTimeout(this.post, timeUntilPost);
     this.postAt = Date.now() + timeUntilPost;
-    this.sources = [...submission.sources];
   }
 
   private post() {
@@ -109,7 +105,6 @@ export class Poster extends EventEmitter {
     this.emit('ready', {
       submission: this.submission,
       part: this.part,
-      at: this.postAt,
     });
     if (!this.waitForExternalStart) {
       this.performPost();
@@ -247,19 +242,19 @@ export class Poster extends EventEmitter {
       } else {
         Object.assign(errorMsg, error);
       }
-      this.emit('error', errorMsg);
       this.done(false, errorMsg);
     }
   }
 
   private done(success: boolean, response: PostResponse) {
     this.isDone = true;
+    this.success = success;
     this.response = response;
     this.emit('done', {
       submission: this.submission,
       part: this.part,
       success,
-      sources: this.sources,
+      source: response.source,
     });
   }
 

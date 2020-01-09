@@ -77,10 +77,19 @@ export class SubmissionPartService {
       accountId: 'default',
       data: defaultPart,
       isDefault: true,
+      postStatus: 'UNPOSTED',
     });
   }
 
-  getPartsForSubmission(submissionId: string): Promise<Array<SubmissionPart<any>>> {
+  getPartsForSubmission(
+    submissionId: string,
+    incompleteOnly: boolean,
+  ): Promise<Array<SubmissionPart<any>>> {
+    if (incompleteOnly) {
+      return this.repository
+        .findAllBySubmissionId(submissionId)
+        .then(parts => parts.filter(part => part.postStatus !== 'SUCCESS'));
+    }
     return this.repository.findAllBySubmissionId(submissionId);
   }
 

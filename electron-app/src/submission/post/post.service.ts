@@ -16,7 +16,11 @@ import { FileSubmission } from '../file-submission/interfaces/file-submission.in
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { Poster } from './poster';
 import { LogService } from '../log/log.service';
+import { PostStatus } from './interfaces/post-status.interface';
+import { EventsGateway } from 'src/events/events.gateway';
+import { PostEvent } from './post.events.enum';
 
+// TODO clear all based on setting on failure
 @Injectable()
 export class PostService {
   private readonly logger = new Logger(PostService.name);
@@ -48,6 +52,7 @@ export class PostService {
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
     private readonly logService: LogService,
+    private eventEmitter: EventsGateway,
   ) {}
 
   queue(submission: Submission) {
@@ -87,11 +92,35 @@ export class PostService {
     return !!this.submissionQueue[submission.type].find(s => s.id === submission.id);
   }
 
+  getPostingStatus(): PostStatus {
+    const posting = [];
+    Object.values(this.posting).forEach(submission => {
+      if (submission) {
+        posting.push({
+          submission,
+          statuses: this.postingParts[submission.type].map(poster => ({
+            postAt: poster.postAt,
+            success: poster.success,
+            done: poster.isDone,
+            waitingForCondition: poster.waitForExternalStart,
+            website: poster.part.website,
+          })),
+        });
+      }
+    });
+
+    return {
+      queued: _.flatten(Object.values(this.submissionQueue)),
+      posting,
+    };
+  }
+
   private insert(submission: Submission) {
-    if (!this.submissionQueue[submission.type].find(s => s.id === submission.id)) {
+    if (!this.isCurrentlyQueued(submission)) {
       this.logger.log(submission.id, `Inserting Into Queue ${submission.type}`);
       this.submissionQueue[submission.type].push(submission);
       this.notifyPostingStateChanged();
+      this.notifyPostingStatusChanged();
     }
   }
 
@@ -101,69 +130,132 @@ export class PostService {
 
   private async post(submission: Submission) {
     this.logger.log(submission.id, 'Posting');
+    this.posting[submission.type] = submission; // set here to stop double queue scenario
 
+    // Check for problems
     const validationPackage = await this.submissionService.validate(submission);
     const isValid: boolean = !!_.flatMap(validationPackage.problems, p => p.problems).length;
 
     if (isValid) {
-      this.posting[submission.type] = submission;
+      if (submission.schedule.isScheduled) {
+        this.submissionService.scheduleSubmission(submission.id, false); // Unschedule
+      }
       this.notifyPostingStateChanged();
-      const parts = await this.partService.getPartsForSubmission(submission.id);
+      const parts = await this.partService.getPartsForSubmission(submission.id, true);
       const [defaultPart] = parts.filter(p => p.isDefault);
+
+      // Preload files if they exist
       if (this.isFileSubmission(submission)) {
         await this.preloadFiles(submission);
       }
+
+      // Create posters
+      const existingSources = parts.filter(p => p.postedTo).map(p => p.postedTo);
       this.postingParts[submission.type] = parts
         .filter(p => !p.isDefault)
-        .map(p => this.createPoster(submission, p, defaultPart));
+        .map(p => this.createPoster(submission, p, defaultPart, existingSources));
 
+      // Listen to events
       this.postingParts[submission.type].forEach(poster => {
+        poster.once('ready', () => this.notifyPostingStatusChanged());
+        poster.once('posting', () => this.notifyPostingStatusChanged());
         poster.once('cancelled', data => this.checkForCompletion(data.submission));
-        // TODO handle done behavior for logging and saving
         poster.once('done', data => {
-          this.checkForCompletion(data.submission);
+          if (data.source) {
+            this.addSource(data.submission.type, data.source);
+          }
+
+          if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+            this.emptyQueue(data.submission.type);
+          }
+
+          // Save part and then check/notify
+          this.partService
+            .createOrUpdateSubmissionPart(
+              {
+                ...data.part,
+                postStatus: data.success ? 'SUCCESS' : 'FAILED',
+                postedTo: data.source,
+              },
+              data.submission.type,
+            )
+            .finally(() => {
+              this.notifyPostingStateChanged();
+              this.checkForCompletion(data.submission);
+            });
         });
-        // TODO handle 'error' 'posting'
       });
+
+      this.notifyPostingStatusChanged();
     } else {
       this.posting[submission.type] = null;
       throw new BadRequestException('Submission has problems');
     }
   }
 
+  private addSource(type: SubmissionType, source: string) {
+    this.postingParts[type].forEach(poster => {
+      poster.addSource(source);
+      // Start poster that was waiting for a source
+      if (poster.waitForExternalStart) {
+        poster.doPost();
+      }
+    });
+  }
+
   private checkForCompletion(submission: Submission) {
-    if (this.postingParts[submission.type].filter(poster => !poster.isDone).length) {
-      // TODO not done (send socket change event)
+    // isDone is set when 'done' is called and 'cancelled'
+    const incomplete = this.postingParts[submission.type].filter(poster => !poster.isDone);
+    if (incomplete.length) {
+      const waitingForExternal = incomplete.filter(poster => poster.waitForExternalStart);
+
+      if (waitingForExternal.length === incomplete.length) {
+        // Force post start as no source was found
+        waitingForExternal.forEach(poster => poster.doPost());
+      }
+
+      this.notifyPostingStatusChanged();
     } else {
       this.logService
         .addLog(
           submission,
-          this.postingParts[submission.type].map(poster => ({
-            part: poster.part,
-            response: poster.response,
-          })),
+          this.postingParts[submission.type]
+            .filter(poster => !poster.cancelled)
+            .map(poster => ({
+              part: {
+                ...poster.part,
+                postStatus: poster.success ? 'SUCCESS' : 'FAILED',
+                postedTo: poster.response.source,
+              },
+              response: poster.response,
+            })),
         )
         .finally(() => {
           // TODO emit notification to UI and OS
-          this.submissionService.deleteSubmission(submission.id);
+          // Delete submission if 100% completed
+          if (!this.postingParts[submission.type].filter(p => !p.success).length) {
+            this.submissionService.deleteSubmission(submission.id);
+          }
         });
 
       this.clearAndPostNext(submission.type);
     }
   }
 
-  private clearAndPostNext(type: SubmissionType) {
-    const [next] = this.submissionQueue[type].splice(0, 1);
+  private async clearAndPostNext(type: SubmissionType) {
+    const next = this.submissionQueue[type].pop();
     this.postingParts[type] = [];
     this.posting[type] = null;
     if (next) {
       try {
-        this.post(next);
+        this.notifyPostingStatusChanged();
+        await this.post(next);
       } catch (err) {
         this.clearAndPostNext(type); // keep searching until there is a valid submission to post
       }
     } else {
       this.notifyPostingStateChanged();
+      this.notifyPostingStatusChanged();
     }
   }
 
@@ -171,7 +263,9 @@ export class PostService {
     submission: Submission,
     part: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    sources: string[],
   ): Poster {
+    const knownSources = [...sources, ...(part.data.sources || [])];
     return new Poster(
       this.accountService,
       this.settings,
@@ -180,9 +274,15 @@ export class PostService {
       submission,
       part,
       defaultPart,
-      this.websites.getWebsiteModule(part.website).acceptsSourceUrls,
+      this.websites.getWebsiteModule(part.website).acceptsSourceUrls && knownSources.length === 0,
       this.getWaitTime(part.accountId, this.websites.getWebsiteModule(part.website)),
     );
+  }
+
+  private emptyQueue(type: SubmissionType) {
+    this.submissionQueue[type] = [];
+    this.notifyPostingStatusChanged();
+    this.notifyPostingStateChanged();
   }
 
   private getWaitTime(accountId: string, website: Website): number {
@@ -225,6 +325,11 @@ export class PostService {
 
   private notifyPostingStateChanged = _.debounce(
     () => this.submissionService.postingStateChanged(),
+    1000,
+  );
+
+  private notifyPostingStatusChanged = _.debounce(
+    () => this.eventEmitter.emit(PostEvent.UPDATED, this.getPostingStatus()),
     1000,
   );
 }

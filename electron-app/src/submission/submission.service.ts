@@ -27,13 +27,12 @@ import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
 import { PostService } from './post/post.service';
+import { Interval } from '@nestjs/schedule';
 
 @Injectable()
 export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
 
-  // TODO handle posting state
-  // TODO cron for scheduled
   constructor(
     private readonly repository: SubmissionRepository,
     private readonly partService: SubmissionPartService,
@@ -43,6 +42,19 @@ export class SubmissionService {
     @Inject(forwardRef(() => PostService))
     private readonly postService: PostService,
   ) {}
+
+  @Interval(60000)
+  async queueScheduledSubmissions() {
+    const submissions: Array<SubmissionPackage<any>> = (await this.getAll(true) as Array<SubmissionPackage<any>>);
+    const now = Date.now();
+    submissions
+      .filter(p => p.submission.schedule.isScheduled)
+      .filter(p => p.submission.schedule.postAt <= now)
+      .filter(p => !this.postService.isCurrentlyPosting(p.submission))
+      .filter(p => !this.postService.isCurrentlyQueued(p.submission))
+      .sort((a, b) => a.submission.schedule.postAt - b.submission.schedule.postAt)
+      .forEach(p => this.postService.queue(p.submission));
+  }
 
   async get(id: string, packaged?: boolean): Promise<Submission | SubmissionPackage<any>> {
     const submission = await this.repository.find(id);
@@ -113,7 +125,7 @@ export class SubmissionService {
   }
 
   async validate(submission: Submission): Promise<SubmissionPackage<any>> {
-    const parts = await this.partService.getPartsForSubmission(submission.id);
+    const parts = await this.partService.getPartsForSubmission(submission.id, true);
     const problems: Problems = this.validatorService.validateParts(submission, parts);
     const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part));
@@ -184,7 +196,7 @@ export class SubmissionService {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const allParts = await this.partService.getPartsForSubmission(submission.id);
+    const allParts = await this.partService.getPartsForSubmission(submission.id, false);
     const keepIds = submissionOverwrite.parts.map(p => p.accountId);
     const removeParts = allParts.filter(p => !keepIds.includes(p.accountId));
 
@@ -245,6 +257,8 @@ export class SubmissionService {
         submissionId: submission.id,
         website: submissionPart.website,
         isDefault: submissionPart.isDefault,
+        postedTo: submissionPart.postedTo,
+        postStatus: submissionPart.postStatus, // UNSET ON SAVE?
       };
     }
 
@@ -286,7 +300,7 @@ export class SubmissionService {
     }
 
     // Duplicate parts
-    const parts = await this.partService.getPartsForSubmission(originalId);
+    const parts = await this.partService.getPartsForSubmission(originalId, true);
     const duplicateParts: Array<SubmissionPart<any>> = _.cloneDeep(parts);
     await Promise.all(
       duplicateParts.map(p => {

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { WebsitesModule } from './websites/websites.module';
 import { TagGroupModule } from './tag-group/tag-group.module';
@@ -12,6 +13,7 @@ import { RemoteModule } from './remote/remote.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     WebsitesModule,
     TagGroupModule,
     EventsModule,

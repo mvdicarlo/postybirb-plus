@@ -8,6 +8,8 @@ export interface SubmissionPart<T extends DefaultOptions> {
   submissionId: string;
   website: string;
   isDefault?: boolean;
+  postedTo?: string;
+  postStatus: 'SUCCESS' | 'FAILED' | 'UNPOSTED';
 }
 
 export interface Parts {

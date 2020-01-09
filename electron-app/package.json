@@ -31,6 +31,7 @@
     "@nestjs/core": "^6.7.2",
     "@nestjs/platform-express": "^6.9.0",
     "@nestjs/platform-socket.io": "^6.9.0",
+    "@nestjs/schedule": "^0.1.1",
     "@nestjs/websockets": "^6.9.0",
     "cheerio": "^1.0.0-rc.3",
     "class-transformer": "^0.2.3",

@@ -5,6 +5,7 @@ import { BrowserWindow } from 'electron';
 import * as logger from 'electron-log';
 import { AppGlobal } from 'src/app-global.interface';
 import { PostService } from 'src/submission/post/post.service';
+import { Interval } from '@nestjs/schedule';
 
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
@@ -91,7 +92,6 @@ export class UpdateService {
     });
 
     setTimeout(() => this.checkForUpdate(), 5000); // initial check
-    setInterval(() => this.checkForUpdate(), 60000 * 60); // hourly check
   }
 
   public updateInfo() {
@@ -123,6 +123,7 @@ export class UpdateService {
     autoUpdater.downloadUpdate();
   }
 
+  @Interval(3600000)
   private checkForUpdate() {
     if (this.updateAvailable.available || this.DEBUG_MODE || this.isUpdating) {
       return;
