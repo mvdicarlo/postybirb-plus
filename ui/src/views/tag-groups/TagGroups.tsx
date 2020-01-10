@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import './TagGroup.css';
 import { inject, observer } from 'mobx-react';
 import { TagGroupStore } from '../../stores/tag-group.store';
-import { TagGroup } from '../../../../electron-app/src/tag-group/tag-group.interface';
+import { TagGroup } from '../../../../electron-app/src/tag-group/interfaces/tag-group.interface';
 import TagGroupService from '../../services/tag-group.service';
 import TagInput from '../submissions/form-components/TagInput';
 import { Input, Button, message, Popconfirm, Spin, Empty, Card, Icon } from 'antd';
@@ -18,7 +18,6 @@ interface Props {
 export default class TagGroups extends React.Component<Props> {
   createNewGroup() {
     TagGroupService.create({
-      id: Date.now().toString(),
       alias: 'New Tag Group',
       tags: []
     });
@@ -54,7 +53,7 @@ export default class TagGroups extends React.Component<Props> {
 interface TagGroupInputState {
   touched: boolean;
   saving: boolean;
-  tagGroup: TagGroup;
+  tagGroup: Partial<TagGroup>;
 }
 
 class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
@@ -62,7 +61,6 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
     touched: false,
     saving: false,
     tagGroup: {
-      id: '',
       alias: '',
       tags: []
     }
@@ -95,7 +93,7 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
     }
 
     this.setState({ saving: true });
-    TagGroupService.update(this.state.tagGroup)
+    TagGroupService.update(this.state.tagGroup as TagGroup)
       .then(() => {
         this.setState({ saving: false, touched: false });
         message.success('Tag group updated.');
@@ -108,8 +106,12 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
 
   onDelete = () => {
     TagGroupService.deleteTagGroup(this.props.id)
-      .then(() => message.success('Tag group removed.'))
-      .catch(() => message.error('Failed to remove tag group.'));
+      .then(() => {
+        message.success('Tag group removed.');
+      })
+      .catch(() => {
+        message.error('Failed to remove tag group.');
+      });
   };
 
   render() {
@@ -138,7 +140,7 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
               hideExtend={true}
               hideExtra={true}
               hideTagGroup={true}
-              defaultValue={{ extendDefault: false, value: this.state.tagGroup.tags }}
+              defaultValue={{ extendDefault: false, value: this.state.tagGroup.tags! }}
             />
           </Card>
         </Spin>

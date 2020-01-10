@@ -1,24 +1,23 @@
 import { Controller, Get, Patch, Body, Delete, Param, Post } from '@nestjs/common';
 import { TagGroupService } from './tag-group.service';
-import { TagGroup } from './tag-group.interface';
-import { TagGroupDto } from './tag-group.dto';
+import TagGroupEntity from './models/tag-group.entity';
 
 @Controller('tag-group')
 export class TagGroupController {
   constructor(private readonly service: TagGroupService) {}
 
   @Get()
-  async getAll(): Promise<TagGroup[]> {
+  async getAll(): Promise<TagGroupEntity[]> {
     return this.service.getAll();
   }
 
   @Post('create')
-  async create(@Body() tagGroup: TagGroupDto): Promise<TagGroup> {
+  async create(@Body() tagGroup: TagGroupEntity): Promise<TagGroupEntity> {
     return this.service.create(tagGroup);
   }
 
   @Patch('update')
-  async update(@Body() tagGroup: TagGroupDto) {
+  async update(@Body() tagGroup: TagGroupEntity) {
     return this.service.update(tagGroup);
   }
 

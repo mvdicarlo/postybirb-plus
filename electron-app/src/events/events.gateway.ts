@@ -1,6 +1,7 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayInit } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { AppGlobal } from 'src/app-global.interface';
+import { classToPlain } from 'class-transformer';
 
 @WebSocketGateway()
 export class EventsGateway implements OnGatewayInit {
@@ -18,10 +19,10 @@ export class EventsGateway implements OnGatewayInit {
   }
 
   public emit(event: string, data: any) {
-    this.server.emit(event, data);
+    this.server.emit(event, classToPlain(data));
   }
 
   public async emitOnComplete(event: string, promise: Promise<any>) {
-    this.server.emit(event, await promise);
+    this.server.emit(event, classToPlain(await promise));
   }
 }

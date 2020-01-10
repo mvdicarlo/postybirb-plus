@@ -1,10 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TagGroupRepository } from './tag-group.repository';
-import { TagGroup } from './tag-group.interface';
-import { TagGroupDto } from './tag-group.dto';
-import * as shortid from 'shortid';
 import { EventsGateway } from 'src/events/events.gateway';
 import { TagGroupEvent } from './tag-group.events.enum';
+import TagGroupEntity from './models/tag-group.entity';
 
 @Injectable()
 export class TagGroupService {
@@ -16,20 +14,19 @@ export class TagGroupService {
   ) {}
 
   getAll() {
-    return this.repository.findAll();
+    return this.repository.find();
   }
 
-  async create(tagGroup: TagGroupDto) {
+  async create(tagGroup: TagGroupEntity) {
     this.logger.log(tagGroup, 'Create Tag Group');
-    tagGroup.id = shortid.generate();
-    const newTagGroup = await this.repository.create(tagGroup);
+    const newTagGroup = await this.repository.save(tagGroup);
     this.eventEmitter.emit(TagGroupEvent.CREATED, newTagGroup);
     return newTagGroup;
   }
 
-  async update(tagGroup: TagGroup) {
+  async update(tagGroup: TagGroupEntity) {
     this.logger.log(tagGroup.id, 'Update Tag Group');
-    await this.repository.update(tagGroup.id, { alias: tagGroup.alias, tags: tagGroup.tags });
+    await this.repository.update(tagGroup);
     this.eventEmitter.emit(TagGroupEvent.UPDATED, tagGroup);
   }
 

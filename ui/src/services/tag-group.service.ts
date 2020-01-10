@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { TagGroup } from '../../../electron-app/src/tag-group/tag-group.interface';
+import { TagGroup } from '../../../electron-app/src/tag-group/interfaces/tag-group.interface';
 
 export default class TagGroupService {
   static getAll() {
@@ -14,7 +14,7 @@ export default class TagGroupService {
     return axios.patch('/tag-group/update', tagGroup);
   }
 
-  static create(tagGroup: TagGroup) {
+  static create(tagGroup: Partial<TagGroup>) {
     return axios.post<TagGroup>('/tag-group/create', tagGroup);
   }
 }

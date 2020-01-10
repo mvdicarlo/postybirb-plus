@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { TagGroup } from './tag-group.interface';
-import Repository from '../base/repository.base';
+import EntityRepository from 'src/base/entity/entity.repository.base';
+import TagGroupEntity from './models/tag-group.entity';
 
 @Injectable()
-export class TagGroupRepository extends Repository<TagGroup> {
+export class TagGroupRepository extends EntityRepository<TagGroupEntity> {
   constructor() {
-    super('tag-group');
+    super('tag-group', TagGroupEntity);
   }
 }
