@@ -38,6 +38,8 @@ export default class EntityRepository<T extends Entity> {
       return docs.map(doc => new this.clazz(doc));
     } catch (err) {
       throw new NotFoundException(err);
+    } finally {
+      this.db.persistence.compactDatafile();
     }
   }
 
@@ -55,6 +57,8 @@ export default class EntityRepository<T extends Entity> {
       return await this._remove({ _id: id }, { multi: false });
     } catch (err) {
       throw new BadRequestException(err);
+    } finally {
+      this.db.persistence.compactDatafile();
     }
   }
 
@@ -67,10 +71,11 @@ export default class EntityRepository<T extends Entity> {
       return new this.clazz(savedEntity);
     } catch (err) {
       throw new BadRequestException(err);
+    } finally {
+      this.db.persistence.compactDatafile();
     }
   }
 
-  // TODO fix duplicate insert
   async update(entity: T): Promise<number> {
     try {
       await validate(entity);
@@ -91,6 +96,8 @@ export default class EntityRepository<T extends Entity> {
       return updatedCount;
     } catch (err) {
       throw new BadRequestException(err);
+    } finally {
+      this.db.persistence.compactDatafile();
     }
   }
 }

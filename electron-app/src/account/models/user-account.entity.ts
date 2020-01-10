@@ -8,7 +8,7 @@ export default class UserAccountEntity extends Entity implements UserAccount {
   alias: string;
 
   @IsOptional()
-  data: any = {};
+  data: any;
 
   @IsNotEmpty()
   @IsString()
