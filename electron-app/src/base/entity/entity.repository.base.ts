@@ -44,7 +44,7 @@ export default class EntityRepository<T extends Entity> {
   async findOne(id: string): Promise<T> {
     try {
       const doc = await this._findOne({ _id: id });
-      return new this.clazz(doc);
+      return doc ? new this.clazz(doc) : null;
     } catch (err) {
       throw new NotFoundException(err);
     }
@@ -70,6 +70,7 @@ export default class EntityRepository<T extends Entity> {
     }
   }
 
+  // TODO fix duplicate insert
   async update(entity: T): Promise<number> {
     try {
       await validate(entity);
@@ -85,7 +86,7 @@ export default class EntityRepository<T extends Entity> {
             lastUpdated: new Date().toLocaleString(),
           },
         },
-        {},
+        { upsert: false, multi: false },
       );
       return updatedCount;
     } catch (err) {

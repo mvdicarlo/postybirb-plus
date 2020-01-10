@@ -1,13 +1,12 @@
-import React from 'react';
-import { UserAccountDto } from '../../../../electron-app/src/account/account.interface';
+import { UserAccountDto } from '../../../../electron-app/src/account/interfaces/user-account.dto.interface';
 import { SubmissionSectionProps } from '../../views/submissions/interfaces/submission-section.interface';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 
 export interface LoginDialogProps {
-    account: UserAccountDto;
-    url?: string;
-    data?: any;
+  account: UserAccountDto;
+  url?: string;
+  data?: any;
 }
 
 export interface Website {

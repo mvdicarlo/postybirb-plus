@@ -6,12 +6,12 @@ import { FileSubmission } from 'src/submission/file-submission/interfaces/file-s
 import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import WebsiteValidator from '../utils/website-validator.util';
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import { UserAccount } from 'src/account/account.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
+import UserAccountEntity from 'src/account/models/user-account.entity';
 
 interface DiscordLoginData {
   name: string;
@@ -31,7 +31,7 @@ export class Discord extends Website {
 
   readonly usernameShortcuts = [];
 
-  async checkLoginStatus(data: UserAccount): Promise<LoginResponse> {
+  async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
 
     if (data.data) {

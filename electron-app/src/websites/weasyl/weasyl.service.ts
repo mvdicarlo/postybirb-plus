@@ -4,7 +4,6 @@ import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
-import { UserAccount } from 'src/account/account.interface';
 import { Website } from 'src/websites/website.base';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
@@ -15,6 +14,7 @@ import { Folder } from 'src/websites/interfaces/folder.interface';
 import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
+import UserAccountEntity from 'src/account/models/user-account.entity';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -55,7 +55,7 @@ export class Weasyl extends Website {
     throw new NotImplementedException('Method not implemented.');
   }
 
-  async checkLoginStatus(data: UserAccount): Promise<LoginResponse> {
+  async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const res = await Http.get<any>(`${this.BASE_URL}/api/whoami`, data.id, {
       requestOptions: { json: true },
     });

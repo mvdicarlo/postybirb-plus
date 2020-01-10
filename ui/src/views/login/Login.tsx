@@ -4,7 +4,7 @@ import { LoginStatusStore } from '../../stores/login-status.store';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { Website } from '../../website-components/interfaces/website.interface';
-import { UserAccountDto } from '../../../../electron-app/src/account/account.interface';
+import { UserAccountDto } from '../../../../electron-app/src/account/interfaces/user-account.dto.interface';
 import LoginService from '../../services/login.service';
 import './Login.css';
 import {

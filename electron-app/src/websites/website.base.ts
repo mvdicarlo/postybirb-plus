@@ -1,5 +1,4 @@
 import { LoginResponse } from './interfaces/login-response.interface';
-import { UserAccount } from 'src/account/account.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
 import * as _ from 'lodash';
@@ -8,6 +7,7 @@ import { DefaultOptions } from 'src/submission/interfaces/default-options.interf
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
+import UserAccountEntity from 'src/account/models/user-account.entity';
 
 export abstract class Website {
   abstract readonly BASE_URL: string;
@@ -73,7 +73,7 @@ export abstract class Website {
       .map(tag => tag.replace(/\s/g, options.spaceReplacer));
   }
 
-  abstract checkLoginStatus(data: UserAccount): Promise<LoginResponse>;
+  abstract checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
 
   abstract validateFileSubmission(
     submission: Submission,

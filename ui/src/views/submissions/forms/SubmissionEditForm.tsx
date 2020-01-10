@@ -22,6 +22,7 @@ import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
 import { FileRecord } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
+import { UserAccountDto } from '../../../../../electron-app/src/account/interfaces/user-account.dto.interface';
 
 import {
   Form,
@@ -39,7 +40,6 @@ import {
   Alert,
   Tooltip
 } from 'antd';
-import { UserAccountDto } from '../../../../../electron-app/src/account/account.interface';
 
 interface Props {
   match: Match;

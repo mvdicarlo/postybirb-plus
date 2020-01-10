@@ -1,6 +1,6 @@
 import { observable, computed, action } from 'mobx';
 import socket from '../utils/websocket';
-import { UserAccountDto } from '../../../electron-app/src/account/account.interface';
+import { UserAccountDto } from '../../../electron-app/src/account/interfaces/user-account.dto.interface';
 import LoginService from '../services/login.service';
 import { AccountEvent } from '../shared/enums/account.events.enum';
 

@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { UserAccountDto } from '../../../electron-app/src/account/account.interface';
+import { UserAccountDto } from '../../../electron-app/src/account/interfaces/user-account.dto.interface';
 
 export default class LoginService {
   static checkLogin(id: string) {
@@ -8,7 +8,7 @@ export default class LoginService {
 
   static createAccount(id: string, website: string, alias: string, data?: any) {
     return axios.post('/account/create', {
-      id,
+      _id: id,
       website,
       alias,
       data

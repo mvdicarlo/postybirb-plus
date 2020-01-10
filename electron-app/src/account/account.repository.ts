@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { UserAccount } from './account.interface';
-import Repository from 'src/base/repository.base';
+import EntityRepository from 'src/base/entity/entity.repository.base';
+import UserAccountEntity from './models/user-account.entity';
 
 @Injectable()
-export class AccountRepository extends Repository<UserAccount> {
+export class AccountRepository extends EntityRepository<UserAccountEntity> {
   constructor() {
-    super('accounts');
+    super('accounts', UserAccountEntity);
   }
 }

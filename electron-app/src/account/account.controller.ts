@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Delete, Param, Get, Patch } from '@nestjs/common';
 import { AccountService } from './account.service';
-import { UserAccountDto } from './account.interface';
-import { CreateAccountDto } from './account.dto';
+import UserAccountEntity from './models/user-account.entity';
+import { UserAccountDto } from './interfaces/user-account.dto.interface';
 
 @Controller('account')
 export class AccountController {
@@ -13,7 +13,7 @@ export class AccountController {
   }
 
   @Post('create')
-  async create(@Body() createAccountDto: CreateAccountDto) {
+  async create(@Body() createAccountDto: UserAccountEntity) {
     return this.service.createAccount(createAccountDto);
   }
 

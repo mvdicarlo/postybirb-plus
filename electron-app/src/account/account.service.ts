@@ -1,16 +1,17 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import { CreateAccountDto } from './account.dto';
-import { UserAccount, UserAccountDto } from './account.interface';
 import { AccountRepository } from './account.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { session } from 'electron';
 import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
-import { AccountEvent } from './account.events.enum';
+import { AccountEvent } from './enums/account.events.enum';
 import { SubmissionService } from 'src/submission/submission.service';
 import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
+import UserAccountEntity from './models/user-account.entity';
+import { UserAccountDto } from './interfaces/user-account.dto.interface';
 
+// TODO ability to update alias
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
@@ -28,7 +29,7 @@ export class AccountService {
     private readonly submissionTemplateService: SubmissionTemplateService,
   ) {
     this.repository
-      .findAll()
+      .find()
       .then(results => {
         results.forEach(result => {
           this.loginStatuses.push({
@@ -49,7 +50,7 @@ export class AccountService {
       const { refreshInterval } = website;
       if (!this.loginCheckTimers[refreshInterval]) {
         this.loginCheckTimers[refreshInterval] = setInterval(async () => {
-          const accountsToRefresh = await this.repository.findAll({
+          const accountsToRefresh = await this.repository.find({
             website: { $in: this.loginCheckMap[refreshInterval] },
           });
           accountsToRefresh.forEach(account => this.checkLogin(account));
@@ -61,40 +62,40 @@ export class AccountService {
     });
   }
 
-  async createAccount(createAccountDto: CreateAccountDto) {
-    this.logger.log(createAccountDto, 'Create Account');
+  async createAccount(createAccount: UserAccountEntity) {
+    this.logger.log(createAccount, 'Create Account');
 
-    const existing: UserAccount = await this.repository.find(createAccountDto.id);
+    const existing: UserAccountEntity = await this.repository.findOne(createAccount.id);
     if (existing) {
-      throw new BadRequestException(`Account with Id ${createAccountDto.id} already exists.`);
+      throw new BadRequestException(`Account with Id ${createAccount.id} already exists.`);
     }
 
-    await this.repository.create(createAccountDto);
+    const account = await this.repository.save(createAccount);
 
     this.loginStatuses.push({
-      id: createAccountDto.id,
-      alias: createAccountDto.alias,
-      website: createAccountDto.website,
+      id: account.id,
+      alias: account.alias,
+      website: account.website,
       loggedIn: false,
       username: null,
-      data: createAccountDto.data,
+      data: account.data,
     });
 
-    this.eventEmitter.emit(AccountEvent.CREATED, createAccountDto.id);
+    this.eventEmitter.emit(AccountEvent.CREATED, createAccount.id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.findAll());
+    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
   }
 
-  async get(id: string): Promise<UserAccount> {
-    const account = await this.repository.find(id);
+  async get(id: string): Promise<UserAccountEntity> {
+    const account = await this.repository.findOne(id);
     if (!account) {
       throw new NotFoundException(`Account ${id} does not exist.`);
     }
     return account;
   }
 
-  getAll(): Promise<UserAccount[]> {
-    return this.repository.findAll();
+  getAll(): Promise<UserAccountEntity[]> {
+    return this.repository.find();
   }
 
   getLoginStatuses(): UserAccountDto[] {
@@ -112,7 +113,7 @@ export class AccountService {
 
     this.eventEmitter.emit(AccountEvent.DELETED, id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(AccountEvent.UPDATED, await this.repository.findAll());
+    this.eventEmitter.emit(AccountEvent.UPDATED, await this.repository.find());
 
     session
       .fromPartition(`persist:${id}`)
@@ -127,9 +128,9 @@ export class AccountService {
     this.submissionService.verifyAll();
   }
 
-  async checkLogin(userAccount: string | UserAccount): Promise<UserAccountDto> {
-    const account: UserAccount =
-      typeof userAccount === 'string' ? await this.repository.find(userAccount) : userAccount;
+  async checkLogin(userAccount: string | UserAccountEntity): Promise<UserAccountDto> {
+    const account: UserAccountEntity =
+      typeof userAccount === 'string' ? await this.repository.findOne(userAccount) : userAccount;
     if (!account) {
       throw new NotFoundException(`Account ID ${userAccount} does not exist.`);
     }
@@ -153,8 +154,9 @@ export class AccountService {
 
   async setData(id: string, data: any): Promise<void> {
     this.logger.debug(id, 'Update Account Data');
-    await this.get(id);
-    await this.repository.update(id, { data });
+    const entity = await this.get(id);
+    entity.data = data;
+    await this.repository.update(entity);
   }
 
   private async insertOrUpdateLoginStatus(login: UserAccountDto): Promise<void> {
