@@ -141,7 +141,7 @@ export class PostService {
         this.submissionService.scheduleSubmission(submission.id, false); // Unschedule
       }
       this.notifyPostingStateChanged();
-      const parts = await this.partService.getPartsForSubmission(submission.id, true);
+      const parts = await this.partService.getPartsForSubmission(submission.id, false);
       const [defaultPart] = parts.filter(p => p.isDefault);
 
       // Preload files if they exist
@@ -153,6 +153,7 @@ export class PostService {
       const existingSources = parts.filter(p => p.postedTo).map(p => p.postedTo);
       this.postingParts[submission.type] = parts
         .filter(p => !p.isDefault)
+        .filter(p => p.postStatus !== 'SUCCESS')
         .map(p => this.createPoster(submission, p, defaultPart, existingSources));
 
       // Listen to events
@@ -186,6 +187,7 @@ export class PostService {
         });
       });
 
+      this.checkForCompletion(null);
       this.notifyPostingStatusChanged();
     } else {
       this.posting[submission.type] = null;
