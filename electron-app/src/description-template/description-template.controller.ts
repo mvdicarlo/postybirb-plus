@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Delete, Param } from '@nestjs/common';
 import { DescriptionTemplateService } from './description-template.service';
-import { DescriptionTemplateDto } from './description-template.dto';
+import DescriptionTemplateEntity from './models/description-template.entity';
 
 @Controller('description-template')
 export class DescriptionTemplateController {
@@ -12,12 +12,12 @@ export class DescriptionTemplateController {
   }
 
   @Post('create')
-  async create(@Body() descriptionTemplateDto: DescriptionTemplateDto) {
+  async create(@Body() descriptionTemplateDto: DescriptionTemplateEntity) {
     return this.service.create(descriptionTemplateDto);
   }
 
   @Patch('update')
-  async update(@Body() tagGroup: DescriptionTemplateDto) {
+  async update(@Body() tagGroup: DescriptionTemplateEntity) {
     return this.service.update(tagGroup);
   }
 

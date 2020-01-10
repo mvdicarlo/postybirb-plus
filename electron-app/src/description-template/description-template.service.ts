@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import * as shortid from 'shortid';
-import { DescriptionTemplateDto } from './description-template.dto';
-import { DescriptionTemplateEvent } from './description-template.events.enum';
+import { DescriptionTemplateEvent } from './enums/description-template.events.enum';
 import { DescriptionTemplateRepository } from './description-template.repository';
 import { EventsGateway } from 'src/events/events.gateway';
+import DescriptionTemplateEntity from './models/description-template.entity';
 
 @Injectable()
 export class DescriptionTemplateService {
@@ -15,13 +14,12 @@ export class DescriptionTemplateService {
   ) {}
 
   getAll() {
-    return this.repository.findAll();
+    return this.repository.find();
   }
 
-  async create(descriptionTemplateDto: DescriptionTemplateDto) {
+  async create(descriptionTemplateDto: DescriptionTemplateEntity) {
     this.logger.log(descriptionTemplateDto, 'Create Description Template');
-    descriptionTemplateDto.id = shortid.generate();
-    const dt = await this.repository.create(descriptionTemplateDto);
+    const dt = await this.repository.save(descriptionTemplateDto);
     this.eventEmitter.emit(DescriptionTemplateEvent.CREATED, dt);
     return dt;
   }
@@ -32,18 +30,17 @@ export class DescriptionTemplateService {
     return this.repository.remove(id);
   }
 
-  async update(update: DescriptionTemplateDto) {
+  async update(update: DescriptionTemplateEntity) {
     this.logger.log(update.id, 'Update Description Template');
-    const exists = await this.repository.find(update.id);
+    const exists = await this.repository.findOne(update.id);
     if (!exists) {
       throw new NotFoundException(`Description template ${update.id} does not exist.`);
     }
-    await this.repository.update(update.id, {
-      content: update.content,
-      description: update.description,
-      title: update.title,
-    });
+    exists.content = update.content;
+    exists.description = update.description;
+    exists.title = update.title;
+    await this.repository.update(exists);
 
-    this.eventEmitter.emit(DescriptionTemplateEvent.UPDATED, update);
+    this.eventEmitter.emit(DescriptionTemplateEvent.UPDATED, exists);
   }
 }

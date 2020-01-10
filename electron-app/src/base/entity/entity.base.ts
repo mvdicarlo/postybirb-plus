@@ -1,5 +1,5 @@
 import { EntityIntf } from './entity.base.interface';
-import { IsOptional, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import * as uuid from 'uuid/v1';
 import { Expose } from 'class-transformer';
 

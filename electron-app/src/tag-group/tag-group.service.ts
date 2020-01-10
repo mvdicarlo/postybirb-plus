@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TagGroupRepository } from './tag-group.repository';
 import { EventsGateway } from 'src/events/events.gateway';
-import { TagGroupEvent } from './tag-group.events.enum';
+import { TagGroupEvent } from './enums/tag-group.events.enum';
 import TagGroupEntity from './models/tag-group.entity';
 
 @Injectable()

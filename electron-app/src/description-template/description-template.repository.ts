@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DescriptionTemplate } from './description-template.interface';
-import Repository from '../base/repository.base';
+import DescriptionTemplateEntity from './models/description-template.entity';
+import EntityRepository from 'src/base/entity/entity.repository.base';
 
 @Injectable()
-export class DescriptionTemplateRepository extends Repository<DescriptionTemplate> {
+export class DescriptionTemplateRepository extends EntityRepository<DescriptionTemplateEntity> {
   constructor() {
-    super('description-template');
+    super('description-template', DescriptionTemplateEntity);
   }
 }

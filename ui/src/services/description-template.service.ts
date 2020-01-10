@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { DescriptionTemplate } from '../../../electron-app/src/description-template/description-template.interface';
+import { DescriptionTemplate } from '../../../electron-app/src/description-template/interfaces/description-template.interface';
 
 export default class DescriptionTemplateService {
   static getAll() {
@@ -10,11 +10,11 @@ export default class DescriptionTemplateService {
     return axios.delete(`/description-template/${id}`);
   }
 
-  static update(template: DescriptionTemplate) {
+  static update(template: Partial<DescriptionTemplate>) {
     return axios.patch('/description-template/update', template);
   }
 
-  static create(template: DescriptionTemplate) {
+  static create(template: Partial<DescriptionTemplate>) {
     return axios.post<DescriptionTemplate>('/description-template/create', template);
   }
 }

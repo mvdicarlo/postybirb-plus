@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { DescriptionTemplateStore } from '../../stores/description-template.store';
 import DescriptionTemplateService from '../../services/description-template.service';
 import { Empty, Button, Form, message, Spin, Card, Input, Icon, Popconfirm } from 'antd';
-import { DescriptionTemplate } from '../../../../electron-app/src/description-template/description-template.interface';
+import { DescriptionTemplate } from '../../../../electron-app/src/description-template/interfaces/description-template.interface';
 import DescriptionInput from '../submissions/form-components/DescriptionInput';
 
 interface Props {
@@ -16,7 +16,6 @@ interface Props {
 export default class DescriptionTemplates extends React.Component<Props> {
   createNewDescriptionTemplate() {
     DescriptionTemplateService.create({
-      id: Date.now().toString(),
       title: 'New Description Template',
       content: '',
       description: ''
@@ -55,19 +54,14 @@ interface EditorProps {
 }
 
 interface EditorState {
-  template: DescriptionTemplate;
+  template: Partial<DescriptionTemplate>;
   touched: boolean;
   saving: boolean;
 }
 
 class DescriptionTemplateEditor extends React.Component<EditorProps, EditorState> {
   state: EditorState = {
-    template: {
-      id: '',
-      title: '',
-      description: '',
-      content: ''
-    },
+    template: {},
     touched: false,
     saving: false
   };
@@ -146,7 +140,7 @@ class DescriptionTemplateEditor extends React.Component<EditorProps, EditorState
                 />
               </Form.Item>
               <DescriptionInput
-                defaultValue={{ overwriteDefault: false, value: this.state.template.content }}
+                defaultValue={{ overwriteDefault: false, value: this.state.template.content! }}
                 onChange={this.handleContentChange}
                 hideOverwrite={true}
               />

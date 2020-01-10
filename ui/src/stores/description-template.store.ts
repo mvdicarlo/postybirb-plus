@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { DescriptionTemplate } from '../../../electron-app/src/description-template/description-template.interface';
+import { DescriptionTemplate } from '../../../electron-app/src/description-template/interfaces/description-template.interface';
 import DescriptionTemplateService from '../services/description-template.service';
 import { DescriptionTemplateEvent } from '../shared/enums/description-template.events.enum';
 
