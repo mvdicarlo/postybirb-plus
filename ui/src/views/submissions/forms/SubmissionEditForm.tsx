@@ -39,6 +39,7 @@ import {
   Alert,
   Tooltip
 } from 'antd';
+import { UserAccountDto } from '../../../../../electron-app/src/account/account.interface';
 
 interface Props {
   match: Match;
@@ -192,30 +193,34 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     this.onUpdate(parts);
   }
 
-  getWebsiteTreeData(): TreeNode[] {
+  getWebsiteTreeData(filter?: (status: UserAccountDto) => boolean): TreeNode[] {
     const websiteData: { [key: string]: TreeNode } = {};
-    this.props
-      .loginStatusStore!.statuses.filter(status => {
-        const website = WebsiteRegistry.websites[status.website];
-        if (this.state.submissionType === SubmissionType.FILE) {
-          return true; // always can expect having a file form
-        } else {
-          // assume notification
-          return !!website.NotificationSubmissionForm;
-        }
-      })
-      .forEach(status => {
-        websiteData[status.website] = websiteData[status.website] || { children: [] };
-        websiteData[status.website].title = status.website;
-        websiteData[status.website].key = status.website;
-        websiteData[status.website].value = status.website;
-        (websiteData[status.website].children as any[]).push({
-          key: status.id,
-          value: status.id,
-          title: `${status.website}: ${status.alias}`,
-          isLeaf: true
-        });
+    let filtered = this.props.loginStatusStore!.statuses.filter(status => {
+      const website = WebsiteRegistry.websites[status.website];
+      if (this.state.submissionType === SubmissionType.FILE) {
+        return true; // always can expect having a file form
+      } else {
+        // assume notification
+        return !!website.NotificationSubmissionForm;
+      }
+    });
+
+    if (filter) {
+      filtered = filtered.filter(filter);
+    }
+
+    filtered.forEach(status => {
+      websiteData[status.website] = websiteData[status.website] || { children: [] };
+      websiteData[status.website].title = status.website;
+      websiteData[status.website].key = status.website;
+      websiteData[status.website].value = status.website;
+      (websiteData[status.website].children as any[]).push({
+        key: status.id,
+        value: status.id,
+        title: `${status.website}: ${status.alias}`,
+        isLeaf: true
       });
+    });
     return Object.values(websiteData).sort((a, b) =>
       (a.title as string).localeCompare(b.title as string)
     );
@@ -383,6 +388,32 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   handleAdditionalIgnoredAccounts(record: FileRecord, value: string[]) {
     record.ignoredAccounts = value;
     this.updateAdditionalIgnoredAccounts(record);
+  }
+
+  unsupportedAdditionalWebsites(): any {
+    if ((this.state.submission as FileSubmission).additional!.length) {
+      const unsupportedWebsites = Object.values(this.state.parts)
+        .filter(p => !p.isDefault)
+        .filter(p => !WebsiteRegistry.websites[p.website].supportsAdditionalFiles)
+        .map(p => WebsiteRegistry.websites[p.website].name);
+      if (unsupportedWebsites.length) {
+        return (
+          <Alert
+            type="warning"
+            message="Incompatible Websites"
+            description={
+              <div>
+                <div>
+                  The following website(s) do not support additional files:{' '}
+                  {unsupportedWebsites.join()}
+                </div>
+              </div>
+            }
+          />
+        );
+      }
+    }
+    return null;
   }
 
   updateAdditionalIgnoredAccounts = _.debounce((record: FileRecord) => {
@@ -561,6 +592,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                         </Upload>
                       }
                     >
+                      {this.unsupportedAdditionalWebsites()}
                       <div className="flex flex-wrap">
                         {((this.state.submission! as FileSubmission).additional || []).map(f => {
                           return (
@@ -580,7 +612,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                                 treeNodeFilterProp="title"
                                 allowClear={true}
                                 defaultValue={f.ignoredAccounts}
-                                treeData={this.getWebsiteTreeData()}
+                                treeData={this.getWebsiteTreeData(
+                                  status =>
+                                    WebsiteRegistry.websites[status.website].supportsAdditionalFiles
+                                )}
                                 onChange={value => this.handleAdditionalIgnoredAccounts(f, value)}
                                 placeholder="Ignored accounts"
                                 maxTagCount={0}

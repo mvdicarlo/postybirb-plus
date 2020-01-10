@@ -36,6 +36,7 @@ const defaultOptions: DefaultWeasylOptions = {
 
 export class Weasyl implements Website {
   name: string = 'Weasyl';
+  supportsAdditionalFiles: boolean = false;
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
   );
