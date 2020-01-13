@@ -24,13 +24,13 @@ export class TagGroupStore {
 
   @action
   addOrUpdateTagGroup(group: TagGroup) {
-    const index: number = this.state.groups.findIndex(g => g.id === group.id);
+    const index: number = this.state.groups.findIndex(g => g._id === group._id);
     index === -1 ? this.state.groups.push(group) : (this.state.groups[index] = group);
   }
 
   @action
   removeGroup(id: string) {
-    const index: number = this.state.groups.findIndex(g => g.id === id);
+    const index: number = this.state.groups.findIndex(g => g._id === id);
     if (index !== -1) this.state.groups.splice(index, 1);
   }
 }

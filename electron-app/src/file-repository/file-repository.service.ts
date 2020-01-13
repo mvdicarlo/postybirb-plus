@@ -51,7 +51,7 @@ export class FileRepositoryService {
   }
 
   async removeSubmissionFiles(submission: FileSubmission) {
-    this.logger.debug(submission.id, 'Removing Files');
+    this.logger.debug(submission._id, 'Removing Files');
     const files = [submission.primary, submission.thumbnail, ...(submission.additional || [])];
     const promises = _.flatten(
       files.filter(f => !!f).map(f => [fs.remove(f.location), fs.remove(f.preview)]),

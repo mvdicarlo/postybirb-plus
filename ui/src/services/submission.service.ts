@@ -53,8 +53,8 @@ export default class SubmissionService {
     return axios.post(`/submission/schedule/${id}`, { isScheduled, postAt });
   }
 
-  static setPostAt(id: string, time: number | undefined) {
-    return axios.patch(`/submission/set/postAt/${id}`, { time });
+  static setPostAt(id: string, postAt: number | undefined) {
+    return axios.patch(`/submission/set/postAt/${id}`, { postAt });
   }
 
   static updateAdditionalFileIgnoredAccounts(id: string, record: FileRecord) {

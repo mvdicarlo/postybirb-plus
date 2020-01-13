@@ -1,9 +1,9 @@
 import { LoginResponse } from './interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import * as _ from 'lodash';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
-import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';

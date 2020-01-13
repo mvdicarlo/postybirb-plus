@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
-import { SubmissionPart } from '../interfaces/submission-part.interface';
+import { SubmissionPart } from '../submission-part/interfaces/submission-part.interface';
 import { Submission } from '../interfaces/submission.interface';
 import * as _ from 'lodash';
 import { Problems } from './interfaces/problems.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
-import { DefaultOptions } from '../interfaces/default-options.interface';
+import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
 import { ValidationParts } from './interfaces/validation-parts.interface';
 import { Website } from 'src/websites/website.base';
 

@@ -19,7 +19,7 @@ export class GenericLoginDialog extends React.Component<LoginDialogProps, State>
       view.addEventListener('did-stop-loading', () => {
         if (this.state.loading) this.setState({ loading: false });
       });
-      view.partition = `persist:${this.props.account.id}`;
+      view.partition = `persist:${this.props.account._id}`;
       view.src = this.props.url;
     }
   }

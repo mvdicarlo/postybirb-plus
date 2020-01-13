@@ -16,11 +16,11 @@ import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import moment from 'moment';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
+import { DefaultOptions } from '../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import { FileRecord } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
 import { UserAccountDto } from '../../../../../electron-app/src/account/interfaces/user-account.dto.interface';
 
@@ -136,7 +136,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           this.state.removedParts.map(accountId => {
             const found = Object.values(this.state.parts).find(p => p.accountId === accountId);
             if (found && !found.isNew) {
-              return found.id;
+              return found._id;
             }
             return null;
           })
@@ -183,10 +183,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       p.submissionId = this.id;
       if (existing) {
         p._id = existing._id;
-        p.id = existing.id;
       } else {
-        p._id = undefined;
-        p.id = `${this.id}-${p.accountId}`;
+        p._id = `${this.id}-${p.accountId}`;
       }
     });
 
@@ -215,8 +213,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       websiteData[status.website].key = status.website;
       websiteData[status.website].value = status.website;
       (websiteData[status.website].children as any[]).push({
-        key: status.id,
-        value: status.id,
+        key: status._id,
+        value: status._id,
         title: `${status.website}: ${status.alias}`,
         isLeaf: true
       });
@@ -268,12 +266,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         parts[accountId] = {
           accountId,
           submissionId: this.id,
-          id: _.uniqueId('New Part'),
+          _id: _.uniqueId('New Part'),
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
           ].getDefaults(),
-          isNew: true
+          isNew: true,
+          created: Date.now(),
         };
       });
 
@@ -332,21 +331,21 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   primaryFileChangeAction = (file: RcFile) =>
     Promise.resolve(
       `https://localhost:${window['PORT']}/submission/change/primary/${
-        this.state.submission!.id
+        this.state.submission!._id
       }/${encodeURIComponent(file['path'])}`
     );
 
   thumbnailFileChangeAction = (file: RcFile) =>
     Promise.resolve(
       `https://localhost:${window['PORT']}/submission/change/thumbnail/${
-        this.state.submission!.id
+        this.state.submission!._id
       }/${encodeURIComponent(file['path'])}`
     );
 
   additionalFileChangeAction = (file: RcFile) =>
     Promise.resolve(
       `https://localhost:${window['PORT']}/submission/add/additional/${
-        this.state.submission!.id
+        this.state.submission!._id
       }/${encodeURIComponent(file['path'])}`
     );
 
@@ -365,7 +364,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   removeThumbnail() {
     if ((this.state.submission as FileSubmission).thumbnail) {
-      SubmissionService.removeThumbnail(this.state.submission!.id)
+      SubmissionService.removeThumbnail(this.state.submission!._id)
         .then(({ data }) => {
           this.setState({ submission: data.submission, problems: data.problems });
         })
@@ -376,7 +375,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   }
 
   removeAdditionalFile(file: FileRecord) {
-    SubmissionService.removeAdditionalFile(this.state.submission!.id, file.location)
+    SubmissionService.removeAdditionalFile(this.state.submission!._id, file.location)
       .then(({ data }) => {
         this.setState({ submission: data.submission, problems: data.problems });
       })
@@ -418,7 +417,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   updateAdditionalIgnoredAccounts = _.debounce((record: FileRecord) => {
     SubmissionService.updateAdditionalFileIgnoredAccounts(
-      this.state.submission!.id,
+      this.state.submission!._id,
       record
     ).finally(this.checkProblems);
   }, 1000);

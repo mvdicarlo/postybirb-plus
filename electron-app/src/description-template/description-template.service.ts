@@ -31,10 +31,10 @@ export class DescriptionTemplateService {
   }
 
   async update(update: DescriptionTemplateEntity) {
-    this.logger.log(update.id, 'Update Description Template');
-    const exists = await this.repository.findOne(update.id);
+    this.logger.log(update._id, 'Update Description Template');
+    const exists = await this.repository.findOne(update._id);
     if (!exists) {
-      throw new NotFoundException(`Description template ${update.id} does not exist.`);
+      throw new NotFoundException(`Description template ${update._id} does not exist.`);
     }
     exists.content = update.content;
     exists.description = update.description;

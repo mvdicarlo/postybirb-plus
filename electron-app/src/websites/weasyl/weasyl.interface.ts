@@ -1,4 +1,4 @@
-import { DefaultFileOptions } from '../../submission/interfaces/default-options.interface';
+import { DefaultFileOptions } from '../../submission/submission-part/interfaces/default-options.interface';
 
 export interface DefaultWeasylOptions extends DefaultFileOptions {
   category: string | null;

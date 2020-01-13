@@ -5,7 +5,7 @@ import { SubmissionSectionProps } from '../../views/submissions/interfaces/submi
 import { DefaultDiscordOptions } from '../../../../electron-app/src/websites/discord/discord.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
-import { SubmissionPart } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { Alert, Form, Input, Checkbox } from 'antd';
 import DiscordLogin from './DiscordLogin';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';

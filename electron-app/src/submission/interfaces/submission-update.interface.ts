@@ -1,4 +1,4 @@
-import { SubmissionPart } from './submission-part.interface';
+import { SubmissionPart } from '../submission-part/interfaces/submission-part.interface';
 
 export interface SubmissionUpdate {
   id: string;

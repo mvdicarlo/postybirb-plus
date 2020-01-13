@@ -8,7 +8,7 @@ import { classToPlain } from 'class-transformer';
 import Entity from './entity.base';
 import { EntityIntf } from './entity.base.interface';
 
-export default class EntityRepository<T extends Entity> {
+export default class EntityRepository<T extends Entity, K extends EntityIntf> {
   protected readonly db: Datastore;
   protected _find: Function;
   protected _findOne: Function;
@@ -19,6 +19,7 @@ export default class EntityRepository<T extends Entity> {
   constructor(
     private readonly databaseName: string,
     private readonly clazz: new (...args: any[]) => T,
+    private readonly classDescriminatorFn?: (entity: K) => new (...args: any[]) => T,
   ) {
     this.db = new Datastore({
       filename: path.join(DATABASE_DIRECTORY, `${databaseName}.db`),
@@ -35,7 +36,7 @@ export default class EntityRepository<T extends Entity> {
   async find(search?: any): Promise<T[]> {
     try {
       const docs = await this._find(search || {});
-      return docs.map(doc => new this.clazz(doc));
+      return docs.map(doc => this.constructEntity(doc));
     } catch (err) {
       throw new NotFoundException(err);
     } finally {
@@ -46,7 +47,7 @@ export default class EntityRepository<T extends Entity> {
   async findOne(id: string): Promise<T> {
     try {
       const doc = await this._findOne({ _id: id });
-      return doc ? new this.clazz(doc) : null;
+      return this.constructEntity(doc);
     } catch (err) {
       throw new NotFoundException(err);
     }
@@ -62,13 +63,23 @@ export default class EntityRepository<T extends Entity> {
     }
   }
 
+  async removeBy(search: object): Promise<number> {
+    try {
+      return await this._remove(search, { multi: false });
+    } catch (err) {
+      throw new BadRequestException(err);
+    } finally {
+      this.db.persistence.compactDatafile();
+    }
+  }
+
   async save(entity: T): Promise<T> {
     try {
       await validate(entity);
       const obj = classToPlain<T>(entity) as EntityIntf;
-      obj.created = new Date().toLocaleString();
+      obj.created = Date.now();
       const savedEntity = await this._insert(obj);
-      return new this.clazz(savedEntity);
+      return this.constructEntity(savedEntity);
     } catch (err) {
       throw new BadRequestException(err);
     } finally {
@@ -82,7 +93,6 @@ export default class EntityRepository<T extends Entity> {
       const obj = classToPlain<T>(entity) as EntityIntf;
       // Disallow id updates
       delete obj._id;
-      delete obj.id;
       const updatedCount = await this._update(
         { _id: entity._id },
         {
@@ -99,5 +109,18 @@ export default class EntityRepository<T extends Entity> {
     } finally {
       this.db.persistence.compactDatafile();
     }
+  }
+
+  private constructEntity(entity: K): T {
+    if (!entity) {
+      return null;
+    }
+
+    let newFn = this.clazz;
+    if (this.classDescriminatorFn) {
+      newFn = this.classDescriminatorFn(entity);
+    }
+
+    return new newFn(entity);
   }
 }

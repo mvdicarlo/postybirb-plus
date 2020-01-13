@@ -6,14 +6,14 @@ import { SubmissionSectionProps } from '../../views/submissions/interfaces/submi
 import { DefaultWeasylOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
-import { SubmissionPart } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Alert, Form, Input, Radio, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { DefaultOptions } from '../../../../electron-app/src/submission/interfaces/default-options.interface';
+import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 
 const defaultOptions: DefaultWeasylOptions = {
   title: undefined,

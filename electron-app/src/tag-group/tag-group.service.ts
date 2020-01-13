@@ -25,7 +25,7 @@ export class TagGroupService {
   }
 
   async update(tagGroup: TagGroupEntity) {
-    this.logger.log(tagGroup.id, 'Update Tag Group');
+    this.logger.log(tagGroup._id, 'Update Tag Group');
     await this.repository.update(tagGroup);
     this.eventEmitter.emit(TagGroupEvent.UPDATED, tagGroup);
   }

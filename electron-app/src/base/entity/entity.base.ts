@@ -1,26 +1,35 @@
 import { EntityIntf } from './entity.base.interface';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
+import * as _ from 'lodash';
 import * as uuid from 'uuid/v1';
-import { Expose } from 'class-transformer';
+import { Expose, classToPlain } from 'class-transformer';
 
 export default class Entity implements EntityIntf {
   @IsNotEmpty()
   @IsString()
   _id: string;
 
-  @Expose()
-  get id(): string {
-    return this._id;
-  }
-  set id(id: string) {}
+  @IsNumber()
+  @IsOptional()
+  created: number;
 
-  created: string;
-  lastUpdated: string;
+  @IsOptional()
+  @IsNumber()
+  lastUpdated: number;
 
   constructor(partial: Partial<Entity>) {
     Object.assign(this, partial);
     if (!this._id) {
       this._id = uuid();
     }
+  }
+
+  public copy<T>(): T {
+    const constr: any = this.constructor;
+    return new constr(_.cloneDeep(classToPlain(this)));
+  }
+
+  public asPlain<T>(): T {
+    return classToPlain(this) as T;
   }
 }

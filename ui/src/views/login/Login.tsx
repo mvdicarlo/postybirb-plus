@@ -149,11 +149,11 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
   hideModal = () => {
     this.setState({ modalVisible: false });
     if (RemoteService.isRemote()) {
-      RemoteService.updateCookies(this.props.accountInfo.id).finally(() => {
-        LoginService.checkLogin(this.props.accountInfo.id);
+      RemoteService.updateCookies(this.props.accountInfo._id).finally(() => {
+        LoginService.checkLogin(this.props.accountInfo._id);
       });
     } else {
-      LoginService.checkLogin(this.props.accountInfo.id);
+      LoginService.checkLogin(this.props.accountInfo._id);
     }
   };
   deleteAccount = (id: string) => LoginService.deleteAccount(id);
@@ -178,7 +178,7 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
                 This action cannot be undone and the account will be removed from all submissions.
               </div>
             }
-            onConfirm={() => this.deleteAccount(this.props.accountInfo.id)}
+            onConfirm={() => this.deleteAccount(this.props.accountInfo._id)}
           >
             <a key="action-delete">
               <Typography.Text type="danger">

@@ -1,6 +1,7 @@
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import * as _ from 'lodash';
-import { TagData, DescriptionData } from 'src/submission/interfaces/default-options.interface';
+import { DescriptionData } from 'src/submission/submission-part/interfaces/description-data.interface';
+import { TagData } from 'src/submission/submission-part/interfaces/tag-data.interface';
 
 export default class WebsiteValidator {
   static supportsFileType(fileInfo: FileRecord, supportedFileTypes: string[]): boolean {

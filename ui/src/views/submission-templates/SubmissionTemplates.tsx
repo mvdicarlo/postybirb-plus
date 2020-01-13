@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { SubmissionTemplateStore } from '../../stores/submission-template.store';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
-import { SubmissionTemplate } from '../../../../electron-app/src/submission/submission-template/submission-template.interface';
+import { SubmissionTemplate } from '../../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
 import SubmissionTemplateService from '../../services/submission-template.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import {
@@ -132,7 +132,7 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
   }
 
   updateName() {
-    SubmissionTemplateService.renameTemplate(this.props.id, this.state.renameValue)
+    SubmissionTemplateService.renameTemplate(this.props._id, this.state.renameValue)
       .then(() => message.success('Submission template renamed'))
       .catch(() => message.error('Failed to rename submission template.'));
     this.hideRenameModal();
@@ -150,14 +150,14 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
     return (
       <List.Item
         actions={[
-          <Link to={`/edit/submission-template/${this.props.id}`}>
+          <Link to={`/edit/submission-template/${this.props._id}`}>
             <span key="template-edit">Edit</span>
           </Link>,
           <Popconfirm
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
-            onConfirm={() => SubmissionTemplateService.removeTemplate(this.props.id)}
+            onConfirm={() => SubmissionTemplateService.removeTemplate(this.props._id)}
           >
             <Typography.Text type="danger">Delete</Typography.Text>
           </Popconfirm>

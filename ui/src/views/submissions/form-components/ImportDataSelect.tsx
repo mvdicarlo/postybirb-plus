@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { LoginStatusStore } from '../../../stores/login-status.store';
 import { SubmissionStore } from '../../../stores/submission.store';
 import { Modal, Select, Button, Form, TreeSelect } from 'antd';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../website-components/website-registry';
 import SubmissionUtil from '../../../utils/submission.util';
@@ -78,12 +78,12 @@ export default class ImportDataSelect extends React.Component<Props, State> {
   };
 
   findById(id: string | number): { [key: string]: SubmissionPart<any> } | undefined {
-    const foundTemplate = this.props.submissionTemplateStore!.all.find(t => t.id === id);
+    const foundTemplate = this.props.submissionTemplateStore!.all.find(t => t._id === id);
     if (foundTemplate) {
       return foundTemplate.parts;
     }
 
-    const foundSubmission = this.props.submissionStore!.all.find(s => s.submission.id === id);
+    const foundSubmission = this.props.submissionStore!.all.find(s => s.submission._id === id);
     if (foundSubmission) {
       return foundSubmission.parts;
     }
@@ -124,19 +124,19 @@ export default class ImportDataSelect extends React.Component<Props, State> {
                     ),
                     'alias'
                   ).map(t => (
-                    <Select.Option value={t.id}>{t.alias}</Select.Option>
+                    <Select.Option value={t._id}>{t.alias}</Select.Option>
                   ))}
                 </Select.OptGroup>
                 <Select.OptGroup label="Submissions">
                   {_.sortBy(
                     this.props.submissionStore!.all.filter(
                       s =>
-                        s.submission.id !== this.props.ignoreId &&
+                        s.submission._id !== this.props.ignoreId &&
                         s.submission.type === this.props.submissionType
                     ),
                     s => SubmissionUtil.getSubmissionTitle(s)
                   ).map(s => (
-                    <Select.Option value={s.submission.id}>
+                    <Select.Option value={s.submission._id}>
                       {SubmissionUtil.getSubmissionTitle(s)}
                     </Select.Option>
                   ))}

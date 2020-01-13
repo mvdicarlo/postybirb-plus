@@ -28,15 +28,15 @@ export class LoginStatusStore {
   }
 
   getAliasForAccountId(id: string): string {
-    return (this.state.statuses.find(s => s.id === id) || {}).alias || id;
+    return (this.state.statuses.find(s => s._id === id) || {}).alias || id;
   }
 
   getWebsiteForAccountId(id: string): string {
-    return (this.state.statuses.find(s => s.id === id) || {}).website || id;
+    return (this.state.statuses.find(s => s._id === id) || {}).website || id;
   }
 
   getWebsiteLoginStatusForAccountId(id: string): boolean {
-    return (this.state.statuses.find(s => s.id === id) || {}).loggedIn || false;
+    return (this.state.statuses.find(s => s._id === id) || {}).loggedIn || false;
   }
 
   hasLoggedInAccounts(website: string): boolean {
@@ -44,7 +44,7 @@ export class LoginStatusStore {
   }
 
   accountExists(accountId: string): boolean {
-    return !!this.state.statuses.find(s => s.id === accountId);
+    return !!this.state.statuses.find(s => s._id === accountId);
   }
 }
 

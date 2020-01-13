@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
 import { EventEmitter } from 'events';
-import { Submission } from '../interfaces/submission.interface';
-import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { AccountService } from '../../account/account.service';
 import { PostData } from './interfaces/post-data.interface';
-import { DefaultOptions, DefaultFileOptions } from '../interfaces/default-options.interface';
+import {
+  DefaultOptions,
+  DefaultFileOptions,
+} from '../submission-part/interfaces/default-options.interface';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
 import { FilePostData } from './interfaces/file-post-data.interface';
@@ -14,29 +15,41 @@ import { AdInsertParser } from 'src/description-parsing/miscellaneous/ad.parser'
 import { WebsitesService } from 'src/websites/websites.service';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import { PostResponse } from './interfaces/post-response.interface';
+import SubmissionEntity from '../models/submission.entity';
+import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
+import { Submission } from '../interfaces/submission.interface';
+import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 
 export interface Poster {
   on(
     event: 'cancelled',
-    listener: (data: { submission: Submission; part: SubmissionPart<any> }) => void,
+    listener: (data: { submission: SubmissionEntity; part: SubmissionPartEntity<any> }) => void,
   ): this;
 
   on(
     event: 'ready',
-    listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
+    listener: (data: {
+      submission: SubmissionEntity;
+      part: SubmissionPartEntity<any>;
+      at: number;
+    }) => void,
   ): this;
 
   on(
     event: 'posting',
-    listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
+    listener: (data: {
+      submission: SubmissionEntity;
+      part: SubmissionPartEntity<any>;
+      at: number;
+    }) => void,
   ): this;
 
   on(
     event: 'done',
     listener: (
       data: {
-        submission: Submission;
-        part: SubmissionPart<any>;
+        submission: SubmissionEntity;
+        part: SubmissionPartEntity<any>;
         success: boolean;
         source: string;
       },
@@ -46,20 +59,20 @@ export interface Poster {
 
   once(
     event: 'cancelled',
-    listener: (data: { submission: Submission; part: SubmissionPart<any> }) => void,
+    listener: (data: { submission: SubmissionEntity; part: SubmissionPartEntity<any> }) => void,
   ): this;
 
   once(
     event: 'posting',
-    listener: (data: { submission: Submission; part: SubmissionPart<any> }) => void,
+    listener: (data: { submission: SubmissionEntity; part: SubmissionPartEntity<any> }) => void,
   ): this;
 
   once(
     event: 'done',
     listener: (
       data: {
-        submission: Submission;
-        part: SubmissionPart<any>;
+        submission: SubmissionEntity;
+        part: SubmissionPartEntity<any>;
         success: boolean;
         source: string;
       },
@@ -69,7 +82,11 @@ export interface Poster {
 
   once(
     event: 'ready',
-    listener: (data: { submission: Submission; part: SubmissionPart<any>; at: number }) => void,
+    listener: (data: {
+      submission: SubmissionEntity;
+      part: SubmissionPartEntity<any>;
+      at: number;
+    }) => void,
   ): this;
 }
 
@@ -90,9 +107,9 @@ export class Poster extends EventEmitter {
     private settingsService: SettingsService,
     private websitesService: WebsitesService,
     private website: Website,
-    private submission: Submission,
-    public part: SubmissionPart<any>,
-    private defaultPart: SubmissionPart<DefaultOptions>,
+    private submission: SubmissionEntity,
+    public part: SubmissionPartEntity<any>,
+    private defaultPart: SubmissionPartEntity<DefaultOptions>,
     public waitForExternalStart: boolean,
     timeUntilPost: number,
   ) {
@@ -261,7 +278,7 @@ export class Poster extends EventEmitter {
   }
 
   private isFileSubmission(submission: Submission): submission is FileSubmission {
-    return !!(submission as FileSubmission).primary;
+    return submission instanceof FileSubmissionEntity;
   }
 
   addSource(source: string) {

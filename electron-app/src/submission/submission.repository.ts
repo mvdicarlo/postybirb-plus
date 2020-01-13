@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import Repository from 'src/base/repository.base';
 import { Submission } from './interfaces/submission.interface';
+import EntityRepository from 'src/base/entity/entity.repository.base';
+import SubmissionEntity from './models/submission.entity';
+import FileSubmissionEntity from './file-submission/models/file-submission.entity';
 
 @Injectable()
-export class SubmissionRepository extends Repository<Submission> {
+export class SubmissionRepository extends EntityRepository<SubmissionEntity, Submission> {
   constructor() {
-    super('submissions');
-  }
-
-  count(): Promise<number> {
-    return new Promise(resolve => {
-      this.db.count({}, (err, count: number) => {
-        resolve(count || 0);
-      });
+    super('submissions', SubmissionEntity, (entity: any) => {
+      if (entity.primary) {
+        return FileSubmissionEntity;
+      }
+      return SubmissionEntity;
     });
   }
 }

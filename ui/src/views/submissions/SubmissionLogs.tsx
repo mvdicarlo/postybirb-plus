@@ -1,6 +1,6 @@
 import React from 'react';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
-import { SubmissionLog } from '../../../../electron-app/src/submission/log/log.interface';
+import { SubmissionLog } from '../../../../electron-app/src/submission/log/interfaces/submission-log.interface';
 import SubmissionLogService from '../../services/submission-log.service';
 import { List, Button, Icon, Typography } from 'antd';
 
@@ -46,7 +46,7 @@ export default class SubmissionLogs extends React.Component<Props, State> {
         }
         renderItem={item => (
           <List.Item
-            key={item.id}
+            key={item._id}
             actions={[
               <span className="text-link">Create Submission From Log</span>,
               <span className="text-link">Download</span>

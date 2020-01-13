@@ -1,12 +1,12 @@
 import React from 'react';
 import * as _ from 'lodash';
-import { SubmissionPart } from '../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { SubmissionSectionProps } from '../../views/submissions/interfaces/submission-section.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import TagInput from '../../views/submissions/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
 import { Alert, Form, Input } from 'antd';
-import { DefaultOptions } from '../../../../electron-app/src/submission/interfaces/default-options.interface';
+import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 
 const defaultOptions: DefaultOptions = {
   tags: {

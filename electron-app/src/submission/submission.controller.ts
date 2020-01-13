@@ -9,15 +9,15 @@ import {
   UseInterceptors,
   UploadedFile,
   Patch,
-  NotImplementedException,
 } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
 import { SubmissionType } from './enums/submission-type.enum';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
-import { SubmissionPart } from './interfaces/submission-part.interface';
+import { SubmissionPart } from './submission-part/interfaces/submission-part.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
+import SubmissionScheduleModel from './models/submission-schedule.model';
 
 @Controller('submission')
 export class SubmissionController {
@@ -68,12 +68,12 @@ export class SubmissionController {
   }
 
   @Patch('set/postAt/:id')
-  async setPostAt(@Body() body: { time: number | undefined }, @Param('id') id: string) {
-    return this.service.setPostAt(id, body.time);
+  async setPostAt(@Body() body: SubmissionScheduleModel, @Param('id') id: string) {
+    return this.service.setPostAt(id, body.postAt);
   }
 
   @Post('dryValidate')
-  async dryValidate(@Body() body: { id: string, parts: Array<SubmissionPart<any>>}) {
+  async dryValidate(@Body() body: { id: string; parts: Array<SubmissionPart<any>> }) {
     return this.service.dryValidate(body.id, body.parts || []);
   }
 
@@ -82,13 +82,11 @@ export class SubmissionController {
     return this.service.duplicate(id);
   }
 
-  @Post('post/:id')
-  async queueSubmission(@Param('id') id: string) {
-    throw new NotImplementedException('Post not implemented yet');
-  }
-
   @Post('schedule/:id')
-  async scheduleSubmission(@Body() data: { isScheduled: boolean, postAt?: number }, @Param('id') id: string) {
+  async scheduleSubmission(
+    @Body() data: { isScheduled: boolean; postAt?: number },
+    @Param('id') id: string,
+  ) {
     return this.service.scheduleSubmission(id, data.isScheduled, data.postAt);
   }
 
@@ -100,25 +98,25 @@ export class SubmissionController {
 
   @Delete('remove/additional/:id/:location')
   async removeAdditionalFile(@Param() params) {
-    return this.service.removeFileSubmissionAdditionalFile(params.id, params.location);
+    return this.service.removeFileSubmissionAdditionalFile(params._id, params.location);
   }
 
   @Post('change/primary/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async changePrimary(@UploadedFile() file, @Param() params) {
-    return this.service.changeFileSubmissionPrimaryFile(file, params.id, params.path);
+    return this.service.changeFileSubmissionPrimaryFile(file, params._id, params.path);
   }
 
   @Post('change/thumbnail/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async changeThumbnail(@UploadedFile() file, @Param() params) {
-    return this.service.changeFileSubmissionThumbnailFile(file, params.id, params.path);
+    return this.service.changeFileSubmissionThumbnailFile(file, params._id, params.path);
   }
 
   @Post('add/additional/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async addAdditionalFile(@UploadedFile() file, @Param() params) {
-    return this.service.addFileSubmissionAdditionalFile(file, params.id, params.path);
+    return this.service.addFileSubmissionAdditionalFile(file, params._id, params.path);
   }
 
   @Patch('update/additional/:id')

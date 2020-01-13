@@ -3,7 +3,7 @@ import Http from 'src/http/http.util';
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { Website } from 'src/websites/website.base';
 import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
@@ -11,7 +11,7 @@ import { FileSubmissionType } from 'src/submission/file-submission/enums/file-su
 import { WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
 import { DefaultWeasylOptions } from './weasyl.interface';
 import { Folder } from 'src/websites/interfaces/folder.interface';
-import { DefaultOptions } from 'src/submission/interfaces/default-options.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
@@ -56,7 +56,7 @@ export class Weasyl extends Website {
   }
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    const res = await Http.get<any>(`${this.BASE_URL}/api/whoami`, data.id, {
+    const res = await Http.get<any>(`${this.BASE_URL}/api/whoami`, data._id, {
       requestOptions: { json: true },
     });
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -64,7 +64,7 @@ export class Weasyl extends Website {
       const login: string = _.get(res.body, 'login');
       status.loggedIn = !!login;
       status.username = login;
-      await this.retrieveFolders(data.id, status.username);
+      await this.retrieveFolders(data._id, status.username);
     } catch (e) {
       /* Swallow */
     }

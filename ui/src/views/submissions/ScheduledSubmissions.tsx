@@ -42,7 +42,7 @@ export default class ScheduledSubmissions extends React.Component<Props> {
     return (
       <ul className="calendar-events">
         {data.map(s => (
-          <li key={s.submission.id}>
+          <li key={s.submission._id}>
             <Badge
               status="processing"
               text={
@@ -82,7 +82,7 @@ export default class ScheduledSubmissions extends React.Component<Props> {
 
   unscheduleAll() {
     Promise.all(
-      this.props.submissions.map(s => SubmissionService.schedule(s.submission.id, false))
+      this.props.submissions.map(s => SubmissionService.schedule(s.submission._id, false))
     ).finally(() => message.success('Submissions unscheduled.'));
   }
 
@@ -140,7 +140,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
 
   handleScheduleUpdate() {
     if (this.state.postAt) {
-      SubmissionService.setPostAt(this.props.item.submission.id, this.state.postAt);
+      SubmissionService.setPostAt(this.props.item.submission._id, this.state.postAt);
     }
     this.hideScheduler();
   }
@@ -154,13 +154,13 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
           <span className="text-link" key="schedule-post-now">
             Post Now
           </span>,
-          <Link to={`/edit/submission/${item.submission.id}`}>
+          <Link to={`/edit/submission/${item.submission._id}`}>
             <span key="schedule-edit">Edit</span>
           </Link>,
           <span
             className="text-link"
             key="schedule-unschedule"
-            onClick={() => SubmissionService.schedule(item.submission.id, false)}
+            onClick={() => SubmissionService.schedule(item.submission._id, false)}
           >
             Unschedule
           </span>,
@@ -168,7 +168,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
-            onConfirm={() => SubmissionService.deleteSubmission(item.submission.id)}
+            onConfirm={() => SubmissionService.deleteSubmission(item.submission._id)}
           >
             <Typography.Text type="danger">Delete</Typography.Text>
           </Popconfirm>

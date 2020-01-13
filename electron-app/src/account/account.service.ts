@@ -33,7 +33,7 @@ export class AccountService {
       .then(results => {
         results.forEach(result => {
           this.loginStatuses.push({
-            id: result.id,
+            _id: result._id,
             alias: result.alias,
             website: result.website,
             loggedIn: false,
@@ -43,7 +43,7 @@ export class AccountService {
         });
       })
       .finally(() => {
-        this.loginStatuses.forEach(s => this.checkLogin(s.id));
+        this.loginStatuses.forEach(s => this.checkLogin(s._id));
       });
 
     this.websiteProvider.getAllWebsiteModules().forEach(website => {
@@ -65,15 +65,15 @@ export class AccountService {
   async createAccount(createAccount: UserAccountEntity) {
     this.logger.log(createAccount, 'Create Account');
 
-    const existing: UserAccountEntity = await this.repository.findOne(createAccount.id);
+    const existing: UserAccountEntity = await this.repository.findOne(createAccount._id);
     if (existing) {
-      throw new BadRequestException(`Account with Id ${createAccount.id} already exists.`);
+      throw new BadRequestException(`Account with Id ${createAccount._id} already exists.`);
     }
 
     const account = await this.repository.save(createAccount);
 
     this.loginStatuses.push({
-      id: account.id,
+      _id: account._id,
       alias: account.alias,
       website: account.website,
       loggedIn: false,
@@ -81,7 +81,7 @@ export class AccountService {
       data: account.data,
     });
 
-    this.eventEmitter.emit(AccountEvent.CREATED, createAccount.id);
+    this.eventEmitter.emit(AccountEvent.CREATED, createAccount._id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
     this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
   }
@@ -106,7 +106,7 @@ export class AccountService {
     this.logger.log(id, 'Delete Account');
 
     await this.repository.remove(id);
-    const index: number = this.loginStatuses.findIndex(s => s.id === id);
+    const index: number = this.loginStatuses.findIndex(s => s._id === id);
     if (index !== -1) {
       this.loginStatuses.splice(index, 1);
     }
@@ -135,12 +135,12 @@ export class AccountService {
       throw new NotFoundException(`Account ID ${userAccount} does not exist.`);
     }
 
-    this.logger.debug(account.id, 'Login Check');
+    this.logger.debug(account._id, 'Login Check');
     const website = this.websiteProvider.getWebsiteModule(account.website);
     const response: LoginResponse = await website.checkLoginStatus(account);
 
     const login: UserAccountDto = {
-      id: account.id,
+      _id: account._id,
       website: account.website,
       alias: account.alias,
       loggedIn: response.loggedIn,
@@ -160,7 +160,7 @@ export class AccountService {
   }
 
   private async insertOrUpdateLoginStatus(login: UserAccountDto): Promise<void> {
-    const index: number = this.loginStatuses.findIndex(s => s.id === login.id);
+    const index: number = this.loginStatuses.findIndex(s => s._id === login._id);
     this.loginStatuses[index] = login;
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
   }

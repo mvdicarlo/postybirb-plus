@@ -1,4 +1,6 @@
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { TagData } from './tag-data.interface';
+import { DescriptionData } from './description-data.interface';
 
 export interface DefaultOptions {
   title?: string;
@@ -11,14 +13,4 @@ export interface DefaultOptions {
 export interface DefaultFileOptions extends DefaultOptions {
   useThumbnail: boolean;
   autoScale: boolean;
-}
-
-export interface TagData {
-  extendDefault: boolean;
-  value: string[];
-}
-
-export interface DescriptionData {
-  overwriteDefault: boolean;
-  value: string;
 }

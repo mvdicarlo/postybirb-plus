@@ -53,7 +53,7 @@ export class SubmissionStore {
   addOrUpdateSubmissions(submissions: Array<SubmissionPackage<Submission>>) {
     submissions.forEach(submission => {
       const index: number = this.state.submissions.findIndex(
-        s => s.submission.id === submission.submission.id
+        s => s.submission._id === submission.submission._id
       );
       if (index === -1) {
         this.state.submissions.push(submission);
@@ -64,7 +64,7 @@ export class SubmissionStore {
   }
 
   @action removeSubmission(id: string) {
-    const index: number = this.state.submissions.findIndex(s => s.submission.id === id);
+    const index: number = this.state.submissions.findIndex(s => s.submission._id === id);
     if (index !== -1) this.state.submissions.splice(index, 1);
   }
 

@@ -24,13 +24,13 @@ export class DescriptionTemplateStore {
 
   @action
   addOrUpdate(group: DescriptionTemplate) {
-    const index: number = this.state.templates.findIndex(g => g.id === group.id);
+    const index: number = this.state.templates.findIndex(g => g._id === group._id);
     index === -1 ? this.state.templates.push(group) : (this.state.templates[index] = group);
   }
 
   @action
   remove(id: string) {
-    const index: number = this.state.templates.findIndex(g => g.id === id);
+    const index: number = this.state.templates.findIndex(g => g._id === id);
     if (index !== -1) this.state.templates.splice(index, 1);
   }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { loginStatusStore, LoginStatusStore } from '../../../stores/login-status.store';
 import { WebsiteRegistry } from '../../../website-components/website-registry';
 import { Form, Typography, Tabs, Badge, Empty } from 'antd';

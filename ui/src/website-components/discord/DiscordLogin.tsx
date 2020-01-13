@@ -26,7 +26,7 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
 
   submit() {
     this.setState({ sending: true });
-    LoginService.setAccountData(this.props.account.id, {
+    LoginService.setAccountData(this.props.account._id, {
       name: this.state.name,
       webhook: this.state.webhook
     })

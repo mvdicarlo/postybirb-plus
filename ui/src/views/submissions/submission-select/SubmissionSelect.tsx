@@ -28,26 +28,26 @@ export default class SubmissionSelect extends React.Component<Props> {
     if (props.selectAll) {
       let submissions = this.props
         .submissionStore!.all.filter(s => s.submission.type === this.props.submissionType)
-        .filter(s => s.submission.id !== this.props.ignoreId);
+        .filter(s => s.submission._id !== this.props.ignoreId);
 
       if (this.props.validOnly) {
         submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
       }
       
-      this.onChange(submissions.map(s => s.submission.id));
+      this.onChange(submissions.map(s => s.submission._id));
     }
   }
 
   onChange(ids: string[]) {
     this.props.onSelect(
-      _.cloneDeep(this.props.submissionStore!.all.filter(s => ids.includes(s.submission.id)))
+      _.cloneDeep(this.props.submissionStore!.all.filter(s => ids.includes(s.submission._id)))
     );
   }
 
   render() {
     let submissions = this.props
       .submissionStore!.all.filter(s => s.submission.type === this.props.submissionType)
-      .filter(s => s.submission.id !== this.props.ignoreId);
+      .filter(s => s.submission._id !== this.props.ignoreId);
 
     if (this.props.validOnly) {
       submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
@@ -57,12 +57,12 @@ export default class SubmissionSelect extends React.Component<Props> {
       <Select
         allowClear={this.props.multiple}
         className={this.props.className}
-        defaultValue={this.props.selectAll ? submissions.map(s => s.submission.id) : []}
+        defaultValue={this.props.selectAll ? submissions.map(s => s.submission._id) : []}
         mode={this.props.multiple ? 'multiple' : 'default'}
         onChange={this.onChange.bind(this)}
       >
         {submissions.map(s => (
-          <Select.Option value={s.submission.id}>
+          <Select.Option value={s.submission._id}>
             <span className="mr-2">
               {this.props.submissionType === SubmissionType.FILE ? (
                 <Avatar src={(s.submission as FileSubmission).primary.preview} shape="square" />

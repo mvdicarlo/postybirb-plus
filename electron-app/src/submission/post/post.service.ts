@@ -8,8 +8,8 @@ import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { AccountService } from 'src/account/account.service';
-import { DefaultOptions } from '../interfaces/default-options.interface';
-import { SubmissionPart } from '../interfaces/submission-part.interface';
+import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from '../submission-part/interfaces/submission-part.interface';
 import { WebsitesService } from 'src/websites/websites.service';
 import { Website } from 'src/websites/website.base';
 import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
@@ -19,13 +19,16 @@ import { LogService } from '../log/log.service';
 import { PostStatus } from './interfaces/post-status.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { PostEvent } from './post.events.enum';
+import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
+import SubmissionEntity from '../models/submission.entity';
+import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 
 // TODO clear all based on setting on failure
 @Injectable()
 export class PostService {
   private readonly logger = new Logger(PostService.name);
 
-  private posting: { [key: string]: Submission } = {
+  private posting: { [key: string]: SubmissionEntity } = {
     [SubmissionType.FILE]: null,
     [SubmissionType.NOTIFICATION]: null,
   };
@@ -35,7 +38,7 @@ export class PostService {
     [SubmissionType.NOTIFICATION]: [],
   };
 
-  private submissionQueue: { [key: string]: Submission[] } = {
+  private submissionQueue: { [key: string]: SubmissionEntity[] } = {
     [SubmissionType.FILE]: [],
     [SubmissionType.NOTIFICATION]: [],
   };
@@ -55,7 +58,7 @@ export class PostService {
     private eventEmitter: EventsGateway,
   ) {}
 
-  queue(submission: Submission) {
+  queue(submission: SubmissionEntity) {
     this.logger.log(submission, 'Queueing');
     if (!this.isPosting(submission.type)) {
       this.post(submission);
@@ -70,7 +73,7 @@ export class PostService {
       this.postingParts[submission.type].forEach(poster => poster.cancel());
     } else if (this.isCurrentlyQueued(submission)) {
       this.submissionQueue[submission.type].splice(
-        this.submissionQueue[submission.type].findIndex(s => s.id === submission.id),
+        this.submissionQueue[submission.type].findIndex(s => s._id === submission._id),
         1,
       );
     } else {
@@ -81,7 +84,7 @@ export class PostService {
   }
 
   isCurrentlyPosting(submission: Submission): boolean {
-    return this.posting[submission.type] && this.posting[submission.type].id === submission.id;
+    return this.posting[submission.type] && this.posting[submission.type]._id === submission._id;
   }
 
   isCurrentlyPostingToAny(): boolean {
@@ -89,7 +92,7 @@ export class PostService {
   }
 
   isCurrentlyQueued(submission: Submission): boolean {
-    return !!this.submissionQueue[submission.type].find(s => s.id === submission.id);
+    return !!this.submissionQueue[submission.type].find(s => s._id === submission._id);
   }
 
   getPostingStatus(): PostStatus {
@@ -97,7 +100,7 @@ export class PostService {
     Object.values(this.posting).forEach(submission => {
       if (submission) {
         posting.push({
-          submission,
+          submission, // TODO check to see if this fails to return id
           statuses: this.postingParts[submission.type].map(poster => ({
             postAt: poster.postAt,
             success: poster.success,
@@ -115,9 +118,9 @@ export class PostService {
     };
   }
 
-  private insert(submission: Submission) {
+  private insert(submission: SubmissionEntity) {
     if (!this.isCurrentlyQueued(submission)) {
-      this.logger.log(submission.id, `Inserting Into Queue ${submission.type}`);
+      this.logger.log(submission._id, `Inserting Into Queue ${submission.type}`);
       this.submissionQueue[submission.type].push(submission);
       this.notifyPostingStateChanged();
       this.notifyPostingStatusChanged();
@@ -128,8 +131,8 @@ export class PostService {
     return !!this.posting[type];
   }
 
-  private async post(submission: Submission) {
-    this.logger.log(submission.id, 'Posting');
+  private async post(submission: SubmissionEntity) {
+    this.logger.log(submission._id, 'Posting');
     this.posting[submission.type] = submission; // set here to stop double queue scenario
 
     // Check for problems
@@ -138,10 +141,10 @@ export class PostService {
 
     if (isValid) {
       if (submission.schedule.isScheduled) {
-        this.submissionService.scheduleSubmission(submission.id, false); // Unschedule
+        this.submissionService.scheduleSubmission(submission._id, false); // Unschedule
       }
       this.notifyPostingStateChanged();
-      const parts = await this.partService.getPartsForSubmission(submission.id, false);
+      const parts = await this.partService.getPartsForSubmission(submission._id, false);
       const [defaultPart] = parts.filter(p => p.isDefault);
 
       // Preload files if they exist
@@ -173,11 +176,11 @@ export class PostService {
           // Save part and then check/notify
           this.partService
             .createOrUpdateSubmissionPart(
-              {
+              new SubmissionPartEntity({
                 ...data.part,
                 postStatus: data.success ? 'SUCCESS' : 'FAILED',
                 postedTo: data.source,
-              },
+              }),
               data.submission.type,
             )
             .finally(() => {
@@ -205,7 +208,7 @@ export class PostService {
     });
   }
 
-  private checkForCompletion(submission: Submission) {
+  private checkForCompletion(submission: SubmissionEntity) {
     // isDone is set when 'done' is called and 'cancelled'
     const incomplete = this.postingParts[submission.type].filter(poster => !poster.isDone);
     if (incomplete.length) {
@@ -220,12 +223,12 @@ export class PostService {
     } else {
       this.logService
         .addLog(
-          submission,
+          submission.asPlain(),
           this.postingParts[submission.type]
             .filter(poster => !poster.cancelled)
             .map(poster => ({
               part: {
-                ...poster.part,
+                ...poster.part.asPlain(),
                 postStatus: poster.success ? 'SUCCESS' : 'FAILED',
                 postedTo: poster.response.source,
               },
@@ -234,9 +237,10 @@ export class PostService {
         )
         .finally(() => {
           // TODO emit notification to UI and OS
+          // TODO clear typed queue if failures exist and setting exists
           // Delete submission if 100% completed
           if (!this.postingParts[submission.type].filter(p => !p.success).length) {
-            this.submissionService.deleteSubmission(submission.id);
+            this.submissionService.deleteSubmission(submission._id);
           }
         });
 
@@ -262,9 +266,9 @@ export class PostService {
   }
 
   private createPoster(
-    submission: Submission,
-    part: SubmissionPart<any>,
-    defaultPart: SubmissionPart<DefaultOptions>,
+    submission: SubmissionEntity,
+    part: SubmissionPartEntity<any>,
+    defaultPart: SubmissionPartEntity<DefaultOptions>,
     sources: string[],
   ): Poster {
     const knownSources = [...sources, ...(part.data.sources || [])];
@@ -303,11 +307,11 @@ export class PostService {
     }
   }
 
-  private isFileSubmission(submission: Submission): submission is FileSubmission {
-    return !!(submission as FileSubmission).primary;
+  private isFileSubmission(submission: SubmissionEntity): submission is FileSubmissionEntity {
+    return submission instanceof FileSubmissionEntity;
   }
 
-  private async preloadFiles(submission: FileSubmission): Promise<void> {
+  private async preloadFiles(submission: FileSubmissionEntity): Promise<void> {
     const files: FileRecord[] = _.compact([
       submission.primary,
       submission.thumbnail,
@@ -320,6 +324,7 @@ export class PostService {
           .then(buffer => (record.buffer = buffer))
           .catch(err => {
             this.logger.error(err, 'Preload File Failure');
+            // TODO do something with this?
           });
       }),
     );

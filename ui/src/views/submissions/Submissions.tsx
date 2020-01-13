@@ -60,7 +60,7 @@ export class Submissions extends React.Component<Props, State> {
 
   deleteSubmissions(submissions: SubmissionPackage<any>[]) {
     this.setState({ deleteModalVisible: false });
-    Promise.all(submissions.map(s => SubmissionService.deleteSubmission(s.submission.id))).finally(
+    Promise.all(submissions.map(s => SubmissionService.deleteSubmission(s.submission._id))).finally(
       () => message.success('Submissions deleted.')
     );
   }
@@ -74,7 +74,7 @@ export class Submissions extends React.Component<Props, State> {
     this.setState({ scheduleManyModalVisible: false });
     Promise.all(
       submissions.map(s => {
-        const promise = SubmissionService.schedule(s.submission.id, true, postAt.valueOf());
+        const promise = SubmissionService.schedule(s.submission._id, true, postAt.valueOf());
         postAt.add(this.scheduleManyPeriod.d, 'days');
         postAt.add(this.scheduleManyPeriod.h, 'hours');
         postAt.add(this.scheduleManyPeriod.m, 'minutes');
@@ -270,12 +270,12 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
   }
 
   handleScheduleUpdate() {
-    SubmissionService.setPostAt(this.props.item.submission.id, this.postAt);
+    SubmissionService.setPostAt(this.props.item.submission._id, this.postAt);
     this.hideScheduler();
   }
 
   onDuplicate() {
-    SubmissionService.duplicate(this.props.item.submission.id)
+    SubmissionService.duplicate(this.props.item.submission._id)
       .then(() => {
         message.success('Submission duplicated.');
       })
@@ -300,14 +300,14 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
             }`}
             key="submission-schedule"
             onClick={() =>
-              SubmissionService.schedule(item.submission.id, true)
+              SubmissionService.schedule(item.submission._id, true)
                 .then(() => message.success('Submission scheduled.'))
                 .catch(() => message.error('Failed to schedule submission.'))
             }
           >
             Schedule
           </span>,
-          <Link to={`/edit/submission/${item.submission.type}/${item.submission.id}`}>
+          <Link to={`/edit/submission/${item.submission.type}/${item.submission._id}`}>
             <span key="submission-edit">Edit</span>
           </Link>,
           <span
@@ -321,7 +321,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
-            onConfirm={() => SubmissionService.deleteSubmission(item.submission.id)}
+            onConfirm={() => SubmissionService.deleteSubmission(item.submission._id)}
           >
             <Typography.Text type="danger">Delete</Typography.Text>
           </Popconfirm>,

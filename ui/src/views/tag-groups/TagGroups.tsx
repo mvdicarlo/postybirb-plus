@@ -7,7 +7,7 @@ import { TagGroup } from '../../../../electron-app/src/tag-group/interfaces/tag-
 import TagGroupService from '../../services/tag-group.service';
 import TagInput from '../submissions/form-components/TagInput';
 import { Input, Button, message, Popconfirm, Spin, Empty, Card, Icon } from 'antd';
-import { TagData } from '../../../../electron-app/src/submission/interfaces/default-options.interface';
+import { TagData } from '../../../../electron-app/src/submission/submission-part/interfaces/tag-data.interface';
 
 interface Props {
   tagGroupStore?: TagGroupStore;
@@ -34,7 +34,7 @@ export default class TagGroups extends React.Component<Props> {
             </Button>
             {groups.map(g => (
               <div className="tag-group-display">
-                <TagGroupInput key={g.id} {...g} />
+                <TagGroupInput key={g._id} {...g} />
               </div>
             ))}
           </div>
@@ -105,7 +105,7 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
   };
 
   onDelete = () => {
-    TagGroupService.deleteTagGroup(this.props.id)
+    TagGroupService.deleteTagGroup(this.props._id)
       .then(() => {
         message.success('Tag group removed.');
       })

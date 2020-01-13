@@ -33,7 +33,7 @@ export default class DescriptionTemplates extends React.Component<Props> {
             </Button>
             {templates.map((t: DescriptionTemplate) => (
               <div className="mb-2">
-                <DescriptionTemplateEditor key={t.id} template={t} />
+                <DescriptionTemplateEditor key={t._id} template={t} />
               </div>
             ))}
           </div>
@@ -93,7 +93,7 @@ class DescriptionTemplateEditor extends React.Component<EditorProps, EditorState
   };
 
   onDelete = () => {
-    DescriptionTemplateService.remove(this.props.template.id)
+    DescriptionTemplateService.remove(this.props.template._id)
       .then(() => message.success('Description template removed.'))
       .catch(() => message.error('Failed to remove description template.'));
   };

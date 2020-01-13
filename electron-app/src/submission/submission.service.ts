@@ -2,13 +2,10 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  NotImplementedException,
   Logger,
   forwardRef,
   Inject,
 } from '@nestjs/common';
-import * as _ from 'lodash';
-import * as shortid from 'shortid';
 import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
 import { FileSubmissionService } from './file-submission/file-submission.service';
@@ -17,7 +14,7 @@ import { Submission } from './interfaces/submission.interface';
 import { SubmissionCreate } from './interfaces/submission-create.interface';
 import { SubmissionEvent } from './enums/submission.events.enum';
 import { SubmissionPackage } from './interfaces/submission-package.interface';
-import { SubmissionPart, Parts } from './interfaces/submission-part.interface';
+import { SubmissionPart, Parts } from './submission-part/interfaces/submission-part.interface';
 import { SubmissionPartService } from './submission-part/submission-part.service';
 import { SubmissionRepository } from './submission.repository';
 import { SubmissionType } from './enums/submission-type.enum';
@@ -28,6 +25,10 @@ import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
 import { PostService } from './post/post.service';
 import { Interval } from '@nestjs/schedule';
+import SubmissionEntity from './models/submission.entity';
+import SubmissionScheduleModel from './models/submission-schedule.model';
+import SubmissionPartEntity from './submission-part/models/submission-part.entity';
+import FileSubmissionEntity from './file-submission/models/file-submission.entity';
 
 @Injectable()
 export class SubmissionService {
@@ -46,7 +47,9 @@ export class SubmissionService {
   @Interval(60000)
   async queueScheduledSubmissions() {
     this.logger.log('Schedule Post Check', 'Schedule Check');
-    const submissions: Array<SubmissionPackage<any>> = (await this.getAll(true) as Array<SubmissionPackage<any>>);
+    const submissions: Array<SubmissionPackage<any>> = (await this.getAll(true)) as Array<
+      SubmissionPackage<any>
+    >;
     const now = Date.now();
     submissions
       .filter(p => p.submission.schedule.isScheduled)
@@ -57,8 +60,9 @@ export class SubmissionService {
       .forEach(p => this.postService.queue(p.submission));
   }
 
-  async get(id: string, packaged?: boolean): Promise<Submission | SubmissionPackage<any>> {
-    const submission = await this.repository.find(id);
+  // TODO classify package
+  async get(id: string, packaged?: boolean): Promise<SubmissionEntity | SubmissionPackage<any>> {
+    const submission = await this.repository.findOne(id);
     if (!submission) {
       throw new NotFoundException(`Submission ${id} could not be found`);
     }
@@ -72,13 +76,13 @@ export class SubmissionService {
   async getAll(
     packaged: boolean,
     type?: SubmissionType,
-  ): Promise<Array<Submission | SubmissionPackage<any>>> {
+  ): Promise<Array<SubmissionEntity | SubmissionPackage<any>>> {
     const query: any = {};
     if (type) {
       query.type = type;
     }
 
-    const submissions = await this.repository.findAll(query);
+    const submissions = await this.repository.find(query);
     if (packaged) {
       return await Promise.all(submissions.map(s => this.validate(s)));
     } else {
@@ -95,16 +99,12 @@ export class SubmissionService {
       throw new BadRequestException(`Unknown submission type: ${createDto.type}`);
     }
 
-    const id = shortid.generate();
-    const submission: Submission = {
-      id,
-      title: createDto.data.title || id,
-      schedule: {},
+    const submission: SubmissionEntity = new SubmissionEntity({
+      title: createDto.data.title,
+      schedule: new SubmissionScheduleModel(),
       type: createDto.type,
-      order: await this.repository.count(),
-      created: Date.now(),
       sources: [],
-    };
+    });
 
     let completedSubmission = null;
     switch (createDto.type) {
@@ -119,19 +119,19 @@ export class SubmissionService {
         break;
     }
 
-    await this.repository.create(completedSubmission);
+    await this.repository.save(completedSubmission);
     await this.partService.createDefaultPart(completedSubmission);
     this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(completedSubmission));
     return completedSubmission;
   }
 
-  async validate(submission: Submission): Promise<SubmissionPackage<any>> {
-    const parts = await this.partService.getPartsForSubmission(submission.id, true);
+  async validate(submission: SubmissionEntity): Promise<SubmissionPackage<any>> {
+    const parts = await this.partService.getPartsForSubmission(submission._id, true);
     const problems: Problems = this.validatorService.validateParts(submission, parts);
     const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part));
     return {
-      submission,
+      submission: submission.asPlain(),
       parts: mappedParts,
       problems,
     };
@@ -143,7 +143,7 @@ export class SubmissionService {
 
   async dryValidate(id: string, parts: Array<SubmissionPart<any>>): Promise<Problems> {
     if (parts.length) {
-      return this.validatorService.validateParts(await this.repository.find(id), parts);
+      return this.validatorService.validateParts(await this.repository.findOne(id), parts);
     }
 
     return {};
@@ -151,11 +151,11 @@ export class SubmissionService {
 
   async deleteSubmission(id: string): Promise<number> {
     this.logger.log(id, 'Delete Submission');
-    const submission = (await this.get(id)) as Submission;
+    const submission = (await this.get(id)) as SubmissionEntity;
     this.postService.cancel(submission);
     switch (submission.type) {
       case SubmissionType.FILE:
-        await this.fileSubmissionService.cleanupSubmission(submission as FileSubmission);
+        await this.fileSubmissionService.cleanupSubmission(submission as FileSubmissionEntity);
         break;
       case SubmissionType.NOTIFICATION:
         break;
@@ -169,7 +169,7 @@ export class SubmissionService {
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<any>> {
     this.logger.log(update.id, 'Update Submission');
     const { id, parts, postAt, removedParts } = update;
-    const submissionToUpdate = (await this.get(id)) as Submission;
+    const submissionToUpdate = (await this.get(id)) as SubmissionEntity;
 
     if (submissionToUpdate.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
@@ -179,7 +179,7 @@ export class SubmissionService {
     if (!postAt) {
       submissionToUpdate.schedule.isScheduled = false;
     }
-    await this.repository.update(id, { schedule: submissionToUpdate.schedule });
+    await this.repository.update(submissionToUpdate);
 
     await Promise.all(removedParts.map(partId => this.partService.removeSubmissionPart(partId)));
     await Promise.all(parts.map(p => this.setPart(submissionToUpdate, p)));
@@ -191,18 +191,18 @@ export class SubmissionService {
   }
 
   async overwriteSubmissionParts(submissionOverwrite: SubmissionOverwrite) {
-    const submission = (await this.get(submissionOverwrite.id, false)) as Submission;
+    const submission = (await this.get(submissionOverwrite.id, false)) as SubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const allParts = await this.partService.getPartsForSubmission(submission.id, false);
+    const allParts = await this.partService.getPartsForSubmission(submission._id, false);
     const keepIds = submissionOverwrite.parts.map(p => p.accountId);
     const removeParts = allParts.filter(p => !keepIds.includes(p.accountId));
 
     await Promise.all(submissionOverwrite.parts.map(part => this.setPart(submission, part)));
-    await Promise.all(removeParts.map(p => this.partService.removeSubmissionPart(p.id)));
+    await Promise.all(removeParts.map(p => this.partService.removeSubmissionPart(p._id)));
 
     const packaged: SubmissionPackage<any> = await this.validate(submission);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
@@ -210,7 +210,7 @@ export class SubmissionService {
 
   async scheduleSubmission(id: string, isScheduled: boolean, postAt?: number): Promise<void> {
     this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
-    const submissionToSchedule = (await this.get(id)) as Submission;
+    const submissionToSchedule = (await this.get(id)) as SubmissionEntity;
 
     if (submissionToSchedule.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
@@ -226,41 +226,41 @@ export class SubmissionService {
       );
     }
 
-    const copy = _.cloneDeep(submissionToSchedule);
-    copy.schedule.isScheduled = isScheduled;
-    await this.repository.update(id, { schedule: copy.schedule });
+    submissionToSchedule.schedule.isScheduled = isScheduled;
+    await this.repository.update(submissionToSchedule);
 
-    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, Promise.all([this.validate(copy)]));
+    this.eventEmitter.emitOnComplete(
+      SubmissionEvent.UPDATED,
+      Promise.all([this.validate(submissionToSchedule)]),
+    );
   }
 
   async setPart(
-    submission: Submission,
+    submission: SubmissionEntity,
     submissionPart: SubmissionPart<any>,
   ): Promise<SubmissionPart<any>> {
     // This might be slower, but it ensures some kind of safety against corruption
     const existingPart = await this.partService.getSubmissionPart(
-      submission.id,
+      submission._id,
       submissionPart.accountId,
     );
 
-    let part: SubmissionPart<any>;
+    let part: SubmissionPartEntity<any>;
     if (existingPart) {
-      part = {
+      part = new SubmissionPartEntity({
         ...existingPart,
         data: submissionPart.data,
-      };
+      });
     } else {
-      part = {
-        _id: submissionPart._id,
-        id: submissionPart.id,
+      part = new SubmissionPartEntity({
         data: submissionPart.data,
         accountId: submissionPart.accountId,
-        submissionId: submission.id,
+        submissionId: submission._id,
         website: submissionPart.website,
         isDefault: submissionPart.isDefault,
         postedTo: submissionPart.postedTo,
         postStatus: submissionPart.postStatus, // UNSET ON SAVE?
-      };
+      });
     }
 
     return await this.partService.createOrUpdateSubmissionPart(part, submission.type);
@@ -268,12 +268,12 @@ export class SubmissionService {
 
   async setPostAt(id: string, postAt: number | undefined): Promise<void> {
     this.logger.debug(`${id}: ${new Date(postAt).toLocaleString()}`, 'Update Submission Post At');
-    const submission = (await this.get(id)) as Submission;
+    const submission = (await this.get(id)) as SubmissionEntity;
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
     submission.schedule.postAt = postAt;
-    await this.repository.update(id, { schedule: submission.schedule });
+    await this.repository.update(submission);
     this.eventEmitter.emitOnComplete(
       SubmissionEvent.UPDATED,
       Promise.all([this.validate(submission)]),
@@ -282,18 +282,15 @@ export class SubmissionService {
 
   async duplicate(originalId: string): Promise<Submission> {
     this.logger.log(originalId, 'Duplicate Submission');
-    const original = (await this.get(originalId)) as Submission;
-    const id = shortid.generate();
+    const original = (await this.get(originalId)) as SubmissionEntity;
+    original._id = undefined;
 
-    let duplicate = _.cloneDeep(original);
-    delete duplicate._id;
-    duplicate.id = id;
-    duplicate.created = Date.now();
+    let duplicate = new SubmissionEntity(original);
 
     switch (duplicate.type) {
       case SubmissionType.FILE:
         duplicate = await this.fileSubmissionService.duplicateSubmission(
-          duplicate as FileSubmission,
+          duplicate as FileSubmissionEntity,
         );
         break;
       case SubmissionType.NOTIFICATION:
@@ -302,17 +299,14 @@ export class SubmissionService {
 
     // Duplicate parts
     const parts = await this.partService.getPartsForSubmission(originalId, true);
-    const duplicateParts: Array<SubmissionPart<any>> = _.cloneDeep(parts);
     await Promise.all(
-      duplicateParts.map(p => {
-        p.submissionId = id;
-        delete p.id;
-        delete p._id;
+      parts.map(p => {
+        p.submissionId = duplicate._id;
         return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
       }),
     );
 
-    const createdSubmission = await this.repository.create(duplicate);
+    const createdSubmission = await this.repository.save(duplicate);
     this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
 
     return createdSubmission;
@@ -320,18 +314,18 @@ export class SubmissionService {
 
   // File Submission Actions
   // NOTE: Might be good to pull these out into a different place
-  async removeFileSubmissionThumbnail(id: string): Promise<SubmissionPackage<FileSubmission>> {
+  async removeFileSubmissionThumbnail(id: string): Promise<SubmissionPackage<FileSubmissionEntity>> {
     this.logger.debug(id, 'Remove Submission Thumbnail');
-    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const updated = await this.fileSubmissionService.removeThumbnail(submission);
-    await this.repository.update(id, { thumbnail: null });
+    await this.fileSubmissionService.removeThumbnail(submission);
+    await this.repository.update(submission);
 
-    const validated = await this.validate(updated);
+    const validated = await this.validate(submission);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
@@ -339,18 +333,18 @@ export class SubmissionService {
   async removeFileSubmissionAdditionalFile(
     id: string,
     location: string,
-  ): Promise<SubmissionPackage<FileSubmission>> {
+  ): Promise<SubmissionPackage<FileSubmissionEntity>> {
     this.logger.debug(location, 'Remove Submission Additional File');
-    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const updated = await this.fileSubmissionService.removeAdditionalFile(submission, location);
-    await this.repository.update(id, { additional: updated.additional });
+    await this.fileSubmissionService.removeAdditionalFile(submission, location);
+    await this.repository.update(submission);
 
-    const validated = await this.validate(updated);
+    const validated = await this.validate(submission);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
@@ -359,18 +353,18 @@ export class SubmissionService {
     file: UploadedFile,
     id: string,
     path: string,
-  ): Promise<SubmissionPackage<FileSubmission>> {
+  ): Promise<SubmissionPackage<FileSubmissionEntity>> {
     this.logger.debug(path, 'Change Submission Thumbnail');
-    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const updated = await this.fileSubmissionService.changeThumbnailFile(submission, file, path);
-    await this.repository.update(id, { thumbnail: updated.thumbnail });
+    await this.fileSubmissionService.changeThumbnailFile(submission, file, path);
+    await this.repository.update(submission);
 
-    const validated = await this.validate(updated);
+    const validated = await this.validate(submission);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
@@ -379,17 +373,17 @@ export class SubmissionService {
     file: UploadedFile,
     id: string,
     path: string,
-  ): Promise<SubmissionPackage<FileSubmission>> {
-    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+  ): Promise<SubmissionPackage<FileSubmissionEntity>> {
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const updated = await this.fileSubmissionService.changePrimaryFile(submission, file, path);
-    await this.repository.update(id, { primary: updated.primary });
+    await this.fileSubmissionService.changePrimaryFile(submission, file, path);
+    await this.repository.update(submission);
 
-    const validated = await this.validate(updated);
+    const validated = await this.validate(submission);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
@@ -398,25 +392,25 @@ export class SubmissionService {
     file: UploadedFile,
     id: string,
     path: string,
-  ): Promise<SubmissionPackage<FileSubmission>> {
+  ): Promise<SubmissionPackage<FileSubmissionEntity>> {
     this.logger.debug(path, 'Add Additional File');
-    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
 
-    const updated = await this.fileSubmissionService.addAdditionalFile(submission, file, path);
-    await this.repository.update(id, { additional: updated.additional });
+    await this.fileSubmissionService.addAdditionalFile(submission, file, path);
+    await this.repository.update(submission);
 
-    const validated = await this.validate(updated);
+    const validated = await this.validate(submission);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
   async updateFileSubmissionAdditionalFile(id: string, record: FileRecord) {
     this.logger.debug(record, 'Updating Additional File');
-    const submission: FileSubmission = (await this.get(id)) as FileSubmission;
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
@@ -428,7 +422,7 @@ export class SubmissionService {
       );
       if (recordToUpdate) {
         recordToUpdate.ignoredAccounts = record.ignoredAccounts || [];
-        this.repository.update(id, { additional: submission.additional });
+        this.repository.update(submission);
 
         this.eventEmitter.emitOnComplete(
           SubmissionEvent.UPDATED,

@@ -1,6 +1,7 @@
 import axios from '../utils/http';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
-import { SubmissionTemplateUpdateDto, SubmissionTemplate } from '../../../electron-app/src/submission/submission-template/submission-template.interface';
+import { SubmissionTemplate } from '../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
+import { SubmissionTemplateUpdateDto } from '../../../electron-app/src/submission/submission-template/interfaces/submission-template-update.interface';
 
 export default class SubmissionTemplateService {
   static createTemplate(alias: string, type: SubmissionType) {

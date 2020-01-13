@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Param, Delete, Patch } from '@nestjs/common';
 import { SubmissionTemplateService } from './submission-template.service';
-import { CreateSubmissionTemplateDto } from './models/create-template.dto';
-import { UpdateSubmissionTemplateDto } from './models/update-template.dto';
+import { CreateSubmissionTemplateModel } from './models/create-template.model';
+import { UpdateSubmissionTemplateModel } from './models/update-template.model';
 
 @Controller('submission-template')
 export class SubmissionTemplateController {
@@ -18,7 +18,7 @@ export class SubmissionTemplateController {
   }
 
   @Post('create')
-  async create(@Body() createDto: CreateSubmissionTemplateDto) {
+  async create(@Body() createDto: CreateSubmissionTemplateModel) {
     return this.service.create(createDto);
   }
 
@@ -28,7 +28,7 @@ export class SubmissionTemplateController {
   }
 
   @Patch('update')
-  async update(@Body() updateDto: UpdateSubmissionTemplateDto) {
+  async update(@Body() updateDto: UpdateSubmissionTemplateModel) {
     return this.service.update(updateDto);
   }
 

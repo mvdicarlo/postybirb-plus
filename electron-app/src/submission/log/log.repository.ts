@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import Repository from '../../base/repository.base';
-import { SubmissionLog } from './log.interface';
+import { SubmissionLog } from './interfaces/submission-log.interface';
+import EntityRepository from 'src/base/entity/entity.repository.base';
+import SubmissionLogEntity from './models/submission-log.entity';
 
 @Injectable()
-export class SubmissionLogRepository extends Repository<SubmissionLog> {
+export class SubmissionLogRepository extends EntityRepository<SubmissionLogEntity, SubmissionLog> {
   constructor() {
-    super('submission-logs');
+    super('submission-logs', SubmissionLogEntity);
   }
 }

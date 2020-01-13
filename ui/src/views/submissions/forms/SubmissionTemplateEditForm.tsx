@@ -11,11 +11,11 @@ import { TreeNode } from 'antd/lib/tree-select';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import { SubmissionTemplate } from '../../../../../electron-app/src/submission/submission-template/submission-template.interface';
+import { SubmissionTemplate } from '../../../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
 import SubmissionTemplateService from '../../../services/submission-template.service';
-import { DefaultOptions } from '../../../../../electron-app/src/submission/interfaces/default-options.interface';
+import { DefaultOptions } from '../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import {
   Form,
   Button,
@@ -125,10 +125,8 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
       p.submissionId = this.id;
       if (existing) {
         p._id = existing._id;
-        p.id = existing.id;
       } else {
-        p._id = undefined;
-        p.id = `${this.id}-${p.accountId}`;
+        p._id = `${this.id}-${p.accountId}`;
       }
     });
 
@@ -153,8 +151,8 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
         websiteData[status.website].key = status.website;
         websiteData[status.website].value = status.website;
         (websiteData[status.website].children as any[]).push({
-          key: status.id,
-          value: status.id,
+          key: status._id,
+          value: status._id,
           title: `${status.website}: ${status.alias}`,
           isLeaf: true
         });
@@ -206,12 +204,13 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
         parts[accountId] = {
           accountId,
           submissionId: this.id,
-          id: _.uniqueId('New Part'),
+          _id: _.uniqueId('New Part'),
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
           ].getDefaults(),
-          isNew: true
+          isNew: true,
+          created: Date.now(),
         };
       });
 

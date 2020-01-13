@@ -1,7 +1,7 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import SubmissionTemplateService from '../services/submission-template.service';
-import { SubmissionTemplate } from '../../../electron-app/src/submission/submission-template/submission-template.interface';
+import { SubmissionTemplate } from '../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
 import { SubmissionTemplateEvent } from '../shared/enums/submission-template.events.enum';
 
 export interface SubmissionStoreState {
@@ -35,7 +35,7 @@ export class SubmissionTemplateStore {
 
   @action
   addOrUpdate(template: SubmissionTemplate) {
-    const index: number = this.state.templates.findIndex(s => s.id === template.id);
+    const index: number = this.state.templates.findIndex(s => s._id === template._id);
     if (index === -1) {
       this.state.templates.push(template);
     } else {
@@ -45,12 +45,12 @@ export class SubmissionTemplateStore {
 
   @action
   remove(id: string) {
-    const index: number = this.state.templates.findIndex(s => s.id === id);
+    const index: number = this.state.templates.findIndex(s => s._id === id);
     if (index !== -1) this.state.templates.splice(index, 1);
   }
 
   getSubmissionTemplate(id: string): SubmissionTemplate | undefined {
-    return this.state.templates.find(t => t.id === id);
+    return this.state.templates.find(t => t._id === id);
   }
 }
 

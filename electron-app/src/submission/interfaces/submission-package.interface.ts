@@ -1,4 +1,4 @@
-import { Parts } from './submission-part.interface';
+import { Parts } from '../submission-part/interfaces/submission-part.interface';
 import { Problems } from '../validator/interfaces/problems.interface';
 
 export interface SubmissionPackage<T> {

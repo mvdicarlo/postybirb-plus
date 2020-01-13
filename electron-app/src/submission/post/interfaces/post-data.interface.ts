@@ -1,5 +1,5 @@
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import { SubmissionPart } from 'src/submission/interfaces/submission-part.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 
 export interface PostData<T extends Submission> {
   description: string;

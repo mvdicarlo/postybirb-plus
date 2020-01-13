@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SubmissionPartRepository } from './submission-part.repository';
-import { SubmissionPart } from '../interfaces/submission-part.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { Submission } from '../interfaces/submission.interface';
-import * as _ from 'lodash';
 import { SubmissionType } from '../enums/submission-type.enum';
-import { DefaultOptions } from '../interfaces/default-options.interface';
+import { DefaultOptions } from './interfaces/default-options.interface';
 import { Website } from 'src/websites/website.base';
+import SubmissionPartEntity from './models/submission-part.entity';
 
 @Injectable()
 export class SubmissionPartService {
@@ -18,45 +17,42 @@ export class SubmissionPartService {
   ) {}
 
   async createOrUpdateSubmissionPart(
-    part: SubmissionPart<any>,
+    part: SubmissionPartEntity<any>,
     submissionType: SubmissionType,
-  ): Promise<SubmissionPart<any>> {
-    const copy = _.cloneDeep(part);
+  ): Promise<SubmissionPartEntity<any>> {
+    const copy = part.copy<SubmissionPartEntity<any>>();
+
     let defaultData = {};
     if (!copy.isDefault) {
       const website: Website = this.websiteProvider.getWebsiteModule(copy.website);
       defaultData = website.getDefaultOptions(submissionType);
     }
 
-    let update = {};
-
-    const existing = await this.repository.find(this.getPartId(part.submissionId, copy.accountId));
+    const existing = await this.repository.findOne(copy._id);
     if (existing) {
       this.logger.log(`${copy.submissionId}: ${copy.accountId}`, 'Update Submission Part');
-      update = {
+      copy.data = {
         ...defaultData,
         ...existing.data,
         ...copy.data,
       };
-      await this.repository.update(copy.id, update);
+      await this.repository.update(copy);
     } else {
       this.logger.log(copy.submissionId, 'Create Submission Part');
-      update = {
+      copy.data = {
         ...defaultData,
         ...copy.data,
       };
-      await this.repository.create({
-        ...copy,
-        data: update,
-        id: this.getPartId(copy.submissionId, copy.accountId),
-      });
+      await this.repository.save(copy);
     }
 
-    copy.data = update;
     return copy;
   }
 
-  async createDefaultPart(submission: Submission, title?: string): Promise<void> {
+  async createDefaultPart(
+    submission: Submission,
+    title?: string,
+  ): Promise<SubmissionPartEntity<DefaultOptions>> {
     const defaultPart: DefaultOptions = {
       title: title || submission.title,
       rating: null,
@@ -70,38 +66,35 @@ export class SubmissionPartService {
       },
     };
 
-    await this.repository.create({
-      id: this.getPartId(submission.id, 'default'),
-      submissionId: submission.id,
-      website: 'default',
-      accountId: 'default',
-      data: defaultPart,
-      isDefault: true,
-      postStatus: 'UNPOSTED',
-    });
+    return await this.repository.save(
+      new SubmissionPartEntity({
+        submissionId: submission._id,
+        website: 'default',
+        accountId: 'default',
+        data: defaultPart,
+        isDefault: true,
+        postStatus: 'UNPOSTED',
+      }),
+    );
   }
 
   getPartsForSubmission(
     submissionId: string,
     incompleteOnly: boolean,
-  ): Promise<Array<SubmissionPart<any>>> {
+  ): Promise<Array<SubmissionPartEntity<any>>> {
     if (incompleteOnly) {
       return this.repository
-        .findAllBySubmissionId(submissionId)
+        .find({ submissionId })
         .then(parts => parts.filter(part => part.postStatus !== 'SUCCESS'));
     }
-    return this.repository.findAllBySubmissionId(submissionId);
+    return this.repository.find({ submissionId });
   }
 
   async getSubmissionPart(
     submissionId: string,
     accountId: string,
-  ): Promise<SubmissionPart<any> | undefined> {
-    return (await this.repository.findAll({ accountId, submissionId }))[0];
-  }
-
-  getPartId(submissionId: string, accountId: string) {
-    return `${submissionId}-${accountId}`;
+  ): Promise<SubmissionPartEntity<any> | undefined> {
+    return (await this.repository.find({ accountId, submissionId }))[0];
   }
 
   removeSubmissionPart(id: string): Promise<number> {
@@ -116,6 +109,6 @@ export class SubmissionPartService {
 
   removeAllSubmissionPartsForAccount(accountId: string): Promise<number> {
     this.logger.log(accountId, 'Remove All Parts For Account');
-    return this.repository.removeByAccountId(accountId);
+    return this.repository.removeBy({ accountId });
   }
 }
