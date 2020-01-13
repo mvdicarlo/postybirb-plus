@@ -98,25 +98,25 @@ export class SubmissionController {
 
   @Delete('remove/additional/:id/:location')
   async removeAdditionalFile(@Param() params) {
-    return this.service.removeFileSubmissionAdditionalFile(params._id, params.location);
+    return this.service.removeFileSubmissionAdditionalFile(params.id, params.location);
   }
 
   @Post('change/primary/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async changePrimary(@UploadedFile() file, @Param() params) {
-    return this.service.changeFileSubmissionPrimaryFile(file, params._id, params.path);
+    return this.service.changeFileSubmissionPrimaryFile(file, params.id, params.path);
   }
 
   @Post('change/thumbnail/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async changeThumbnail(@UploadedFile() file, @Param() params) {
-    return this.service.changeFileSubmissionThumbnailFile(file, params._id, params.path);
+    return this.service.changeFileSubmissionThumbnailFile(file, params.id, params.path);
   }
 
   @Post('add/additional/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async addAdditionalFile(@UploadedFile() file, @Param() params) {
-    return this.service.addFileSubmissionAdditionalFile(file, params._id, params.path);
+    return this.service.addFileSubmissionAdditionalFile(file, params.id, params.path);
   }
 
   @Patch('update/additional/:id')

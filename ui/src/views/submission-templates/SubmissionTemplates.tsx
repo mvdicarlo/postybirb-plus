@@ -92,7 +92,7 @@ class SubmissionTemplateCreator extends React.Component<any, SubmissionTemplateC
             <Form.Item label="Name" required>
               <Input
                 value={this.state.alias}
-                onChange={({ target }) => this.setState({ alias: target.value.trim() })}
+                onChange={({ target }) => this.setState({ alias: target.value })}
               />
             </Form.Item>
             <Form.Item label="Type" required>

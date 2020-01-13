@@ -98,7 +98,7 @@ export default class EntityRepository<T extends Entity, K extends EntityIntf> {
         {
           $set: {
             ...obj,
-            lastUpdated: new Date().toLocaleString(),
+            lastUpdated: Date.now(),
           },
         },
         { upsert: false, multi: false },

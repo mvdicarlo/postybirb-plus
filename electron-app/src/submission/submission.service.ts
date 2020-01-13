@@ -60,7 +60,6 @@ export class SubmissionService {
       .forEach(p => this.postService.queue(p.submission));
   }
 
-  // TODO classify package
   async get(id: string, packaged?: boolean): Promise<SubmissionEntity | SubmissionPackage<any>> {
     const submission = await this.repository.findOne(id);
     if (!submission) {
@@ -131,7 +130,7 @@ export class SubmissionService {
     const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part));
     return {
-      submission: submission.asPlain(),
+      submission,
       parts: mappedParts,
       problems,
     };

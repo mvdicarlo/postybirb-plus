@@ -90,11 +90,6 @@ export class Discord extends Website {
         f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
-    files
-      .filter(file => !WebsiteValidator.supportsFileType(file, this.acceptsFiles))
-      .forEach(file =>
-        problems.push(`Does not support file format: (${file.name}) ${file.mimetype}.`),
-      );
 
     files.forEach(file => {
       const { type, size, name } = file;
