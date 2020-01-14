@@ -4,6 +4,7 @@ import { PostService } from './post.service';
 import { SubmissionService } from '../submission.service';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { Submission } from '../interfaces/submission.interface';
+import SubmissionEntity from '../models/submission.entity';
 
 @Controller('post')
 export class PostController {
@@ -17,13 +18,19 @@ export class PostController {
     return this.service.getPostingStatus();
   }
 
-  @Post('post/:id')
-  async post(@Param('id') id: string) {
+  @Post('queue/:id')
+  async queue(@Param('id') id: string) {
     const validatedSubmission = (await this.submissionService.get(id, true)) as SubmissionPackage<
-      any
+      SubmissionEntity
     >;
     if (!!_.flatMap(validatedSubmission.problems, p => p.problems).length) {
       throw new BadRequestException('Cannot queue submission with problems');
+    }
+
+    // remove scheduled flag
+    if (validatedSubmission.submission.schedule.isScheduled) {
+      validatedSubmission.submission.schedule.isScheduled = false;
+      await this.submissionService.scheduleSubmission(id, false); // somewhat inefficient
     }
 
     return this.service.queue(validatedSubmission.submission);

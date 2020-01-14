@@ -10,6 +10,7 @@ import { submissionTemplateStore } from './stores/submission-template.store';
 import { tagGroupStore } from './stores/tag-group.store';
 import { uiStore } from './stores/ui.store';
 import { updateStore } from './stores/update.store';
+import { postStatusStore } from './stores/post-status.store';
 
 export default class App extends React.Component {
   render() {
@@ -24,6 +25,7 @@ export default class App extends React.Component {
         tagGroupStore={tagGroupStore}
         uiStore={uiStore}
         updateStore={updateStore}
+        postStatusStore={postStatusStore}
       >
         <AppLayout />
       </Provider>

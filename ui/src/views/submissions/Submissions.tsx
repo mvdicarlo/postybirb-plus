@@ -28,6 +28,7 @@ import moment from 'moment';
 import SubmissionSelectModal from './submission-select/SubmissionSelectModal';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import PostService from '../../services/post.service';
 
 interface Props {
   submissions: SubmissionPackage<any>[];
@@ -65,8 +66,17 @@ export class Submissions extends React.Component<Props, State> {
     );
   }
 
-  postSubmissions(submissions: SubmissionPackage<any>[]) {
+  async postSubmissions(submissions: SubmissionPackage<any>[]) {
     this.setState({ postModalVisible: false });
+    for (let i = 0; i < submissions.length; i++) {
+      try {
+        await PostService.queue(submissions[i].submission._id);
+      } catch {
+        message.error(`Unable to queue ${SubmissionUtil.getSubmissionTitle(submissions[i])}.`);
+      }
+    }
+
+    message.success('Submissions queued.');
   }
 
   scheduleSubmissions(submissions: SubmissionPackage<any>[]) {
@@ -284,6 +294,26 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
       });
   }
 
+  onPost() {
+    PostService.queue(this.props.item.submission._id)
+      .then(() => {
+        message.success('Submission queued.');
+      })
+      .catch(() => {
+        message.error('Failed to queue submission.');
+      });
+  }
+
+  onSchedule() {
+    SubmissionService.schedule(this.props.item.submission._id, true)
+      .then(() => {
+        message.success('Submission scheduled.');
+      })
+      .catch(() => {
+        message.error('Failed to schedule submission.');
+      });
+  }
+
   render() {
     const { item } = this.props;
     const problems: Problems = item.problems;
@@ -291,7 +321,11 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     return (
       <List.Item
         actions={[
-          <span className={`text-link ${problemCount > 0 ? 'disabled' : ''}`} key="submission-post">
+          <span
+            className={`text-link ${problemCount > 0 ? 'disabled' : ''}`}
+            key="submission-post"
+            onClick={this.onPost.bind(this)}
+          >
             Post
           </span>,
           <span
@@ -299,11 +333,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
               problemCount > 0 || !item.submission.schedule.postAt ? 'disabled' : ''
             }`}
             key="submission-schedule"
-            onClick={() =>
-              SubmissionService.schedule(item.submission._id, true)
-                .then(() => message.success('Submission scheduled.'))
-                .catch(() => message.error('Failed to schedule submission.'))
-            }
+            onClick={this.onSchedule.bind(this)}
           >
             Schedule
           </span>,

@@ -114,7 +114,7 @@ export class Poster extends EventEmitter {
     timeUntilPost: number,
   ) {
     super();
-    this.postAtTimeout = setTimeout(this.post, timeUntilPost);
+    this.postAtTimeout = setTimeout(this.post.bind(this), timeUntilPost);
     this.postAt = Date.now() + timeUntilPost;
     this.retries = settingsService.getValue<number>('postRetries') || 0;
   }

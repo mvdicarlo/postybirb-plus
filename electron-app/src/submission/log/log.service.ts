@@ -1,5 +1,5 @@
 import { app } from 'electron';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { SubmissionLog, PartWithResponse } from './interfaces/submission-log.interface';
 import { SubmissionLogRepository } from './log.repository';
 import { Submission } from '../interfaces/submission.interface';
@@ -9,6 +9,7 @@ import SubmissionEntity from '../models/submission.entity';
 
 @Injectable()
 export class LogService {
+  private readonly logger = new Logger(LogService.name);
   private readonly MAX_LOGS: number = 30;
 
   constructor(private readonly repository: SubmissionLogRepository) {}
@@ -22,6 +23,7 @@ export class LogService {
   }
 
   async addLog(submission: SubmissionEntity, parts: PartWithResponse[]): Promise<void> {
+    this.logger.log(submission._id, 'Creating Log');
     await this.repository.save(
       new SubmissionLogEntity({
         submission,

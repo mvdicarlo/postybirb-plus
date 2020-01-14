@@ -16,7 +16,7 @@ import { FileSubmission } from '../file-submission/interfaces/file-submission.in
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { Poster } from './poster';
 import { LogService } from '../log/log.service';
-import { PostStatus } from './interfaces/post-status.interface';
+import { PostStatuses } from './interfaces/post-status.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { PostEvent } from './post.events.enum';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
@@ -84,7 +84,7 @@ export class PostService {
   }
 
   isCurrentlyPosting(submission: Submission): boolean {
-    return this.posting[submission.type] && this.posting[submission.type]._id === submission._id;
+    return !!(this.posting[submission.type] && this.posting[submission.type]._id === submission._id);
   }
 
   isCurrentlyPostingToAny(): boolean {
@@ -95,7 +95,7 @@ export class PostService {
     return !!this.submissionQueue[submission.type].find(s => s._id === submission._id);
   }
 
-  getPostingStatus(): PostStatus {
+  getPostingStatus(): PostStatuses {
     const posting = [];
     Object.values(this.posting).forEach(submission => {
       if (submission) {
@@ -119,7 +119,7 @@ export class PostService {
   }
 
   private insert(submission: SubmissionEntity) {
-    if (!this.isCurrentlyQueued(submission)) {
+    if (!this.isCurrentlyQueued(submission) && !this.isCurrentlyPosting(submission)) {
       this.logger.log(submission._id, `Inserting Into Queue ${submission.type}`);
       this.submissionQueue[submission.type].push(submission);
       this.notifyPostingStateChanged();
@@ -137,13 +137,14 @@ export class PostService {
 
     // Check for problems
     const validationPackage = await this.submissionService.validate(submission);
-    const isValid: boolean = !!_.flatMap(validationPackage.problems, p => p.problems).length;
+    const isValid: boolean = !_.flatMap(validationPackage.problems, p => p.problems).length;
 
     if (isValid) {
       if (submission.schedule.isScheduled) {
         this.submissionService.scheduleSubmission(submission._id, false); // Unschedule
       }
       this.notifyPostingStateChanged();
+      this.notifyPostingStatusChanged();
       const parts = await this.partService.getPartsForSubmission(submission._id, false);
       const [defaultPart] = parts.filter(p => p.isDefault);
 
@@ -190,10 +191,11 @@ export class PostService {
         });
       });
 
-      this.checkForCompletion(null);
+      this.checkForCompletion(submission);
       this.notifyPostingStatusChanged();
     } else {
       this.posting[submission.type] = null;
+      // TODO do something with this throw and notify
       throw new BadRequestException('Submission has problems');
     }
   }
@@ -237,12 +239,22 @@ export class PostService {
         )
         .finally(() => {
           // TODO emit notification to UI and OS
-          // TODO clear typed queue if failures exist and setting exists
           // Delete submission if 100% completed
           if (!this.postingParts[submission.type].filter(p => !p.success).length) {
-            this.submissionService.deleteSubmission(submission._id);
+            this.submissionService.deleteSubmission(submission._id, true);
           }
         });
+
+      if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+        // If the failures were not cancels
+        // TODO emit notification?
+        if (
+          this.postingParts[submission.type].filter(p => !p.success).filter(p => !p.cancelled)
+            .length
+        ) {
+          this.emptyQueue(submission.type);
+        }
+      }
 
       this.clearAndPostNext(submission.type);
     }
@@ -332,11 +344,11 @@ export class PostService {
 
   private notifyPostingStateChanged = _.debounce(
     () => this.submissionService.postingStateChanged(),
-    1000,
+    500,
   );
 
   private notifyPostingStatusChanged = _.debounce(
     () => this.eventEmitter.emit(PostEvent.UPDATED, this.getPostingStatus()),
-    1000,
+    500,
   );
 }

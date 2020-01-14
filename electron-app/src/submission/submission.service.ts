@@ -82,6 +82,11 @@ export class SubmissionService {
     }
 
     const submissions = await this.repository.find(query);
+    submissions.forEach(submission => {
+      submission.isPosting = this.postService.isCurrentlyPosting(submission);
+      submission.isQueued = this.postService.isCurrentlyQueued(submission);
+    });
+
     if (packaged) {
       return await Promise.all(submissions.map(s => this.validate(s)));
     } else {
@@ -148,10 +153,14 @@ export class SubmissionService {
     return {};
   }
 
-  async deleteSubmission(id: string): Promise<number> {
+  async deleteSubmission(id: string, skipCancel?: boolean): Promise<number> {
     this.logger.log(id, 'Delete Submission');
     const submission = (await this.get(id)) as SubmissionEntity;
-    this.postService.cancel(submission);
+
+    if (!skipCancel) {
+      this.postService.cancel(submission);
+    }
+
     switch (submission.type) {
       case SubmissionType.FILE:
         await this.fileSubmissionService.cleanupSubmission(submission as FileSubmissionEntity);
@@ -313,7 +322,9 @@ export class SubmissionService {
 
   // File Submission Actions
   // NOTE: Might be good to pull these out into a different place
-  async removeFileSubmissionThumbnail(id: string): Promise<SubmissionPackage<FileSubmissionEntity>> {
+  async removeFileSubmissionThumbnail(
+    id: string,
+  ): Promise<SubmissionPackage<FileSubmissionEntity>> {
     this.logger.debug(id, 'Remove Submission Thumbnail');
     const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
 

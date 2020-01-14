@@ -55,39 +55,41 @@ export default class SubmissionLogs extends React.Component<Props, State> {
             <List.Item.Meta
               title={item.submission.title}
               description={<div>Posted at {new Date(item.created).toLocaleString()}</div>}
-            >
-              <div className="flex">
-                <div className="flex-1">
-                  <Typography.Text>
-                    <ul>
-                      {item.parts
-                        .filter(p => p.part.postStatus === 'SUCCESS')
-                        .sort((a, b) => a.part.website.localeCompare(b.part.website))
-                        .map(p => (
-                          <li>
-                            <span className="mr-1">{p.part.website}</span>
-                            {p.part.postedTo ? <span>(p.part.postedTo)</span> : null}
-                          </li>
-                        ))}
-                    </ul>
-                  </Typography.Text>
-                </div>
-                <div className="flex-1">
-                  <Typography.Text type="danger">
-                    <ul>
-                      {item.parts
-                        .filter(p => p.part.postStatus !== 'SUCCESS')
-                        .sort((a, b) => a.part.website.localeCompare(b.part.website))
-                        .map(p => (
-                          <li>
-                            <span className="mr-1">{p.part.website}</span>
-                          </li>
-                        ))}
-                    </ul>
-                  </Typography.Text>
-                </div>
+            />
+            <div className="flex">
+              <div className="flex-1">
+                <Typography.Title level={4}>Successful</Typography.Title>
+                <Typography.Text>
+                  <ul>
+                    {item.parts
+                      .filter(p => p.part.postStatus === 'SUCCESS')
+                      .sort((a, b) => a.part.website.localeCompare(b.part.website))
+                      .map(p => (
+                        <li>
+                          <span className="mr-1">{p.part.website}</span>
+                          {p.part.postedTo ? <span>(p.part.postedTo)</span> : null}
+                        </li>
+                      ))}
+                  </ul>
+                </Typography.Text>
               </div>
-            </List.Item.Meta>
+              <div className="flex-1">
+                <Typography.Text type="danger">
+                  <Typography.Title level={4}>Failed</Typography.Title>
+
+                  <ul>
+                    {item.parts
+                      .filter(p => p.part.postStatus !== 'SUCCESS')
+                      .sort((a, b) => a.part.website.localeCompare(b.part.website))
+                      .map(p => (
+                        <li>
+                          <span className="mr-1">{p.part.website}</span>
+                        </li>
+                      ))}
+                  </ul>
+                </Typography.Text>
+              </div>
+            </div>
           </List.Item>
         )}
       />

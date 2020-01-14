@@ -30,8 +30,12 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
       name: this.state.name,
       webhook: this.state.webhook
     })
-      .then(() => message.success('Discord updated.'))
-      .catch(() => message.error('Failed to update Discord account.'))
+      .then(() => {
+        message.success('Discord updated.');
+      })
+      .catch(() => {
+        message.error('Failed to update Discord account.');
+      })
       .finally(() => this.setState({ sending: false }));
   }
 

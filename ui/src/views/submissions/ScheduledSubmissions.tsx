@@ -2,6 +2,11 @@ import React from 'react';
 import SubmissionService from '../../services/submission.service';
 import SubmissionUtil from '../../utils/submission.util';
 import moment from 'moment';
+import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { Link } from 'react-router-dom';
+import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import {
   Calendar,
   Button,
@@ -15,11 +20,7 @@ import {
   Modal,
   DatePicker
 } from 'antd';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Link } from 'react-router-dom';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import PostService from '../../services/post.service';
 
 interface Props {
   submissions: SubmissionPackage<Submission>[];
@@ -133,7 +134,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     showScheduler: false,
     postAt: undefined
   };
-  
+
   hideScheduler() {
     this.setState({ showScheduler: false, postAt: undefined });
   }
@@ -143,6 +144,16 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
       SubmissionService.setPostAt(this.props.item.submission._id, this.state.postAt);
     }
     this.hideScheduler();
+  }
+
+  postNow() {
+    PostService.queue(this.props.item.submission._id)
+      .then(() => {
+        message.success('Submission queued.');
+      })
+      .catch(() => {
+        message.error('Failed to queue submission.');
+      });
   }
 
   render() {
