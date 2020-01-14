@@ -8,7 +8,7 @@ import { classToPlain } from 'class-transformer';
 import Entity from './entity.base';
 import { EntityIntf } from './entity.base.interface';
 
-export default class EntityRepository<T extends Entity, K extends EntityIntf> {
+export default abstract class EntityRepository<T extends Entity, K extends EntityIntf> {
   protected readonly db: Datastore;
   protected _find: Function;
   protected _findOne: Function;
@@ -65,7 +65,7 @@ export default class EntityRepository<T extends Entity, K extends EntityIntf> {
 
   async removeBy(search: object): Promise<number> {
     try {
-      return await this._remove(search, { multi: false });
+      return await this._remove(search, { multi: true });
     } catch (err) {
       throw new BadRequestException(err);
     } finally {

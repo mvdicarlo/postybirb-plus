@@ -128,7 +128,7 @@ export class SubmissionService {
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
     const problems: Problems = this.validatorService.validateParts(submission, parts);
     const mappedParts: Parts = {};
-    parts.forEach(part => (mappedParts[part.accountId] = part));
+    parts.forEach(part => (mappedParts[part.accountId] = part.asPlain())); // asPlain to expose the _id (a model might work better)
     return {
       submission,
       parts: mappedParts,

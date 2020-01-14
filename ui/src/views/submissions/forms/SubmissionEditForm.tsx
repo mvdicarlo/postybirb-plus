@@ -132,15 +132,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         parts: Object.values(this.state.parts).filter(
           p => !this.state.removedParts.includes(p.accountId)
         ),
-        removedParts: _.compact(
-          this.state.removedParts.map(accountId => {
-            const found = Object.values(this.state.parts).find(p => p.accountId === accountId);
-            if (found && !found.isNew) {
-              return found._id;
-            }
-            return null;
-          })
-        ),
+        removedParts: this.state.removedParts
+          .filter(accountId => this.state.parts[accountId])
+          .filter(accountId => !this.state.parts[accountId].isNew)
+          .map(accountId => this.state.parts[accountId]._id),
         id: this.id,
         postAt: this.state.postAt
       })
@@ -272,7 +267,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
           ].getDefaults(),
           isNew: true,
-          created: Date.now(),
+          created: Date.now()
         };
       });
 
