@@ -7,7 +7,11 @@ import { Link } from 'react-router-dom';
 import { Problems } from '../../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { SubmissionPackage } from '../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { loginStatusStore } from '../../stores/login-status.store';
-
+import moment from 'moment';
+import SubmissionSelectModal from './submission-select/SubmissionSelectModal';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import PostService from '../../services/post.service';
 import {
   Avatar,
   Button,
@@ -24,11 +28,6 @@ import {
   Form,
   InputNumber
 } from 'antd';
-import moment from 'moment';
-import SubmissionSelectModal from './submission-select/SubmissionSelectModal';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import PostService from '../../services/post.service';
 
 interface Props {
   submissions: SubmissionPackage<any>[];
@@ -252,14 +251,17 @@ interface ListItemProps {
 interface ListItemState {
   previewVisible: boolean;
   showScheduler: boolean;
+  disableActions: boolean;
 }
 
 class ListItem extends React.Component<ListItemProps, ListItemState> {
   state: any = {
     previewVisible: false,
-    showScheduler: false
+    showScheduler: false,
+    disableActions: false
   };
 
+  disableActions: boolean = false;
   postAt: number | undefined = undefined;
 
   hidePreview() {
@@ -280,37 +282,64 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
   }
 
   handleScheduleUpdate() {
-    SubmissionService.setPostAt(this.props.item.submission._id, this.postAt);
+    if (this.disableActions) return;
+    this.disableActions = true;
+    this.setState({ disableActions: true });
+    SubmissionService.setPostAt(this.props.item.submission._id, this.postAt).finally(() => {
+      this.setState({ disableActions: false });
+      this.disableActions = false;
+    });
     this.hideScheduler();
   }
 
   onDuplicate() {
+    if (this.disableActions) return;
+    this.disableActions = true;
+    this.setState({ disableActions: true });
     SubmissionService.duplicate(this.props.item.submission._id)
       .then(() => {
         message.success('Submission duplicated.');
       })
       .catch(() => {
         message.error('PostyBirb was unable to duplicate the submission.');
+      })
+      .finally(() => {
+        this.setState({ disableActions: false });
+        this.disableActions = false;
       });
   }
 
   onPost() {
+    if (this.disableActions) return;
+    this.disableActions = true;
+    this.setState({ disableActions: true });
     PostService.queue(this.props.item.submission._id)
       .then(() => {
         message.success('Submission queued.');
       })
       .catch(() => {
         message.error('Failed to queue submission.');
+      })
+      .finally(() => {
+        this.setState({ disableActions: false });
+        this.disableActions = false;
       });
   }
 
   onSchedule() {
+    if (this.disableActions) return;
+    this.disableActions = true;
+    this.setState({ disableActions: true });
     SubmissionService.schedule(this.props.item.submission._id, true)
       .then(() => {
         message.success('Submission scheduled.');
       })
       .catch(() => {
         message.error('Failed to schedule submission.');
+      })
+      .finally(() => {
+        this.setState({ disableActions: false });
+        this.disableActions = false;
       });
   }
 
@@ -322,7 +351,9 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
       <List.Item
         actions={[
           <span
-            className={`text-link ${problemCount > 0 ? 'disabled' : ''}`}
+            className={`text-link ${
+              problemCount > 0 || this.state.disableActions ? 'disabled' : ''
+            }`}
             key="submission-post"
             onClick={this.onPost.bind(this)}
           >
@@ -330,30 +361,41 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
           </span>,
           <span
             className={`text-link ${
-              problemCount > 0 || !item.submission.schedule.postAt ? 'disabled' : ''
+              problemCount > 0 || !item.submission.schedule.postAt || this.state.disableActions
+                ? 'disabled'
+                : ''
             }`}
             key="submission-schedule"
             onClick={this.onSchedule.bind(this)}
           >
             Schedule
           </span>,
-          <Link to={`/edit/submission/${item.submission.type}/${item.submission._id}`}>
+          <Link
+            className={`${this.state.disableActions ? 'disabled' : ''}`}
+            to={`/edit/submission/${item.submission.type}/${item.submission._id}`}
+          >
             <span key="submission-edit">Edit</span>
           </Link>,
           <span
-            className="text-link"
+            className={`text-link ${this.state.disableActions ? 'disabled' : ''}`}
             key="submission-duplicate"
             onClick={this.onDuplicate.bind(this)}
           >
             Duplicate
           </span>,
           <Popconfirm
+            disabled={this.state.disableActions}
             cancelText="No"
             okText="Yes"
             title="Are you sure you want to delete? This action cannot be undone."
             onConfirm={() => SubmissionService.deleteSubmission(item.submission._id)}
           >
-            <Typography.Text type="danger">Delete</Typography.Text>
+            <Typography.Text
+              className={`${this.state.disableActions ? 'disabled' : ''}`}
+              type="danger"
+            >
+              Delete
+            </Typography.Text>
           </Popconfirm>,
           <IssueState problems={problems} problemCount={problemCount} />
         ]}

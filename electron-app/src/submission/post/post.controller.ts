@@ -5,6 +5,7 @@ import { SubmissionService } from '../submission.service';
 import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { Submission } from '../interfaces/submission.interface';
 import SubmissionEntity from '../models/submission.entity';
+import { SubmissionType } from '../enums/submission-type.enum';
 
 @Controller('post')
 export class PostController {
@@ -39,5 +40,10 @@ export class PostController {
   @Post('cancel/:id')
   async cancel(@Param('id') id: string) {
     return this.service.cancel((await this.submissionService.get(id)) as Submission);
+  }
+
+  @Post('cancelAll/:type')
+  async cancelAll(@Param('type') type: SubmissionType) {
+    return this.service.emptyQueue(type);
   }
 }

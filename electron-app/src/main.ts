@@ -2,7 +2,6 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { HttpExceptionFilter } from './http-exception.filter';
-import { AppGlobal } from './app-global.interface';
 import { SSL } from './ssl';
 import * as compression from 'compression';
 import { AuthGuard } from './auth.guard';
@@ -14,7 +13,7 @@ async function bootstrap() {
       key,
       cert,
     },
-    logger: (global as AppGlobal).DEBUG_MODE ? undefined : ['error', 'warn', 'log'],
+    logger: global.DEBUG_MODE ? undefined : ['error', 'warn', 'log'],
   });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalGuards(new AuthGuard());

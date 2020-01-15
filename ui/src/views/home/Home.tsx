@@ -40,7 +40,10 @@ export default class Home extends React.Component<Props> {
                 >
                   {
                     this.props.submissionStore!.fileSubmissions.filter(
-                      s => !s.submission.isPosting && !s.submission.schedule.isScheduled
+                      s =>
+                        !s.submission.isPosting &&
+                        !s.submission.isQueued &&
+                        !s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
@@ -49,7 +52,10 @@ export default class Home extends React.Component<Props> {
                 >
                   {
                     this.props.submissionStore!.fileSubmissions.filter(
-                      s => !s.submission.isPosting && s.submission.schedule.isScheduled
+                      s =>
+                        !s.submission.isPosting &&
+                        !s.submission.isQueued &&
+                        s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
@@ -57,8 +63,9 @@ export default class Home extends React.Component<Props> {
                   label={<Link to={`/${SubmissionType.FILE}/posting`}>Posting</Link>}
                 >
                   {
-                    this.props.submissionStore!.fileSubmissions.filter(s => s.submission.isPosting)
-                      .length
+                    this.props.submissionStore!.fileSubmissions.filter(
+                      s => s.submission.isPosting || s.submission.isQueued
+                    ).length
                   }
                 </Descriptions.Item>
               </Descriptions>
@@ -77,7 +84,10 @@ export default class Home extends React.Component<Props> {
                 >
                   {
                     this.props.submissionStore!.notificationSubmissions.filter(
-                      s => !s.submission.isPosting && !s.submission.schedule.isScheduled
+                      s =>
+                        !s.submission.isPosting &&
+                        !s.submission.isQueued &&
+                        !s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
@@ -86,7 +96,10 @@ export default class Home extends React.Component<Props> {
                 >
                   {
                     this.props.submissionStore!.notificationSubmissions.filter(
-                      s => !s.submission.isPosting && s.submission.schedule.isScheduled
+                      s =>
+                        !s.submission.isPosting &&
+                        !s.submission.isQueued &&
+                        s.submission.schedule.isScheduled
                     ).length
                   }
                 </Descriptions.Item>
@@ -95,7 +108,7 @@ export default class Home extends React.Component<Props> {
                 >
                   {
                     this.props.submissionStore!.notificationSubmissions.filter(
-                      s => s.submission.isPosting
+                      s => s.submission.isPosting || s.submission.isQueued
                     ).length
                   }
                 </Descriptions.Item>

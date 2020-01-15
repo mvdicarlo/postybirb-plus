@@ -20,7 +20,7 @@ export class SubmissionPartService {
     part: SubmissionPartEntity<any>,
     submissionType: SubmissionType,
   ): Promise<SubmissionPartEntity<any>> {
-    const copy = part.copy<SubmissionPartEntity<any>>();
+    const copy = part.copy();
 
     let defaultData = {};
     if (!copy.isDefault) {

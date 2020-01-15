@@ -24,7 +24,7 @@ export default class Entity implements EntityIntf {
     }
   }
 
-  public copy<T>(): T {
+  public copy(): this {
     const constr: any = this.constructor;
     return new constr(_.cloneDeep(classToPlain(this)));
   }

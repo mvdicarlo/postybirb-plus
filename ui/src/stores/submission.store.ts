@@ -5,6 +5,7 @@ import { SubmissionEvent } from '../shared/enums/submission.events.enum';
 import { Submission } from '../../../electron-app/src/submission/interfaces/submission.interface';
 import SubmissionService from '../services/submission.service';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
+import SubmissionUtil from '../utils/submission.util';
 
 export interface SubmissionState {
   loading: boolean;
@@ -71,6 +72,14 @@ export class SubmissionStore {
   @action
   setSubmissions(submissions: SubmissionPackage<Submission>[]) {
     this.state.submissions = submissions || [];
+  }
+
+  getSubmissionTitle(id: string): string {
+    const found = this.state.submissions.find(s => s.submission._id === id);
+    if (found) {
+      return SubmissionUtil.getSubmissionTitle(found);
+    }
+    return 'Unknown';
   }
 }
 

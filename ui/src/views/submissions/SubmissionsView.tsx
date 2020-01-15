@@ -12,6 +12,7 @@ import { Upload, Icon, message, Tabs, Button, Badge, Modal, Input } from 'antd';
 import SubmissionService from '../../services/submission.service';
 import ScheduledSubmissions from './ScheduledSubmissions';
 import { uiStore } from '../../stores/ui.store';
+import SubmissionQueue from './SubmissionQueue';
 const { Dragger } = Upload;
 
 interface Props {
@@ -56,14 +57,16 @@ export default class SubmissionView extends React.Component<Props> {
         : this.props.submissionStore!.notificationSubmissions;
 
     const editableSubmissions = submissions.filter(
-      s => !s.submission.isPosting && !s.submission.schedule.isScheduled
+      s => !s.submission.isPosting && !s.submission.isQueued && !s.submission.schedule.isScheduled
     );
 
     const scheduledSubmissions = submissions.filter(
-      s => !s.submission.isPosting && s.submission.schedule.isScheduled
+      s => !s.submission.isPosting && !s.submission.isQueued && s.submission.schedule.isScheduled
     );
 
-    const queuedSubmissions = submissions.filter(s => s.submission.isPosting);
+    const queuedSubmissions = submissions.filter(
+      s => s.submission.isPosting || s.submission.isQueued
+    );
 
     return (
       <Tabs defaultActiveKey={this.defaultKey}>
@@ -112,10 +115,10 @@ export default class SubmissionView extends React.Component<Props> {
           }
           key="posting"
         >
-          TBD
+          <SubmissionQueue type={this.type} />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Logs" key="logs">
-          <SubmissionLogs type={this.type}/>
+          <SubmissionLogs type={this.type} />
         </Tabs.TabPane>
       </Tabs>
     );

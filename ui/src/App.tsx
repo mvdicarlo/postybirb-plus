@@ -1,6 +1,7 @@
 import React from 'react';
 import AppLayout from './views/app-layout/AppLayout';
 import { Provider } from 'mobx-react';
+import './services/notification.service';
 import { descriptionTemplateStore } from './stores/description-template.store';
 import { headerStore } from './stores/header.store';
 import { loginStatusStore } from './stores/login-status.store';

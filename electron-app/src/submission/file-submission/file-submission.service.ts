@@ -154,7 +154,7 @@ export class FileSubmissionService {
   async duplicateSubmission(submission: FileSubmissionEntity): Promise<FileSubmissionEntity> {
     // Copy files
     const { _id } = submission;
-    const duplicate = submission.copy<FileSubmissionEntity>();
+    const duplicate = submission.copy();
     duplicate.primary = await this.fileRepository.copyFileWithNewId(_id, duplicate.primary);
 
     if (duplicate.thumbnail) {

@@ -274,8 +274,8 @@ export class Poster extends EventEmitter {
     this.emit('done', {
       submission: this.submission,
       part: this.part,
-      success,
       source: response.source,
+      status: this.status,
     });
   }
 

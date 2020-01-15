@@ -9,10 +9,8 @@ import { SettingsService } from 'src/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { AccountService } from 'src/account/account.service';
 import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from '../submission-part/interfaces/submission-part.interface';
 import { WebsitesService } from 'src/websites/websites.service';
 import { Website } from 'src/websites/website.base';
-import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { Poster } from './poster';
 import { LogService } from '../log/log.service';
@@ -22,6 +20,8 @@ import { PostEvent } from './post.events.enum';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
+import { NotificationType } from 'src/events/enums/notification-type.enum';
+import { nativeImage } from 'electron';
 
 @Injectable()
 export class PostService {
@@ -69,7 +69,7 @@ export class PostService {
   cancel(submission: Submission) {
     if (this.isCurrentlyPosting(submission)) {
       // Need to handle cancel event
-      this.getPostingParts(submission.type).forEach(poster => poster.cancel());
+      this.getPosters(submission.type).forEach(poster => poster.cancel());
     } else if (this.isCurrentlyQueued(submission)) {
       this.submissionQueue[submission.type].splice(
         this.submissionQueue[submission.type].findIndex(s => s._id === submission._id),
@@ -102,7 +102,7 @@ export class PostService {
       if (submission) {
         posting.push({
           submission,
-          statuses: this.getPostingParts(submission.type).map(poster => ({
+          statuses: this.getPosters(submission.type).map(poster => ({
             postAt: poster.postAt,
             success: poster.status === 'SUCCESS',
             done: poster.isDone,
@@ -151,29 +151,30 @@ export class PostService {
       const [defaultPart] = parts.filter(p => p.isDefault);
 
       // Preload files if they exist
-      if (this.isFileSubmission(submission)) {
-        await this.preloadFiles(submission);
+      const postingSubmission = submission.copy();
+      if (this.isFileSubmission(postingSubmission)) {
+        await this.preloadFiles(postingSubmission);
       }
 
       // Create posters
       const existingSources = parts.filter(p => p.postedTo).map(p => p.postedTo);
-      this.postingParts[submission.type] = parts
+      this.postingParts[postingSubmission.type] = parts
         .filter(p => !p.isDefault)
         .filter(p => p.postStatus !== 'SUCCESS')
-        .map(p => this.createPoster(submission, p, defaultPart, existingSources));
+        .map(p => this.createPoster(postingSubmission, p, defaultPart, existingSources));
 
       // Listen to events
-      this.getPostingParts(submission.type).forEach(poster => {
+      this.getPosters(postingSubmission.type).forEach(poster => {
         poster.once('ready', () => this.notifyPostingStatusChanged());
         poster.once('posting', () => this.notifyPostingStatusChanged());
         poster.once('cancelled', data => this.checkForCompletion(data.submission));
         poster.once('done', data => {
           if (data.source) {
-            this.addSource(data.submission.type, data.source);
+            this.addSource(submission.type, data.source);
           }
 
           if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-            this.emptyQueue(data.submission.type);
+            this.emptyQueue(submission.type);
           }
 
           // Save part and then check/notify
@@ -184,17 +185,17 @@ export class PostService {
                 postStatus: data.status,
                 postedTo: data.source,
               }),
-              data.submission.type,
+              submission.type,
             )
             .finally(() => {
               this.notifyPostingStateChanged();
               this.notifyPostingStatusChanged();
-              this.checkForCompletion(data.submission);
+              this.checkForCompletion(submission); // use base submission to avoid preloaded buffers
             });
         });
       });
 
-      this.checkForCompletion(submission);
+      this.checkForCompletion(submission); // use base submission to avoid preloaded buffers
       this.notifyPostingStatusChanged();
     } else {
       this.posting[submission.type] = null;
@@ -216,8 +217,8 @@ export class PostService {
 
   private checkForCompletion(submission: SubmissionEntity) {
     // isDone is set when 'done' is called and 'cancelled'
-    const parts = this.getPostingParts(submission.type);
-    const incomplete = parts.filter(poster => !poster.isDone);
+    const posters = this.getPosters(submission.type);
+    const incomplete = posters.filter(poster => !poster.isDone);
     if (incomplete.length) {
       const waitingForExternal = incomplete.filter(poster => poster.waitForExternalStart);
 
@@ -229,7 +230,7 @@ export class PostService {
       this.logService
         .addLog(
           submission.asPlain(),
-          parts
+          posters
             .filter(poster => !poster.cancelled)
             .map(poster => ({
               part: {
@@ -241,21 +242,66 @@ export class PostService {
             })),
         )
         .finally(() => {
-          // TODO emit notification to UI and OS
-          // Delete submission if 100% completed
           const canDelete: boolean =
-            parts.length === parts.filter(p => p.status === 'SUCCESS').length;
+            posters.length === posters.filter(p => p.status === 'SUCCESS').length;
           if (canDelete) {
+            this.eventEmitter.notify(
+              {
+                type: NotificationType.SUCCESS,
+                isNotification: false,
+              },
+              {
+                title: 'Success',
+                body: `Posted (${_.capitalize(submission.type)}) ${submission.title}`, // may want to make body more dynamic to title
+                icon:
+                  submission instanceof FileSubmissionEntity
+                    ? nativeImage.createFromPath(submission.primary.preview)
+                    : undefined,
+              },
+            );
             this.submissionService.deleteSubmission(submission._id, true);
+          } else {
+            this.eventEmitter.notify(
+              {
+                type: NotificationType.SUCCESS,
+                isNotification: true,
+                sticky: true,
+                title: `(${_.capitalize(submission.type)}) ${submission.title}`,
+                body: posters
+                  .filter(p => p.status === 'FAILED')
+                  .map(p => `${p.part.website}: ${p.response.message || 'Unknown error occurred.'}`)
+                  .join('\n'),
+              },
+              {
+                title: 'Failure',
+                body: `(${_.capitalize(submission.type)}) ${submission.title}`, // may want to make body more dynamic to title
+                icon:
+                  submission instanceof FileSubmissionEntity
+                    ? nativeImage.createFromPath(submission.primary.preview)
+                    : undefined,
+              },
+            );
           }
         });
 
       if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
         // If the failures were not cancels
-        // TODO emit notification?
-        const shouldEmptyQueue: boolean = !!parts.filter(p => p.status === 'FAILED').length;
+        const shouldEmptyQueue: boolean = !!posters.filter(p => p.status === 'FAILED').length;
         if (shouldEmptyQueue) {
           this.emptyQueue(submission.type);
+          this.eventEmitter.notify(
+            {
+              type: NotificationType.WARNING,
+              sticky: true,
+              isNotification: true,
+            },
+            {
+              title: 'Warning',
+              body: `${_.capitalize(
+                submission.type,
+              )} queue was emptied due to a failure to post.\n\nYou can change this behavior in the settings.`,
+            },
+          );
         }
       }
 
@@ -300,13 +346,13 @@ export class PostService {
     );
   }
 
-  private emptyQueue(type: SubmissionType) {
+  emptyQueue(type: SubmissionType) {
     this.submissionQueue[type] = [];
     this.notifyPostingStatusChanged();
     this.notifyPostingStateChanged();
   }
 
-  private getPostingParts(type: SubmissionType): Poster[] {
+  private getPosters(type: SubmissionType): Poster[] {
     return this.postingParts[type] || [];
   }
 

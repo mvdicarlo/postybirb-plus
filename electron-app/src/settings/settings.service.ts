@@ -3,12 +3,12 @@ import * as lowdb from 'lowdb';
 import { SettingEvent } from './settings.events.enum';
 import { Settings } from './settings.interface';
 import { EventsGateway } from 'src/events/events.gateway';
-import { AppGlobal } from 'src/app-global.interface';
+import {  } from 'src/global';
 
 @Injectable()
 export class SettingsService {
   private readonly logger = new Logger(SettingsService.name);
-  private readonly settings: lowdb.LowdbSync<Settings> = (global as AppGlobal).settingsDB;
+  private readonly settings: lowdb.LowdbSync<Settings> = global.settingsDB;
 
   constructor(private readonly eventEmitter: EventsGateway) {}
 

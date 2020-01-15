@@ -2,6 +2,7 @@ import React from 'react';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { SubmissionLog } from '../../../../electron-app/src/submission/log/interfaces/submission-log.interface';
 import SubmissionLogService from '../../services/submission-log.service';
+import { saveAs } from 'file-saver';
 import { List, Button, Icon, Typography } from 'antd';
 
 interface Props {
@@ -31,6 +32,13 @@ export default class SubmissionLogs extends React.Component<Props, State> {
     );
   }
 
+  saveLog(log: SubmissionLog) {
+    const blob: Blob = new Blob([JSON.stringify(log, null, 1)], {
+      type: 'application/json'
+    });
+    saveAs(blob, `${log.created}_${log.submission.title}.log`);
+  }
+
   render() {
     return (
       <List
@@ -49,7 +57,9 @@ export default class SubmissionLogs extends React.Component<Props, State> {
             key={item._id}
             actions={[
               <span className="text-link">Create Submission From Log</span>,
-              <span className="text-link">Download</span>
+              <span className="text-link" onClick={() => this.saveLog(item)}>
+                Download
+              </span>
             ]}
           >
             <List.Item.Meta

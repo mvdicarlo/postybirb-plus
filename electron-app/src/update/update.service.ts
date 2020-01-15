@@ -3,7 +3,6 @@ import { EventsGateway } from 'src/events/events.gateway';
 import { autoUpdater } from 'electron-updater';
 import { BrowserWindow } from 'electron';
 import * as logger from 'electron-log';
-import { AppGlobal } from 'src/app-global.interface';
 import { PostService } from 'src/submission/post/post.service';
 import { Interval } from '@nestjs/schedule';
 
@@ -25,7 +24,7 @@ interface UpdateInfo {
 @Injectable()
 export class UpdateService {
   private readonly logger: Logger = new Logger(UpdateService.name);
-  private DEBUG_MODE: boolean = (global as AppGlobal).DEBUG_MODE;
+  private DEBUG_MODE: boolean = global.DEBUG_MODE;
 
   private isUpdating: boolean = false;
   private updateAvailable: UpdateInfo = {

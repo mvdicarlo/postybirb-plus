@@ -184,3 +184,5 @@ function show() {
   }
   window.focus();
 }
+
+global.showApp = show;
