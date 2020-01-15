@@ -11,5 +11,5 @@ export interface SubmissionPart<T extends DefaultOptions> extends EntityIntf {
   postStatus?: PostStatus;
 }
 
-export type PostStatus = 'SUCCESS' | 'FAILED' | 'UNPOSTED';
+export type PostStatus = 'SUCCESS' | 'FAILED' | 'UNPOSTED' | 'CANCELLED';
 export type Parts = Record<string, SubmissionPart<any>>;

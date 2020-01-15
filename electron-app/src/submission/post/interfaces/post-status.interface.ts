@@ -7,7 +7,8 @@ export interface PostStatuses {
 
 export interface PostInfo {
   submission: Submission;
-  status: Array<{
+  statuses: Array<{
+    accountId: string;
     done: boolean;
     postAt: number;
     success: boolean;

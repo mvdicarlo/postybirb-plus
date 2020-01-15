@@ -60,7 +60,7 @@ export default class SubmissionLogs extends React.Component<Props, State> {
               <div className="flex-1">
                 <Typography.Title level={4}>Successful</Typography.Title>
                 <Typography.Text>
-                  <ul>
+                  <ul className="text-success">
                     {item.parts
                       .filter(p => p.part.postStatus === 'SUCCESS')
                       .sort((a, b) => a.part.website.localeCompare(b.part.website))
@@ -74,9 +74,8 @@ export default class SubmissionLogs extends React.Component<Props, State> {
                 </Typography.Text>
               </div>
               <div className="flex-1">
+                <Typography.Title level={4}>Failed</Typography.Title>
                 <Typography.Text type="danger">
-                  <Typography.Title level={4}>Failed</Typography.Title>
-
                   <ul>
                     {item.parts
                       .filter(p => p.part.postStatus !== 'SUCCESS')

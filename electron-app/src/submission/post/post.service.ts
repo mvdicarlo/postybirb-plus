@@ -16,14 +16,13 @@ import { FileSubmission } from '../file-submission/interfaces/file-submission.in
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { Poster } from './poster';
 import { LogService } from '../log/log.service';
-import { PostStatuses } from './interfaces/post-status.interface';
+import { PostStatuses, PostInfo } from './interfaces/post-status.interface';
 import { EventsGateway } from 'src/events/events.gateway';
 import { PostEvent } from './post.events.enum';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 
-// TODO clear all based on setting on failure
 @Injectable()
 export class PostService {
   private readonly logger = new Logger(PostService.name);
@@ -70,7 +69,7 @@ export class PostService {
   cancel(submission: Submission) {
     if (this.isCurrentlyPosting(submission)) {
       // Need to handle cancel event
-      this.postingParts[submission.type].forEach(poster => poster.cancel());
+      this.getPostingParts(submission.type).forEach(poster => poster.cancel());
     } else if (this.isCurrentlyQueued(submission)) {
       this.submissionQueue[submission.type].splice(
         this.submissionQueue[submission.type].findIndex(s => s._id === submission._id),
@@ -84,7 +83,9 @@ export class PostService {
   }
 
   isCurrentlyPosting(submission: Submission): boolean {
-    return !!(this.posting[submission.type] && this.posting[submission.type]._id === submission._id);
+    return !!(
+      this.posting[submission.type] && this.posting[submission.type]._id === submission._id
+    );
   }
 
   isCurrentlyPostingToAny(): boolean {
@@ -96,17 +97,18 @@ export class PostService {
   }
 
   getPostingStatus(): PostStatuses {
-    const posting = [];
+    const posting: PostInfo[] = [];
     Object.values(this.posting).forEach(submission => {
       if (submission) {
         posting.push({
-          submission, // TODO check to see if this fails to return id
-          statuses: this.postingParts[submission.type].map(poster => ({
+          submission,
+          statuses: this.getPostingParts(submission.type).map(poster => ({
             postAt: poster.postAt,
-            success: poster.success,
+            success: poster.status === 'SUCCESS',
             done: poster.isDone,
             waitingForCondition: poster.waitForExternalStart,
             website: poster.part.website,
+            accountId: poster.part.accountId,
           })),
         });
       }
@@ -161,7 +163,7 @@ export class PostService {
         .map(p => this.createPoster(submission, p, defaultPart, existingSources));
 
       // Listen to events
-      this.postingParts[submission.type].forEach(poster => {
+      this.getPostingParts(submission.type).forEach(poster => {
         poster.once('ready', () => this.notifyPostingStatusChanged());
         poster.once('posting', () => this.notifyPostingStatusChanged());
         poster.once('cancelled', data => this.checkForCompletion(data.submission));
@@ -179,13 +181,14 @@ export class PostService {
             .createOrUpdateSubmissionPart(
               new SubmissionPartEntity({
                 ...data.part,
-                postStatus: data.success ? 'SUCCESS' : 'FAILED',
+                postStatus: data.status,
                 postedTo: data.source,
               }),
               data.submission.type,
             )
             .finally(() => {
               this.notifyPostingStateChanged();
+              this.notifyPostingStatusChanged();
               this.checkForCompletion(data.submission);
             });
         });
@@ -196,6 +199,7 @@ export class PostService {
     } else {
       this.posting[submission.type] = null;
       // TODO do something with this throw and notify
+      // notify ui
       throw new BadRequestException('Submission has problems');
     }
   }
@@ -212,7 +216,8 @@ export class PostService {
 
   private checkForCompletion(submission: SubmissionEntity) {
     // isDone is set when 'done' is called and 'cancelled'
-    const incomplete = this.postingParts[submission.type].filter(poster => !poster.isDone);
+    const parts = this.getPostingParts(submission.type);
+    const incomplete = parts.filter(poster => !poster.isDone);
     if (incomplete.length) {
       const waitingForExternal = incomplete.filter(poster => poster.waitForExternalStart);
 
@@ -220,18 +225,16 @@ export class PostService {
         // Force post start as no source was found
         waitingForExternal.forEach(poster => poster.doPost());
       }
-
-      this.notifyPostingStatusChanged();
     } else {
       this.logService
         .addLog(
           submission.asPlain(),
-          this.postingParts[submission.type]
+          parts
             .filter(poster => !poster.cancelled)
             .map(poster => ({
               part: {
                 ...poster.part.asPlain(),
-                postStatus: poster.success ? 'SUCCESS' : 'FAILED',
+                postStatus: poster.status,
                 postedTo: poster.response.source,
               },
               response: poster.response,
@@ -240,7 +243,9 @@ export class PostService {
         .finally(() => {
           // TODO emit notification to UI and OS
           // Delete submission if 100% completed
-          if (!this.postingParts[submission.type].filter(p => !p.success).length) {
+          const canDelete: boolean =
+            parts.length === parts.filter(p => p.status === 'SUCCESS').length;
+          if (canDelete) {
             this.submissionService.deleteSubmission(submission._id, true);
           }
         });
@@ -248,10 +253,8 @@ export class PostService {
       if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
         // If the failures were not cancels
         // TODO emit notification?
-        if (
-          this.postingParts[submission.type].filter(p => !p.success).filter(p => !p.cancelled)
-            .length
-        ) {
+        const shouldEmptyQueue: boolean = !!parts.filter(p => p.status === 'FAILED').length;
+        if (shouldEmptyQueue) {
           this.emptyQueue(submission.type);
         }
       }
@@ -301,6 +304,10 @@ export class PostService {
     this.submissionQueue[type] = [];
     this.notifyPostingStatusChanged();
     this.notifyPostingStateChanged();
+  }
+
+  private getPostingParts(type: SubmissionType): Poster[] {
+    return this.postingParts[type] || [];
   }
 
   private getWaitTime(accountId: string, website: Website): number {

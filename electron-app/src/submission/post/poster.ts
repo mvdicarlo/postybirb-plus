@@ -19,6 +19,7 @@ import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 import { Submission } from '../interfaces/submission.interface';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
+import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
 
 export interface Poster {
   on(
@@ -50,7 +51,7 @@ export interface Poster {
       data: {
         submission: SubmissionEntity;
         part: SubmissionPartEntity<any>;
-        success: boolean;
+        status: PostStatus;
         source: string;
       },
       response: PostResponse,
@@ -73,7 +74,7 @@ export interface Poster {
       data: {
         submission: SubmissionEntity;
         part: SubmissionPartEntity<any>;
-        success: boolean;
+        status: PostStatus;
         source: string;
       },
       response: PostResponse,
@@ -92,10 +93,10 @@ export interface Poster {
 
 export class Poster extends EventEmitter {
   cancelled: boolean = false;
-  success: boolean = false;
   isPosting: boolean = false;
   isReady: boolean = false;
   isDone: boolean = false;
+  status: PostStatus = 'UNPOSTED';
   response: PostResponse;
   postAtTimeout: NodeJS.Timeout;
   sources: string[] = [];
@@ -245,6 +246,7 @@ export class Poster extends EventEmitter {
       // TODO post w/ retries
       const random = _.random(0, 100);
       if (random > 50) {
+        this.status = 'SUCCESS';
         this.done(true, { website: this.part.website });
       } else {
         throw new Error('Fake Failure');
@@ -261,13 +263,13 @@ export class Poster extends EventEmitter {
       } else {
         Object.assign(errorMsg, error);
       }
+      this.status = 'FAILED';
       this.done(false, errorMsg);
     }
   }
 
   private done(success: boolean, response: PostResponse) {
     this.isDone = true;
-    this.success = success;
     this.response = response;
     this.emit('done', {
       submission: this.submission,
@@ -291,6 +293,8 @@ export class Poster extends EventEmitter {
     if (this.isPosting) {
       return;
     }
+    // TODO emit here?
+    this.status = 'CANCELLED';
     this.cancelled = true;
   }
 
