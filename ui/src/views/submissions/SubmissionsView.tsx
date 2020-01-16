@@ -7,7 +7,7 @@ import { headerStore } from '../../stores/header.store';
 import { SubmissionStore } from '../../stores/submission.store';
 import { inject, observer } from 'mobx-react';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
-import { Match } from 'react-router-dom';
+import { Match, Location } from 'react-router-dom';
 import { Upload, Icon, message, Tabs, Button, Badge, Modal, Input } from 'antd';
 import SubmissionService from '../../services/submission.service';
 import ScheduledSubmissions from './ScheduledSubmissions';
@@ -18,6 +18,8 @@ const { Dragger } = Upload;
 interface Props {
   submissionStore?: SubmissionStore;
   match: Match;
+  location: Location;
+  history: any;
 }
 
 @inject('submissionStore')
@@ -28,7 +30,6 @@ export default class SubmissionView extends React.Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    this.defaultKey = props.match.params.view || 'submissions';
     uiStore.setActiveNav('update'); // force an update
     switch (props.match.path.split('/').pop()) {
       case SubmissionType.FILE:
@@ -37,6 +38,15 @@ export default class SubmissionView extends React.Component<Props> {
       case SubmissionType.NOTIFICATION:
         this.type = SubmissionType.NOTIFICATION;
         break;
+    }
+
+    // Don't like doing it like this, but router is being weird.
+    // Will need to change if hash routing is ever changed.
+    const hashPart = location.hash.split('/').pop();  // eslint-disable-line no-restricted-globals
+    if (hashPart === this.type) {
+      this.defaultKey = 'submissions';
+    } else {
+      this.defaultKey = hashPart || 'submissions';
     }
   }
 
@@ -69,7 +79,12 @@ export default class SubmissionView extends React.Component<Props> {
     );
 
     return (
-      <Tabs defaultActiveKey={this.defaultKey}>
+      <Tabs
+        defaultActiveKey={this.defaultKey}
+        onTabClick={(key: string) => {
+          this.props.history.replace(`/${this.type}/${key}`);
+        }}
+      >
         <Tabs.TabPane
           tab={
             <div>

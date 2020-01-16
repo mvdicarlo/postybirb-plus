@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
 import { PageHeader, Breadcrumb, Icon } from 'antd';
 import {
@@ -10,6 +10,7 @@ import {
 
 interface Props {
   headerStore?: HeaderStore;
+  history?: any;
 }
 
 const BreadcrumbNav: React.SFC<BreadcrumbNavItem> = props => {
@@ -24,19 +25,22 @@ const BreadcrumbNav: React.SFC<BreadcrumbNavItem> = props => {
 
 @inject('headerStore')
 @observer
-export default class AppHeader extends React.Component<any | Props, any> {
+class AppHeader extends React.Component<any | Props, any> {
   render() {
     const headerState: HeaderState = this.props.headerStore.headerState;
     return (
       <PageHeader
         title={headerState.title}
         subTitle={headerState.subtitle}
+        onBack={() => this.props.history!.goBack()}
       >
         <Breadcrumb
           routes={headerState.routes}
           itemRender={BreadcrumbNav}
-        ></Breadcrumb>
+        />
       </PageHeader>
     );
   }
 }
+
+export default withRouter(AppHeader);

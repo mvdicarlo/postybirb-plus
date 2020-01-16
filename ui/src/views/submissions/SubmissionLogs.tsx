@@ -56,7 +56,7 @@ export default class SubmissionLogs extends React.Component<Props, State> {
           <List.Item
             key={item._id}
             actions={[
-              <span className="text-link">Create Submission From Log</span>,
+              <span className="text-link">Recreate Submission</span>,
               <span className="text-link" onClick={() => this.saveLog(item)}>
                 Download
               </span>
