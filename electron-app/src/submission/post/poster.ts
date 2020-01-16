@@ -246,8 +246,13 @@ export class Poster extends EventEmitter {
       // TODO post w/ retries
       const random = _.random(0, 100);
       if (random > 50) {
-        this.status = 'SUCCESS';
-        this.done(true, { website: this.part.website });
+        setTimeout(
+          function() {
+            this.status = 'SUCCESS';
+            this.done({ website: this.part.website });
+          }.bind(this),
+          _.random(8000),
+        );
       } else {
         throw new Error('Fake Failure');
       }
@@ -264,12 +269,13 @@ export class Poster extends EventEmitter {
         Object.assign(errorMsg, error);
       }
       this.status = 'FAILED';
-      this.done(false, errorMsg);
+      this.done(errorMsg);
     }
   }
 
-  private done(success: boolean, response: PostResponse) {
+  private done(response: PostResponse) {
     this.isDone = true;
+    this.isPosting = false;
     this.response = response;
     this.emit('done', {
       submission: this.submission,
@@ -290,12 +296,19 @@ export class Poster extends EventEmitter {
   }
 
   cancel() {
-    if (this.isPosting) {
+    if (this.isPosting || this.isDone) {
       return;
     }
-    // TODO emit here?
     this.status = 'CANCELLED';
     this.cancelled = true;
+    this.isDone = true;
+    if (!this.isReady) {
+      clearTimeout(this.postAtTimeout);
+      this.emit('cancelled', {
+        submission: this.submission,
+        part: this.part,
+      });
+    }
   }
 
   doPost() {

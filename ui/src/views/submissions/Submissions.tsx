@@ -347,8 +347,10 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     const { item } = this.props;
     const problems: Problems = item.problems;
     const problemCount: number = SubmissionUtil.getProblemCount(problems);
+    const hasFailure = !!Object.values(item.parts).find(p => p.postStatus === 'FAILED');
     return (
       <List.Item
+        className={hasFailure ? 'bg-red-200' : ''}
         actions={[
           <span
             className={`text-link ${
@@ -463,8 +465,8 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
             defaultValue={
               this.props.item.submission.schedule.postAt ? moment(this.state.postAt) : undefined
             }
-            format="YYYY-MM-DD HH:mm"
-            showTime={{ format: 'HH:mm' }}
+            format="YYYY-MM-DD HH:mm:ss"
+            showTime={{ format: 'HH:mm:ss', use12Hours: true }}
             placeholder="Unscheduled"
             onChange={value => (this.postAt = value ? value.valueOf() : undefined)}
           />

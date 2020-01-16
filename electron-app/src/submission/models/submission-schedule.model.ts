@@ -3,6 +3,7 @@ import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export default class SubmissionScheduleModel implements SubmissionSchedule {
   @IsBoolean()
+  @IsOptional()
   isScheduled: boolean;
 
   @IsOptional()

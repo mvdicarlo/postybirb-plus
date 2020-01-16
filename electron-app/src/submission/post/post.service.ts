@@ -104,11 +104,13 @@ export class PostService {
           submission,
           statuses: this.getPosters(submission.type).map(poster => ({
             postAt: poster.postAt,
-            success: poster.status === 'SUCCESS',
-            done: poster.isDone,
+            status: poster.status,
             waitingForCondition: poster.waitForExternalStart,
             website: poster.part.website,
             accountId: poster.part.accountId,
+            source: poster.response ? poster.response.source : undefined,
+            error: poster.response ? poster.response.error : undefined,
+            isPosting: poster.isPosting,
           })),
         });
       }
@@ -171,6 +173,10 @@ export class PostService {
         poster.once('done', data => {
           if (data.source) {
             this.addSource(submission.type, data.source);
+          }
+
+          if (data.status === 'SUCCESS') {
+            this.accountPostTimeMap[`${data.part.accountId}-${data.part.website}`] = Date.now();
           }
 
           if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
@@ -245,14 +251,16 @@ export class PostService {
           const canDelete: boolean =
             posters.length === posters.filter(p => p.status === 'SUCCESS').length;
           if (canDelete) {
+            const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
             this.eventEmitter.notify(
               {
                 type: NotificationType.SUCCESS,
                 isNotification: false,
+                body,
               },
               {
                 title: 'Success',
-                body: `Posted (${_.capitalize(submission.type)}) ${submission.title}`, // may want to make body more dynamic to title
+                body,
                 icon:
                   submission instanceof FileSubmissionEntity
                     ? nativeImage.createFromPath(submission.primary.preview)
@@ -263,7 +271,7 @@ export class PostService {
           } else {
             this.eventEmitter.notify(
               {
-                type: NotificationType.SUCCESS,
+                type: NotificationType.ERROR,
                 isNotification: true,
                 sticky: true,
                 title: `(${_.capitalize(submission.type)}) ${submission.title}`,
@@ -366,9 +374,9 @@ export class PostService {
     const timeDifference = Date.now() - lastPosted;
     if (timeDifference >= timeToWait) {
       // when the time since the last post is already greater than the specified wait time
-      return 4000;
+      return 5000;
     } else {
-      return Math.max(Math.abs(timeDifference - timeToWait), 4000);
+      return Math.max(Math.abs(timeDifference - timeToWait), 5000);
     }
   }
 
@@ -397,11 +405,10 @@ export class PostService {
 
   private notifyPostingStateChanged = _.debounce(
     () => this.submissionService.postingStateChanged(),
-    500,
+    100,
   );
 
-  private notifyPostingStatusChanged = _.debounce(
-    () => this.eventEmitter.emit(PostEvent.UPDATED, this.getPostingStatus()),
-    500,
-  );
+  private notifyPostingStatusChanged() {
+    this.eventEmitter.emit(PostEvent.UPDATED, this.getPostingStatus());
+  }
 }

@@ -7,7 +7,6 @@ import {
   Inject,
 } from '@nestjs/common';
 import { EventsGateway } from 'src/events/events.gateway';
-import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import { Problems } from './validator/interfaces/problems.interface';
 import { Submission } from './interfaces/submission.interface';
@@ -57,7 +56,10 @@ export class SubmissionService {
       .filter(p => !this.postService.isCurrentlyPosting(p.submission))
       .filter(p => !this.postService.isCurrentlyQueued(p.submission))
       .sort((a, b) => a.submission.schedule.postAt - b.submission.schedule.postAt)
-      .forEach(p => this.postService.queue(p.submission));
+      .forEach(p => {
+        this.scheduleSubmission(p.submission._id, false);
+        this.postService.queue(p.submission);
+      });
   }
 
   async get(id: string, packaged?: boolean): Promise<SubmissionEntity | SubmissionPackage<any>> {
@@ -220,10 +222,6 @@ export class SubmissionService {
     this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
     const submissionToSchedule = (await this.get(id)) as SubmissionEntity;
 
-    if (submissionToSchedule.isPosting) {
-      throw new BadRequestException('Cannot update a submission that is posting');
-    }
-
     if (postAt) {
       submissionToSchedule.schedule.postAt = postAt;
     }
@@ -310,6 +308,7 @@ export class SubmissionService {
     await Promise.all(
       parts.map(p => {
         p.submissionId = duplicate._id;
+        p.postStatus = 'UNPOSTED';
         return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
       }),
     );

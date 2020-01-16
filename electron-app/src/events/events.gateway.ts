@@ -47,7 +47,7 @@ export class EventsGateway implements OnGatewayInit {
     const msg: NotificationInfo = {
       type: messageOptions.type,
       sticky: messageOptions.sticky,
-      body: messageOptions.body || notificationOptions.body,
+      body: messageOptions.body,
       title: messageOptions.isNotification ? messageOptions.title || notificationOptions.title : undefined,
     };
     this.emit(NotificationEvent.NOTIFICATION, msg);

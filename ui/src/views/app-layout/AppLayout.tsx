@@ -57,7 +57,7 @@ export default class AppLayout extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    props.uiStore!.setActiveNav(this.getCurrentNavId())
+    props.uiStore!.setActiveNav(this.getCurrentNavId());
   }
 
   getCurrentNavId(): string {
@@ -138,7 +138,7 @@ export default class AppLayout extends React.Component<Props, State> {
   render() {
     const { uiStore } = this.props;
     const state = uiStore!.state;
-    message.config({ prefixCls: `ant-${this.props.uiStore!.state.theme}-message` });
+    message.config({ duration: 2, prefixCls: `ant-${this.props.uiStore!.state.theme}-message` });
     this.props.uiStore!.setActiveNav(this.getCurrentNavId());
     return (
       <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>
