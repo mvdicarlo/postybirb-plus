@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directories';
 import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
+import * as gifFrames from 'gif-frames';
 
 @Injectable()
 export class FileRepositoryService {
@@ -26,18 +27,20 @@ export class FileRepositoryService {
     let thumbnail: Buffer = null;
     const thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${idName}.jpeg`;
     if (file.mimetype.includes('image')) {
+      let tmp: Electron.NativeImage = null;
       if (file.mimetype.includes('gif')) {
-        thumbnail = file.buffer;
+        const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
+        tmp = nativeImage.createFromBuffer(frame0.getImage().read());
       } else {
-        const tmp = nativeImage.createFromBuffer(file.buffer);
-        const sizes = tmp.getSize();
-        thumbnail = tmp
-          .resize({
-            width: Math.min(sizes.width, 300),
-            height: Math.min(sizes.height, 300),
-          })
-          .toPNG();
+        tmp = nativeImage.createFromBuffer(file.buffer);
       }
+      const sizes = tmp.getSize();
+      thumbnail = tmp
+        .resize({
+          width: Math.min(sizes.width, 300),
+          height: Math.min(sizes.height, 300),
+        })
+        .toPNG();
     } else {
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
