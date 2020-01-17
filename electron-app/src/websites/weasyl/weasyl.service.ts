@@ -143,7 +143,7 @@ export class Weasyl extends Website {
       );
 
     files.forEach(file => {
-      const { type, size, name } = file;
+      const { type, size, name, mimetype } = file;
       let maxMB: number = 10;
       if (type === FileSubmissionType.VIDEO || type === FileSubmissionType.AUDIO) {
         maxMB = 15;
@@ -156,7 +156,7 @@ export class Weasyl extends Website {
       }
 
       if (WebsiteValidator.MBtoBytes(maxMB) < size) {
-        if (isAutoscaling && type === FileSubmissionType.IMAGE) {
+        if (isAutoscaling && type === FileSubmissionType.IMAGE && mimetype !== 'image/gif') {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
           problems.push(`Weasyl limits ${file.mimetype} to ${maxMB}MB`);

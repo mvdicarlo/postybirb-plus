@@ -2,11 +2,8 @@ import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
 import { PageHeader, Breadcrumb, Icon } from 'antd';
-import {
-  HeaderStore,
-  HeaderState,
-  BreadcrumbNavItem
-} from '../../stores/header.store';
+import { HeaderStore, HeaderState, BreadcrumbNavItem } from '../../stores/header.store';
+import NotificationsView from '../notifications/NotificationsView';
 
 interface Props {
   headerStore?: HeaderStore;
@@ -34,10 +31,14 @@ class AppHeader extends React.Component<any | Props, any> {
         subTitle={headerState.subtitle}
         onBack={() => this.props.history!.goBack()}
       >
-        <Breadcrumb
-          routes={headerState.routes}
-          itemRender={BreadcrumbNav}
-        />
+        <div className="flex">
+          <div style={{ flex: 10 }}>
+            <Breadcrumb routes={headerState.routes} itemRender={BreadcrumbNav} />
+          </div>
+          <div>
+            <NotificationsView />
+          </div>
+        </div>
       </PageHeader>
     );
   }

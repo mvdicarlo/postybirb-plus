@@ -17,7 +17,8 @@ module.exports = {
       center: true
     },
     cursor: {
-      'zoom-in': 'zoom-in'
+      'zoom-in': 'zoom-in',
+      'pointer': 'pointer'
     }
   },
   variants: {},

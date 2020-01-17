@@ -245,7 +245,7 @@ export class Poster extends EventEmitter {
       // TODO post
       // TODO post w/ retries
       const random = _.random(0, 100);
-      if (random > 50) {
+      if (random > 15) {
         setTimeout(
           function() {
             this.status = 'SUCCESS';

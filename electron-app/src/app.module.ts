@@ -10,6 +10,7 @@ import { UpdateModule } from './update/update.module';
 import { SubmissionModule } from './submission/submission.module';
 import { AccountModule } from './account/account.module';
 import { RemoteModule } from './remote/remote.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RemoteModule } from './remote/remote.module';
     SubmissionModule,
     AccountModule,
     RemoteModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],

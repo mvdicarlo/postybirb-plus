@@ -63,6 +63,16 @@ export default abstract class EntityRepository<T extends Entity, K extends Entit
     }
   }
 
+  async removeAll(): Promise<number> {
+    try {
+      return await this._remove({}, { multi: true });
+    } catch (err) {
+      throw new BadRequestException(err);
+    } finally {
+      this.db.persistence.compactDatafile();
+    }
+  }
+
   async removeBy(search: object): Promise<number> {
     try {
       return await this._remove(search, { multi: true });

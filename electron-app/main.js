@@ -10,7 +10,7 @@ const nanoid = require('nanoid');
 process.env.PORT = process.env.PORT || 9247;
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 
-const SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
+global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
@@ -91,7 +91,7 @@ async function initialize() {
   }
 
   if (!shouldDisplayWindow) return; // observe user setting
-  if (SERVER_ONLY_MODE) return;
+  if (global.SERVER_ONLY_MODE) return;
 
   const mainWindowState = windowStateKeeper({
     defaultWidth: 992,

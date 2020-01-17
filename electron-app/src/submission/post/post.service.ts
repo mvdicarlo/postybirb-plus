@@ -20,8 +20,9 @@ import { PostEvent } from './post.events.enum';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
-import { NotificationType } from 'src/events/enums/notification-type.enum';
 import { nativeImage } from 'electron';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationType } from 'src/notification/enums/notification-type.enum';
 
 @Injectable()
 export class PostService {
@@ -54,7 +55,8 @@ export class PostService {
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
     private readonly logService: LogService,
-    private eventEmitter: EventsGateway,
+    private readonly eventEmitter: EventsGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
   queue(submission: SubmissionEntity) {
@@ -252,42 +254,30 @@ export class PostService {
             posters.length === posters.filter(p => p.status === 'SUCCESS').length;
           if (canDelete) {
             const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
-            this.eventEmitter.notify(
+            this.notificationService.createNotification(
               {
                 type: NotificationType.SUCCESS,
-                isNotification: false,
                 body,
+                title: 'Post Success',
               },
-              {
-                title: 'Success',
-                body,
-                icon:
-                  submission instanceof FileSubmissionEntity
-                    ? nativeImage.createFromPath(submission.primary.preview)
-                    : undefined,
-              },
+              submission instanceof FileSubmissionEntity
+                ? nativeImage.createFromPath(submission.primary.preview)
+                : undefined,
             );
             this.submissionService.deleteSubmission(submission._id, true);
           } else {
-            this.eventEmitter.notify(
+            this.notificationService.createNotification(
               {
                 type: NotificationType.ERROR,
-                isNotification: true,
-                sticky: true,
-                title: `(${_.capitalize(submission.type)}) ${submission.title}`,
                 body: posters
                   .filter(p => p.status === 'FAILED')
                   .map(p => `${p.part.website}: ${p.response.message || 'Unknown error occurred.'}`)
                   .join('\n'),
+                title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
               },
-              {
-                title: 'Failure',
-                body: `(${_.capitalize(submission.type)}) ${submission.title}`, // may want to make body more dynamic to title
-                icon:
-                  submission instanceof FileSubmissionEntity
-                    ? nativeImage.createFromPath(submission.primary.preview)
-                    : undefined,
-              },
+              submission instanceof FileSubmissionEntity
+                ? nativeImage.createFromPath(submission.primary.preview)
+                : undefined,
             );
           }
         });
@@ -297,18 +287,17 @@ export class PostService {
         const shouldEmptyQueue: boolean = !!posters.filter(p => p.status === 'FAILED').length;
         if (shouldEmptyQueue) {
           this.emptyQueue(submission.type);
-          this.eventEmitter.notify(
+          this.notificationService.createNotification(
             {
               type: NotificationType.WARNING,
-              sticky: true,
-              isNotification: true,
-            },
-            {
-              title: 'Warning',
               body: `${_.capitalize(
                 submission.type,
               )} queue was emptied due to a failure to post.\n\nYou can change this behavior in the settings.`,
+              title: `${_.capitalize(submission.type)} Queue Cleared`,
             },
+            submission instanceof FileSubmissionEntity
+              ? nativeImage.createFromPath(submission.primary.preview)
+              : undefined,
           );
         }
       }

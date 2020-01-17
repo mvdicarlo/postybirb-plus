@@ -92,10 +92,10 @@ export class Discord extends Website {
     ];
 
     files.forEach(file => {
-      const { type, size, name } = file;
+      const { type, size, name, mimetype } = file;
       const maxMB: number = 8;
       if (WebsiteValidator.MBtoBytes(maxMB) < size) {
-        if (isAutoscaling && type === FileSubmissionType.IMAGE) {
+        if (isAutoscaling && type === FileSubmissionType.IMAGE && mimetype !== 'image/gif') {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
           problems.push(`Discord limits ${file.mimetype} to ${maxMB}MB`);
