@@ -19,7 +19,6 @@ if (!hasLock) {
 }
 
 let nest;
-let tray;
 
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
 
@@ -86,7 +85,7 @@ async function initialize() {
     const menu = Menu.buildFromTemplate(require('./menu'));
     Menu.setApplicationMenu(menu);
     const image = buildAppImage();
-    tray = buildTray(image);
+    global.tray = buildTray(image); // force to stay in memory
     initializedOnce = true;
     shouldDisplayWindow = settings.getState().openOnStartup;
   }
@@ -146,7 +145,6 @@ function buildAppImage() {
     });
   }
 
-  console.log(image.getSize())
   // image.setTemplateImage(true);
   return image;
 }
