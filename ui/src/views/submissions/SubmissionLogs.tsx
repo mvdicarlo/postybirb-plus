@@ -3,7 +3,8 @@ import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { SubmissionLog } from '../../../../electron-app/src/submission/log/interfaces/submission-log.interface';
 import SubmissionLogService from '../../services/submission-log.service';
 import { saveAs } from 'file-saver';
-import { List, Button, Icon, Typography } from 'antd';
+import { List, Button, Icon, Typography, message } from 'antd';
+import SubmissionService from '../../services/submission.service';
 
 interface Props {
   type: SubmissionType;
@@ -39,6 +40,16 @@ export default class SubmissionLogs extends React.Component<Props, State> {
     saveAs(blob, `${log.created}_${log.submission.title}.log`);
   }
 
+  recreateSubmission(log: SubmissionLog) {
+    SubmissionService.recreateSubmissionFromLog(log)
+      .then(() => {
+        message.success('Submission recreated.');
+      })
+      .catch(() => {
+        message.error('Unable to recreate submission.');
+      });
+  }
+
   render() {
     return (
       <List
@@ -56,7 +67,9 @@ export default class SubmissionLogs extends React.Component<Props, State> {
           <List.Item
             key={item._id}
             actions={[
-              <span className="text-link">Recreate Submission</span>,
+              <span className="text-link" onClick={() => this.recreateSubmission(item)}>
+                Recreate Submission
+              </span>,
               <span className="text-link" onClick={() => this.saveLog(item)}>
                 Download
               </span>

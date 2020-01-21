@@ -18,6 +18,7 @@ import { SubmissionPart } from './submission-part/interfaces/submission-part.int
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
 import SubmissionScheduleModel from './models/submission-schedule.model';
+import SubmissionLogEntity from './log/models/submission-log.entity';
 
 @Controller('submission')
 export class SubmissionController {
@@ -55,6 +56,11 @@ export class SubmissionController {
         file,
       },
     });
+  }
+
+  @Post('recreate')
+  async recreateFromLog(@Body() log: SubmissionLogEntity) {
+    return this.service.recreate(log);
   }
 
   @Patch('update')

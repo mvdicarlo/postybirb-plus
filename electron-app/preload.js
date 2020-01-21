@@ -18,6 +18,9 @@ window.electron = {
     getCookies(accountId) {
       return session.fromPartition(`persist:${accountId}`).cookies.get({});
     },
+    clearSessionData(id) {
+      return session.fromPartition(`persist:${id}`).clearStorageData();
+    },
   },
   shell: {
     openInBrowser(url) {

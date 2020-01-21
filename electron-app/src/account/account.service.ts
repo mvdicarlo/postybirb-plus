@@ -1,4 +1,4 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException, forwardRef, Inject } from '@nestjs/common';
 import { AccountRepository } from './account.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
@@ -25,6 +25,7 @@ export class AccountService {
     private readonly eventEmitter: EventsGateway,
     private readonly websiteProvider: WebsiteProvider,
     private readonly submissionPartService: SubmissionPartService,
+    @Inject(forwardRef(() => SubmissionService))
     private readonly submissionService: SubmissionService,
     private readonly submissionTemplateService: SubmissionTemplateService,
   ) {

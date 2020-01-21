@@ -16,6 +16,9 @@ export default class LoginService {
   }
 
   static deleteAccount(id: string) {
+    if (localStorage.getItem('REMOTE_URI')) {
+      window.electron.session.clearSessionData(id);
+    }
     return axios.delete(`/account/${id}`);
   }
 

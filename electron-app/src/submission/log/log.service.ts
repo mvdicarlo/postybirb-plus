@@ -1,18 +1,21 @@
 import { app } from 'electron';
 import { Injectable, Logger } from '@nestjs/common';
-import { SubmissionLog, PartWithResponse } from './interfaces/submission-log.interface';
+import { PartWithResponse } from './interfaces/submission-log.interface';
 import { SubmissionLogRepository } from './log.repository';
-import { Submission } from '../interfaces/submission.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
 import SubmissionLogEntity from './models/submission-log.entity';
 import SubmissionEntity from '../models/submission.entity';
+import { SubmissionPartService } from '../submission-part/submission-part.service';
 
 @Injectable()
 export class LogService {
   private readonly logger = new Logger(LogService.name);
   private readonly MAX_LOGS: number = 30;
 
-  constructor(private readonly repository: SubmissionLogRepository) {}
+  constructor(
+    private readonly repository: SubmissionLogRepository,
+    private readonly partService: SubmissionPartService,
+  ) {}
 
   async getLogs(type?: SubmissionType): Promise<SubmissionLogEntity[]> {
     let logs = await this.repository.find();
@@ -29,6 +32,9 @@ export class LogService {
         submission,
         parts,
         version: app.getVersion(),
+        defaultPart: (await this.partService.getPartsForSubmission(submission._id, false)).filter(
+          p => p.isDefault,
+        )[0],
       }),
     );
 

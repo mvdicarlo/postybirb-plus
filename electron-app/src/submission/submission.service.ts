@@ -6,6 +6,7 @@ import {
   forwardRef,
   Inject,
 } from '@nestjs/common';
+import * as fs from 'fs-extra';
 import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import { Problems } from './validator/interfaces/problems.interface';
@@ -28,6 +29,9 @@ import SubmissionEntity from './models/submission.entity';
 import SubmissionScheduleModel from './models/submission-schedule.model';
 import SubmissionPartEntity from './submission-part/models/submission-part.entity';
 import FileSubmissionEntity from './file-submission/models/file-submission.entity';
+import SubmissionLogEntity from './log/models/submission-log.entity';
+import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
+import { AccountService } from 'src/account/account.service';
 
 @Injectable()
 export class SubmissionService {
@@ -41,6 +45,8 @@ export class SubmissionService {
     private readonly eventEmitter: EventsGateway,
     @Inject(forwardRef(() => PostService))
     private readonly postService: PostService,
+    @Inject(forwardRef(() => AccountService))
+    private readonly accountService,
   ) {}
 
   @Interval(60000)
@@ -129,6 +135,111 @@ export class SubmissionService {
     await this.partService.createDefaultPart(completedSubmission);
     this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(completedSubmission));
     return completedSubmission;
+  }
+
+  async recreate(log: SubmissionLogEntity): Promise<Submission> {
+    const { submission, parts, defaultPart } = log;
+    const createData: SubmissionCreate = {
+      type: submission.type,
+      data: {
+        title: submission.title,
+      },
+    };
+
+    if (createData.type === SubmissionType.FILE) {
+      createData.data = {
+        path: (submission as FileSubmission).primary.originalPath,
+        file: {
+          originalname: (submission as FileSubmission).primary.name,
+          mimetype: (submission as FileSubmission).primary.mimetype,
+          buffer: await fs
+            .readFile((submission as FileSubmission).primary.originalPath)
+            .catch(() => Buffer.from([])), // empty if no file found
+        },
+      };
+    }
+
+    const newSubmission = await this.create(createData);
+
+    const submissionParts: Array<SubmissionPartEntity<any>> = parts
+      .map(responsePart => responsePart.part)
+      .map(part => {
+        part.submissionId = newSubmission._id;
+        part.postStatus = 'UNPOSTED';
+        part.postedTo = undefined;
+        return part;
+      })
+      .filter(async part => {
+        try {
+          if (part.isDefault) {
+            return true;
+          }
+          await this.accountService.get(part.accountId);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      })
+      .map(part => new SubmissionPartEntity(part));
+
+    const defaultEntity = new SubmissionPartEntity(defaultPart);
+    defaultEntity.submissionId = newSubmission._id;
+
+    await Promise.all([
+      ...submissionParts.map(p =>
+        this.partService.createOrUpdateSubmissionPart(p, newSubmission.type),
+      ),
+      this.partService.createOrUpdateSubmissionPart(defaultEntity, newSubmission.type),
+    ]);
+
+    if (submission.type === SubmissionType.FILE) {
+      const fileSubmission = submission as FileSubmission;
+      if (fileSubmission.thumbnail) {
+        try {
+          const buffer = await fs.readFile(fileSubmission.thumbnail.originalPath);
+          const { mimetype, name, originalPath } = fileSubmission.thumbnail;
+          await this.changeFileSubmissionThumbnailFile(
+            {
+              fieldname: 'file',
+              mimetype,
+              originalname: name,
+              encoding: '',
+              buffer,
+            },
+            newSubmission._id,
+            originalPath,
+          );
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      if (fileSubmission.additional && fileSubmission.additional.length) {
+        for (let i = 0; i < fileSubmission.additional.length; i++) {
+          try {
+            const buffer = await fs.readFile(fileSubmission.additional[i].originalPath);
+            const { mimetype, name, originalPath } = fileSubmission.additional[i];
+            await this.addFileSubmissionAdditionalFile(
+              {
+                fieldname: 'file',
+                mimetype,
+                originalname: name,
+                encoding: '',
+                buffer,
+              },
+              newSubmission._id,
+              originalPath,
+            );
+          } catch (e) {
+            // Ignore dead file
+          }
+        }
+      }
+    }
+
+    const s = (await this.get(newSubmission._id, true)) as SubmissionPackage<any>;
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [s]);
+    return s.submission;
   }
 
   async validate(submission: SubmissionEntity): Promise<SubmissionPackage<any>> {

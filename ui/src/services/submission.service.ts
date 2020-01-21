@@ -5,6 +5,7 @@ import { FormSubmissionPart } from '../views/submissions/interfaces/form-submiss
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
+import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
 
 export default class SubmissionService {
   static checkProblems(id: string, parts: Array<FormSubmissionPart<any>>) {
@@ -39,6 +40,10 @@ export default class SubmissionService {
 
   static overwriteSubmissionParts(overwrite: SubmissionOverwrite) {
     return axios.post('/submission/overwrite', overwrite);
+  }
+
+  static recreateSubmissionFromLog(log: SubmissionLog) {
+    return axios.post('/submission/recreate', log);
   }
 
   static removeAdditionalFile(id: string, location: string) {

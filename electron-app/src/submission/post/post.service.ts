@@ -247,7 +247,7 @@ export class PostService {
                 postedTo: poster.response.source,
               },
               response: poster.response,
-            })),
+            }))
         )
         .finally(() => {
           const canDelete: boolean =

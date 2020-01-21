@@ -19,6 +19,7 @@ declare global {
       };
       session: {
         getCookies(accountId: string): Promise<any[]>;
+        clearSessionData(id: string): Promise<void>;
       };
       shell: {
         openInBrowser(url: string): Promise<void>;
