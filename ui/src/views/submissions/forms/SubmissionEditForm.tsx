@@ -40,6 +40,7 @@ import {
   Alert,
   Tooltip
 } from 'antd';
+import PostService from '../../../services/post.service';
 
 interface Props {
   match: Match;
@@ -105,7 +106,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         });
       })
       .catch(() => {
-        props.history.push('/submissions');
+        props.history.push('/home');
       });
   }
 
@@ -126,34 +127,54 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   }, 1250);
 
   onSubmit = () => {
-    if (this.state.touched || this.scheduleHasChanged()) {
-      this.setState({ loading: true });
-      SubmissionService.updateSubmission({
-        parts: Object.values(this.state.parts).filter(
-          p => !this.state.removedParts.includes(p.accountId)
-        ),
-        removedParts: this.state.removedParts
-          .filter(accountId => this.state.parts[accountId])
-          .filter(accountId => !this.state.parts[accountId].isNew)
-          .map(accountId => this.state.parts[accountId]._id),
-        id: this.id,
-        postAt: this.state.postAt
-      })
-        .then(({ data }) => {
-          this.original = _.cloneDeep(data);
-          this.setState({
-            ...this.state,
-            ...data,
-            loading: false,
-            touched: false
-          });
-          message.success('Submission was successfully saved.');
+    return new Promise(resolve => {
+      if (this.state.touched || this.scheduleHasChanged()) {
+        this.setState({ loading: true });
+        SubmissionService.updateSubmission({
+          parts: Object.values(this.state.parts).filter(
+            p => !this.state.removedParts.includes(p.accountId)
+          ),
+          removedParts: this.state.removedParts
+            .filter(accountId => this.state.parts[accountId])
+            .filter(accountId => !this.state.parts[accountId].isNew)
+            .map(accountId => this.state.parts[accountId]._id),
+          id: this.id,
+          postAt: this.state.postAt
         })
-        .catch(() => {
-          this.setState({ loading: false });
-          message.error('A problem occurred when trying to save the submission.');
-        });
+          .then(({ data }) => {
+            this.original = _.cloneDeep(data);
+            this.setState({
+              ...this.state,
+              ...data,
+              loading: false,
+              touched: false
+            });
+            message.success('Submission was successfully saved.');
+          })
+          .catch(() => {
+            this.setState({ loading: false });
+            message.error('A problem occurred when trying to save the submission.');
+          })
+          .finally(resolve);
+      }
+    });
+  };
+
+  onPost = async (saveFirst: boolean) => {
+    if (saveFirst) {
+      await this.onSubmit();
     }
+
+    uiStore.setPendingChanges(false);
+
+    PostService.queue(this.id)
+      .then(() => {
+        message.success('Submission queued.');
+        this.props.history.push(`/${this.state.submissionType}/posting`);
+      })
+      .catch(() => {
+        message.error('Unable to queue submission.');
+      });
   };
 
   scheduleHasChanged(): boolean {
@@ -743,30 +764,62 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
             <Popconfirm
               disabled={!this.formHasChanges()}
               title="Are you sure? This will revert all recent changes you have made."
-              onConfirm={() =>
+              onConfirm={() => {
                 this.setState({
                   parts: _.cloneDeep(this.original.parts),
                   removedParts: [],
                   postAt: this.original.submission.schedule.postAt,
                   touched: false
-                })
-              }
+                });
+                
+                this.checkProblems();
+              }}
             >
               <Button className="mr-1" disabled={!this.formHasChanges()}>
                 Undo
               </Button>
             </Popconfirm>
 
-            <Button onClick={this.onSubmit} type="primary" disabled={!this.formHasChanges()}>
+            <Button
+              className="mr-1"
+              onClick={this.onSubmit}
+              type="primary"
+              disabled={!this.formHasChanges()}
+            >
               Save
             </Button>
+
+            {this.formHasChanges() ? (
+              <Popconfirm
+                title="The submission has unsaved changes. Would you like to save them first?"
+                disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
+                onConfirm={() => this.onPost(true)}
+                onCancel={() => this.onPost(false)}
+                cancelText="No"
+              >
+                <Button
+                  type="primary"
+                  disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
+                >
+                  Post
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                type="primary"
+                onClick={() => this.onPost(false)}
+                disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
+              >
+                Post
+              </Button>
+            )}
           </div>
         </div>
       );
     }
     return (
       <Spin spinning={this.state.loading} delay={500}>
-        <div></div>
+        <div className="h-1/2 w-full"></div>
       </Spin>
     );
   }

@@ -37,6 +37,7 @@
     "class-transformer": "^0.2.3",
     "class-validator": "^0.11.0",
     "compression": "^1.7.4",
+    "electron-context-menu": "^0.15.2",
     "electron-log": "^3.0.9",
     "electron-updater": "^4.2.0",
     "electron-window-state": "^5.0.3",

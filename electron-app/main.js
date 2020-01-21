@@ -7,20 +7,22 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const nanoid = require('nanoid');
 
-process.env.PORT = process.env.PORT || 9247;
-global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
-
-global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
-
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
   app.quit();
   return;
 }
 
-let nest;
-
+process.env.PORT = process.env.PORT || 9247;
+global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
+global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
+
+require('electron-context-menu')({
+  showInspectElement: false,
+});
+
+let nest;
 
 const idPath = path.join(app.getPath('userData'), 'data', 'id.txt');
 if (!fs.existsSync(idPath)) {
