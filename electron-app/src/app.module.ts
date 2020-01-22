@@ -11,6 +11,7 @@ import { SubmissionModule } from './submission/submission.module';
 import { AccountModule } from './account/account.module';
 import { RemoteModule } from './remote/remote.module';
 import { NotificationModule } from './notification/notification.module';
+import { FileManipulationModule } from './file-manipulation/file-manipulation.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { NotificationModule } from './notification/notification.module';
     AccountModule,
     RemoteModule,
     NotificationModule,
+    FileManipulationModule,
   ],
   controllers: [],
   providers: [],
