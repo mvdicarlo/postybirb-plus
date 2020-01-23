@@ -17,11 +17,9 @@ export class NotificationController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    if (id === 'all') {
+      return this.service.deleteAll();
+    }
     return this.service.deleteNotification(id);
-  }
-
-  @Delete('all')
-  async removeAll() {
-    return this.service.deleteAll();
   }
 }
