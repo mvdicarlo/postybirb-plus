@@ -15,6 +15,7 @@ import { DefaultOptions } from 'src/submission/submission-part/interfaces/defaul
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -156,7 +157,11 @@ export class Weasyl extends Website {
       }
 
       if (WebsiteValidator.MBtoBytes(maxMB) < size) {
-        if (isAutoscaling && type === FileSubmissionType.IMAGE && mimetype !== 'image/gif') {
+        if (
+          isAutoscaling &&
+          type === FileSubmissionType.IMAGE &&
+          ImageManipulator.isMimeType(file.mimetype)
+        ) {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
           problems.push(`Weasyl limits ${file.mimetype} to ${maxMB}MB`);

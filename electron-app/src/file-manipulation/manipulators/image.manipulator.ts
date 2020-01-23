@@ -35,11 +35,18 @@ export default class ImageManipulator {
       const { data, width, height } = decode(buffer, mimeType);
       if (ImageManipulator.hasAlpha(data)) {
         if (mimeType !== 'image/png') {
-          buffer = Buffer.from(encode(data, [width, height], 'image/png'));
+          buffer = Buffer.from(encode(data, { height, width, format: 'image/png' }));
           mimeType = 'image/png';
         }
       } else {
-        buffer = Buffer.from(encode(data, [width, height], 'image/jpeg'));
+        buffer = Buffer.from(
+          encode(data, {
+            width,
+            height,
+            format: 'image/jpeg',
+            quality: 100,
+          }),
+        );
         mimeType = 'image/jpeg';
       }
     }

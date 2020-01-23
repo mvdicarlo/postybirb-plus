@@ -39,6 +39,12 @@ export class FileRepositoryService {
         thumbnail = im.resize(300).getBuffer();
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
         const im: ImageManipulator = ImageManipulator.build(file.buffer, file.mimetype);
+
+        // Update file properties to match manipulations
+        file.mimetype = im.getMimeType();
+        file.originalname = `${file.originalname}.${im.getExtension()}`;
+        file.buffer = im.getBuffer();
+
         submissionFilePath = await im.writeTo(SUBMISSION_FILE_DIRECTORY, fileId);
         thumbnail = im
           .toPNG()

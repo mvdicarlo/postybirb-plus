@@ -12,6 +12,7 @@ import { ValidationParts } from 'src/submission/validator/interfaces/validation-
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 
 interface DiscordLoginData {
   name: string;
@@ -95,7 +96,11 @@ export class Discord extends Website {
       const { type, size, name, mimetype } = file;
       const maxMB: number = 8;
       if (WebsiteValidator.MBtoBytes(maxMB) < size) {
-        if (isAutoscaling && type === FileSubmissionType.IMAGE && mimetype !== 'image/gif') {
+        if (
+          isAutoscaling &&
+          type === FileSubmissionType.IMAGE &&
+          ImageManipulator.isMimeType(file.mimetype)
+        ) {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
           problems.push(`Discord limits ${file.mimetype} to ${maxMB}MB`);
@@ -103,10 +108,12 @@ export class Discord extends Website {
       }
     });
 
-    const description = this.defaultDescriptionParser(WebsiteValidator.getDescription(
-      defaultPart.data.description,
-      submissionPart.data.description,
-    ));
+    const description = this.defaultDescriptionParser(
+      WebsiteValidator.getDescription(
+        defaultPart.data.description,
+        submissionPart.data.description,
+      ),
+    );
 
     if (description.length > 2000) {
       warnings.push('Max description length allowed is 2,000 characters.');

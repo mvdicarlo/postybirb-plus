@@ -23,10 +23,12 @@ export class FileSubmissionService {
       throw new BadRequestException('FileSubmission requires a file');
     }
 
+    const title = file.originalname;
     const locations = await this.fileRepository.insertFile(submission._id, file, path);
+    // file mimetype may be manipulated by insertFile
     const completedSubmission: FileSubmissionEntity = new FileSubmissionEntity({
       ...submission,
-      title: file.originalname,
+      title,
       primary: {
         location: locations.submissionLocation,
         mimetype: file.mimetype,
