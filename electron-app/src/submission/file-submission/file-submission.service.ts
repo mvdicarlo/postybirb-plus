@@ -81,7 +81,6 @@ export class FileSubmissionService {
     if (
       !(
         file.mimetype.includes('image/jpeg') ||
-        file.mimetype.includes('image/jpg') ||
         file.mimetype.includes('image/png')
       )
     ) {

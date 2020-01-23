@@ -3,12 +3,11 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as filesize from 'filesize';
 import * as exif from 'piexifjs';
-import { Image } from 'image-js';
-import * as bmp from 'bmp-js';
+import * as decode from 'image-decode';
+import * as encode from 'image-encode';
 
-type MimeType = 'image/jpg' | 'image/png' | 'image/tiff' | 'image/bmp';
+type MimeType = 'image/jpeg' | 'image/jpeg' | 'image/png' | 'image/tiff' | 'image/bmp';
 
-// TODO test with tiff
 export default class ImageManipulator {
   private nImage: Electron.NativeImage;
   private mimeType: MimeType;
@@ -22,36 +21,54 @@ export default class ImageManipulator {
     }
 
     switch (mimeType) {
-      case 'image/jpg':
+      case 'image/jpeg':
         const exifRemoved = exif.remove(this.getBase64(true));
         this.nImage = nativeImage.createFromBuffer(
-          Buffer.from(exifRemoved.replace('data:image/jpg;base64,', ''), 'base64'),
+          Buffer.from(exifRemoved.replace('data:image/jpeg;base64,', ''), 'base64'),
         );
-        break;
-      case 'image/bmp':
-        const { data, width, height, is_width_alpha } = bmp.decode(buffer);
-        this.nImage = nativeImage.createFromBitmap(data, { width, height });
-        if (is_width_alpha) {
-          this.toPNG();
-        } else {
-          this.toJPEG();
-        }
         break;
     }
   }
 
-  static async build(data: Buffer, mimeType: MimeType): Promise<ImageManipulator> {
-    const instance = new ImageManipulator(data, mimeType);
-    switch (instance.getMimeType()) {
-      case 'image/png':
-        const image: Image = await Image.load(instance.getBuffer());
-        if (!image.alpha) {
-          instance.toJPEG(100);
+  static build(buffer: Buffer, mimeType: MimeType): ImageManipulator {
+    if (mimeType === 'image/png' || mimeType === 'image/tiff' || mimeType === 'image/bmp') {
+      const { data, width, height } = decode(buffer, mimeType);
+      if (ImageManipulator.hasAlpha(data)) {
+        if (mimeType !== 'image/png') {
+          buffer = Buffer.from(encode(data, [width, height], 'image/png'));
+          mimeType = 'image/png';
         }
-        break;
+      } else {
+        buffer = Buffer.from(encode(data, [width, height], 'image/jpeg'));
+        mimeType = 'image/jpeg';
+      }
     }
 
-    return instance;
+    return new ImageManipulator(buffer, mimeType);
+  }
+
+  static hasAlpha(data: Buffer): boolean {
+    const rgbaCount = data.length / 4;
+    for (let i = 0; i < rgbaCount; i++) {
+      const a = data[i * 4 + 3];
+      if (!a) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  static isMimeType(mimeType: string): mimeType is MimeType {
+    if (
+      mimeType === 'image/png' ||
+      mimeType === 'image/jpeg' ||
+      mimeType === 'image/tiff' ||
+      mimeType === 'image/bmp'
+    ) {
+      return true;
+    }
+    return false;
   }
 
   getNativeImage(): Electron.NativeImage {
@@ -66,7 +83,7 @@ export default class ImageManipulator {
 
   getBuffer(): Buffer {
     switch (this.mimeType) {
-      case 'image/jpg':
+      case 'image/jpeg':
         return this.nImage.toJPEG(100);
       case 'image/png':
       case 'image/tiff':
@@ -80,7 +97,7 @@ export default class ImageManipulator {
 
   getExtension(): string {
     switch (this.mimeType) {
-      case 'image/jpg':
+      case 'image/jpeg':
         return 'jpg';
       case 'image/png':
       case 'image/tiff':
@@ -105,11 +122,11 @@ export default class ImageManipulator {
   }
 
   toJPEG(quality: number = 100): this {
-    if (quality === 100 && this.mimeType === 'image/jpg') {
+    if (quality === 100 && this.mimeType === 'image/jpeg') {
       return this;
     }
     this.nImage = nativeImage.createFromBuffer(this.nImage.toJPEG(quality));
-    this.mimeType = 'image/jpg';
+    this.mimeType = 'image/jpeg';
     return this;
   }
 
@@ -136,9 +153,22 @@ export default class ImageManipulator {
     return this;
   }
 
+  setBuffer(buffer: Buffer | Electron.NativeImage): this {
+    if (buffer instanceof Buffer) {
+      this.nImage = nativeImage.createFromBuffer(buffer);
+    } else {
+      this.nImage = buffer;
+    }
+    return this;
+  }
+
   async writeTo(filepath: string, fileName: string): Promise<string> {
-    const completePath: string = path.join(filepath, `${fileName}.${this.getExtension()}`);
+    const completePath: string = this.buildFilePath(filepath, fileName);
     await fs.writeFile(completePath, this.getBuffer());
     return completePath;
+  }
+
+  buildFilePath(filepath: string, fileName: string): string {
+    return path.join(filepath, `${fileName}.${this.getExtension()}`);
   }
 }

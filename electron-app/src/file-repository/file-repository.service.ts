@@ -8,6 +8,7 @@ import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directo
 import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 
 @Injectable()
 export class FileRepositoryService {
@@ -18,30 +19,40 @@ export class FileRepositoryService {
     file: UploadedFile,
     path: string,
   ): Promise<{ thumbnailLocation: string; submissionLocation: string }> {
-    this.logger.debug(file.originalname, `Uploading file ${path ? 'From File' : 'From Clipboard'}`);
+    this.logger.debug(
+      `${file.originalname} (${file.mimetype})`,
+      `Uploading file ${path ? 'From File' : 'From Clipboard'}`,
+    );
 
-    const idName = `${id}-${shortid.generate()}.${file.originalname.split('.').pop()}`;
-    const submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${idName}`;
-    await fs.outputFile(submissionFilePath, file.buffer);
+    const fileId = `${id}-${shortid.generate()}`;
+    let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${file.originalname
+      .split('.')
+      .pop()}`;
+    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
 
     let thumbnail: Buffer = null;
-    const thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${idName}.jpeg`;
     if (file.mimetype.includes('image')) {
-      let tmp: Electron.NativeImage = null;
       if (file.mimetype.includes('gif')) {
+        await fs.outputFile(submissionFilePath, file.buffer);
         const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
-        tmp = nativeImage.createFromBuffer(frame0.getImage().read());
+        const im: ImageManipulator = ImageManipulator.build(frame0.getImage().read(), 'image/jpeg');
+        thumbnail = im.resize(300).getBuffer();
+      } else if (ImageManipulator.isMimeType(file.mimetype)) {
+        const im: ImageManipulator = ImageManipulator.build(file.buffer, file.mimetype);
+        submissionFilePath = await im.writeTo(SUBMISSION_FILE_DIRECTORY, fileId);
+        thumbnail = im
+          .toPNG()
+          .resize(300)
+          .getBuffer();
+        thumbnailFilePath = im.buildFilePath(THUMBNAIL_FILE_DIRECTORY, fileId);
       } else {
-        tmp = nativeImage.createFromBuffer(file.buffer);
+        // Unsupported file for manipulation
+        await fs.outputFile(submissionFilePath, file.buffer);
+        thumbnail = (await app.getFileIcon(path)).toPNG();
       }
-      const sizes = tmp.getSize();
-      thumbnail = tmp
-        .resize({
-          width: Math.min(sizes.width, 300),
-          height: Math.min(sizes.height, 300),
-        })
-        .toPNG();
     } else {
+      // Non-image saving
+      await fs.outputFile(submissionFilePath, file.buffer);
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
 
@@ -65,10 +76,12 @@ export class FileRepositoryService {
   scaleImage(file: UploadedFile, w: number): UploadedFile {
     let image = nativeImage.createFromBuffer(file.buffer);
     const { width } = image.getSize();
-    image = image.resize({
-      width: Math.min(w, width),
-      height: w / image.getAspectRatio(),
-    });
+    if (width > w) {
+      image = image.resize({
+        width: w,
+        height: w / image.getAspectRatio(),
+      });
+    }
     const copy = _.cloneDeep(file);
     copy.buffer = image.toJPEG(100);
     copy.mimetype = 'image/jpeg';
@@ -93,7 +106,7 @@ export class FileRepositoryService {
 
     const thumbPathParts = file.preview.split('/');
     thumbPathParts.pop();
-    const thumbPath = [...thumbPathParts, `${newId}.jpeg`].join('/');
+    const thumbPath = [...thumbPathParts, `${newId}.jpg`].join('/');
 
     await fs.copy(file.preview, thumbPath);
 
