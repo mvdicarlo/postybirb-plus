@@ -1,11 +1,6 @@
 const path = require('path');
-const fs = require('fs-extra');
 const { app, BrowserWindow, Menu, nativeImage, Tray } = require('electron');
 const windowStateKeeper = require('electron-window-state');
-const log = require('electron-log');
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const nanoid = require('nanoid');
 
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
@@ -18,42 +13,15 @@ global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develo
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
 
+require('./src-electron/auth-generator');
+require('./src-electron/settings');
 require('electron-context-menu')({
   showInspectElement: false,
 });
 
 let nest;
-
-const idPath = path.join(app.getPath('userData'), 'data', 'id.txt');
-if (!fs.existsSync(idPath)) {
-  global.AUTH_ID = nanoid();
-  fs.writeFile(idPath, global.AUTH_ID);
-} else {
-  global.AUTH_ID = fs.readFileSync(idPath).toString();
-}
-
-fs.ensureFileSync(`${BASE_DIRECTORY}/data/settings.json`);
-const adapter = new FileSync(`${BASE_DIRECTORY}/data/settings.json`);
-const settings = low(adapter);
-settings
-  .defaults({
-    advertise: true,
-    emptyQueueOnFailedPost: true,
-    postRetries: 0,
-    openOnStartup: true,
-    useHardwareAcceleration: process.platform === 'win32' || process.platform === 'darwin',
-  })
-  .write();
-
-global.settingsDB = settings;
-
-if (
-  !settings.getState().useHardwareAcceleration ||
-  !(process.platform === 'win32' || process.platform === 'darwin')
-) {
-  log.info('Hardware acceleration disabled');
-  app.disableHardwareAcceleration();
-}
+let window = null;
+let initializedOnce = false;
 
 app.on('second-instance', show);
 app.on('activate', show);
@@ -74,22 +42,19 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
   }
 });
 
-let window = null;
-let initializedOnce = false;
-
 async function initialize() {
   if (!hasLock) return;
 
   let shouldDisplayWindow = true;
   if (!initializedOnce) {
     await nest();
-    console.log(`THE AUTH ID IS: ${global.AUTH_ID}`);
-    const menu = Menu.buildFromTemplate(require('./menu'));
+    console.log('\033[1m\x1b[36m', `\n\nAUTH ID: ${global.AUTH_ID}\n\n`, '\x1b[0m\033[0m');
+    const menu = Menu.buildFromTemplate(require('./src-electron/menu'));
     Menu.setApplicationMenu(menu);
     const image = buildAppImage();
     global.tray = buildTray(image); // force to stay in memory
     initializedOnce = true;
-    shouldDisplayWindow = settings.getState().openOnStartup;
+    shouldDisplayWindow = settingsDB.getState().openOnStartup;
   }
 
   if (!shouldDisplayWindow) return; // observe user setting
@@ -113,7 +78,7 @@ async function initialize() {
       devTools: global.DEBUG_MODE,
       allowRunningInsecureContent: false,
       nodeIntegration: false,
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'src-electron', 'preload.js'),
       webviewTag: true,
       backgroundThrottling: false,
       contextIsolation: false,
@@ -131,9 +96,7 @@ async function initialize() {
   window.loadFile(`./build/index.html`);
   window.once('ready-to-show', () => window.show());
   window.webContents.on('new-window', event => event.preventDefault());
-  window.on('closed', () => {
-    window = null;
-  });
+  window.on('closed', () => (window = null));
 }
 
 function buildAppImage() {

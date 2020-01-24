@@ -1,4 +1,4 @@
-const { app } = require('electron');
+const { app, shell } = require('electron');
 
 const template = [{
     label: 'Edit',
@@ -56,7 +56,7 @@ const template = [{
     submenu: [{
         label: 'Learn More',
         click() {
-            require('electron').shell.openExternal('https://postybirb.com');
+            shell.openExternal('https://postybirb.com');
         },
     }],
 }];

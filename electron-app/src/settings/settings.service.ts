@@ -3,7 +3,6 @@ import * as lowdb from 'lowdb';
 import { SettingEvent } from './settings.events.enum';
 import { Settings } from './settings.interface';
 import { EventsGateway } from 'src/events/events.gateway';
-import {  } from 'src/global';
 
 @Injectable()
 export class SettingsService {
