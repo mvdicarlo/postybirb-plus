@@ -13,6 +13,11 @@ global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develo
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
 
+if (DEBUG_MODE) {
+  console.log(`BASE: ${BASE_DIRECTORY}`);
+  console.log(`APP: ${app.getPath('userData')}`);
+}
+
 require('./src-electron/auth-generator');
 require('./src-electron/settings');
 require('electron-context-menu')({

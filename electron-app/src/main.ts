@@ -5,6 +5,7 @@ import { HttpExceptionFilter } from './http-exception.filter';
 import { SSL } from './ssl';
 import * as compression from 'compression';
 import { AuthGuard } from './auth.guard';
+import { CustomLogger } from './custom.logger';
 
 async function bootstrap() {
   const { key, cert } = SSL.getOrCreate();
@@ -13,7 +14,7 @@ async function bootstrap() {
       key,
       cert,
     },
-    logger: global.DEBUG_MODE ? undefined : ['error', 'warn', 'log'],
+    logger: new CustomLogger(),
   });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalGuards(new AuthGuard());

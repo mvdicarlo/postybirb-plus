@@ -2,9 +2,9 @@ import { Injectable, Logger, BadRequestException, Inject } from '@nestjs/common'
 import { EventsGateway } from 'src/events/events.gateway';
 import { autoUpdater } from 'electron-updater';
 import { BrowserWindow } from 'electron';
-import * as logger from 'electron-log';
 import { PostService } from 'src/submission/post/post.service';
 import { Interval } from '@nestjs/schedule';
+import { CustomLogger } from 'src/custom.logger';
 
 enum UpdateEvent {
   AVAILABLE = '[UPDATE] AVAILABLE',
@@ -40,8 +40,7 @@ export class UpdateService {
     private readonly eventEmitter: EventsGateway,
     private readonly postService: PostService,
   ) {
-    logger.transports.file.level = 'info';
-    autoUpdater.logger = logger;
+    autoUpdater.logger = CustomLogger.logger;
     autoUpdater.autoDownload = false;
     autoUpdater.fullChangelog = true;
 
@@ -67,7 +66,6 @@ export class UpdateService {
       this.updateAvailable.error = err;
       this.updateAvailable.percent = 0;
 
-      logger.error(err);
       this.logger.error(err);
 
       this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);

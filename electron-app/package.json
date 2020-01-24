@@ -38,7 +38,6 @@
     "class-validator": "^0.11.0",
     "compression": "^1.7.4",
     "electron-context-menu": "^0.15.2",
-    "electron-log": "^3.0.9",
     "electron-updater": "^4.2.0",
     "electron-window-state": "^5.0.3",
     "filesize": "^6.0.1",
@@ -60,7 +59,9 @@
     "sanitize-html": "^1.20.1",
     "shortid": "^2.2.15",
     "turndown": "^5.0.3",
-    "uuid": "^3.3.3"
+    "uuid": "^3.3.3",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^6.10.14",
