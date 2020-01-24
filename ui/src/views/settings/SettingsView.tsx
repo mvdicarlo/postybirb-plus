@@ -19,6 +19,16 @@ export default class SettingsView extends React.Component<Props> {
     SettingsService.updateSetting(key, value);
   }
 
+  private exampleDimensionChange(value: number, height: number, width: number) {
+    const percent = (100 - value) / 100;
+    return (
+      <span>
+        A {height} x {width} image would be reduced down to a maximum of {percent * height} x{' '}
+        {percent * width}.
+      </span>
+    );
+  }
+
   render() {
     const settings = this.props.settingsStore!.settings;
     return (
@@ -51,11 +61,84 @@ export default class SettingsView extends React.Component<Props> {
                   min={0}
                   max={5}
                   value={settings.postRetries}
-                  onBlur={({ target }) =>
-                    this.updateSetting('postRetries', Math.max(0, Number(target.value)))
-                  }
+                  onChange={value => this.updateSetting('postRetries', Math.max(0, Number(value)))}
                 />
               </Tooltip>
+            </Form.Item>
+          </Collapse.Panel>
+          <Collapse.Panel header="Autoscaling" key="autoscaling">
+            <p>
+              <em>PostyBirb converts .bmp, .tiff to JPEG or PNG (if opacity is detected).</em>
+            </p>
+            <Form.Item label="PNG">
+              <p>
+                <em>
+                  If file size requirements cannot be met using PNG options, the image will be
+                  converted to JPEG.
+                </em>
+              </p>
+              <Form.Item
+                label="Max Height / Width Reduction"
+                extra={this.exampleDimensionChange(settings.maxPNGSizeCompression, 1000, 1000)}
+              >
+                <InputNumber
+                  min={0}
+                  max={99}
+                  value={settings.maxPNGSizeCompression}
+                  formatter={value => `${value}%`}
+                  onChange={value =>
+                    this.updateSetting('maxPNGSizeCompression', Math.max(0, Number(value)))
+                  }
+                />
+              </Form.Item>
+              <Form.Item
+                label="Max Height / Width Reduction (For Images with Opacity)"
+                extra={this.exampleDimensionChange(
+                  settings.maxPNGSizeCompressionWithAlpha,
+                  1000,
+                  1000
+                )}
+              >
+                <InputNumber
+                  min={0}
+                  max={99}
+                  value={settings.maxPNGSizeCompressionWithAlpha}
+                  formatter={value => `${value}%`}
+                  onChange={value =>
+                    this.updateSetting('maxPNGSizeCompressionWithAlpha', Math.max(0, Number(value)))
+                  }
+                />
+              </Form.Item>
+            </Form.Item>
+            <Form.Item label="JPEG">
+              <Form.Item
+                label="Max Height / Width Reduction"
+                extra={this.exampleDimensionChange(settings.maxJPEGSizeCompression, 1000, 1000)}
+              >
+                <InputNumber
+                  min={0}
+                  max={99}
+                  value={settings.maxJPEGSizeCompression}
+                  formatter={value => `${value}%`}
+                  onChange={value =>
+                    this.updateSetting('maxJPEGSizeCompression', Math.max(0, Number(value)))
+                  }
+                />
+              </Form.Item>
+              <Form.Item
+                label="Max Image Quality Reduction"
+                extra="Size reduction is attempted before quality reduction."
+              >
+                <InputNumber
+                  min={0}
+                  max={99}
+                  value={settings.maxJPEGQualityCompression}
+                  formatter={value => `${value}%`}
+                  onChange={value =>
+                    this.updateSetting('maxJPEGQualityCompression', Math.max(0, Number(value)))
+                  }
+                />
+              </Form.Item>
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Display" key="2">

@@ -11,9 +11,11 @@ type MimeType = 'image/jpeg' | 'image/jpeg' | 'image/png' | 'image/tiff' | 'imag
 export default class ImageManipulator {
   private nImage: Electron.NativeImage;
   private mimeType: MimeType;
+  private hasAlpha: boolean;
 
-  private constructor(buffer: Buffer, mimeType: MimeType) {
+  private constructor(buffer: Buffer, mimeType: MimeType, hasAlpha: boolean) {
     this.mimeType = mimeType;
+    this.hasAlpha = hasAlpha;
     if (buffer instanceof Buffer) {
       this.nImage = nativeImage.createFromBuffer(buffer);
     } else {
@@ -31,9 +33,11 @@ export default class ImageManipulator {
   }
 
   static build(buffer: Buffer, mimeType: MimeType): ImageManipulator {
+    let hasAlpha: boolean = false;
     if (mimeType === 'image/png' || mimeType === 'image/tiff' || mimeType === 'image/bmp') {
       const { data, width, height } = decode(buffer, mimeType);
       if (ImageManipulator.hasAlpha(data)) {
+        hasAlpha = true;
         if (mimeType !== 'image/png') {
           buffer = Buffer.from(encode(data, { height, width, format: 'image/png' }));
           mimeType = 'image/png';
@@ -51,7 +55,7 @@ export default class ImageManipulator {
       }
     }
 
-    return new ImageManipulator(buffer, mimeType);
+    return new ImageManipulator(buffer, mimeType, hasAlpha);
   }
 
   static hasAlpha(data: Buffer): boolean {
@@ -116,7 +120,7 @@ export default class ImageManipulator {
     return this.mimeType;
   }
 
-  getSize(): { width: number; height: number } {
+  getSize() {
     return this.nImage.getSize();
   }
 
@@ -124,12 +128,16 @@ export default class ImageManipulator {
     return (filesize(this.getBuffer().length, { output: 'object', exponent: 2 }) as any).value; // Only output as MB
   }
 
+  hasTransparency(): boolean {
+    return this.hasAlpha;
+  }
+
   isEmpty(): boolean {
     return this.nImage.isEmpty();
   }
 
   toJPEG(quality: number = 100): this {
-    if (quality === 100 && this.mimeType === 'image/jpeg') {
+    if ((quality >= 100 || !quality) && this.mimeType === 'image/jpeg') {
       return this;
     }
     this.nImage = nativeImage.createFromBuffer(this.nImage.toJPEG(quality));

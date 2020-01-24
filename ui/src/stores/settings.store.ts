@@ -10,7 +10,11 @@ export class SettingsStore {
     emptyQueueOnFailedPost: true,
     postRetries: 1,
     openOnStartup: true,
-    useHardwareAcceleration: false
+    useHardwareAcceleration: false,
+    maxPNGSizeCompression: 25,
+    maxPNGSizeCompressionWithAlpha: 25,
+    maxJPEGQualityCompression: 10,
+    maxJPEGSizeCompression: 30,
   };
 
   constructor() {

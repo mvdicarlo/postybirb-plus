@@ -4,7 +4,7 @@ export interface Settings {
   postRetries: number;
   openOnStartup: boolean;
   useHardwareAcceleration: boolean;
-  maxPNGSizeComression: number;
+  maxPNGSizeCompression: number;
   maxPNGSizeCompressionWithAlpha: number;
   maxJPEGQualityCompression: number;
   maxJPEGSizeCompression: number;
