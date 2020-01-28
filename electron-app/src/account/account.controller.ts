@@ -22,6 +22,11 @@ export class AccountController {
     return this.service.setData(id, body.data);
   }
 
+  @Patch('rename')
+  async rename(@Body() body: { id: string, alias: string }) {
+    return this.service.renameAccount(body.id, body.alias);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.service.removeAccount(id);

@@ -138,11 +138,15 @@ interface AccountInfoProps {
 
 interface AccountInfoState {
   modalVisible: boolean;
+  renameVisible: boolean;
+  renameValue?: string;
 }
 
 class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
   state: any = {
-    modalVisible: false
+    modalVisible: false,
+    renameVisible: false,
+    renameValue: undefined
   };
 
   showModal = () => this.setState({ modalVisible: true });
@@ -156,7 +160,35 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
       LoginService.checkLogin(this.props.accountInfo._id);
     }
   };
+
   deleteAccount = (id: string) => LoginService.deleteAccount(id);
+
+  renameAccount = () => {
+    this.setState({ renameVisible: false });
+    if (this.isRenameValid()) {
+      LoginService.renameAccount(this.props.accountInfo._id, this.state.renameValue.trim())
+        .then(() => {
+          message.success('Account name updated.');
+        })
+        .catch(() => {
+          message.error('Failed to update account name.');
+        });
+    } else {
+      message.error('Account cannot be given an empty name.');
+    }
+  };
+
+  isRenameValid(): boolean {
+    if (!this.state.renameValue) {
+      return false;
+    }
+
+    if (!this.state.renameValue.trim()) {
+      return false;
+    }
+
+    return true;
+  }
 
   render() {
     const { accountInfo } = this.props;
@@ -188,7 +220,34 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
           </Popconfirm>
         ]}
       >
-        <List.Item.Meta title={accountInfo.alias} />
+        <List.Item.Meta
+          title={
+            <div>
+              {accountInfo.alias}
+              <span className="text-link ml-1">
+                <Icon
+                  type="edit"
+                  onClick={() =>
+                    this.setState({ renameVisible: true, renameValue: accountInfo.alias })
+                  }
+                />
+              </span>
+              <Modal
+                title="Rename"
+                visible={this.state.renameVisible}
+                destroyOnClose={true}
+                onCancel={() => this.setState({ renameVisible: false })}
+                onOk={this.renameAccount}
+                okButtonProps={{ disabled: !this.isRenameValid() }}
+              >
+                <Input
+                  value={this.state.renameValue}
+                  onChange={({ target }) => this.setState({ renameValue: target.value })}
+                />
+              </Modal>
+            </div>
+          }
+        />
         <span>
           <Badge
             status={accountInfo.loggedIn ? 'success' : 'error'}

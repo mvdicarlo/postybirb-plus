@@ -1,4 +1,11 @@
-import { Injectable, Logger, BadRequestException, NotFoundException, forwardRef, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+  forwardRef,
+  Inject,
+} from '@nestjs/common';
 import { AccountRepository } from './account.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
@@ -127,6 +134,19 @@ export class AccountService {
     ]);
 
     this.submissionService.verifyAll();
+  }
+
+  async renameAccount(id: string, alias: string): Promise<void> {
+    const account = await this.get(id);
+    if (!alias) {
+      throw new BadRequestException('No new alias provided');
+    }
+
+    account.alias = alias;
+    await this.repository.update(account);
+    this.loginStatuses.find(status => status._id === id).alias = alias;
+    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
   }
 
   async checkLogin(userAccount: string | UserAccountEntity): Promise<UserAccountDto> {

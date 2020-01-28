@@ -26,8 +26,11 @@ export default class LoginService {
     return axios.get('/account/statuses').then(({ data }) => data);
   }
 
+  static renameAccount(id: string, alias: string) {
+    return axios.patch('/account/rename', { id, alias });
+  }
+
   static setAccountData(id: string, data: any) {
     return axios.patch(`/account/data/${id}`, { data });
   }
-
 }
