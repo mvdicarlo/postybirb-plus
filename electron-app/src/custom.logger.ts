@@ -26,8 +26,9 @@ export class CustomLogger extends Logger {
 
   log(message: string) {
     super.log(message);
-
-    if (!message.match(/(Mapped|Module)/)) {
+    if (typeof message !== 'string') {
+      CustomLogger.logger.info(message);
+    } else if (!message.match(/(Mapped|Module)/)) {
       CustomLogger.logger.info(message);
     }
   }

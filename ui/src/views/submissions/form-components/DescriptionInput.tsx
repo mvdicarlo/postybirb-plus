@@ -7,6 +7,7 @@ import { DescriptionTemplateStore } from '../../../stores/description-template.s
 import { DescriptionData } from '../../../../../electron-app/src/submission/submission-part/interfaces/description-data.interface';
 import WebsiteService from '../../../services/website.service';
 import { WebsiteRegistry } from '../../../website-components/website-registry';
+import { uiStore } from '../../../stores/ui.store';
 
 interface Props {
   defaultValue: DescriptionData;
@@ -34,10 +35,11 @@ export default class DescriptionInput extends React.Component<Props, State> {
 
   private tinyMCESettings: any = {
     suffix: '.min',
+    skin: uiStore!.state.theme === 'dark' ? 'oxide-dark' : 'oxide',
     inline: false,
     statusbar: false,
     paste_data_images: false,
-    browser_spellcheck: false,
+    browser_spellcheck: false, // should be supported in electron 8
     entity_encoding: 'raw',
     paste_retain_style_properties: 'color',
     invalid_elements: 'img,audio,video',
@@ -79,7 +81,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
     }
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.data = props.defaultValue;
   }
