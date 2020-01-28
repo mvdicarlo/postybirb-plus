@@ -23,6 +23,7 @@ import { Submission } from '../../../../../electron-app/src/submission/interface
 import { DefaultOptions } from '../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import { FileRecord } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
 import { UserAccountDto } from '../../../../../electron-app/src/account/interfaces/user-account.dto.interface';
+import { submissionStore } from '../../../stores/submission.store';
 
 import {
   Form,
@@ -129,6 +130,12 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   onSubmit = () => {
     return new Promise(resolve => {
       if (this.state.touched || this.scheduleHasChanged()) {
+        const submissionFromStore = submissionStore.getSubmission(this.id);
+        if (submissionFromStore && submissionFromStore.submission.isPosting) {
+          message.error('Cannot update a submission that is posting.');
+          return;
+        }
+
         this.setState({ loading: true });
         SubmissionService.updateSubmission({
           parts: Object.values(this.state.parts).filter(
@@ -515,6 +522,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
       this.setHeaders();
 
+      const submissionFromStore = submissionStore.getSubmission(this.id);
+      const isPosting = submissionFromStore && submissionFromStore.submission.isPosting;
+
       return (
         <div>
           <div className="flex">
@@ -771,7 +781,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                   postAt: this.original.submission.schedule.postAt,
                   touched: false
                 });
-                
+
                 this.checkProblems();
               }}
             >
@@ -789,29 +799,37 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               Save
             </Button>
 
-            {this.formHasChanges() ? (
-              <Popconfirm
-                title="The submission has unsaved changes. Would you like to save them first?"
-                disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
-                onConfirm={() => this.onPost(true)}
-                onCancel={() => this.onPost(false)}
-                cancelText="No"
-              >
-                <Button
-                  type="primary"
-                  disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
-                >
-                  Post
-                </Button>
-              </Popconfirm>
+            {isPosting ? (
+              <Typography.Text type="danger">
+                Updates cannot be made while the submission is posting.
+              </Typography.Text>
             ) : (
-              <Button
-                type="primary"
-                onClick={() => this.onPost(false)}
-                disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
-              >
-                Post
-              </Button>
+              <span>
+                {this.formHasChanges() ? (
+                  <Popconfirm
+                    title="The submission has unsaved changes. Would you like to save them first?"
+                    disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
+                    onConfirm={() => this.onPost(true)}
+                    onCancel={() => this.onPost(false)}
+                    cancelText="No"
+                  >
+                    <Button
+                      type="primary"
+                      disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
+                    >
+                      Post
+                    </Button>
+                  </Popconfirm>
+                ) : (
+                  <Button
+                    type="primary"
+                    onClick={() => this.onPost(false)}
+                    disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
+                  >
+                    Post
+                  </Button>
+                )}
+              </span>
             )}
           </div>
         </div>

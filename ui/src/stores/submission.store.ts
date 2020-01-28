@@ -6,6 +6,7 @@ import { Submission } from '../../../electron-app/src/submission/interfaces/subm
 import SubmissionService from '../services/submission.service';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import SubmissionUtil from '../utils/submission.util';
+import { sign } from 'crypto';
 
 export interface SubmissionState {
   loading: boolean;
@@ -80,6 +81,10 @@ export class SubmissionStore {
       return SubmissionUtil.getSubmissionTitle(found);
     }
     return 'Unknown';
+  }
+
+  getSubmission(id: string): SubmissionPackage<Submission> | undefined {
+    return this.state.submissions.find(s => s.submission._id === id);
   }
 }
 
