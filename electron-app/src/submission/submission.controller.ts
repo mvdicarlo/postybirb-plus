@@ -96,6 +96,11 @@ export class SubmissionController {
     return this.service.scheduleSubmission(id, data.isScheduled, data.postAt);
   }
 
+  @Post('splitAdditional/:id')
+  async splitAdditional(@Param('id') id: string) {
+    return this.service.splitAdditionalIntoSubmissions(id);
+  }
+
   // File Submission File Actions
   @Delete('remove/thumbnail/:id')
   async removeThumbnail(@Param('id') id: string) {

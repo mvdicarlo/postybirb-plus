@@ -62,6 +62,10 @@ export default class SubmissionService {
     return axios.patch(`/submission/set/postAt/${id}`, { postAt });
   }
 
+  static splitAdditionalFilesIntoNewSubmissions(id: string) {
+    return axios.post(`/submission/splitAdditional/${id}`);
+  }
+
   static updateAdditionalFileIgnoredAccounts(id: string, record: FileRecord) {
     return axios.patch(`/submission/update/additional/${id}`, record);
   }

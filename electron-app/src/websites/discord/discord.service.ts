@@ -25,6 +25,7 @@ export class Discord extends Website {
 
   readonly BASE_URL: string = '';
   readonly acceptsFiles: string[] = []; // accepts all
+  readonly acceptsAdditionalFiles: boolean = true;
 
   readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;

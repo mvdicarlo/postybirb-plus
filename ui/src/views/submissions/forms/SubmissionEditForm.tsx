@@ -416,6 +416,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     if ((this.state.submission as FileSubmission).additional!.length) {
       const unsupportedWebsites = Object.values(this.state.parts)
         .filter(p => !p.isDefault)
+        .filter(p => p.postStatus !== 'SUCCESS')
         .filter(p => !WebsiteRegistry.websites[p.website].supportsAdditionalFiles)
         .map(p => WebsiteRegistry.websites[p.website].name);
       if (unsupportedWebsites.length) {

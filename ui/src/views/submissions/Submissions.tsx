@@ -26,8 +26,10 @@ import {
   Typography,
   message,
   Form,
-  InputNumber
+  InputNumber,
+  Alert
 } from 'antd';
+import { WebsiteRegistry } from '../../website-components/website-registry';
 
 interface Props {
   submissions: SubmissionPackage<any>[];
@@ -343,6 +345,51 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
       });
   }
 
+  splitAdditionalFilesIntoNewSubmissions() {
+    SubmissionService.splitAdditionalFilesIntoNewSubmissions(this.props.item.submission._id)
+      .then(() => {
+        message.success('Submission successfully split.');
+      })
+      .catch(() => {
+        message.error('Failed to split submission.');
+      });
+  }
+
+  unsupportedAdditionalWebsites() {
+    const { item } = this.props;
+    if ((item.submission as FileSubmission).additional!.length) {
+      const unsupportedWebsites = Object.values(item.parts)
+        .filter(p => !p.isDefault)
+        .filter(p => p.postStatus !== 'SUCCESS')
+        .filter(p => !WebsiteRegistry.websites[p.website].supportsAdditionalFiles)
+        .map(p => WebsiteRegistry.websites[p.website].name);
+      if (unsupportedWebsites.length) {
+        return (
+          <Alert
+            type="warning"
+            message="Incompatible Websites"
+            description={
+              <div>
+                <div>
+                  The following website(s) do not support additional files:{' '}
+                  {unsupportedWebsites.join()}
+                </div>
+
+                <span
+                  className="text-link"
+                  onClick={this.splitAdditionalFilesIntoNewSubmissions.bind(this)}
+                >
+                  Create submissions for unsupported websites
+                </span>
+              </div>
+            }
+          />
+        );
+      }
+    }
+    return null;
+  }
+
   render() {
     const { item } = this.props;
     const problems: Problems = item.problems;
@@ -351,6 +398,9 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     return (
       <List.Item
         className={hasFailure ? 'bg-red-200' : ''}
+        extra={
+          item.submission.type === SubmissionType.FILE ? this.unsupportedAdditionalWebsites() : null
+        }
         actions={[
           <span
             className={`text-link ${

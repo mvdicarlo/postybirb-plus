@@ -32,6 +32,7 @@ import FileSubmissionEntity from './file-submission/models/file-submission.entit
 import SubmissionLogEntity from './log/models/submission-log.entity';
 import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
 import { AccountService } from 'src/account/account.service';
+import { WebsiteProvider } from 'src/websites/website-provider.service';
 
 @Injectable()
 export class SubmissionService {
@@ -47,11 +48,12 @@ export class SubmissionService {
     private readonly postService: PostService,
     @Inject(forwardRef(() => AccountService))
     private readonly accountService,
+    private readonly websiteProvider: WebsiteProvider,
   ) {}
 
   @Interval(60000)
   async queueScheduledSubmissions() {
-    this.logger.log('Schedule Post Check', 'Schedule Check');
+    this.logger.debug('Schedule Post Check', 'Schedule Check');
     const submissions: Array<SubmissionPackage<any>> = (await this.getAll(true)) as Array<
       SubmissionPackage<any>
     >;
@@ -215,10 +217,10 @@ export class SubmissionService {
       }
 
       if (fileSubmission.additional && fileSubmission.additional.length) {
-        for (let i = 0; i < fileSubmission.additional.length; i++) {
+        for (const additionalFile of fileSubmission.additional) {
           try {
-            const buffer = await fs.readFile(fileSubmission.additional[i].originalPath);
-            const { mimetype, name, originalPath } = fileSubmission.additional[i];
+            const buffer = await fs.readFile(additionalFile.originalPath);
+            const { mimetype, name, originalPath } = additionalFile;
             await this.addFileSubmissionAdditionalFile(
               {
                 fieldname: 'file',
@@ -240,6 +242,86 @@ export class SubmissionService {
     const s = (await this.get(newSubmission._id, true)) as SubmissionPackage<any>;
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [s]);
     return s.submission;
+  }
+
+  async splitAdditionalIntoSubmissions(id: string) {
+    this.logger.log(id, 'Splitting Additional Files');
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
+    if (!(submission.additional && submission.additional.length)) {
+      throw new BadRequestException(
+        'Submission is not a File submission or does not have additional files',
+      );
+    }
+
+    const unsupportedAdditionalWebsites = this.websiteProvider
+      .getAllWebsiteModules()
+      .filter(w => !w.acceptsAdditionalFiles)
+      .map(w => w.constructor.name);
+
+    const parts = await this.partService.getPartsForSubmission(submission._id, true);
+
+    const websitePartsThatNeedSplitting = parts
+      .filter(p => !p.isDefault)
+      .filter(p => unsupportedAdditionalWebsites.includes(p.website));
+
+    if (!websitePartsThatNeedSplitting.length) {
+      return; // Nothing needs to be done
+    }
+
+    // Reintroduce default part
+    websitePartsThatNeedSplitting.push(parts.find(p => p.isDefault));
+
+    for (const additional of submission.additional) {
+      const copy = submission.copy();
+      delete copy._id;
+      let newSubmission = new FileSubmissionEntity(copy);
+      newSubmission.additional = [];
+      newSubmission.primary = additional;
+      newSubmission = await this.fileSubmissionService.duplicateSubmission(newSubmission);
+      const createdSubmission = await this.repository.save(newSubmission);
+      await Promise.all(
+        websitePartsThatNeedSplitting.map(p => {
+          p.submissionId = newSubmission._id;
+          p.postStatus = 'UNPOSTED';
+          return this.partService.createOrUpdateSubmissionPart(p, newSubmission.type);
+        }),
+      );
+
+      this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+    }
+  }
+
+  async duplicate(originalId: string): Promise<SubmissionEntity> {
+    this.logger.log(originalId, 'Duplicate Submission');
+    const original = (await this.get(originalId)) as SubmissionEntity;
+    original._id = undefined;
+
+    let duplicate = new SubmissionEntity(original);
+
+    switch (duplicate.type) {
+      case SubmissionType.FILE:
+        duplicate = await this.fileSubmissionService.duplicateSubmission(
+          duplicate as FileSubmissionEntity,
+        );
+        break;
+      case SubmissionType.NOTIFICATION:
+        break;
+    }
+
+    // Duplicate parts
+    const parts = await this.partService.getPartsForSubmission(originalId, true);
+    await Promise.all(
+      parts.map(p => {
+        p.submissionId = duplicate._id;
+        p.postStatus = 'UNPOSTED';
+        return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
+      }),
+    );
+
+    const createdSubmission = await this.repository.save(duplicate);
+    this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+
+    return createdSubmission;
   }
 
   async validate(submission: SubmissionEntity): Promise<SubmissionPackage<any>> {
@@ -395,39 +477,6 @@ export class SubmissionService {
       SubmissionEvent.UPDATED,
       Promise.all([this.validate(submission)]),
     );
-  }
-
-  async duplicate(originalId: string): Promise<Submission> {
-    this.logger.log(originalId, 'Duplicate Submission');
-    const original = (await this.get(originalId)) as SubmissionEntity;
-    original._id = undefined;
-
-    let duplicate = new SubmissionEntity(original);
-
-    switch (duplicate.type) {
-      case SubmissionType.FILE:
-        duplicate = await this.fileSubmissionService.duplicateSubmission(
-          duplicate as FileSubmissionEntity,
-        );
-        break;
-      case SubmissionType.NOTIFICATION:
-        break;
-    }
-
-    // Duplicate parts
-    const parts = await this.partService.getPartsForSubmission(originalId, true);
-    await Promise.all(
-      parts.map(p => {
-        p.submissionId = duplicate._id;
-        p.postStatus = 'UNPOSTED';
-        return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
-      }),
-    );
-
-    const createdSubmission = await this.repository.save(duplicate);
-    this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
-
-    return createdSubmission;
   }
 
   // File Submission Actions

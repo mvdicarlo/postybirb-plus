@@ -19,36 +19,40 @@ export class CustomLogger extends Logger {
     exitOnError: false,
   });
 
-  error(message: string, trace: string) {
-    super.error(message, trace);
-    CustomLogger.logger.error(`${message}\n${trace}`);
+  error(message: string, trace?: string, context?: string) {
+    super.error(message, trace, context);
+    CustomLogger.logger.error(`[${context || this.context}] ${message}\n${trace}`);
   }
 
-  log(message: string) {
-    super.log(message);
+  log(message: string, context?: string) {
+    super.log(message, context);
     if (typeof message !== 'string') {
-      CustomLogger.logger.info(message);
+      CustomLogger.logger.info(
+        `[${context || this.context}] ${
+          typeof message === 'object' ? JSON.stringify(message, null, 1) : message
+        }`,
+      );
     } else if (!message.match(/(Mapped|Module)/)) {
-      CustomLogger.logger.info(message);
+      CustomLogger.logger.info(`[${context || this.context}] ${message}`);
     }
   }
 
-  warn(message: string) {
-    super.warn(message);
-    CustomLogger.logger.warn(message);
+  warn(message: string, context?: string) {
+    super.warn(message, context);
+    CustomLogger.logger.warn(`[${context || this.context}] ${message}`);
   }
 
-  debug(message: string) {
+  debug(message: string, context?: string) {
     if (global.DEBUG_MODE) {
-      super.debug(message);
-      CustomLogger.logger.debug(message);
+      super.debug(message, context);
+      CustomLogger.logger.debug(`[${context || this.context}] ${message}`);
     }
   }
 
-  verbose(message: string) {
+  verbose(message: string, context?: string) {
     if (global.DEBUG_MODE) {
-      super.verbose(message);
-      CustomLogger.logger.verbose(message);
+      super.verbose(message, context);
+      CustomLogger.logger.verbose(`[${context || this.context}] ${message}`);
     }
   }
 }
