@@ -174,14 +174,24 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
     uiStore.setPendingChanges(false);
 
-    PostService.queue(this.id)
-      .then(() => {
-        message.success('Submission queued.');
-        this.props.history.push(`/${this.state.submissionType}/posting`);
-      })
-      .catch(() => {
-        message.error('Unable to queue submission.');
-      });
+    if (this.state.submission!.schedule.postAt) {
+      SubmissionService.schedule(this.id, true)
+        .then(() => {
+          message.success('Submission scheduled.');
+        })
+        .catch(() => {
+          message.error('Unable to schedule submission.');
+        });
+    } else {
+      PostService.queue(this.id)
+        .then(() => {
+          message.success('Submission queued.');
+          this.props.history.push(`/${this.state.submissionType}/posting`);
+        })
+        .catch(() => {
+          message.error('Unable to queue submission.');
+        });
+    }
   };
 
   scheduleHasChanged(): boolean {
@@ -818,7 +828,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                       type="primary"
                       disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
                     >
-                      Post
+                      {this.state.submission!.schedule.postAt ? 'Schedule' : 'Post'}
                     </Button>
                   </Popconfirm>
                 ) : (
@@ -827,7 +837,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     onClick={() => this.onPost(false)}
                     disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
                   >
-                    Post
+                    {this.state.submission!.schedule.postAt ? 'Schedule' : 'Post'}
                   </Button>
                 )}
               </span>

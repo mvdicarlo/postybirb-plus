@@ -2,9 +2,7 @@ import * as _ from 'lodash';
 import { Controller, Post, Param, BadRequestException, Get } from '@nestjs/common';
 import { PostService } from './post.service';
 import { SubmissionService } from '../submission.service';
-import { SubmissionPackage } from '../interfaces/submission-package.interface';
 import { Submission } from '../interfaces/submission.interface';
-import SubmissionEntity from '../models/submission.entity';
 import { SubmissionType } from '../enums/submission-type.enum';
 
 @Controller('post')
@@ -21,9 +19,7 @@ export class PostController {
 
   @Post('queue/:id')
   async queue(@Param('id') id: string) {
-    const validatedSubmission = (await this.submissionService.get(id, true)) as SubmissionPackage<
-      SubmissionEntity
-    >;
+    const validatedSubmission = await this.submissionService.getAndValidate(id);
     if (!!_.flatMap(validatedSubmission.problems, p => p.problems).length) {
       throw new BadRequestException('Cannot queue submission with problems');
     }
@@ -31,7 +27,7 @@ export class PostController {
     // remove scheduled flag
     if (validatedSubmission.submission.schedule.isScheduled) {
       validatedSubmission.submission.schedule.isScheduled = false;
-      await this.submissionService.scheduleSubmission(id, false); // somewhat inefficient
+      await this.submissionService.scheduleSubmission(validatedSubmission.submission, false);
     }
 
     return this.service.queue(validatedSubmission.submission);

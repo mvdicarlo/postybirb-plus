@@ -34,6 +34,8 @@ import { FileSubmission } from './file-submission/interfaces/file-submission.int
 import { AccountService } from 'src/account/account.service';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 
+type SubmissionEntityReference = string | SubmissionEntity;
+
 @Injectable()
 export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
@@ -54,9 +56,7 @@ export class SubmissionService {
   @Interval(60000)
   async queueScheduledSubmissions() {
     this.logger.debug('Schedule Post Check', 'Schedule Check');
-    const submissions: Array<SubmissionPackage<any>> = (await this.getAll(true)) as Array<
-      SubmissionPackage<any>
-    >;
+    const submissions: Array<SubmissionPackage<any>> = await this.getAllAndValidate();
     const now = Date.now();
     submissions
       .filter(p => p.submission.schedule.isScheduled)
@@ -70,7 +70,11 @@ export class SubmissionService {
       });
   }
 
-  async get(id: string, packaged?: boolean): Promise<SubmissionEntity | SubmissionPackage<any>> {
+  async get(id: SubmissionEntityReference): Promise<SubmissionEntity> {
+    if (id instanceof SubmissionEntity) {
+      return id;
+    }
+
     const submission = await this.repository.findOne(id);
     if (!submission) {
       throw new NotFoundException(`Submission ${id} could not be found`);
@@ -79,13 +83,14 @@ export class SubmissionService {
     submission.isPosting = this.postService.isCurrentlyPosting(submission);
     submission.isQueued = this.postService.isCurrentlyQueued(submission);
 
-    return packaged ? await this.validate(submission) : submission;
+    return submission;
   }
 
-  async getAll(
-    packaged: boolean,
-    type?: SubmissionType,
-  ): Promise<Array<SubmissionEntity | SubmissionPackage<any>>> {
+  async getAndValidate(id: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
+    return this.validate(await this.get(id));
+  }
+
+  async getAll(type?: SubmissionType): Promise<SubmissionEntity[]> {
     const query: any = {};
     if (type) {
       query.type = type;
@@ -97,15 +102,15 @@ export class SubmissionService {
       submission.isQueued = this.postService.isCurrentlyQueued(submission);
     });
 
-    if (packaged) {
-      return await Promise.all(submissions.map(s => this.validate(s)));
-    } else {
-      return submissions;
-    }
+    return submissions;
+  }
+
+  async getAllAndValidate(type?: SubmissionType): Promise<Array<SubmissionPackage<any>>> {
+    return await Promise.all((await this.getAll(type)).map(s => this.validate(s)));
   }
 
   postingStateChanged(): void {
-    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAll(true));
+    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
 
   async create(createDto: SubmissionCreate): Promise<Submission> {
@@ -239,7 +244,7 @@ export class SubmissionService {
       }
     }
 
-    const s = (await this.get(newSubmission._id, true)) as SubmissionPackage<any>;
+    const s = await this.getAndValidate(newSubmission._id);
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [s]);
     return s.submission;
   }
@@ -324,7 +329,8 @@ export class SubmissionService {
     return createdSubmission;
   }
 
-  async validate(submission: SubmissionEntity): Promise<SubmissionPackage<any>> {
+  async validate(submission: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
+    submission = await this.get(submission);
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
     const problems: Problems = this.validatorService.validateParts(submission, parts);
     const mappedParts: Parts = {};
@@ -337,20 +343,24 @@ export class SubmissionService {
   }
 
   async verifyAll(): Promise<void> {
-    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAll(true));
+    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
 
-  async dryValidate(id: string, parts: Array<SubmissionPart<any>>): Promise<Problems> {
+  async dryValidate(
+    id: SubmissionEntityReference,
+    parts: Array<SubmissionPart<any>>,
+  ): Promise<Problems> {
     if (parts.length) {
-      return this.validatorService.validateParts(await this.repository.findOne(id), parts);
+      return this.validatorService.validateParts(await this.get(id), parts);
     }
 
     return {};
   }
 
-  async deleteSubmission(id: string, skipCancel?: boolean): Promise<number> {
+  async deleteSubmission(id: SubmissionEntityReference, skipCancel?: boolean): Promise<number> {
+    const submission = await this.get(id);
+    id = submission._id;
     this.logger.log(id, 'Delete Submission');
-    const submission = (await this.get(id)) as SubmissionEntity;
 
     if (!skipCancel) {
       this.postService.cancel(submission);
@@ -394,7 +404,7 @@ export class SubmissionService {
   }
 
   async overwriteSubmissionParts(submissionOverwrite: SubmissionOverwrite) {
-    const submission = (await this.get(submissionOverwrite.id, false)) as SubmissionEntity;
+    const submission = await this.get(submissionOverwrite.id);
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
@@ -411,9 +421,13 @@ export class SubmissionService {
     this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
   }
 
-  async scheduleSubmission(id: string, isScheduled: boolean, postAt?: number): Promise<void> {
-    this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
-    const submissionToSchedule = (await this.get(id)) as SubmissionEntity;
+  async scheduleSubmission(
+    id: SubmissionEntityReference,
+    isScheduled: boolean,
+    postAt?: number,
+  ): Promise<void> {
+    const submissionToSchedule = await this.get(id);
+    this.logger.debug(`${submissionToSchedule._id}: ${isScheduled}`, 'Schedule Submission');
 
     if (postAt) {
       submissionToSchedule.schedule.postAt = postAt;
@@ -465,12 +479,14 @@ export class SubmissionService {
     return await this.partService.createOrUpdateSubmissionPart(part, submission.type);
   }
 
-  async setPostAt(id: string, postAt: number | undefined): Promise<void> {
-    this.logger.debug(`${id}: ${new Date(postAt).toLocaleString()}`, 'Update Submission Post At');
-    const submission = (await this.get(id)) as SubmissionEntity;
+  async setPostAt(id: SubmissionEntityReference, postAt: number | undefined): Promise<void> {
+    const submission = await this.get(id);
+    this.logger.debug(`${submission._id}: ${new Date(postAt).toLocaleString()}`, 'Update Submission Post At');
+
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
     }
+
     submission.schedule.postAt = postAt;
     await this.repository.update(submission);
     this.eventEmitter.emitOnComplete(

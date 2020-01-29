@@ -33,12 +33,14 @@ export class SubmissionController {
     @Query('packaged') packaged: string,
     @Query('type') submissionType: SubmissionType,
   ) {
-    return this.service.getAll(this.isTrue(packaged), submissionType);
+    return this.isTrue(packaged)
+      ? this.service.getAllAndValidate(submissionType)
+      : this.service.getAll(submissionType);
   }
 
   @Get(':id')
   async get(@Param('id') id: string, @Query('packaged') packaged: string) {
-    return this.service.get(id, this.isTrue(packaged));
+    return this.isTrue(packaged) ? this.service.getAndValidate(id) : this.service.get(id);
   }
 
   @Delete(':id')

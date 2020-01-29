@@ -162,7 +162,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     return (
       <List.Item
         actions={[
-          <span className="text-link" key="schedule-post-now">
+          <span className="text-link" key="schedule-post-now" onClick={this.postNow.bind(this)}>
             Post Now
           </span>,
           <Link to={`/edit/submission/${item.submission._id}`}>
