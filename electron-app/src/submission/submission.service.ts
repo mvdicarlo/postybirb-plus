@@ -5,6 +5,7 @@ import {
   Logger,
   forwardRef,
   Inject,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import * as fs from 'fs-extra';
 import { EventsGateway } from 'src/events/events.gateway';
@@ -113,7 +114,7 @@ export class SubmissionService {
     this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
 
-  async create(createDto: SubmissionCreate): Promise<Submission> {
+  async create(createDto: SubmissionCreate): Promise<SubmissionEntity> {
     if (!SubmissionType[createDto.type]) {
       throw new BadRequestException(`Unknown submission type: ${createDto.type}`);
     }
@@ -138,8 +139,16 @@ export class SubmissionService {
         break;
     }
 
-    await this.repository.save(completedSubmission);
-    await this.partService.createDefaultPart(completedSubmission);
+    try {
+      await this.repository.save(completedSubmission);
+      await this.partService.createDefaultPart(completedSubmission);
+    } catch (err) {
+      // Clean up bad data on failure
+      this.logger.error(err, 'Create Failure');
+      await this.deleteSubmission(completedSubmission);
+      throw new InternalServerErrorException(err);
+    }
+
     this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(completedSubmission));
     return completedSubmission;
   }
@@ -168,65 +177,45 @@ export class SubmissionService {
 
     const newSubmission = await this.create(createData);
 
-    const submissionParts: Array<SubmissionPartEntity<any>> = parts
-      .map(responsePart => responsePart.part)
-      .map(part => {
-        part.submissionId = newSubmission._id;
-        part.postStatus = 'UNPOSTED';
-        part.postedTo = undefined;
-        return part;
-      })
-      .filter(async part => {
-        try {
-          if (part.isDefault) {
-            return true;
-          }
-          await this.accountService.get(part.accountId);
-          return true;
-        } catch (e) {
-          return false;
-        }
-      })
-      .map(part => new SubmissionPartEntity(part));
-
-    const defaultEntity = new SubmissionPartEntity(defaultPart);
-    defaultEntity.submissionId = newSubmission._id;
-
-    await Promise.all([
-      ...submissionParts.map(p =>
-        this.partService.createOrUpdateSubmissionPart(p, newSubmission.type),
-      ),
-      this.partService.createOrUpdateSubmissionPart(defaultEntity, newSubmission.type),
-    ]);
-
-    if (submission.type === SubmissionType.FILE) {
-      const fileSubmission = submission as FileSubmission;
-      if (fileSubmission.thumbnail) {
-        try {
-          const buffer = await fs.readFile(fileSubmission.thumbnail.originalPath);
-          const { mimetype, name, originalPath } = fileSubmission.thumbnail;
-          await this.changeFileSubmissionThumbnailFile(
-            {
-              fieldname: 'file',
-              mimetype,
-              originalname: name,
-              encoding: '',
-              buffer,
-            },
-            newSubmission._id,
-            originalPath,
-          );
-        } catch (e) {
-          // Ignore
-        }
-      }
-
-      if (fileSubmission.additional && fileSubmission.additional.length) {
-        for (const additionalFile of fileSubmission.additional) {
+    try {
+      const submissionParts: Array<SubmissionPartEntity<any>> = parts
+        .map(responsePart => responsePart.part)
+        .map(part => {
+          part.submissionId = newSubmission._id;
+          part.postStatus = 'UNPOSTED';
+          part.postedTo = undefined;
+          return part;
+        })
+        .filter(async part => {
           try {
-            const buffer = await fs.readFile(additionalFile.originalPath);
-            const { mimetype, name, originalPath } = additionalFile;
-            await this.addFileSubmissionAdditionalFile(
+            if (part.isDefault) {
+              return true;
+            }
+            await this.accountService.get(part.accountId);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        })
+        .map(part => new SubmissionPartEntity(part));
+
+      const defaultEntity = new SubmissionPartEntity(defaultPart);
+      defaultEntity.submissionId = newSubmission._id;
+
+      await Promise.all([
+        ...submissionParts.map(p =>
+          this.partService.createOrUpdateSubmissionPart(p, newSubmission.type),
+        ),
+        this.partService.createOrUpdateSubmissionPart(defaultEntity, newSubmission.type),
+      ]);
+
+      if (submission.type === SubmissionType.FILE) {
+        const fileSubmission = submission as FileSubmission;
+        if (fileSubmission.thumbnail) {
+          try {
+            const buffer = await fs.readFile(fileSubmission.thumbnail.originalPath);
+            const { mimetype, name, originalPath } = fileSubmission.thumbnail;
+            await this.changeFileSubmissionThumbnailFile(
               {
                 fieldname: 'file',
                 mimetype,
@@ -238,10 +227,36 @@ export class SubmissionService {
               originalPath,
             );
           } catch (e) {
-            // Ignore dead file
+            // Ignore
+          }
+        }
+
+        if (fileSubmission.additional && fileSubmission.additional.length) {
+          for (const additionalFile of fileSubmission.additional) {
+            try {
+              const buffer = await fs.readFile(additionalFile.originalPath);
+              const { mimetype, name, originalPath } = additionalFile;
+              await this.addFileSubmissionAdditionalFile(
+                {
+                  fieldname: 'file',
+                  mimetype,
+                  originalname: name,
+                  encoding: '',
+                  buffer,
+                },
+                newSubmission._id,
+                originalPath,
+              );
+            } catch (e) {
+              // Ignore dead file
+            }
           }
         }
       }
+    } catch (err) {
+      this.logger.error(err, 'Recreate Failure');
+      await this.deleteSubmission(newSubmission);
+      throw new InternalServerErrorException(err);
     }
 
     const s = await this.getAndValidate(newSubmission._id);
@@ -282,23 +297,28 @@ export class SubmissionService {
       let newSubmission = new FileSubmissionEntity(copy);
       newSubmission.additional = [];
       newSubmission.primary = additional;
-      newSubmission = await this.fileSubmissionService.duplicateSubmission(newSubmission);
-      const createdSubmission = await this.repository.save(newSubmission);
-      await Promise.all(
-        websitePartsThatNeedSplitting.map(p => {
-          p.submissionId = newSubmission._id;
-          p.postStatus = 'UNPOSTED';
-          return this.partService.createOrUpdateSubmissionPart(p, newSubmission.type);
-        }),
-      );
-
-      this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+      try {
+        newSubmission = await this.fileSubmissionService.duplicateSubmission(newSubmission);
+        const createdSubmission = await this.repository.save(newSubmission);
+        await Promise.all(
+          websitePartsThatNeedSplitting.map(p => {
+            p.submissionId = newSubmission._id;
+            p.postStatus = 'UNPOSTED';
+            return this.partService.createOrUpdateSubmissionPart(p, newSubmission.type);
+          }),
+        );
+        this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+      } catch (err) {
+        this.logger.error(err, 'Additional Split Failure');
+        await this.deleteSubmission(newSubmission);
+        throw new InternalServerErrorException(err);
+      }
     }
   }
 
   async duplicate(originalId: string): Promise<SubmissionEntity> {
     this.logger.log(originalId, 'Duplicate Submission');
-    const original = (await this.get(originalId)) as SubmissionEntity;
+    const original = await this.get(originalId);
     original._id = undefined;
 
     let duplicate = new SubmissionEntity(original);
@@ -313,20 +333,27 @@ export class SubmissionService {
         break;
     }
 
-    // Duplicate parts
-    const parts = await this.partService.getPartsForSubmission(originalId, true);
-    await Promise.all(
-      parts.map(p => {
-        p.submissionId = duplicate._id;
-        p.postStatus = 'UNPOSTED';
-        return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
-      }),
-    );
+    try {
+      const createdSubmission = await this.repository.save(duplicate);
 
-    const createdSubmission = await this.repository.save(duplicate);
-    this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+      // Duplicate parts
+      const parts = await this.partService.getPartsForSubmission(originalId, true);
+      await Promise.all(
+        parts.map(p => {
+          p.submissionId = duplicate._id;
+          p.postStatus = 'UNPOSTED';
+          return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
+        }),
+      );
 
-    return createdSubmission;
+      this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+
+      return createdSubmission;
+    } catch (err) {
+      this.logger.error(err, 'Duplicate Failure');
+      await this.deleteSubmission(duplicate._id);
+      throw new InternalServerErrorException(err);
+    }
   }
 
   async validate(submission: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
@@ -382,7 +409,7 @@ export class SubmissionService {
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<any>> {
     this.logger.log(update.id, 'Update Submission');
     const { id, parts, postAt, removedParts } = update;
-    const submissionToUpdate = (await this.get(id)) as SubmissionEntity;
+    const submissionToUpdate = await this.get(id);
 
     if (submissionToUpdate.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
@@ -481,7 +508,10 @@ export class SubmissionService {
 
   async setPostAt(id: SubmissionEntityReference, postAt: number | undefined): Promise<void> {
     const submission = await this.get(id);
-    this.logger.debug(`${submission._id}: ${new Date(postAt).toLocaleString()}`, 'Update Submission Post At');
+    this.logger.debug(
+      `${submission._id}: ${new Date(postAt).toLocaleString()}`,
+      'Update Submission Post At',
+    );
 
     if (submission.isPosting) {
       throw new BadRequestException('Cannot update a submission that is posting');
