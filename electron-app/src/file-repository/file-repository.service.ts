@@ -70,13 +70,21 @@ export class FileRepositoryService {
     };
   }
 
+  async insertFileDirectly(file: UploadedFile, filename: string): Promise<string> {
+    const filepath = `${SUBMISSION_FILE_DIRECTORY}/${filename}`;
+    await fs.outputFile(filepath, file.buffer);
+    return filepath;
+  }
+
   async removeSubmissionFiles(submission: FileSubmission) {
     this.logger.debug(submission._id, 'Removing Files');
-    const files = [submission.primary, submission.thumbnail, ...(submission.additional || [])];
-    const promises = _.flatten(
-      files.filter(f => !!f).map(f => [fs.remove(f.location), fs.remove(f.preview)]),
-    );
-    await Promise.all(promises);
+    const files = [
+      submission.primary,
+      submission.thumbnail,
+      submission.fallback,
+      ...(submission.additional || []),
+    ];
+    await Promise.all(files.filter(f => !!f).map(f => this.removeSubmissionFile(f)));
   }
 
   scaleImage(file: UploadedFile, w: number): UploadedFile {
@@ -96,8 +104,12 @@ export class FileRepositoryService {
 
   async removeSubmissionFile(record: FileRecord): Promise<void> {
     this.logger.debug(record.location, 'Remove Submission File');
-    await fs.remove(record.location);
-    await fs.remove(record.preview);
+    if (record.location) {
+      await fs.remove(record.location);
+    }
+    if (record.preview) {
+      await fs.remove(record.preview);
+    }
   }
 
   async copyFileWithNewId(id: string, file: FileRecord): Promise<FileRecord> {
@@ -109,16 +121,17 @@ export class FileRepositoryService {
     const filePath = [...pathParts, `${newId}.${extension}`].join('/');
 
     await fs.copy(file.location, filePath);
-
-    const thumbPathParts = file.preview.split('/');
-    thumbPathParts.pop();
-    const thumbPath = [...thumbPathParts, `${newId}.jpg`].join('/');
-
-    await fs.copy(file.preview, thumbPath);
-
-    // Set new file paths and return
     file.location = filePath;
-    file.preview = thumbPath;
+
+    if (file.preview) {
+      const thumbPathParts = file.preview.split('/');
+      thumbPathParts.pop();
+      const thumbPath = [...thumbPathParts, `${newId}.jpg`].join('/');
+
+      await fs.copy(file.preview, thumbPath);
+      file.preview = thumbPath;
+    }
+
     return file;
   }
 }

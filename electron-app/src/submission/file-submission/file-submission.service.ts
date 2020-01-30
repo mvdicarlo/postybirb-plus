@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { FileSubmission } from './interfaces/file-submission.interface';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
-import { getSubmissionType } from './enums/file-submission-type.enum';
+import { getSubmissionType, FileSubmissionType } from './enums/file-submission-type.enum';
 import FileSubmissionEntity from './models/file-submission.entity';
 import SubmissionEntity from '../models/submission.entity';
 
@@ -10,9 +10,7 @@ import SubmissionEntity from '../models/submission.entity';
 export class FileSubmissionService {
   private readonly logger = new Logger(FileSubmissionService.name);
 
-  constructor(
-    private readonly fileRepository: FileRepositoryService,
-  ) {}
+  constructor(private readonly fileRepository: FileRepositoryService) {}
 
   async createSubmission(
     submission: SubmissionEntity,
@@ -80,12 +78,7 @@ export class FileSubmissionService {
       throw new BadRequestException('No file provided');
     }
 
-    if (
-      !(
-        file.mimetype.includes('image/jpeg') ||
-        file.mimetype.includes('image/png')
-      )
-    ) {
+    if (!(file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))) {
       throw new BadRequestException('Thumbnail file must be png or jpeg');
     }
 
@@ -104,6 +97,44 @@ export class FileSubmissionService {
       size: scaledUpload.buffer.length,
       type: getSubmissionType(scaledUpload.mimetype, scaledUpload.originalname),
     };
+
+    return submission;
+  }
+
+  async changeFallbackFile(
+    submission: FileSubmissionEntity,
+    file: UploadedFile,
+  ): Promise<FileSubmissionEntity> {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    if (submission.fallback) {
+      await this.fileRepository.removeSubmissionFile(submission.fallback);
+    }
+
+    const location = await this.fileRepository.insertFileDirectly(
+      file,
+      `${submission._id}-fallback.md`,
+    );
+    submission.fallback = {
+      location,
+      mimetype: 'text/markdown',
+      name: `${submission._id}-fallback.md`,
+      originalPath: '',
+      preview: '',
+      size: file.buffer.length,
+      type: FileSubmissionType.TEXT,
+    };
+
+    return submission;
+  }
+
+  async removeFallbackFile(submission: FileSubmissionEntity): Promise<FileSubmissionEntity> {
+    if (submission.fallback) {
+      await this.fileRepository.removeSubmissionFile(submission.fallback);
+      submission.fallback = undefined;
+    }
 
     return submission;
   }
@@ -160,6 +191,10 @@ export class FileSubmissionService {
 
     if (duplicate.thumbnail) {
       duplicate.thumbnail = await this.fileRepository.copyFileWithNewId(_id, duplicate.thumbnail);
+    }
+
+    if (duplicate.fallback) {
+      duplicate.fallback = await this.fileRepository.copyFileWithNewId(_id, duplicate.fallback);
     }
 
     if (duplicate.additional && duplicate.additional.length) {

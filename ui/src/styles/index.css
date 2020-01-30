@@ -22,7 +22,7 @@ ul {
 }
 
 .form-action-bar {
-  margin: 0 -.75rem;
+  margin: 0 -0.75rem;
   @apply shadow py-2 px-3 text-right z-10 sticky bottom-0;
 }
 
@@ -86,6 +86,50 @@ ul {
 .ant-light-back-top,
 .ant-dark-back-top {
   right: 75px !important;
+}
+
+.h-full-important {
+  height: 100% !important;
+}
+
+.fullscreen-modal .ant-light-modal,
+.fullscreen-modal .ant-dark-modal {
+  padding: 0;
+  margin: 0;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100vh;
+}
+
+.fullscreen-modal .ant-light-modal-content,
+.fullscreen-modal .ant-dark-modal-content {
+  height: 100%;
+}
+
+.fullscreen-modal .ant-light-modal-body,
+.fullscreen-modal .ant-dark-modal-body {
+  height: calc(100% - 55px);
+  padding: 0 !important;
+}
+
+.fullscreen-modal-with-footer .ant-light-modal,
+.fullscreen-modal-with-footer .ant-dark-modal {
+  padding: 0;
+  margin: 0;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100vh;
+}
+
+.fullscreen-modal-with-footer .ant-light-modal-content,
+.fullscreen-modal-with-footer .ant-dark-modal-content {
+  height: 100%;
+}
+
+.fullscreen-modal-with-footer .ant-light-modal-body,
+.fullscreen-modal-with-footer .ant-dark-modal-body {
+  height: calc(100% - 55px - 53px);
+  padding: 0 !important;
 }
 
 @tailwind utilities;

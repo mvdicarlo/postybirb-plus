@@ -21,6 +21,7 @@
     "react-scripts": "3.2.0",
     "rimraf": "^3.0.0",
     "sanitize-html": "^1.20.1",
+    "showdown": "^1.9.1",
     "socket.io": "^2.3.0",
     "typescript": "3.7.2"
   },

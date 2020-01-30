@@ -30,6 +30,10 @@ export default class SubmissionService {
     return axios.post(`/submission/duplicate/${id}`);
   }
 
+  static getFallbackText(id: string) {
+    return axios.get<string>(`/submission/fallback/${id}`).then(({ data }) => data);
+  }
+
   static getSubmissions(packaged: boolean) {
     return axios.get(`/submission?packaged=${packaged}`);
   }

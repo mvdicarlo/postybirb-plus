@@ -11,6 +11,9 @@ export default class FileSubmissionEntity extends SubmissionEntity implements Fi
   @IsOptional()
   thumbnail: FileRecord;
 
+  @IsOptional()
+  fallback: FileRecord;
+
   @IsArray()
   additional: FileRecord[];
 

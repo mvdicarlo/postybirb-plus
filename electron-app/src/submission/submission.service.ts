@@ -34,6 +34,7 @@ import SubmissionLogEntity from './log/models/submission-log.entity';
 import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
 import { AccountService } from 'src/account/account.service';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
+import { FileSubmissionType } from './file-submission/enums/file-submission-type.enum';
 
 type SubmissionEntityReference = string | SubmissionEntity;
 
@@ -527,6 +528,43 @@ export class SubmissionService {
 
   // File Submission Actions
   // NOTE: Might be good to pull these out into a different place
+  async getFallbackText(id: string): Promise<string> {
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
+    let text = '';
+    // TODO read existing file and manipulate
+    if (submission.fallback) {
+      try {
+        const buf = fs.readFile(submission.fallback.location);
+        // TODO transform
+        // TODO detect latin1
+        text = buf.toString();
+      } catch (err) {
+        // Ignore?
+      }
+    }
+
+    return text;
+  }
+
+  async setFallbackFile(
+    file: UploadedFile,
+    id: string,
+  ): Promise<SubmissionPackage<FileSubmissionEntity>> {
+    this.logger.debug(id, 'Change Submission Fallback File');
+    const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
+
+    if (submission.isPosting) {
+      throw new BadRequestException('Cannot update a submission that is posting');
+    }
+
+    await this.fileSubmissionService.changeFallbackFile(submission, file);
+    await this.repository.update(submission);
+
+    const validated = await this.validate(submission);
+    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    return validated;
+  }
+
   async removeFileSubmissionThumbnail(
     id: string,
   ): Promise<SubmissionPackage<FileSubmissionEntity>> {
@@ -596,6 +634,11 @@ export class SubmissionService {
     }
 
     await this.fileSubmissionService.changePrimaryFile(submission, file, path);
+    if (submission.fallback && submission.primary.type !== FileSubmissionType.TEXT) {
+      this.logger.log(id, 'Removing Fallback File');
+      await this.fileSubmissionService.removeFallbackFile(submission);
+    }
+
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);

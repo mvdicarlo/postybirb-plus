@@ -16,4 +16,5 @@ export interface Website {
   FileSubmissionForm: (props: SubmissionSectionProps<FileSubmission, any>) => JSX.Element;
   NotificationSubmissionForm?: (props: SubmissionSectionProps<Submission, any>) => JSX.Element;
   getDefaults(): any;
+  supportsTextType?(type: string);
 }

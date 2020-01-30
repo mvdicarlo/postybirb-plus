@@ -42,6 +42,7 @@ import {
   Tooltip
 } from 'antd';
 import PostService from '../../../services/post.service';
+import FallbackStoryInput from '../form-components/FallbackStoryInput';
 
 interface Props {
   match: Match;
@@ -518,7 +519,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         <div>
           <Alert
             type="error"
-            message="An error has occured and the submission template is unreadable."
+            message="An error has occured and the submission is unreadable."
           ></Alert>
         </div>
       );
@@ -630,7 +631,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     >
                       {this.unsupportedAdditionalWebsites()}
                       <div className="flex flex-wrap">
-                        {((this.state.submission! as FileSubmission).additional || []).map(f => {
+                        {(submission.additional || []).map(f => {
                           return (
                             <Card
                               size="small"
@@ -662,6 +663,12 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                       </div>
                     </Card>
                   </div>
+                  <FallbackStoryInput
+                    submission={submission}
+                    websites={this.getSelectedWebsiteParts().map(
+                      p => WebsiteRegistry.websites[p.website]
+                    )}
+                  />
                 </Form.Item>
               ) : null}
 

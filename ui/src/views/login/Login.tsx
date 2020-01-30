@@ -260,7 +260,7 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
           destroyOnClose={true}
           footer={null}
           onCancel={this.hideModal}
-          wrapClassName="login-modal"
+          wrapClassName="fullscreen-modal"
           mask={false}
         >
           {LoginDialog}

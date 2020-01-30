@@ -104,6 +104,11 @@ export class SubmissionController {
   }
 
   // File Submission File Actions
+  @Get('fallback/:id')
+  async getFallbackText(@Param('id') id: string) {
+    return this.service.getFallbackText(id);
+  }
+
   @Delete('remove/thumbnail/:id')
   async removeThumbnail(@Param('id') id: string) {
     return this.service.removeFileSubmissionThumbnail(id);
