@@ -115,12 +115,12 @@ export class FileSubmissionService {
 
     const location = await this.fileRepository.insertFileDirectly(
       file,
-      `${submission._id}-fallback.md`,
+      `${submission._id}-fallback.html`,
     );
     submission.fallback = {
       location,
-      mimetype: 'text/markdown',
-      name: `${submission._id}-fallback.md`,
+      mimetype: 'text/html',
+      name: `${submission._id}-fallback.html`,
       originalPath: '',
       preview: '',
       size: file.buffer.length,

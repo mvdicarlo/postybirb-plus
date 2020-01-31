@@ -125,6 +125,12 @@ export class SubmissionController {
     return this.service.changeFileSubmissionPrimaryFile(file, params.id, params.path);
   }
 
+  @Post('change/fallback/:id')
+  @UseInterceptors(FileInterceptor('file'))
+  async changeFallback(@UploadedFile() file, @Param('id') id: string) {
+    return this.service.setFallbackFile(file, id);
+  }
+
   @Post('change/thumbnail/:id/:path')
   @UseInterceptors(FileInterceptor('file'))
   async changeThumbnail(@UploadedFile() file, @Param() params) {

@@ -531,13 +531,11 @@ export class SubmissionService {
   async getFallbackText(id: string): Promise<string> {
     const submission: FileSubmissionEntity = (await this.get(id)) as FileSubmissionEntity;
     let text = '';
-    // TODO read existing file and manipulate
     if (submission.fallback) {
       try {
-        const buf = fs.readFile(submission.fallback.location);
-        // TODO transform
-        // TODO detect latin1
+        const buf: Buffer = await fs.readFile(submission.fallback.location);
         text = buf.toString();
+        // TODO detect latin1?
       } catch (err) {
         // Ignore?
       }

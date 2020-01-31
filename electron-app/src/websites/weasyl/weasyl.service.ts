@@ -131,43 +131,44 @@ export class Weasyl extends Website {
       }
     }
 
-    const files = [
-      submission.primary,
-      ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
-      ),
-    ];
-    files
-      .filter(file => !WebsiteValidator.supportsFileType(file, this.acceptsFiles))
-      .forEach(file =>
-        problems.push(`Does not support file format: (${file.name}) ${file.mimetype}.`),
-      );
-
-    files.forEach(file => {
-      const { type, size, name, mimetype } = file;
-      let maxMB: number = 10;
-      if (type === FileSubmissionType.VIDEO || type === FileSubmissionType.AUDIO) {
-        maxMB = 15;
-      } else if (type === FileSubmissionType.TEXT) {
-        if (name.includes('.md') || name.includes('.md')) {
-          maxMB = 2;
-        } else {
-          maxMB = 10; // assume pdf
-        }
+    if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
+      if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
+        problems.push(
+          `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+        );
+        problems.push('A fallback file is required.');
+      } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
+        warnings.push('The fallback text will be used.');
+      } else {
+        problems.push(
+          `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+        );
       }
+    }
 
-      if (WebsiteValidator.MBtoBytes(maxMB) < size) {
-        if (
-          isAutoscaling &&
-          type === FileSubmissionType.IMAGE &&
-          ImageManipulator.isMimeType(file.mimetype)
-        ) {
-          warnings.push(`${name} will be scaled down to ${maxMB}MB`);
-        } else {
-          problems.push(`Weasyl limits ${file.mimetype} to ${maxMB}MB`);
-        }
+    const { type, size, name, mimetype } = submission.primary;
+    let maxMB: number = 10;
+    if (type === FileSubmissionType.VIDEO || type === FileSubmissionType.AUDIO) {
+      maxMB = 15;
+    } else if (type === FileSubmissionType.TEXT) {
+      if (mimetype === 'text/markdown' || mimetype === 'text/plain') {
+        maxMB = 2;
+      } else {
+        maxMB = 10; // assume pdf
       }
-    });
+    }
+
+    if (WebsiteValidator.MBtoBytes(maxMB) < size) {
+      if (
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        ImageManipulator.isMimeType(submission.primary.mimetype)
+      ) {
+        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+      } else {
+        problems.push(`Weasyl limits ${submission.primary.mimetype} to ${maxMB}MB`);
+      }
+    }
 
     return { problems, warnings };
   }

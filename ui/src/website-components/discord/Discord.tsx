@@ -43,10 +43,6 @@ export class Discord implements Website {
   getDefaults() {
     return _.cloneDeep(defaultOptions);
   }
-
-  supportsTextType(type: string): boolean {
-    return false;
-  }
 }
 
 export class DiscordFileSubmissionForm extends React.Component<

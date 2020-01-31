@@ -52,6 +52,10 @@ export class Weasyl implements Website {
   getDefaults() {
     return _.cloneDeep(defaultOptions);
   }
+
+  supportsTextType(type: string): boolean {
+    return ['text/md', 'text/plain', 'text/pdf'].includes(type);
+  }
 }
 
 interface WeasylFileSubmissionState {

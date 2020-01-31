@@ -396,6 +396,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     }
   };
 
+  fallbackUploadChange(info: SubmissionPackage<any>) {
+    this.setState({
+      submission: info.submission,
+      problems: info.problems
+    });
+  }
+
   removeThumbnail() {
     if ((this.state.submission as FileSubmission).thumbnail) {
       SubmissionService.removeThumbnail(this.state.submission!._id)
@@ -664,6 +671,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     </Card>
                   </div>
                   <FallbackStoryInput
+                    uploadCallback={this.fallbackUploadChange.bind(this)}
                     submission={submission}
                     websites={this.getSelectedWebsiteParts().map(
                       p => WebsiteRegistry.websites[p.website]

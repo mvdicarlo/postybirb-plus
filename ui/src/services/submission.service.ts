@@ -6,6 +6,7 @@ import { Problems } from '../../../electron-app/src/submission/validator/interfa
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
 import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
+import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
 
 export default class SubmissionService {
   static checkProblems(id: string, parts: Array<FormSubmissionPart<any>>) {
@@ -14,6 +15,12 @@ export default class SubmissionService {
 
   static create(type: SubmissionType, title: string) {
     return axios.post(`/submission/create/${type}?title=${title ? encodeURIComponent(title) : ''}`);
+  }
+
+  static changeFallback(id: string, file: File) {
+    const formData = new FormData();
+    formData.set('file', file);
+    return axios.post<SubmissionPackage<any>>(`/submission/change/fallback/${id}`, formData).then(({ data }) => data);
   }
 
   static createFromClipboard() {

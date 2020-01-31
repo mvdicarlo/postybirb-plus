@@ -377,6 +377,7 @@ export class PostService {
     const files: FileRecord[] = _.compact([
       submission.primary,
       submission.thumbnail,
+      submission.fallback,
       ...submission.additional,
     ]);
     await Promise.all(
