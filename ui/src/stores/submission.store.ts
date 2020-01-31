@@ -7,6 +7,8 @@ import { Submission } from '../../../electron-app/src/submission/interfaces/subm
 import SubmissionService from '../services/submission.service';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import SubmissionUtil from '../utils/submission.util';
+import { FileSubmission } from '../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import RemoteService from '../services/remote.service';
 
 export interface SubmissionState {
   loading: boolean;
@@ -29,7 +31,29 @@ export class SubmissionStore {
 
   @computed
   get all(): SubmissionPackage<Submission>[] {
-    return _.sortBy([...this.state.submissions], ['submission.order', 'submission.created']);
+    const isRemote = RemoteService.isRemote();
+    return _.sortBy([...this.state.submissions], ['submission.order', 'submission.created']).map(
+      rec => {
+        if (!isRemote) return rec;
+
+        const submission = rec.submission as FileSubmission;
+        if (submission.primary) {
+          const copy = _.cloneDeep(rec);
+          const copySubmission = copy.submission as FileSubmission;
+          const files = _.compact([
+            copySubmission.primary,
+            copySubmission.thumbnail,
+            ...(copySubmission.additional || [])
+          ]);
+          files.forEach(f => {
+            f.location = RemoteService.getFileUrl(f.location);
+            f.preview = RemoteService.getFileUrl(f.preview);
+          });
+          return copy;
+        }
+        return rec;
+      }
+    );
   }
 
   @computed

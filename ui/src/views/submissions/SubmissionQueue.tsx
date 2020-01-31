@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { loginStatusStore } from '../../stores/login-status.store';
+import RemoteService from '../../services/remote.service';
 
 interface Props {
   postStatusStore?: PostStatusStore;
@@ -84,7 +85,7 @@ export default class SubmissionQueue extends React.Component<Props> {
                   <span>
                     {posting.submission.type === SubmissionType.FILE ? (
                       <Avatar
-                        src={(posting.submission as FileSubmission).primary.preview}
+                        src={RemoteService.getFileUrl((posting.submission as FileSubmission).primary.preview)}
                         shape="square"
                       />
                     ) : (
@@ -134,7 +135,7 @@ export default class SubmissionQueue extends React.Component<Props> {
                   avatar={
                     <span>
                       {item.type === SubmissionType.FILE ? (
-                        <Avatar src={(item as FileSubmission).primary.preview} shape="square" />
+                        <Avatar src={RemoteService.getFileUrl((item as FileSubmission).primary.preview)} shape="square" />
                       ) : (
                         <Avatar icon="notification" shape="square" />
                       )}

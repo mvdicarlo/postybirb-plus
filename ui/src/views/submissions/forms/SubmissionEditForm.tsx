@@ -43,6 +43,7 @@ import {
 } from 'antd';
 import PostService from '../../../services/post.service';
 import FallbackStoryInput from '../form-components/FallbackStoryInput';
+import RemoteService from '../../../services/remote.service';
 
 interface Props {
   match: Match;
@@ -563,7 +564,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                         <img
                           alt={submission.primary.name}
                           title={submission.primary.name}
-                          src={submission.primary.preview}
+                          src={RemoteService.getFileUrl(submission.primary.preview)}
                         />
                       }
                       extra={
@@ -588,7 +589,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           <img
                             alt={submission.thumbnail.name}
                             title={submission.thumbnail.name}
-                            src={submission.thumbnail.preview}
+                            src={RemoteService.getFileUrl(submission.thumbnail.preview)}
                           />
                         ) : null
                       }
@@ -647,7 +648,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                               actions={[
                                 <Icon type="delete" onClick={() => this.removeAdditionalFile(f)} />
                               ]}
-                              cover={<img alt={f.name} src={f.preview} />}
+                              cover={<img alt={f.name} src={RemoteService.getFileUrl(f.preview)} />}
                             >
                               <TreeSelect
                                 multiple
