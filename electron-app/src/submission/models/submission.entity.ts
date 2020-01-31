@@ -1,7 +1,7 @@
 import Entity from 'src/base/entity/entity.base';
 import { Submission } from '../interfaces/submission.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
-import { IsBoolean, IsString, IsEnum, IsArray, ValidateNested, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsString, IsEnum, IsArray, ValidateNested, IsNotEmpty, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import SubmissionScheduleModel from './submission-schedule.model';
 
@@ -29,6 +29,9 @@ export default class SubmissionEntity extends Entity implements Submission {
   @IsEnum(SubmissionType)
   @IsNotEmpty()
   type: SubmissionType;
+
+  @IsNumber()
+  order: number;
 
   constructor(partial: Partial<SubmissionEntity>) {
     super(partial);

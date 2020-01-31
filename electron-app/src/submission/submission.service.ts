@@ -114,7 +114,6 @@ export class SubmissionService {
   postingStateChanged(): void {
     this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
-
   async create(createDto: SubmissionCreate): Promise<SubmissionEntity> {
     if (!SubmissionType[createDto.type]) {
       throw new BadRequestException(`Unknown submission type: ${createDto.type}`);
@@ -125,6 +124,7 @@ export class SubmissionService {
       schedule: new SubmissionScheduleModel(),
       type: createDto.type,
       sources: [],
+      order: await this.repository.count(),
     });
 
     let completedSubmission = null;
@@ -292,12 +292,15 @@ export class SubmissionService {
     // Reintroduce default part
     websitePartsThatNeedSplitting.push(parts.find(p => p.isDefault));
 
+    let order: number = submission.order;
     for (const additional of submission.additional) {
+      order += 0.01;
       const copy = submission.copy();
       delete copy._id;
       let newSubmission = new FileSubmissionEntity(copy);
       newSubmission.additional = [];
       newSubmission.primary = additional;
+      newSubmission.order = order;
       try {
         newSubmission = await this.fileSubmissionService.duplicateSubmission(newSubmission);
         const createdSubmission = await this.repository.save(newSubmission);
@@ -323,6 +326,7 @@ export class SubmissionService {
     original._id = undefined;
 
     let duplicate = new SubmissionEntity(original);
+    duplicate.order += 0.01;
 
     switch (duplicate.type) {
       case SubmissionType.FILE:

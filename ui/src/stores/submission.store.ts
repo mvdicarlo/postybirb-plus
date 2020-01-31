@@ -1,4 +1,5 @@
 import socket from '../utils/websocket';
+import * as _ from 'lodash';
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { observable, computed, action } from 'mobx';
 import { SubmissionEvent } from '../shared/enums/submission.events.enum';
@@ -6,7 +7,6 @@ import { Submission } from '../../../electron-app/src/submission/interfaces/subm
 import SubmissionService from '../services/submission.service';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import SubmissionUtil from '../utils/submission.util';
-import { sign } from 'crypto';
 
 export interface SubmissionState {
   loading: boolean;
@@ -29,21 +29,17 @@ export class SubmissionStore {
 
   @computed
   get all(): SubmissionPackage<Submission>[] {
-    return [...this.state.submissions].sort((a, b) => a.submission.created - b.submission.created);
+    return _.sortBy([...this.state.submissions], ['submission.order', 'submission.created']);
   }
 
   @computed
   get fileSubmissions(): SubmissionPackage<Submission>[] {
-    return [...this.state.submissions]
-      .filter(s => s.submission.type === SubmissionType.FILE)
-      .sort((a, b) => a.submission.created - b.submission.created);
+    return this.all.filter(s => s.submission.type === SubmissionType.FILE);
   }
 
   @computed
   get notificationSubmissions(): SubmissionPackage<Submission>[] {
-    return [...this.state.submissions]
-      .filter(s => s.submission.type === SubmissionType.NOTIFICATION)
-      .sort((a, b) => a.submission.created - b.submission.created);
+    return this.all.filter(s => s.submission.type === SubmissionType.NOTIFICATION);
   }
 
   @computed

@@ -9,4 +9,5 @@ export interface Submission extends EntityIntf {
   sources: string[];
   title: string;
   type: SubmissionType;
+  order: number;
 }

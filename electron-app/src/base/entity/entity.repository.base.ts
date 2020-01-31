@@ -121,6 +121,12 @@ export default abstract class EntityRepository<T extends Entity, K extends Entit
     }
   }
 
+  count(): Promise<number> {
+    return new Promise(resolve => {
+      this.db.count({}, (err, count) => resolve(count));
+    });
+  }
+
   private constructEntity(entity: K): T {
     if (!entity) {
       return null;
