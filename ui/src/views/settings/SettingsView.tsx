@@ -59,7 +59,7 @@ export default class SettingsView extends React.Component<Props> {
               <Tooltip title="# of times to try posting a submission if a failure happens.">
                 <InputNumber
                   min={0}
-                  max={5}
+                  max={2}
                   value={settings.postRetries}
                   onChange={value => this.updateSetting('postRetries', Math.max(0, Number(value)))}
                 />

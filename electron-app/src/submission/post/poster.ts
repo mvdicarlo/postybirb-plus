@@ -242,20 +242,7 @@ export class Poster extends EventEmitter {
         part: this.part,
       });
 
-      // TODO post
-      // TODO post w/ retries
-      const random = _.random(0, 100);
-      if (random > 15) {
-        setTimeout(
-          function() {
-            this.status = 'SUCCESS';
-            this.done({ website: this.part.website });
-          }.bind(this),
-          _.random(8000),
-        );
-      } else {
-        throw new Error('Fake Failure');
-      }
+      await this.attemptPost(data);
     } catch (err) {
       const error: Error | PostResponse = err;
       const errorMsg: PostResponse = {
@@ -271,6 +258,40 @@ export class Poster extends EventEmitter {
       this.status = 'FAILED';
       this.done(errorMsg);
     }
+  }
+
+  private async attemptPost(data: PostData<Submission>): Promise<PostResponse> {
+    // TODO post
+    let totalTries = this.retries + 1;
+    let error = null;
+    while (totalTries) {
+      try {
+        totalTries--;
+        await this.fakePost();
+        this.done({ website: this.part.website });
+        return;
+      } catch (err) {
+        error = err;
+      }
+    }
+    throw error;
+  }
+
+  private fakePost(): Promise<PostResponse> {
+    return new Promise(resolve => {
+      const random = _.random(0, 100);
+      if (random > 15) {
+        setTimeout(
+          function() {
+            this.status = 'SUCCESS';
+            resolve();
+          }.bind(this),
+          _.random(8000),
+        );
+      } else {
+        throw new Error('Fake Failure');
+      }
+    });
   }
 
   private done(response: PostResponse) {
