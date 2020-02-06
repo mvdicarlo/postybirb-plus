@@ -9,6 +9,8 @@ import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import { decode } from 'iconv-lite';
+import { detect } from 'chardet';
 
 @Injectable()
 export class FileRepositoryService {
@@ -24,6 +26,7 @@ export class FileRepositoryService {
       `Uploading file ${path ? 'From File' : 'From Clipboard'}`,
     );
 
+    file = this.parseFileUpload(file);
     const fileId = `${id}-${shortid.generate()}`;
     let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${file.originalname
       .split('.')
@@ -72,6 +75,7 @@ export class FileRepositoryService {
 
   async insertFileDirectly(file: UploadedFile, filename: string): Promise<string> {
     const filepath = `${SUBMISSION_FILE_DIRECTORY}/${filename}`;
+    file = this.parseFileUpload(file);
     await fs.outputFile(filepath, file.buffer);
     return filepath;
   }
@@ -132,6 +136,14 @@ export class FileRepositoryService {
       file.preview = thumbPath;
     }
 
+    return file;
+  }
+
+  private parseFileUpload(file: UploadedFile): UploadedFile {
+    if (file.mimetype === 'text/plain' || file.originalname.endsWith('.txt')) {
+      const encoding = detect(file.buffer);
+      file.buffer = Buffer.from(decode(file.buffer, encoding));
+    }
     return file;
   }
 }
