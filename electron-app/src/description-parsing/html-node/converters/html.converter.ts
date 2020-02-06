@@ -13,7 +13,10 @@ export class HtmlConverter {
     const styleString = HtmlConverter.getStyleString(node.styles);
     switch (node.type) {
       case TagType.TEXT:
-        return `${depth}${node.text.replace(/\n/g, `\n${depth}<br />\n${depth}`)}`;
+        return `${depth}${node.breakBefore ? `<br />\n${depth}` : ''}${node.text.replace(
+          /\n/g,
+          `\n${depth}<br />\n${depth}`,
+        )}`;
       case TagType.SELF_CLOSED:
         let val = `${depth}<${node.tagName}`;
         if (node.classes.length) {

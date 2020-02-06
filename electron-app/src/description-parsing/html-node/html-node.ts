@@ -127,37 +127,26 @@ export default class HtmlNode {
           truncated = html.substring(segment.length);
         } else {
           const tagName = tag[0].match(/^<[a-z0-9]*/)[0].replace('<', '');
-          const openMatcher = new RegExp(`<${tagName}(.*?)>`);
-          const closedMatcher = new RegExp(`</${tagName}>`);
-          let openCount = 1;
-          let builder = tag[0];
-          let htmlSearcher = html.substring(tag[0].length, html.length);
-          while (openCount !== 0) {
-            const match = htmlSearcher.match(openMatcher);
-            const match2 = htmlSearcher.match(closedMatcher);
-            if (match2 && match && match2.index < match.index) {
-              builder = builder.concat(htmlSearcher.substring(0, match2.index + match2[0].length));
-              htmlSearcher = htmlSearcher.substring(match2.index + match2[0].length);
+          const matcher = new RegExp(`(?:<${tagName}(?:[^>]*)>)|(?:<\/${tagName}>)`, 'g');
+          const matches = html.match(matcher) || [];
+          let count = 0;
+          let index = -1;
+          for (let i = 0; i < matches.length; i++) {
+            count += matches[i].startsWith('</') ? -1 : 1;
+            if (!count) {
+              index = i;
               break;
             }
-
-            if (match) {
-              openCount += 1;
-              builder = builder.concat(htmlSearcher.substring(0, match[0].length));
-              htmlSearcher = htmlSearcher.substring(match[0].length);
-            }
-
-            if (!match2) {
-              throw new Error('No matching end tag found for ' + tagName);
-            }
-
-            openCount -= 1;
-            builder = builder.concat(htmlSearcher.substring(0, match2.index + match2[0].length));
-            htmlSearcher = htmlSearcher.substring(match2.index + match2[0].length);
           }
 
-          truncated = htmlSearcher;
-          segment = builder;
+          if (index === -1) {
+            throw new Error(`Unbalanced fragment ${html}`);
+          }
+
+          const regex = new RegExp(`^${matches.slice(0, index + 1).join('(.*?)')}`);
+          const entireMatch = html.match(regex);
+          segment = entireMatch[0];
+          truncated = html.substring(segment.length);
         }
       }
     } else {
@@ -201,7 +190,7 @@ export default class HtmlNode {
     }
 
     // Closed tags are considered unique
-    if (this.type == TagType.SELF_CLOSED) {
+    if (this.type === TagType.SELF_CLOSED) {
       return false;
     }
 
@@ -246,7 +235,7 @@ export default class HtmlNode {
     }
 
     if (this.parent) {
-      let next = this.parent.nextChild(this);
+      const next = this.parent.nextChild(this);
       if (onStyleOnly) {
         if (this.isWeaklyEqual(next)) {
           if (
@@ -267,17 +256,21 @@ export default class HtmlNode {
         }
       } else {
         if (this.isWeaklyEqual(next)) {
-          next.parent = null;
-          next.children.forEach(child => {
-            child.parent = this;
-            child.breakBefore = true;
-            this.children.push(child);
-          });
-          if (next.type === TagType.TEXT) {
-            this.text += `\n${next.text}`;
+          if (this.isBlock && next.isBlock) {
+            next.parent = null;
+            next.children.forEach((child, index) => {
+              child.parent = this;
+              if (index === 0 && !child.isBlock) {
+                child.breakBefore = true;
+              }
+              this.children.push(child);
+            });
+            if (next.type === TagType.TEXT) {
+              this.text += `\n${next.text}`;
+            }
+            this.fragment += next.fragment;
+            this.parent.replaceChild(this, next);
           }
-          this.fragment += next.fragment;
-          this.parent.replaceChild(this, next);
         }
       }
     }
