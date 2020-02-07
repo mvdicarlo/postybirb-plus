@@ -1,6 +1,9 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { FileRepositoryModule } from 'src/file-repository/file-repository.module';
 import { WebsitesModule } from 'src/websites/websites.module';
+import { SettingsModule } from 'src/settings/settings.module';
+import { FileManipulationModule } from 'src/file-manipulation/file-manipulation.module';
+import { AccountModule } from 'src/account/account.module';
 
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import { SubmissionController } from './submission.controller';
@@ -14,14 +17,18 @@ import { SubmissionTemplateService } from './submission-template/submission-temp
 import { SubmissionTemplateRepository } from './submission-template/submission-template.repository';
 import { PostController } from './post/post.controller';
 import { PostService } from './post/post.service';
-import { AccountModule } from 'src/account/account.module';
-import { SettingsModule } from 'src/settings/settings.module';
 import { LogController } from './log/log.controller';
 import { LogService } from './log/log.service';
 import { SubmissionLogRepository } from './log/log.repository';
 
 @Module({
-  imports: [FileRepositoryModule, WebsitesModule, SettingsModule, forwardRef(() => AccountModule)],
+  imports: [
+    FileRepositoryModule,
+    WebsitesModule,
+    SettingsModule,
+    forwardRef(() => AccountModule),
+    FileManipulationModule,
+  ],
   controllers: [SubmissionController, SubmissionTemplateController, PostController, LogController],
   providers: [
     FileSubmissionService,

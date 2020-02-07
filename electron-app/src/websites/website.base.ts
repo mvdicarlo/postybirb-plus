@@ -8,6 +8,8 @@ import { ValidationParts } from 'src/submission/validator/interfaces/validation-
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { ScalingOptions } from './interfaces/scaling-options.interface';
 
 export abstract class Website {
   abstract readonly BASE_URL: string;
@@ -26,6 +28,23 @@ export abstract class Website {
 
   readonly defaultDescriptionParser = HTMLFormatParser.parse;
 
+  abstract checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
+
+  getAccountInfo(id: string) {
+    return this.accountInformation.get(id) || {};
+  }
+
+  getDefaultOptions(submissionType: SubmissionType) {
+    switch (submissionType) {
+      case SubmissionType.FILE:
+        return _.cloneDeep(this.defaultFileSubmissionOptions);
+      case SubmissionType.NOTIFICATION:
+        return _.cloneDeep(this.defaultStatusOptions);
+    }
+  }
+
+  abstract getScalingOptions(file: FileRecord): ScalingOptions;
+
   abstract postStatusSubmission(data: any): Promise<any>;
 
   abstract postFileSubmission(data: any): Promise<any>;
@@ -41,26 +60,6 @@ export abstract class Website {
     return this.defaultDescriptionParser(text);
   }
 
-  getAccountInfo(id: string) {
-    return this.accountInformation.get(id) || {};
-  }
-
-  getDefaultOptions(submissionType: SubmissionType) {
-    switch (submissionType) {
-      case SubmissionType.FILE:
-        return _.cloneDeep(this.defaultFileSubmissionOptions);
-      case SubmissionType.NOTIFICATION:
-        return _.cloneDeep(this.defaultStatusOptions);
-    }
-  }
-
-  protected storeAccountInformation(profileId: string, key: string, value: any): void {
-    this.accountInformation.set(profileId, {
-      ...this.accountInformation.get(profileId),
-      [key]: value,
-    });
-  }
-
   parseTags(
     tags: string[],
     options = { spaceReplacer: '_', minLength: 1, maxLength: 100 },
@@ -73,7 +72,12 @@ export abstract class Website {
       .map(tag => tag.replace(/\s/g, options.spaceReplacer));
   }
 
-  abstract checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
+  protected storeAccountInformation(profileId: string, key: string, value: any): void {
+    this.accountInformation.set(profileId, {
+      ...this.accountInformation.get(profileId),
+      [key]: value,
+    });
+  }
 
   abstract validateFileSubmission(
     submission: Submission,

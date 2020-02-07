@@ -23,6 +23,7 @@ import FileSubmissionEntity from '../file-submission/models/file-submission.enti
 import { nativeImage } from 'electron';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/enums/notification-type.enum';
+import { FileManipulationService } from 'src/file-manipulation/file-manipulation.service';
 
 @Injectable()
 export class PostService {
@@ -52,6 +53,7 @@ export class PostService {
     private readonly accountService: AccountService,
     private readonly websites: WebsiteProvider,
     private readonly websitesService: WebsitesService,
+    private readonly fileManipulator: FileManipulationService,
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
     private readonly logService: LogService,
@@ -62,7 +64,19 @@ export class PostService {
   queue(submission: SubmissionEntity) {
     this.logger.log(submission, 'Queueing');
     if (!this.isPosting(submission.type)) {
-      this.post(submission);
+      this.post(submission).catch(() => {
+        if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+          this.notificationService.createNotification({
+            type: NotificationType.WARNING,
+            body: `${_.capitalize(
+              submission.type,
+            )} queue was emptied due to a failure or because there were problems with ${
+              submission.title
+            }.\n\nYou can change this behavior in the settings.`,
+            title: `${_.capitalize(submission.type)} Queue Cleared`,
+          });
+        }
+      });
     } else {
       this.insert(submission);
     }
@@ -247,7 +261,7 @@ export class PostService {
                 postedTo: poster.response.source,
               },
               response: poster.response,
-            }))
+            })),
         )
         .finally(() => {
           const canDelete: boolean =
@@ -286,19 +300,7 @@ export class PostService {
         // If the failures were not cancels
         const shouldEmptyQueue: boolean = !!posters.filter(p => p.status === 'FAILED').length;
         if (shouldEmptyQueue) {
-          this.emptyQueue(submission.type);
-          this.notificationService.createNotification(
-            {
-              type: NotificationType.WARNING,
-              body: `${_.capitalize(
-                submission.type,
-              )} queue was emptied due to a failure to post.\n\nYou can change this behavior in the settings.`,
-              title: `${_.capitalize(submission.type)} Queue Cleared`,
-            },
-            submission instanceof FileSubmissionEntity
-              ? nativeImage.createFromPath(submission.primary.preview)
-              : undefined,
-          );
+          this.clearQueueIfRequired(submission);
         }
       }
 
@@ -315,6 +317,7 @@ export class PostService {
         this.notifyPostingStatusChanged();
         await this.post(next);
       } catch (err) {
+        this.clearQueueIfRequired(next);
         this.clearAndPostNext(type); // keep searching until there is a valid submission to post
       }
     } else {
@@ -334,6 +337,7 @@ export class PostService {
       this.accountService,
       this.settings,
       this.websitesService,
+      this.fileManipulator,
       this.websites.getWebsiteModule(part.website),
       submission,
       part,
@@ -341,6 +345,24 @@ export class PostService {
       this.websites.getWebsiteModule(part.website).acceptsSourceUrls && knownSources.length === 0,
       this.getWaitTime(part.accountId, this.websites.getWebsiteModule(part.website)),
     );
+  }
+
+  private clearQueueIfRequired(submission: Submission) {
+    if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+      this.emptyQueue(submission.type);
+      this.notificationService.createNotification(
+        {
+          type: NotificationType.WARNING,
+          body: `${_.capitalize(
+            submission.type,
+          )} queue was emptied due to a failure to post.\n\nYou can change this behavior in the settings.`,
+          title: `${_.capitalize(submission.type)} Queue Cleared`,
+        },
+        submission instanceof FileSubmissionEntity
+          ? nativeImage.createFromPath(submission.primary.preview)
+          : undefined,
+      );
+    }
   }
 
   emptyQueue(type: SubmissionType) {

@@ -16,6 +16,8 @@ import { ValidationParts } from 'src/submission/validator/interfaces/validation-
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -33,6 +35,26 @@ export class Weasyl extends Website {
       url: 'https://weasyl.com/~$1',
     },
   ];
+
+  async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
+    const res = await Http.get<any>(`${this.BASE_URL}/api/whoami`, data._id, {
+      requestOptions: { json: true },
+    });
+    const status: LoginResponse = { loggedIn: false, username: null };
+    try {
+      const login: string = _.get(res.body, 'login');
+      status.loggedIn = !!login;
+      status.username = login;
+      await this.retrieveFolders(data._id, status.username);
+    } catch (e) {
+      /* Swallow */
+    }
+    return status;
+  }
+
+  getScalingOptions(file: FileRecord): ScalingOptions {
+    return { maxSize: 10 };
+  }
 
   preparseDescription(text: string): string {
     return UsernameParser.replaceText(text, 'ws', '<!~$1>');
@@ -54,22 +76,6 @@ export class Weasyl extends Website {
 
   postFileSubmission(data: any): Promise<any> {
     throw new NotImplementedException('Method not implemented.');
-  }
-
-  async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    const res = await Http.get<any>(`${this.BASE_URL}/api/whoami`, data._id, {
-      requestOptions: { json: true },
-    });
-    const status: LoginResponse = { loggedIn: false, username: null };
-    try {
-      const login: string = _.get(res.body, 'login');
-      status.loggedIn = !!login;
-      status.username = login;
-      await this.retrieveFolders(data._id, status.username);
-    } catch (e) {
-      /* Swallow */
-    }
-    return status;
   }
 
   async retrieveFolders(id: string, loginName: string): Promise<void> {

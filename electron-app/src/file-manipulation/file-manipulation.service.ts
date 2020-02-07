@@ -15,15 +15,15 @@ export class FileManipulationService {
     mimeType: string,
     targetSize: number,
     settings: {
-      autoConvertToJPEG: boolean;
+      convertToJPEG?: boolean;
     },
   ): { buffer: Buffer; mimetype: string } {
     let newBuffer: Buffer = Buffer.from(buffer);
     let newMimeType: string = mimeType;
     if (ImageManipulator.isMimeType(mimeType)) {
-      const im: ImageManipulator = ImageManipulator.build(buffer, mimeType);
+      const im: ImageManipulator = ImageManipulator.build(buffer, mimeType, true);
       const originalFileSize = im.getFileSize();
-      if (settings.autoConvertToJPEG) {
+      if (settings.convertToJPEG) {
         im.toJPEG();
       }
 
@@ -45,6 +45,8 @@ export class FileManipulationService {
       }
     }
 
+    this.logger.debug(`File scaled from ${buffer.length} -> ${newBuffer.length}`);
+    this.logger.debug(`File MIME changed from ${mimeType} -> ${newMimeType}`);
     return { buffer: newBuffer, mimetype: newMimeType };
   }
 

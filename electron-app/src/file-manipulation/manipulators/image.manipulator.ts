@@ -2,56 +2,51 @@ import { nativeImage } from 'electron';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as filesize from 'filesize';
-import * as exif from 'piexifjs';
 import * as decode from 'image-decode';
 import * as encode from 'image-encode';
 
 type MimeType = 'image/jpeg' | 'image/jpeg' | 'image/png' | 'image/tiff' | 'image/bmp';
 
 export default class ImageManipulator {
-  private nImage: Electron.NativeImage;
+  private originalMimeType: MimeType;
   private mimeType: MimeType;
   private hasAlpha: boolean;
+  private buffer: Buffer;
+  private jpegQuality: number = 100;
+  private height: number;
+  private width: number;
+  private cachedNImage: Electron.NativeImage;
 
-  private constructor(buffer: Buffer, mimeType: MimeType, hasAlpha: boolean) {
-    this.mimeType = mimeType;
-    this.hasAlpha = hasAlpha;
-    if (buffer instanceof Buffer) {
-      this.nImage = nativeImage.createFromBuffer(buffer);
-    } else {
-      throw new Error('Invalid input type');
+  private get nImage(): Electron.NativeImage {
+    if (this.cachedNImage) {
+      return this.cachedNImage;
     }
-
-    switch (mimeType) {
-      case 'image/jpeg':
-        const exifRemoved = exif.remove(this.getBase64(true));
-        this.nImage = nativeImage.createFromBuffer(
-          Buffer.from(exifRemoved.replace('data:image/jpeg;base64,', ''), 'base64'),
-        );
-        break;
-    }
+    return nativeImage.createFromBuffer(this.buffer);
   }
 
-  static build(buffer: Buffer, mimeType: MimeType): ImageManipulator {
+  private constructor(buffer: Buffer, mimeType: MimeType, hasAlpha: boolean) {
+    this.buffer = buffer;
+    this.mimeType = hasAlpha ? mimeType : 'image/jpeg';
+    this.originalMimeType = mimeType;
+    this.hasAlpha = hasAlpha;
+  }
+
+  static build(buffer: Buffer, mimeType: MimeType, skipConversion?: boolean): ImageManipulator {
     let hasAlpha: boolean = false;
-    if (mimeType === 'image/png' || mimeType === 'image/tiff' || mimeType === 'image/bmp') {
-      const { data, width, height } = decode(buffer, mimeType);
-      if (ImageManipulator.hasAlpha(data)) {
-        hasAlpha = true;
-        if (mimeType !== 'image/png') {
-          buffer = Buffer.from(encode(data, { height, width, format: 'image/png' }));
-          mimeType = 'image/png';
-        }
-      } else {
+    if (!skipConversion) {
+      if (mimeType === 'image/tiff' || mimeType === 'image/bmp') {
+        const { data, width, height } = decode(buffer, mimeType);
+        hasAlpha = ImageManipulator.hasAlpha(data);
+        mimeType = hasAlpha ? 'image/png' : 'image/jpeg';
+
         buffer = Buffer.from(
           encode(data, {
             width,
             height,
-            format: 'image/jpeg',
+            format: mimeType,
             quality: 100,
           }),
         );
-        mimeType = 'image/jpeg';
       }
     }
 
@@ -66,39 +61,42 @@ export default class ImageManipulator {
         return true;
       }
     }
-
     return false;
   }
 
   static isMimeType(mimeType: string): mimeType is MimeType {
-    if (
+    return (
       mimeType === 'image/png' ||
       mimeType === 'image/jpeg' ||
       mimeType === 'image/tiff' ||
       mimeType === 'image/bmp'
-    ) {
-      return true;
-    }
-    return false;
+    );
   }
 
   getNativeImage(): Electron.NativeImage {
     return this.nImage;
   }
 
-  getBase64(withPrepend: boolean): string {
-    return `${withPrepend ? `data:${this.mimeType};base64,` : ''}${this.getBuffer().toString(
-      'base64',
-    )}`;
-  }
-
   getBuffer(): Buffer {
+    if (this.originalMimeType === this.mimeType && !this.width && this.jpegQuality === 100) {
+      console.log('no change');
+      return this.buffer;
+    }
+
+    let ni: Electron.NativeImage = this.getNativeImage();
+    if (this.width && !this.cachedNImage) {
+      ni = ni.resize({
+        quality: 'best',
+        width: this.width,
+        height: this.height,
+      });
+      this.cachedNImage = ni;
+    }
     switch (this.mimeType) {
       case 'image/jpeg':
-        return this.nImage.toJPEG(100);
+        return ni.toJPEG(this.jpegQuality);
       case 'image/png':
-      case 'image/tiff':
-        return this.nImage.toPNG();
+        return ni.toPNG();
     }
   }
 
@@ -111,6 +109,7 @@ export default class ImageManipulator {
       case 'image/jpeg':
         return 'jpg';
       case 'image/png':
+      case 'image/bmp':
       case 'image/tiff':
         return 'png';
     }
@@ -133,23 +132,18 @@ export default class ImageManipulator {
   }
 
   isEmpty(): boolean {
-    return this.nImage.isEmpty();
+    return this.buffer.length === 0;
   }
 
   toJPEG(quality: number = 100): this {
-    if ((quality >= 100 || !quality) && this.mimeType === 'image/jpeg') {
-      return this;
+    if (quality) {
+      this.jpegQuality = Math.min(100, Math.max(quality, 1));
     }
-    this.nImage = nativeImage.createFromBuffer(this.nImage.toJPEG(quality));
     this.mimeType = 'image/jpeg';
     return this;
   }
 
   toPNG(): this {
-    if (this.mimeType === 'image/png') {
-      return this;
-    }
-    this.nImage = nativeImage.createFromBuffer(this.nImage.toPNG());
     this.mimeType = 'image/png';
     return this;
   }
@@ -160,20 +154,19 @@ export default class ImageManipulator {
       return this;
     }
 
-    this.nImage = this.nImage.resize({
-      quality: 'best',
-      width,
-      height: width / this.getAspectRatio(),
-    });
+    this.cachedNImage = null;
+    this.width = width;
+    this.height = width / this.getAspectRatio();
     return this;
   }
 
-  setBuffer(buffer: Buffer | Electron.NativeImage): this {
-    if (buffer instanceof Buffer) {
-      this.nImage = nativeImage.createFromBuffer(buffer);
-    } else {
-      this.nImage = buffer;
-    }
+  // Sets buffer, clears cached, clears changed settings
+  setBuffer(buffer: Buffer): this {
+    this.buffer = buffer;
+    this.cachedNImage = null;
+    this.width = null;
+    this.height = null;
+    this.jpegQuality = 100;
     return this;
   }
 

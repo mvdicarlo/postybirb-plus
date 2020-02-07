@@ -20,6 +20,7 @@ import FileSubmissionEntity from '../file-submission/models/file-submission.enti
 import { Submission } from '../interfaces/submission.interface';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
+import { FileManipulationService } from 'src/file-manipulation/file-manipulation.service';
 
 export interface Poster {
   on(
@@ -107,6 +108,7 @@ export class Poster extends EventEmitter {
     private accountService: AccountService,
     private settingsService: SettingsService,
     private websitesService: WebsitesService,
+    public fileManipulator: FileManipulationService,
     private website: Website,
     private submission: SubmissionEntity,
     public part: SubmissionPartEntity<any>,
@@ -186,6 +188,7 @@ export class Poster extends EventEmitter {
 
       if (this.isFileSubmission(this.submission)) {
         const fileData: FilePostData = data as FilePostData;
+        const options: DefaultFileOptions = data.options as DefaultFileOptions;
         fileData.primary = {
           type: this.submission.primary.type,
           file: {
@@ -196,6 +199,18 @@ export class Poster extends EventEmitter {
             },
           },
         };
+
+        if (options.autoScale && this.fileManipulator.canScale(this.submission.primary.mimetype)) {
+          const scaleOptions = this.website.getScalingOptions(this.submission.primary);
+          const scaled = this.fileManipulator.scale(
+            this.submission.primary.buffer,
+            this.submission.primary.mimetype,
+            scaleOptions.maxSize,
+            { convertToJPEG: scaleOptions.converToJPEG },
+          );
+          fileData.primary.file.buffer = scaled.buffer;
+          fileData.primary.file.options.contentType = scaled.mimetype;
+        }
 
         if (this.submission.thumbnail && (this.part.data as DefaultFileOptions).useThumbnail) {
           fileData.thumbnail = {
@@ -213,7 +228,7 @@ export class Poster extends EventEmitter {
 
         fileData.additional = this.website.acceptsAdditionalFiles
           ? additional.map(record => {
-              return {
+              const rec = {
                 type: record.type,
                 file: {
                   buffer: record.buffer,
@@ -223,6 +238,20 @@ export class Poster extends EventEmitter {
                   },
                 },
               };
+
+              if (options.autoScale && this.fileManipulator.canScale(record.mimetype)) {
+                const scaleOptions = this.website.getScalingOptions(record);
+                const scaled = this.fileManipulator.scale(
+                  record.buffer,
+                  record.mimetype,
+                  scaleOptions.maxSize,
+                  { convertToJPEG: scaleOptions.converToJPEG },
+                );
+                rec.file.buffer = scaled.buffer;
+                rec.file.options.contentType = scaled.mimetype;
+              }
+
+              return rec;
             })
           : [];
 
@@ -293,7 +322,7 @@ export class Poster extends EventEmitter {
       }
     });
   }
-
+  
   private done(response: PostResponse) {
     this.isDone = true;
     this.isPosting = false;

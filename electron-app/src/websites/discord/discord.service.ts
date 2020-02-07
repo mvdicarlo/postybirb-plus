@@ -13,6 +13,8 @@ import { FileSubmissionType } from 'src/submission/file-submission/enums/file-su
 import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
 
 interface DiscordLoginData {
   name: string;
@@ -43,6 +45,10 @@ export class Discord extends Website {
     }
 
     return status;
+  }
+
+  getScalingOptions(file: FileRecord): ScalingOptions {
+    return { maxSize: 8 };
   }
 
   postStatusSubmission(data: any): Promise<any> {
@@ -100,11 +106,11 @@ export class Discord extends Website {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
-          ImageManipulator.isMimeType(file.mimetype)
+          ImageManipulator.isMimeType(mimetype)
         ) {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
-          problems.push(`Discord limits ${file.mimetype} to ${maxMB}MB`);
+          problems.push(`Discord limits ${mimetype} to ${maxMB}MB`);
         }
       }
     });
