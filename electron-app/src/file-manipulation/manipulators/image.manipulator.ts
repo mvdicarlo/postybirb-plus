@@ -79,7 +79,6 @@ export default class ImageManipulator {
 
   getBuffer(): Buffer {
     if (this.originalMimeType === this.mimeType && !this.width && this.jpegQuality === 100) {
-      console.log('no change');
       return this.buffer;
     }
 

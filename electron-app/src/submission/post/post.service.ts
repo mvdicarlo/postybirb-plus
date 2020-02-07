@@ -285,7 +285,7 @@ export class PostService {
                 type: NotificationType.ERROR,
                 body: posters
                   .filter(p => p.status === 'FAILED')
-                  .map(p => `${p.part.website}: ${p.response.message || 'Unknown error occurred.'}`)
+                  .map(p => `${p.part.website}: ${p.response.message || p.response.error || 'Unknown error occurred.'}`)
                   .join('\n'),
                 title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
               },

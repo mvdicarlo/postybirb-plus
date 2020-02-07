@@ -280,7 +280,7 @@ export class Poster extends EventEmitter {
       };
       if (error instanceof Error) {
         errorMsg.stack = error.stack;
-        errorMsg.error = error.message;
+        errorMsg.error = error.toString();
       } else {
         Object.assign(errorMsg, error);
       }
@@ -322,7 +322,7 @@ export class Poster extends EventEmitter {
       }
     });
   }
-  
+
   private done(response: PostResponse) {
     this.isDone = true;
     this.isPosting = false;
