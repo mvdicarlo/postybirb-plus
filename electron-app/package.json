@@ -53,7 +53,6 @@
     "nedb": "^1.8.0",
     "node-forge": "^0.9.1",
     "parse5": "^5.1.1",
-    "piexifjs": "^1.0.6",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "rimraf": "^3.0.0",
@@ -66,6 +65,7 @@
     "winston-daily-rotate-file": "^4.4.2"
   },
   "devDependencies": {
+    "@jest-runner/electron": "^2.0.3",
     "@nestjs/cli": "^6.10.14",
     "@nestjs/schematics": "^6.7.6",
     "@nestjs/testing": "^6.10.14",
@@ -103,7 +103,8 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "coverageDirectory": "./coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "runner": "@jest-runner/electron/main"
   },
   "build": {
     "appId": "com.lemonynade.postybirb.plus",
