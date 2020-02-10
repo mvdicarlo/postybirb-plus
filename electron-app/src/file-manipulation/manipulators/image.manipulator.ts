@@ -16,16 +16,18 @@ export default class ImageManipulator {
   private height: number;
   private width: number;
   private cachedNImage: Electron.NativeImage;
+  private _ni: Electron.NativeImage;
 
   private get nImage(): Electron.NativeImage {
     if (this.cachedNImage) {
       return this.cachedNImage;
     }
-    return nativeImage.createFromBuffer(this.buffer);
+    return this._ni;
   }
 
   private constructor(buffer: Buffer, mimeType: MimeType, hasAlpha: boolean) {
     this.buffer = buffer;
+    this._ni = nativeImage.createFromBuffer(buffer);
     this.mimeType = hasAlpha ? mimeType : 'image/jpeg';
     this.originalMimeType = mimeType;
     this.hasAlpha = hasAlpha;
@@ -162,6 +164,7 @@ export default class ImageManipulator {
   // Sets buffer, clears cached, clears changed settings
   setBuffer(buffer: Buffer): this {
     this.buffer = buffer;
+    this._ni = nativeImage.createFromBuffer(buffer);
     this.cachedNImage = null;
     this.width = null;
     this.height = null;
