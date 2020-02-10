@@ -29,6 +29,7 @@ import {
   Tabs,
   message
 } from 'antd';
+import NotificationsView from '../notifications/NotificationsView';
 
 const { Content, Sider } = Layout;
 
@@ -217,6 +218,9 @@ export default class AppLayout extends React.Component<Props, State> {
               <Menu.Item key="accounts" onClick={this.showDrawer}>
                 <Icon type="user" />
                 <span>Accounts</span>
+              </Menu.Item>
+              <Menu.Item key="notifications">
+                <NotificationsView />
               </Menu.Item>
               <Menu.SubMenu
                 key="submissions"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { NotificationStore } from '../../stores/notification.store';
-import { Button, Dropdown, Badge, List, Icon, Tooltip, Modal } from 'antd';
+import { Button, Badge, List, Icon, Modal } from 'antd';
 import NotificationService from '../../services/notification.service';
 
 interface Props {
@@ -76,16 +76,13 @@ export default class NotificationsView extends React.Component<Props, State> {
     );
 
     return (
-      <div style={{ marginRight: '4px' }}>
-        <Badge dot={!!notifications.filter(n => !n.viewed).length}>
-          <Tooltip title="Notifications" placement="left">
-            <Icon
-              className="text-link"
-              type="bell"
-              onClick={() => this.setState({ visible: true })}
-            />
-          </Tooltip>
-        </Badge>
+      <div>
+        <div onClick={() => this.setState({ visible: true })}>
+          <Badge dot={!!notifications.filter(n => !n.viewed).length}>
+            <Icon type="bell" />
+            <span>App Notifications</span>
+          </Badge>
+        </div>
         <Modal
           title="Notifications"
           visible={this.state.visible}
