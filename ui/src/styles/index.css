@@ -60,6 +60,14 @@ ul {
   margin-top: 10px;
 }
 
+li .ant-dark-list-item .error {
+  @apply bg-red-900;
+}
+
+li .ant-light-list-item .error {
+  @apply bg-red-200;
+}
+
 .ant-light-drawer-header,
 .ant-dark-drawer-header {
   @apply z-10 sticky top-0;

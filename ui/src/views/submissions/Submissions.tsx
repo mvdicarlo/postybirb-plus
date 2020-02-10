@@ -397,7 +397,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
     const hasFailure = !!Object.values(item.parts).find(p => p.postStatus === 'FAILED');
     return (
       <List.Item
-        className={hasFailure ? 'bg-red-200' : ''}
+        className={hasFailure ? 'error' : ''}
         extra={
           item.submission.type === SubmissionType.FILE ? this.unsupportedAdditionalWebsites() : null
         }
@@ -535,7 +535,7 @@ const IssueState: React.FC<{ problems: Problems; problemCount: number }> = props
     <Typography.Text type="danger">
       <Tooltip
         overlayStyle={{ maxWidth: 'unset' }}
-        title={<div className="bg-red-100">{<ProblemTree problems={props.problems} />}</div>}
+        title={<div className="bg-red-700">{<ProblemTree problems={props.problems} />}</div>}
       >
         <Icon type="warning" />
         <span className="ml-2">{props.problemCount}</span>
