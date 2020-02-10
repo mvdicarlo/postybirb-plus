@@ -197,7 +197,7 @@ export class Submissions extends React.Component<Props, State> {
                         className="w-full"
                         defaultValue={this.scheduleManyPeriod.time}
                         format="YYYY-MM-DD HH:mm"
-                        showTime={{ format: 'HH:mm' }}
+                        showTime={{ format: 'HH:mm', use12Hours: true }}
                         onChange={value =>
                           (this.scheduleManyPeriod.time = value ? value.valueOf() : undefined)
                         }

@@ -220,7 +220,7 @@ class ListItem extends React.Component<ListItemProps, ListItemState> {
             className="w-full"
             defaultValue={moment(this.props.item.submission.schedule.postAt)}
             format="YYYY-MM-DD HH:mm"
-            showTime={{ format: 'HH:mm' }}
+            showTime={{ format: 'HH:mm', use12Hours: true }}
             placeholder="Unscheduled"
             onChange={value => this.setState({ postAt: value ? value.valueOf() : undefined })}
           />
