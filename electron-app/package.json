@@ -4,7 +4,8 @@
   "description": "",
   "main": "main.js",
   "author": "Michael DiCarlo",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
+  "private": true,
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -12,7 +13,7 @@
     "build:mac": "electron-builder -m",
     "build:windows": "electron-builder -w",
     "build:release": "export $(cat .env | xargs) && electron-builder -mwl -p always",
-    "clean": "rimraf electron-dist",
+    "clean": "rimraf release",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "npm run prebuild; nest build; electron main --develop",
     "start:electron": "electron main --develop",
@@ -116,7 +117,7 @@
     },
     "directories": {
       "buildResources": "packaging-resources",
-      "output": "electron-dist"
+      "output": "release"
     },
     "mac": {
       "category": "public.app-category.productivity",

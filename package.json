@@ -1,0 +1,22 @@
+{
+  "name": "postybirb-plus",
+  "version": "3.0.0",
+  "description": "Currently a reason to learn React. May end up being something more.",
+  "main": "index.js",
+  "scripts": {
+    "build:ui": "cd ui/ && npm i && npm run build",
+    "build:app": "cd electron-app && npm i && npm run build",
+    "build": "npm run build:ui && npm run build:app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mvdicarlo/postybirb-plus.git"
+  },
+  "author": "Michael DiCarlo",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/mvdicarlo/postybirb-plus/issues"
+  },
+  "homepage": "https://github.com/mvdicarlo/postybirb-plus#readme"
+}
