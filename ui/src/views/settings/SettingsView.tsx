@@ -153,7 +153,7 @@ export default class SettingsView extends React.Component<Props> {
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Performance" key="3">
-            <Form.Item label="Use hardware acceleration">
+          <Form.Item label="Use hardware acceleration (requires restart)">
               <Switch
                 disabled={/Linux/.test(navigator.platform)}
                 checked={settings.useHardwareAcceleration}
@@ -166,15 +166,6 @@ export default class SettingsView extends React.Component<Props> {
               <Switch
                 checked={settings.openOnStartup}
                 onChange={value => this.updateSetting('openOnStartup', value)}
-              />
-            </Form.Item>
-          </Collapse.Panel>
-          <Collapse.Panel header="Performance" key="5">
-            <Form.Item label="Use hardware acceleration (requires restart)">
-              <Switch
-                disabled={/Linux/.test(navigator.platform)}
-                checked={settings.useHardwareAcceleration}
-                onChange={value => this.updateSetting('useHardwareAcceleration', value)}
               />
             </Form.Item>
           </Collapse.Panel>
