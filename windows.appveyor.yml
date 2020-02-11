@@ -1,0 +1,21 @@
+image: Visual Studio 2019
+
+platform:
+  - x64
+
+cache:
+  - ui\node_modules
+  - electron-app\node_modules
+  - '%USERPROFILE%\.electron'
+
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - ps: Install-Product node 12 x64
+  - yarn
+
+build_script:
+  - yarn release:windows
+
+test: off

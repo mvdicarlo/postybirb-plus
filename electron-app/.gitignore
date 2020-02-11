@@ -3,6 +3,7 @@
 /build
 /node_modules
 /electron-dist
+/release
 
 # Logs
 logs

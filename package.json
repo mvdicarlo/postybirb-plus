@@ -1,13 +1,13 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Currently a reason to learn React. May end up being something more.",
   "main": "index.js",
   "scripts": {
-    "build:ui": "cd ui/ && npm i && npm run build",
+    "build:ui": "cd ui && npm i && npm run build",
     "build:app": "cd electron-app && npm i && npm run build",
     "build": "npm run build:ui && npm run build:app",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release:windows": "npm run build && cd electron-app && npm run release:windows"
   },
   "repository": {
     "type": "git",
