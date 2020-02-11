@@ -1,0 +1,22 @@
+image:
+  - Visual Studio 2019
+  - Ubuntu
+
+cache:
+  - ui\node_modules
+  - electron-app\node_modules
+  - '%USERPROFILE%\.electron'
+
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - cmd: powershell Install-Product node 12 x64
+  - sh: nvm use 12.14.1
+  - yarn
+
+build_script:
+  - cmd: yarn release:windows
+  - sh: yarn release:linux
+
+test: off
