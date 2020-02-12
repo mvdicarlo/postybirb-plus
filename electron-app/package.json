@@ -6,6 +6,10 @@
   "author": "Michael DiCarlo",
   "license": "BSD-3-Clause",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://mvdicarlo@github.com/mvdicarlo/postybirb-plus.git"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "postinstall": "electron-builder install-app-deps",
@@ -24,7 +28,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "tslint -p tsconfig.json -c tslint.json",
-    "test": "jest",
+    "test": "jest --verbose=false",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -51,6 +55,7 @@
     "iconv-lite": "^0.5.1",
     "image-decode": "^1.2.2",
     "image-encode": "^1.3.0",
+    "jimp": "^0.9.3",
     "lodash": "^4.17.15",
     "lowdb": "^1.0.0",
     "nanoid": "^2.1.8",
@@ -134,7 +139,9 @@
       "artifactName": "${productName}-${version}.${ext}",
       "icon": "icons/icon_256x256x32.png",
       "category": "Network",
-      "publish": ["github"],
+      "publish": [
+        "github"
+      ],
       "target": [
         "AppImage",
         "snap"

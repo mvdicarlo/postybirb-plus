@@ -3,6 +3,7 @@ import * as lowdb from 'lowdb';
 declare global {
   namespace NodeJS {
     interface Global {
+      CHILD_PROCESS_IDS: number[];
       AUTH_ID: string;
       BASE_DIRECTORY: string;
       DEBUG_MODE: boolean;

@@ -8,7 +8,7 @@ import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directo
 import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import ImageManipulator from 'src/file-manipulation/manipulators/image2.manipulator';
 import { decode } from 'iconv-lite';
 import { detect } from 'chardet';
 
@@ -31,41 +31,53 @@ export class FileRepositoryService {
     let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${file.originalname
       .split('.')
       .pop()}`;
-    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
 
+    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
     let thumbnail: Buffer = null;
     if (file.mimetype.includes('image')) {
       if (file.mimetype.includes('gif')) {
         await fs.outputFile(submissionFilePath, file.buffer);
         const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
-        const im: ImageManipulator = ImageManipulator.build(frame0.getImage().read(), 'image/jpeg');
-        thumbnail = im.resize(300).getBuffer();
+        const im: ImageManipulator = await ImageManipulator.build(
+          frame0.getImage().read(),
+          'image/jpeg',
+        );
+        thumbnail = (await im.setWidth(300).getData()).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
-        const im: ImageManipulator = ImageManipulator.build(file.buffer, file.mimetype);
-        // Update file properties to match manipulations
-        file.mimetype = im.getMimeType();
-        file.originalname = `${file.originalname}.${im.getExtension()}`;
-        file.buffer = im.getBuffer();
+        const im: ImageManipulator = await ImageManipulator.build(file.buffer, file.mimetype);
+        try {
+          // Update file properties to match manipulations
+          const data = await im.getData();
+          file.mimetype = data.type;
+          file.originalname = `${file.originalname}.${ImageManipulator.getExtension(data.type)}`;
+          file.buffer = data.buffer;
 
-        submissionFilePath = await im.writeTo(SUBMISSION_FILE_DIRECTORY, fileId);
+          submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
+            data.type,
+          )}`;
 
-        thumbnail = im
-          .resize(300)
-          .getBuffer();
-        thumbnailFilePath = im.buildFilePath(THUMBNAIL_FILE_DIRECTORY, fileId);
+          const thumbnailData = await im.setWidth(300).getData();
+          thumbnail = thumbnailData.buffer;
+          thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
+            thumbnailData.type,
+          )}`;
+        } catch (err) {
+          this.logger.error(err);
+          throw err;
+        } finally {
+          im.destroy();
+        }
       } else {
         // Unsupported file for manipulation
-        await fs.outputFile(submissionFilePath, file.buffer);
         thumbnail = (await app.getFileIcon(path)).toPNG();
       }
     } else {
       // Non-image saving
-      await fs.outputFile(submissionFilePath, file.buffer);
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
 
+    await fs.outputFile(submissionFilePath, file.buffer);
     await fs.outputFile(thumbnailFilePath, thumbnail);
-
     return {
       thumbnailLocation: thumbnailFilePath,
       submissionLocation: submissionFilePath,

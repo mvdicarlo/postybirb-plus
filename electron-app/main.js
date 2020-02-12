@@ -12,6 +12,7 @@ process.env.PORT = process.env.PORT || 9247;
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
+global.CHILD_PROCESS_IDS = [];
 
 if (DEBUG_MODE) {
   console.log(`BASE: ${BASE_DIRECTORY}`);
@@ -45,6 +46,9 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
   } else {
     callback(false);
   }
+});
+app.on('quit', () => {
+  global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });
 
 async function initialize() {
@@ -85,8 +89,8 @@ async function initialize() {
       nodeIntegration: false,
       preload: path.join(__dirname, 'src-electron', 'preload.js'),
       webviewTag: true,
-      backgroundThrottling: false,
       contextIsolation: false,
+      spellcheck: true,
     },
   });
 
