@@ -364,7 +364,7 @@ export class SubmissionService {
   async validate(submission: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
     submission = await this.get(submission);
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
-    const problems: Problems = this.validatorService.validateParts(submission, parts);
+    const problems: Problems = parts.length ? this.validatorService.validateParts(submission, parts) : {};
     const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part.asPlain())); // asPlain to expose the _id (a model might work better)
     return {

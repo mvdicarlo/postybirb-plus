@@ -15,8 +15,8 @@ settings
     postRetries: 0,
     openOnStartup: true,
     useHardwareAcceleration: process.platform === 'win32' || process.platform === 'darwin',
-    maxPNGSizeCompression: 30,
-    maxPNGSizeCompressionWithAlpha: 40,
+    maxPNGSizeCompression: 50,
+    maxPNGSizeCompressionWithAlpha: 60,
     maxJPEGQualityCompression: 15,
     maxJPEGSizeCompression: 50,
   })

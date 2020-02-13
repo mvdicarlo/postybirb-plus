@@ -139,7 +139,11 @@ export default class AppLayout extends React.Component<Props, State> {
   render() {
     const { uiStore } = this.props;
     const state = uiStore!.state;
-    message.config({ duration: 2, prefixCls: `ant-${this.props.uiStore!.state.theme}-message` });
+    message.config({
+      duration: 2,
+      prefixCls: `ant-${this.props.uiStore!.state.theme}-message`,
+      maxCount: 2
+    });
     this.props.uiStore!.setActiveNav(this.getCurrentNavId());
     return (
       <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>

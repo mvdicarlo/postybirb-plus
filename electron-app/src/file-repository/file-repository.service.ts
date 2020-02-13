@@ -8,7 +8,7 @@ import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directo
 import { UploadedFile } from './uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
-import ImageManipulator from 'src/file-manipulation/manipulators/image2.manipulator';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { decode } from 'iconv-lite';
 import { detect } from 'chardet';
 
@@ -28,11 +28,10 @@ export class FileRepositoryService {
 
     file = this.parseFileUpload(file);
     const fileId = `${id}-${shortid.generate()}`;
-    let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${file.originalname
-      .split('.')
-      .pop()}`;
+    const originalExtension = file.originalname.split('.').pop();
+    let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${originalExtension}`;
 
-    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
+    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${originalExtension}`;
     let thumbnail: Buffer = null;
     if (file.mimetype.includes('image')) {
       if (file.mimetype.includes('gif')) {
@@ -42,7 +41,7 @@ export class FileRepositoryService {
           frame0.getImage().read(),
           'image/jpeg',
         );
-        thumbnail = (await im.setWidth(300).getData()).buffer;
+        thumbnail = (await im.resize(300).getData()).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
         const im: ImageManipulator = await ImageManipulator.build(file.buffer, file.mimetype);
         try {
@@ -56,7 +55,7 @@ export class FileRepositoryService {
             data.type,
           )}`;
 
-          const thumbnailData = await im.setWidth(300).getData();
+          const thumbnailData = await im.resize(300).getData();
           thumbnail = thumbnailData.buffer;
           thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
             thumbnailData.type,
@@ -69,10 +68,11 @@ export class FileRepositoryService {
         }
       } else {
         // Unsupported file for manipulation
-        thumbnail = (await app.getFileIcon(path)).toPNG();
+        thumbnail = file.buffer;
       }
     } else {
       // Non-image saving
+      thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
 

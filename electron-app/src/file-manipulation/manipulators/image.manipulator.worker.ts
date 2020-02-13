@@ -1,17 +1,18 @@
 const Jimp = require('jimp');
 const fs = require('fs-extra');
-// Think of way to track children
+
+// Clean up self after 30 minutes (since no process should really be used that long)
+setTimeout(() => {
+  process.exit(1);
+}, 60000 * 30);
 
 let manipulator = null; // JIMP
-let buf = null;
-
 process.on('message', async msg => {
   let hasChanges = false;
   try {
-    let { location, quality, type, width } = msg;
+    let { convertOnAlpha, location, quality, type, width, originalType } = msg;
     if (!manipulator) {
-      buf = await fs.readFile(location);
-      manipulator = await Jimp.read(buf);
+      manipulator = await Jimp.read(location);
     }
     const clone = manipulator.clone();
     if (width && width < clone.bitmap.width) {
@@ -22,17 +23,19 @@ process.on('message', async msg => {
       clone.quality(quality);
       hasChanges = true;
     }
-    if (!clone.hasAlpha()) {
+    if (convertOnAlpha && originalType !== Jimp.MIME_JPEG && !clone.hasAlpha()) {
       type = Jimp.MIME_JPEG;
       hasChanges = true;
     }
+
     if (hasChanges) {
-      const buffer = await clone.getBufferAsync(type);
-      process.send({ code: 'SUCCESS', data: { buffer: buffer.toString('base64'), type } });
+      const tmpLocation = `${location.split('.tmp')[0]}-${Date.now()}.tmp`;
+      await fs.writeFile(tmpLocation, await clone.getBufferAsync(type));
+      process.send({ success: true, data: { location: tmpLocation, type } });
     } else {
-      process.send({ code: 'SUCCESS', data: { buffer: buf.toString('base64'), type } });
+      process.send({ success: true, data: { location: null, type: null } });
     }
   } catch (err) {
-    process.send({ code: 'ERROR', err: err.message });
+    process.send({ success: false, err: err.message });
   }
 });

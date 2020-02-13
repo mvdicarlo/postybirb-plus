@@ -202,7 +202,7 @@ export class Poster extends EventEmitter {
 
         if (options.autoScale && this.fileManipulator.canScale(this.submission.primary.mimetype)) {
           const scaleOptions = this.website.getScalingOptions(this.submission.primary);
-          const scaled = this.fileManipulator.scale(
+          const scaled = await this.fileManipulator.scale(
             this.submission.primary.buffer,
             this.submission.primary.mimetype,
             scaleOptions.maxSize,
@@ -227,32 +227,34 @@ export class Poster extends EventEmitter {
         );
 
         fileData.additional = this.website.acceptsAdditionalFiles
-          ? additional.map(record => {
-              const rec = {
-                type: record.type,
-                file: {
-                  buffer: record.buffer,
-                  options: {
-                    contentType: record.mimetype,
-                    filename: record.name,
+          ? await Promise.all(
+              additional.map(async record => {
+                const rec = {
+                  type: record.type,
+                  file: {
+                    buffer: record.buffer,
+                    options: {
+                      contentType: record.mimetype,
+                      filename: record.name,
+                    },
                   },
-                },
-              };
+                };
 
-              if (options.autoScale && this.fileManipulator.canScale(record.mimetype)) {
-                const scaleOptions = this.website.getScalingOptions(record);
-                const scaled = this.fileManipulator.scale(
-                  record.buffer,
-                  record.mimetype,
-                  scaleOptions.maxSize,
-                  { convertToJPEG: scaleOptions.converToJPEG },
-                );
-                rec.file.buffer = scaled.buffer;
-                rec.file.options.contentType = scaled.mimetype;
-              }
+                if (options.autoScale && this.fileManipulator.canScale(record.mimetype)) {
+                  const scaleOptions = this.website.getScalingOptions(record);
+                  const scaled = await this.fileManipulator.scale(
+                    record.buffer,
+                    record.mimetype,
+                    scaleOptions.maxSize,
+                    { convertToJPEG: scaleOptions.converToJPEG },
+                  );
+                  rec.file.buffer = scaled.buffer;
+                  rec.file.options.contentType = scaled.mimetype;
+                }
 
-              return rec;
-            })
+                return rec;
+              }),
+            )
           : [];
 
         if (this.cancelled) {
