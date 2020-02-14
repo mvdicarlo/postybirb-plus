@@ -28,6 +28,7 @@ require('electron-context-menu')({
 let nest;
 let window = null;
 let initializedOnce = false;
+let mainWindowState = null;
 
 app.on('second-instance', show);
 app.on('activate', show);
@@ -68,12 +69,14 @@ async function initialize() {
 
   if (!shouldDisplayWindow) return; // observe user setting
   if (global.SERVER_ONLY_MODE) return;
-
-  const mainWindowState = windowStateKeeper({
+  mainWindowState = windowStateKeeper({
     defaultWidth: 992,
     defaultHeight: 800,
   });
+  createWindow();
+}
 
+function createWindow() {
   window = new BrowserWindow({
     show: false,
     width: mainWindowState.width,
@@ -148,7 +151,7 @@ function buildTray(image) {
 
 function show() {
   if (!window) {
-    initialize();
+    createWindow();
     return;
   }
   if (window.isMinimized()) {

@@ -24,7 +24,6 @@ export class UiNotificationService {
       message,
       title,
     };
-    console.log(event)
     this.eventEmitter.emit(UINotificationEvent.NOTIFICATION, event);
   }
 }
