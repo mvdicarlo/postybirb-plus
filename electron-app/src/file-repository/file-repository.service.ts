@@ -11,10 +11,13 @@ import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { decode } from 'iconv-lite';
 import { detect } from 'chardet';
+import { ImageManipulationPoolService } from 'src/file-manipulation/pools/image-manipulation-pool.service';
 
 @Injectable()
 export class FileRepositoryService {
   private readonly logger: Logger = new Logger(FileRepositoryService.name);
+
+  constructor(private readonly imageManipulationPool: ImageManipulationPoolService) {}
 
   async insertFile(
     id: string,
@@ -37,18 +40,23 @@ export class FileRepositoryService {
       if (file.mimetype.includes('gif')) {
         await fs.outputFile(submissionFilePath, file.buffer);
         const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
-        const im: ImageManipulator = await ImageManipulator.build(
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
           frame0.getImage().read(),
           'image/jpeg',
         );
         thumbnail = (await im.resize(300).getData()).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
-        const im: ImageManipulator = await ImageManipulator.build(file.buffer, file.mimetype);
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+          file.buffer,
+          file.mimetype,
+        );
         try {
           // Update file properties to match manipulations
+          if (file.mimetype === 'image/tiff') {
+            im.toPNG();
+          }
           const data = await im.getData();
           file.mimetype = data.type;
-          file.originalname = `${file.originalname}.${ImageManipulator.getExtension(data.type)}`;
           file.buffer = data.buffer;
 
           submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(

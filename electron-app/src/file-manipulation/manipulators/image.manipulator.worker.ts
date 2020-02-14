@@ -23,6 +23,9 @@ process.on('message', async msg => {
       clone.quality(quality);
       hasChanges = true;
     }
+    if (type !== originalType) {
+      hasChanges = true;
+    }
     if (convertOnAlpha && originalType !== Jimp.MIME_JPEG && !clone.hasAlpha()) {
       type = Jimp.MIME_JPEG;
       hasChanges = true;

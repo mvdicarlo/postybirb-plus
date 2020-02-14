@@ -1,6 +1,7 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { SettingsService } from 'src/settings/settings.service';
 import ImageManipulator from './manipulators/image.manipulator';
+import { ImageManipulationPoolService } from './pools/image-manipulation-pool.service';
 
 // TODO test
 
@@ -8,7 +9,10 @@ import ImageManipulator from './manipulators/image.manipulator';
 export class FileManipulationService {
   private readonly logger = new Logger(FileManipulationService.name);
 
-  constructor(private readonly settings: SettingsService) {}
+  constructor(
+    private readonly settings: SettingsService,
+    private readonly imageManipulationPool: ImageManipulationPoolService,
+  ) {}
 
   async scale(
     buffer: Buffer,
@@ -24,7 +28,10 @@ export class FileManipulationService {
     if (ImageManipulator.isMimeType(mimeType)) {
       const originalFileSize = buffer.length;
       if (originalFileSize > targetSize) {
-        const im: ImageManipulator = await ImageManipulator.build(buffer, mimeType);
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+          buffer,
+          mimeType,
+        );
         if (settings.convertToJPEG) {
           im.toJPEG();
         }

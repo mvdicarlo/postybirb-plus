@@ -8,7 +8,7 @@ import { TEMP_FILE_DIRECTORY } from '../../directories';
 type MimeType = 'image/jpeg' | 'image/jpeg' | 'image/png' | 'image/tiff' | 'image/bmp';
 
 export default class ImageManipulator {
-  private static readonly DEFERRED_LIMIT: number = 1048576; // 1MB
+  public static readonly DEFERRED_LIMIT: number = 1048576; // 1MB
   public type: MimeType;
   private originalType: MimeType;
   private deferredLocation: string;
@@ -23,6 +23,7 @@ export default class ImageManipulator {
   private imageHeight: number;
   private imageWidth: number;
   private propertiesPopulated: boolean;
+  private onDestroyFn: (im: this) => void;
 
   get isDeferred(): boolean {
     return !!this.deferredLocation;
@@ -37,21 +38,14 @@ export default class ImageManipulator {
     this.propertiesPopulated = false;
   }
 
-  static async build(data: Buffer | string, type: MimeType): Promise<ImageManipulator> {
-    let buffer: Buffer;
-    if (data instanceof Buffer) {
-      buffer = data;
-    } else if (typeof data === 'string') {
-      buffer = await fs.readFile(data);
-    }
-
+  static async build(data: Buffer, type: MimeType): Promise<ImageManipulator> {
     let deferredObj: string = null;
-    if (buffer.length > ImageManipulator.DEFERRED_LIMIT) {
+    if (data.length > ImageManipulator.DEFERRED_LIMIT) {
       deferredObj = `${TEMP_FILE_DIRECTORY}/${shortid.generate()}.tmp`;
-      await fs.writeFile(deferredObj, buffer);
+      await fs.writeFile(deferredObj, data);
     }
 
-    return new ImageManipulator(buffer, type, deferredObj);
+    return new ImageManipulator(data, type, deferredObj);
   }
 
   static isMimeType(mimeType: string): mimeType is MimeType {
@@ -68,9 +62,11 @@ export default class ImageManipulator {
       case 'image/jpeg':
         return 'jpg';
       case 'image/png':
-      case 'image/bmp':
-      case 'image/tiff':
         return 'png';
+      case 'image/bmp':
+        return 'bmp';
+      case 'image/tiff':
+        return 'tiff';
     }
   }
 
@@ -178,6 +174,14 @@ export default class ImageManipulator {
       }
       process.kill(this.process.pid);
     }
+    if (this.onDestroyFn) {
+      this.onDestroyFn(this);
+    }
+  }
+
+  onDestroy(fn: (im: this) => void) {
+    this.onDestroyFn = fn;
+    return this;
   }
 
   private hasChanges(): boolean {
@@ -265,6 +269,7 @@ export default class ImageManipulator {
       this.process.on('exit', code => {
         if (this.reject) {
           this.reject(code);
+          this.destroy();
         }
       });
     }
