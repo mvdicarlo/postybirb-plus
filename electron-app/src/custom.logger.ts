@@ -9,7 +9,7 @@ export class CustomLogger extends Logger {
     transports: [
       new winston.transports.DailyRotateFile({
         filename: 'app-%DATE%.log',
-        datePattern: 'YYY-MM-DD-HH',
+        datePattern: 'YYY-MM-DD',
         maxSize: '20m',
         maxFiles: 15,
         dirname: path.join(app.getPath('userData'), 'logs'),
