@@ -311,7 +311,7 @@ export class Poster extends EventEmitter {
   private fakePost(): Promise<PostResponse> {
     return new Promise(resolve => {
       const random = _.random(0, 100);
-      if (random > 15) {
+      if (random > 90) {
         setTimeout(
           function() {
             this.status = 'SUCCESS';

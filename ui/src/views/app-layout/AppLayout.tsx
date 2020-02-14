@@ -1,5 +1,6 @@
 import React from 'react';
 import './AppLayout.css';
+import '../../services/ui-notification.service';
 import AppHeader from '../app-header/AppHeader';
 import AppUpdate from '../update/AppUpdate';
 import DescriptionTemplates from '../description-templates/DescriptionTemplates';

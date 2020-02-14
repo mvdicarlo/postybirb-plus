@@ -16,6 +16,7 @@ interface Props {
 export default class SettingsView extends React.Component<Props> {
   private updateSetting(key: keyof Settings, value: any) {
     if (value === undefined || value === '' || value === null) return;
+    if (value === this.props.settingsStore!.settings[key]) return;
     SettingsService.updateSetting(key, value);
   }
 
@@ -61,7 +62,9 @@ export default class SettingsView extends React.Component<Props> {
                   min={0}
                   max={2}
                   value={settings.postRetries}
-                  onChange={value => this.updateSetting('postRetries', Math.max(0, Number(value)))}
+                  onChange={value =>
+                    this.updateSetting('postRetries', Math.min(2, Math.max(0, Number(value))))
+                  }
                 />
               </Tooltip>
             </Form.Item>
@@ -87,7 +90,10 @@ export default class SettingsView extends React.Component<Props> {
                   value={settings.maxPNGSizeCompression}
                   formatter={value => `${value}%`}
                   onChange={value =>
-                    this.updateSetting('maxPNGSizeCompression', Math.max(0, Number(value)))
+                    this.updateSetting(
+                      'maxPNGSizeCompression',
+                      Math.min(99, Math.max(0, Number(value)))
+                    )
                   }
                 />
               </Form.Item>
@@ -105,7 +111,10 @@ export default class SettingsView extends React.Component<Props> {
                   value={settings.maxPNGSizeCompressionWithAlpha}
                   formatter={value => `${value}%`}
                   onChange={value =>
-                    this.updateSetting('maxPNGSizeCompressionWithAlpha', Math.max(0, Number(value)))
+                    this.updateSetting(
+                      'maxPNGSizeCompressionWithAlpha',
+                      Math.min(99, Math.max(0, Number(value)))
+                    )
                   }
                 />
               </Form.Item>
@@ -121,7 +130,10 @@ export default class SettingsView extends React.Component<Props> {
                   value={settings.maxJPEGSizeCompression}
                   formatter={value => `${value}%`}
                   onChange={value =>
-                    this.updateSetting('maxJPEGSizeCompression', Math.max(0, Number(value)))
+                    this.updateSetting(
+                      'maxJPEGSizeCompression',
+                      Math.min(99, Math.max(0, Number(value)))
+                    )
                   }
                 />
               </Form.Item>
@@ -135,7 +147,10 @@ export default class SettingsView extends React.Component<Props> {
                   value={settings.maxJPEGQualityCompression}
                   formatter={value => `${value}%`}
                   onChange={value =>
-                    this.updateSetting('maxJPEGQualityCompression', Math.max(0, Number(value)))
+                    this.updateSetting(
+                      'maxJPEGQualityCompression',
+                      Math.min(99, Math.max(0, Number(value)))
+                    )
                   }
                 />
               </Form.Item>
@@ -153,7 +168,7 @@ export default class SettingsView extends React.Component<Props> {
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Performance" key="3">
-          <Form.Item label="Use hardware acceleration (requires restart)">
+            <Form.Item label="Use hardware acceleration (requires restart)">
               <Switch
                 disabled={/Linux/.test(navigator.platform)}
                 checked={settings.useHardwareAcceleration}
