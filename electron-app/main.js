@@ -30,6 +30,11 @@ let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
 
+// Enable windows 10 notifications
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.lemonynade.postybirb.plus');
+}
+
 app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
