@@ -12,6 +12,7 @@ process.env.PORT = process.env.PORT || 9247;
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
+global.CHILD_PROCESS_IDS = [];
 
 if (DEBUG_MODE) {
   console.log(`BASE: ${BASE_DIRECTORY}`);
@@ -27,6 +28,12 @@ require('electron-context-menu')({
 let nest;
 let window = null;
 let initializedOnce = false;
+let mainWindowState = null;
+
+// Enable windows 10 notifications
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.lemonynade.postybirb.plus');
+}
 
 app.on('second-instance', show);
 app.on('activate', show);
@@ -46,6 +53,9 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
     callback(false);
   }
 });
+app.on('quit', () => {
+  global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
+});
 
 async function initialize() {
   if (!hasLock) return;
@@ -64,12 +74,14 @@ async function initialize() {
 
   if (!shouldDisplayWindow) return; // observe user setting
   if (global.SERVER_ONLY_MODE) return;
-
-  const mainWindowState = windowStateKeeper({
+  mainWindowState = windowStateKeeper({
     defaultWidth: 992,
     defaultHeight: 800,
   });
+  createWindow();
+}
 
+function createWindow() {
   window = new BrowserWindow({
     show: false,
     width: mainWindowState.width,
@@ -85,8 +97,8 @@ async function initialize() {
       nodeIntegration: false,
       preload: path.join(__dirname, 'src-electron', 'preload.js'),
       webviewTag: true,
-      backgroundThrottling: false,
       contextIsolation: false,
+      spellcheck: true,
     },
   });
 
@@ -144,7 +156,7 @@ function buildTray(image) {
 
 function show() {
   if (!window) {
-    initialize();
+    createWindow();
     return;
   }
   if (window.isMinimized()) {

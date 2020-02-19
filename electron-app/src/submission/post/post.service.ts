@@ -24,6 +24,7 @@ import { nativeImage } from 'electron';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/enums/notification-type.enum';
 import { FileManipulationService } from 'src/file-manipulation/file-manipulation.service';
+import { UiNotificationService } from 'src/notification/ui-notification/ui-notification.service';
 
 @Injectable()
 export class PostService {
@@ -59,6 +60,7 @@ export class PostService {
     private readonly logService: LogService,
     private readonly eventEmitter: EventsGateway,
     private readonly notificationService: NotificationService,
+    private readonly uiNotificationService: UiNotificationService,
   ) {}
 
   queue(submission: SubmissionEntity) {
@@ -72,9 +74,19 @@ export class PostService {
               submission.type,
             )} queue was emptied due to a failure or because there were problems with ${
               submission.title
-            }.\n\nYou can change this behavior in the settings.`,
+            }.\n\nYou can change this behavior in your settings.`,
             title: `${_.capitalize(submission.type)} Queue Cleared`,
           });
+          this.uiNotificationService.createUINotification(
+            NotificationType.WARNING,
+            10,
+            `${_.capitalize(
+              submission.type,
+            )} queue was emptied due to a failure or because there were problems with ${
+              submission.title
+            }.\n\nYou can change this behavior in your settings.`,
+            `${_.capitalize(submission.type)} Queue Cleared`,
+          );
         }
       });
     } else {
@@ -285,7 +297,12 @@ export class PostService {
                 type: NotificationType.ERROR,
                 body: posters
                   .filter(p => p.status === 'FAILED')
-                  .map(p => `${p.part.website}: ${p.response.message || p.response.error || 'Unknown error occurred.'}`)
+                  .map(
+                    p =>
+                      `${p.part.website}: ${p.response.message ||
+                        p.response.error ||
+                        'Unknown error occurred.'}`,
+                  )
                   .join('\n'),
                 title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
               },
@@ -355,12 +372,20 @@ export class PostService {
           type: NotificationType.WARNING,
           body: `${_.capitalize(
             submission.type,
-          )} queue was emptied due to a failure to post.\n\nYou can change this behavior in the settings.`,
+          )} queue was emptied due to a failure to post.\n\nYou can change this behavior in your settings.`,
           title: `${_.capitalize(submission.type)} Queue Cleared`,
         },
         submission instanceof FileSubmissionEntity
           ? nativeImage.createFromPath(submission.primary.preview)
           : undefined,
+      );
+      this.uiNotificationService.createUINotification(
+        NotificationType.WARNING,
+        0,
+        `${_.capitalize(
+          submission.type,
+        )} queue was emptied due to a failure to post.\n\nYou can change this behavior in your settings.`,
+        `${_.capitalize(submission.type)} Queue Cleared`,
       );
     }
   }

@@ -1,7 +1,7 @@
 import axios from '../utils/http';
 import { SubmissionUpdate } from '../../../electron-app/src/submission/interfaces/submission-update.interface';
 import { SubmissionOverwrite } from '../../../electron-app/src/submission/interfaces/submission-overwrite.interface';
-import { FormSubmissionPart } from '../views/submissions/interfaces/form-submission-part.interface';
+import { FormSubmissionPart } from '../views/submissions/submission-forms/interfaces/form-submission-part.interface';
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
@@ -20,7 +20,9 @@ export default class SubmissionService {
   static changeFallback(id: string, file: File) {
     const formData = new FormData();
     formData.set('file', file);
-    return axios.post<SubmissionPackage<any>>(`/submission/change/fallback/${id}`, formData).then(({ data }) => data);
+    return axios
+      .post<SubmissionPackage<any>>(`/submission/change/fallback/${id}`, formData)
+      .then(({ data }) => data);
   }
 
   static createFromClipboard() {
@@ -67,6 +69,10 @@ export default class SubmissionService {
 
   static schedule(id: string, isScheduled: boolean, postAt?: number) {
     return axios.post(`/submission/schedule/${id}`, { isScheduled, postAt });
+  }
+
+  static changeOrder(id: string, to: number, from: number) {
+    return axios.post('/submission/changeOrder', { id, to, from });
   }
 
   static setPostAt(id: string, postAt: number | undefined) {

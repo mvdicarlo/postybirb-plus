@@ -1,14 +1,14 @@
 import React from 'react';
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
-import { LoginStatusStore } from '../../../stores/login-status.store';
-import { SubmissionStore } from '../../../stores/submission.store';
+import { LoginStatusStore } from '../../../../stores/login-status.store';
+import { SubmissionStore } from '../../../../stores/submission.store';
 import { Modal, Select, Button, Form, TreeSelect } from 'antd';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { TreeNode } from 'antd/lib/tree-select';
-import { WebsiteRegistry } from '../../../website-components/website-registry';
-import SubmissionUtil from '../../../utils/submission.util';
-import { SubmissionTemplateStore } from '../../../stores/submission-template.store';
+import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import SubmissionUtil from '../../../../utils/submission.util';
+import { SubmissionTemplateStore } from '../../../../stores/submission-template.store';
 
 interface Props {
   className?: string;

@@ -1,16 +1,17 @@
 import React from 'react';
 import './AppLayout.css';
+import '../../services/ui-notification.service';
 import AppHeader from '../app-header/AppHeader';
 import AppUpdate from '../update/AppUpdate';
 import DescriptionTemplates from '../description-templates/DescriptionTemplates';
 import Home from '../home/Home';
 import SettingsView from '../settings/SettingsView';
-import SubmissionEditForm from '../submissions/forms/SubmissionEditForm';
+import SubmissionEditForm from '../submissions/submission-forms/forms/SubmissionEditForm';
 import SubmissionsView from '../submissions/SubmissionsView';
 import SubmissionTemplates from '../submission-templates/SubmissionTemplates';
 import TagGroups from '../tag-groups/TagGroups';
-import SubmissionTemplateEditForm from '../submissions/forms/SubmissionTemplateEditForm';
-import MultiSubmissionEditForm from '../submissions/forms/MultiSubmissionEditForm';
+import SubmissionTemplateEditForm from '../submissions/submission-forms/forms/SubmissionTemplateEditForm';
+import MultiSubmissionEditForm from '../submissions/submission-forms/forms/MultiSubmissionEditForm';
 import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
@@ -139,7 +140,11 @@ export default class AppLayout extends React.Component<Props, State> {
   render() {
     const { uiStore } = this.props;
     const state = uiStore!.state;
-    message.config({ duration: 2, prefixCls: `ant-${this.props.uiStore!.state.theme}-message` });
+    message.config({
+      duration: 2,
+      prefixCls: `ant-${this.props.uiStore!.state.theme}-message`,
+      maxCount: 2
+    });
     this.props.uiStore!.setActiveNav(this.getCurrentNavId());
     return (
       <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>

@@ -32,8 +32,9 @@ export class SubmissionStore {
   @computed
   get all(): SubmissionPackage<Submission>[] {
     const isRemote = RemoteService.isRemote();
-    return _.sortBy([...this.state.submissions], ['submission.order', 'submission.created']).map(
-      rec => {
+    return [...this.state.submissions]
+      .sort((a, b) => a.submission.order - b.submission.order)
+      .map(rec => {
         if (!isRemote) return rec;
 
         const submission = rec.submission as FileSubmission;
@@ -52,8 +53,7 @@ export class SubmissionStore {
           return copy;
         }
         return rec;
-      }
-    );
+      });
   }
 
   @computed
@@ -95,6 +95,15 @@ export class SubmissionStore {
     this.state.submissions = submissions || [];
   }
 
+  @action
+  updateOrder(orderRecords: Record<string, number>) {
+    this.state.submissions.forEach(record => {
+      if (orderRecords[record.submission._id] !== undefined) {
+        record.submission.order = orderRecords[record.submission._id];
+      }
+    });
+  }
+
   getSubmissionTitle(id: string): string {
     const found = this.state.submissions.find(s => s.submission._id === id);
     if (found) {
@@ -105,6 +114,31 @@ export class SubmissionStore {
 
   getSubmission(id: string): SubmissionPackage<Submission> | undefined {
     return this.state.submissions.find(s => s.submission._id === id);
+  }
+
+  @action
+  changeOrder(id: string, from: number, to: number) {
+    const fromSubmission = this.state.submissions.find(s => s.submission._id === id)!;
+    const submissions: any[] = this.all.filter(
+      s => s.submission.type === fromSubmission.submission.type
+    );
+    while (from < 0) {
+      from += submissions.length;
+    }
+    while (to < 0) {
+      to += submissions.length;
+    }
+    if (to >= submissions.length) {
+      let k = to - submissions.length + 1;
+      while (k--) {
+        submissions.push(undefined);
+      }
+    }
+    submissions.splice(to, 0, submissions.splice(from, 1)[0]);
+    submissions.forEach((record, index) => {
+      record.submission.order = index;
+    });
+    SubmissionService.changeOrder(id, to, from);
   }
 }
 
@@ -120,4 +154,8 @@ socket.on(SubmissionEvent.UPDATED, (data: Array<SubmissionPackage<Submission>>) 
 
 socket.on(SubmissionEvent.CREATED, (data: SubmissionPackage<Submission>) => {
   submissionStore.addOrUpdateSubmissions([data]);
+});
+
+socket.on(SubmissionEvent.REORDER, (orderRecords: Record<string, number>) => {
+  submissionStore.updateOrder(orderRecords);
 });

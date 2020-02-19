@@ -27,10 +27,6 @@ export default class WebsiteValidator {
     return false;
   }
 
-  static MBtoBytes(size: any): number {
-    return Number(size) * 1024 ** 2;
-  }
-
   static getTags(defaultTags: TagData, websiteTags: TagData): string[] {
     const extendDefault: boolean = _.get(websiteTags, 'extendDefault', true);
     return extendDefault

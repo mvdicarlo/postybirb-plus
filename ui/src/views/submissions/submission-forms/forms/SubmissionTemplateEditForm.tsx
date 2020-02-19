@@ -1,21 +1,21 @@
 import React from 'react';
 import _ from 'lodash';
-import { WebsiteRegistry } from '../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../website-components/website-registry';
 import DefaultFormSection from '../form-sections/DefaultFormSection';
-import { LoginStatusStore } from '../../../stores/login-status.store';
+import { LoginStatusStore } from '../../../../stores/login-status.store';
 import { Match, withRouter, history } from 'react-router-dom';
-import { headerStore } from '../../../stores/header.store';
+import { headerStore } from '../../../../stores/header.store';
 import { inject, observer } from 'mobx-react';
-import { uiStore } from '../../../stores/ui.store';
+import { uiStore } from '../../../../stores/ui.store';
 import { TreeNode } from 'antd/lib/tree-select';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import { SubmissionTemplate } from '../../../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
-import SubmissionTemplateService from '../../../services/submission-template.service';
-import { DefaultOptions } from '../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionTemplate } from '../../../../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
+import SubmissionTemplateService from '../../../../services/submission-template.service';
+import { DefaultOptions } from '../../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import {
   Form,
   Button,

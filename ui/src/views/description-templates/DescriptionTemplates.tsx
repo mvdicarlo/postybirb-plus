@@ -5,7 +5,7 @@ import { DescriptionTemplateStore } from '../../stores/description-template.stor
 import DescriptionTemplateService from '../../services/description-template.service';
 import { Empty, Button, Form, message, Spin, Card, Input, Icon, Popconfirm } from 'antd';
 import { DescriptionTemplate } from '../../../../electron-app/src/description-template/interfaces/description-template.interface';
-import DescriptionInput from '../submissions/form-components/DescriptionInput';
+import DescriptionInput from '../submissions/submission-forms/form-components/DescriptionInput';
 
 interface Props {
   descriptionTemplateStore?: DescriptionTemplateStore;

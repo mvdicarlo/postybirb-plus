@@ -1,6 +1,7 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { SettingsService } from 'src/settings/settings.service';
 import ImageManipulator from './manipulators/image.manipulator';
+import { ImageManipulationPoolService } from './pools/image-manipulation-pool.service';
 
 // TODO test
 
@@ -8,49 +9,60 @@ import ImageManipulator from './manipulators/image.manipulator';
 export class FileManipulationService {
   private readonly logger = new Logger(FileManipulationService.name);
 
-  constructor(private readonly settings: SettingsService) {}
+  constructor(
+    private readonly settings: SettingsService,
+    private readonly imageManipulationPool: ImageManipulationPoolService,
+  ) {}
 
-  scale(
+  async scale(
     buffer: Buffer,
     mimeType: string,
-    targetSize: number,
+    targetSize: number, // Assumed to be in bytes
     settings: {
       convertToJPEG?: boolean;
     },
-  ): { buffer: Buffer; mimetype: string } {
-    let newBuffer: Buffer = Buffer.from(buffer);
+  ): Promise<{ buffer: Buffer; mimetype: string }> {
+    let newBuffer: Buffer = buffer;
     let newMimeType: string = mimeType;
+
     if (ImageManipulator.isMimeType(mimeType)) {
-      const im: ImageManipulator = ImageManipulator.build(buffer, mimeType, true);
-      const originalFileSize = im.getFileSize();
-      if (settings.convertToJPEG) {
-        im.toJPEG();
-      }
+      const originalFileSize = buffer.length;
+      if (originalFileSize > targetSize) {
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+          buffer,
+          mimeType,
+        );
+        if (settings.convertToJPEG) {
+          im.toJPEG();
+        }
 
-      if (im.getFileSize() > targetSize) {
-        let jpgScaleSuccess = false;
-        const pngScaleSuccess = this.scalePNG(im, targetSize);
-
-        if (!pngScaleSuccess) {
-          jpgScaleSuccess = this.scaleJPEG(im, targetSize);
-          if (!jpgScaleSuccess) {
+        const pngScaledBuffer = await this.scalePNG(im, originalFileSize, targetSize);
+        if (!pngScaledBuffer) {
+          const jpgScaledBuffer = await this.scaleJPEG(im, originalFileSize, targetSize);
+          if (!jpgScaledBuffer) {
+            im.destroy();
             this.logger.warn(
-              `Unable to successfully scale image down to ${targetSize}MB from ${originalFileSize}`,
+              `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
             );
             throw new InternalServerErrorException(
-              `Unable to successfully scale image down to ${targetSize}MB from ${originalFileSize}`,
+              `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
             );
+          } else {
+            im.destroy();
+            newMimeType = 'image/jpeg';
+            newBuffer = jpgScaledBuffer;
           }
+        } else {
+          im.destroy();
+          newMimeType = 'image/png';
+          newBuffer = pngScaledBuffer;
         }
-        newMimeType = im.getMimeType();
-        newBuffer = im.getBuffer();
-      } else {
-        newMimeType = im.getMimeType();
-        newBuffer = im.getBuffer();
       }
     }
 
-    this.logger.debug(`File scaled from ${buffer.length} -> ${newBuffer.length}`);
+    this.logger.debug(
+      `File scaled from ${buffer.length / 1048576}MB -> ${newBuffer.length / 1048576}MB`,
+    );
     this.logger.debug(`File MIME changed from ${mimeType} -> ${newMimeType}`);
     return { buffer: newBuffer, mimetype: newMimeType };
   }
@@ -59,43 +71,76 @@ export class FileManipulationService {
     return ImageManipulator.isMimeType(mimeType);
   }
 
-  private scalePNG(im: ImageManipulator, targetSize: number): boolean {
-    if (im.getMimeType() !== 'image/png') {
-      return false;
+  private async scalePNG(
+    im: ImageManipulator,
+    originalSize: number,
+    targetSize: number,
+  ): Promise<Buffer | null> {
+    if (im.getMimeType() === 'image/jpeg') {
+      return null;
     }
+
+    im.toPNG();
 
     let reductionValue: number = this.settings.getValue<number>('maxPNGSizeCompression');
     if (im.hasTransparency()) {
       reductionValue = this.settings.getValue<number>('maxPNGSizeCompressionWithAlpha');
     }
 
-    const { width } = im.getSize();
-    const sizeSteps = this.getSteps(reductionValue, 10).map(step => (1 - step / 100) * width);
+    const width = im.getWidth();
+    const stepSize = originalSize / targetSize > 1.5 ? 20 : 10; // try to optimize # of runs for way larger files
+    const sizeSteps = this.getSteps(reductionValue, stepSize).map(step => (1 - step / 100) * width);
+
+    const lastStep = sizeSteps.pop();
+    im.resize(lastStep);
+    const lastScaled = await im.getData(); // check end first to see if its bother calculating anything between
+    if (lastScaled.buffer.length > targetSize) {
+      return null;
+    }
 
     for (const wdth of sizeSteps) {
       im.resize(wdth);
-      if (im.getFileSize() <= targetSize) {
-        return true;
+      const scaled = await im.getData();
+      if (scaled.buffer.length <= targetSize) {
+        return scaled.buffer;
       }
     }
 
-    return false;
+    return lastScaled.buffer;
   }
 
-  private scaleJPEG(im: ImageManipulator, targetSize: number): boolean {
+  private async scaleJPEG(
+    im: ImageManipulator,
+    originalSize: number,
+    targetSize: number,
+  ): Promise<Buffer> {
     const maxQualityReduction = this.settings.getValue<number>('maxJPEGQualityCompression');
     const maxSizeReduction = this.settings.getValue<number>('maxJPEGSizeCompression');
 
     im.toJPEG();
 
-    const { width } = im.getSize();
-    const sizeSteps = this.getSteps(maxSizeReduction).map(step => (1 - step / 100) * width);
+    const width = im.getWidth();
+    const stepSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
+    const sizeSteps = this.getSteps(maxSizeReduction, stepSize).map(
+      step => (1 - step / 100) * width,
+    );
 
-    for (const wdth of sizeSteps) {
-      im.resize(wdth);
-      if (im.getFileSize() <= targetSize) {
-        return true;
+    const lastStep = sizeSteps[sizeSteps.length - 1];
+    im.resize(lastStep);
+    const lastScaled = await im.getData(); // check end first to see if its bother calculating anything between
+    if (lastScaled.buffer.length <= targetSize) {
+      if (lastScaled.buffer.length === targetSize) {
+        return lastScaled.buffer;
       }
+      for (const wdth of sizeSteps.slice(0, -1)) {
+        im.resize(wdth);
+        const scaled = await im.getData();
+
+        if (scaled.buffer.length <= targetSize) {
+          return scaled.buffer;
+        }
+      }
+      return lastScaled.buffer;
     }
 
     const qualitySteps = this.getSteps(maxQualityReduction, 2).map(step => (1 - step / 100) * 100);
@@ -103,13 +148,14 @@ export class FileManipulationService {
     for (const wdth of sizeSteps) {
       for (const quality of qualitySteps) {
         im.toJPEG(quality).resize(wdth);
-        if (im.getFileSize() <= targetSize) {
-          return true;
+        const scaled = await im.getData();
+        if (scaled.buffer.length <= targetSize) {
+          return scaled.buffer;
         }
       }
     }
 
-    return false;
+    return null;
   }
 
   private getSteps(value: number, stepSize?: number): number[] {

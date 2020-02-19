@@ -1,10 +1,10 @@
 import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { SubmissionSectionProps } from '../../views/submissions/interfaces/submission-section.interface';
+import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { DefaultDiscordOptions } from '../../../../electron-app/src/websites/discord/discord.interface';
-import TagInput from '../../views/submissions/form-components/TagInput';
-import DescriptionInput from '../../views/submissions/form-components/DescriptionInput';
+import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';
+import DescriptionInput from '../../views/submissions/submission-forms/form-components/DescriptionInput';
 import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { Alert, Form, Input, Checkbox } from 'antd';
 import DiscordLogin from './DiscordLogin';

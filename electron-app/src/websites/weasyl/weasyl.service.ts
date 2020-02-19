@@ -18,6 +18,7 @@ import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import FileSize from 'src/utils/filesize';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -53,7 +54,7 @@ export class Weasyl extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: 10 };
+    return { maxSize: FileSize.MBtoBytes(10) };
   }
 
   preparseDescription(text: string): string {
@@ -164,7 +165,7 @@ export class Weasyl extends Website {
       }
     }
 
-    if (WebsiteValidator.MBtoBytes(maxMB) < size) {
+    if (FileSize.MBtoBytes(maxMB) < size) {
       if (
         isAutoscaling &&
         type === FileSubmissionType.IMAGE &&

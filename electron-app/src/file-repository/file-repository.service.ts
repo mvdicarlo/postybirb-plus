@@ -11,10 +11,13 @@ import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { decode } from 'iconv-lite';
 import { detect } from 'chardet';
+import { ImageManipulationPoolService } from 'src/file-manipulation/pools/image-manipulation-pool.service';
 
 @Injectable()
 export class FileRepositoryService {
   private readonly logger: Logger = new Logger(FileRepositoryService.name);
+
+  constructor(private readonly imageManipulationPool: ImageManipulationPoolService) {}
 
   async insertFile(
     id: string,
@@ -28,44 +31,61 @@ export class FileRepositoryService {
 
     file = this.parseFileUpload(file);
     const fileId = `${id}-${shortid.generate()}`;
-    let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${file.originalname
-      .split('.')
-      .pop()}`;
-    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
+    const originalExtension = file.originalname.split('.').pop();
+    let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${originalExtension}`;
 
+    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${originalExtension}`;
     let thumbnail: Buffer = null;
     if (file.mimetype.includes('image')) {
       if (file.mimetype.includes('gif')) {
         await fs.outputFile(submissionFilePath, file.buffer);
         const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
-        const im: ImageManipulator = ImageManipulator.build(frame0.getImage().read(), 'image/jpeg');
-        thumbnail = im.resize(300).getBuffer();
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+          frame0.getImage().read(),
+          'image/jpeg',
+        );
+        thumbnail = (await im.resize(300).getData()).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
-        const im: ImageManipulator = ImageManipulator.build(file.buffer, file.mimetype);
-        // Update file properties to match manipulations
-        file.mimetype = im.getMimeType();
-        file.originalname = `${file.originalname}.${im.getExtension()}`;
-        file.buffer = im.getBuffer();
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+          file.buffer,
+          file.mimetype,
+        );
+        try {
+          // Update file properties to match manipulations
+          if (file.mimetype === 'image/tiff') {
+            im.toPNG();
+          }
+          const data = await im.getData();
+          file.mimetype = data.type;
+          file.buffer = data.buffer;
 
-        submissionFilePath = await im.writeTo(SUBMISSION_FILE_DIRECTORY, fileId);
+          submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
+            data.type,
+          )}`;
 
-        thumbnail = im
-          .resize(300)
-          .getBuffer();
-        thumbnailFilePath = im.buildFilePath(THUMBNAIL_FILE_DIRECTORY, fileId);
+          const thumbnailData = await im.resize(300).getData();
+          thumbnail = thumbnailData.buffer;
+          thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
+            thumbnailData.type,
+          )}`;
+        } catch (err) {
+          this.logger.error(err);
+          throw err;
+        } finally {
+          im.destroy();
+        }
       } else {
         // Unsupported file for manipulation
-        await fs.outputFile(submissionFilePath, file.buffer);
-        thumbnail = (await app.getFileIcon(path)).toPNG();
+        thumbnail = file.buffer;
       }
     } else {
       // Non-image saving
-      await fs.outputFile(submissionFilePath, file.buffer);
+      thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
       thumbnail = (await app.getFileIcon(path)).toJPEG(100);
     }
 
+    await fs.outputFile(submissionFilePath, file.buffer);
     await fs.outputFile(thumbnailFilePath, thumbnail);
-
     return {
       thumbnailLocation: thumbnailFilePath,
       submissionLocation: submissionFilePath,

@@ -15,6 +15,7 @@ import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import FileSize from 'src/utils/filesize';
 
 interface DiscordLoginData {
   name: string;
@@ -48,7 +49,7 @@ export class Discord extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: 8 };
+    return { maxSize: FileSize.MBtoBytes(8) };
   }
 
   postStatusSubmission(data: any): Promise<any> {
@@ -102,7 +103,7 @@ export class Discord extends Website {
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       const maxMB: number = 8;
-      if (WebsiteValidator.MBtoBytes(maxMB) < size) {
+      if (FileSize.MBtoBytes(maxMB) < size) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&

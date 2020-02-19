@@ -75,6 +75,11 @@ export class SubmissionController {
     return this.service.overwriteSubmissionParts(submissionOverwrite);
   }
 
+  @Post('changeOrder')
+  async changeOrder(@Body() body: { id: string, from: number; to: number }) {
+    return this.service.changeOrder(body.id, body.to, body.from);
+  }
+
   @Patch('set/postAt/:id')
   async setPostAt(@Body() body: SubmissionScheduleModel, @Param('id') id: string) {
     return this.service.setPostAt(id, body.postAt);
