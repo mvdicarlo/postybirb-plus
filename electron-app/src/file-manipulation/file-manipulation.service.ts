@@ -88,8 +88,7 @@ export class FileManipulationService {
     }
 
     const width = im.getWidth();
-    const stepSize =
-      originalSize / targetSize > 1.5 ? Math.max(Math.floor(reductionValue / 2), 10) : 10; // try to optimize # of runs for way larger files
+    const stepSize = originalSize / targetSize > 1.5 ? 20 : 10; // try to optimize # of runs for way larger files
     const sizeSteps = this.getSteps(reductionValue, stepSize).map(step => (1 - step / 100) * width);
 
     const lastStep = sizeSteps.pop();
@@ -121,8 +120,7 @@ export class FileManipulationService {
     im.toJPEG();
 
     const width = im.getWidth();
-    const stepSize =
-      originalSize / targetSize > 2 ? Math.max(Math.floor(maxQualityReduction / 4), 10) : 10; // try to optimize # of runs for way larger files
+    const stepSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
     const sizeSteps = this.getSteps(maxSizeReduction, stepSize).map(
       step => (1 - step / 100) * width,
     );

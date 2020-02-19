@@ -1,8 +1,8 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
-import { TagGroupStore } from '../../../stores/tag-group.store';
+import { TagGroupStore } from '../../../../stores/tag-group.store';
 import _ from 'lodash';
-import { TagData } from '../../../../../electron-app/src/submission/submission-part/interfaces/tag-data.interface';
+import { TagData } from '../../../../../../electron-app/src/submission/submission-part/interfaces/tag-data.interface';
 
 import { Switch, Select, Form, Typography, Menu, Dropdown, Tooltip, Icon, Tag } from 'antd';
 

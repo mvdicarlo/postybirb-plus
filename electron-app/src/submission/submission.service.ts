@@ -124,7 +124,7 @@ export class SubmissionService {
       schedule: new SubmissionScheduleModel(),
       type: createDto.type,
       sources: [],
-      order: await this.repository.count(),
+      order: await this.repository.count({ type: createDto.type }),
     });
 
     let completedSubmission = null;
@@ -311,7 +311,12 @@ export class SubmissionService {
             return this.partService.createOrUpdateSubmissionPart(p, newSubmission.type);
           }),
         );
-        this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+
+        this.eventEmitter
+          .emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission))
+          .then(() => {
+            this.orderSubmissions(submission.type);
+          });
       } catch (err) {
         this.logger.error(err, 'Additional Split Failure');
         await this.deleteSubmission(newSubmission);
@@ -351,7 +356,11 @@ export class SubmissionService {
         }),
       );
 
-      this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission));
+      this.eventEmitter
+        .emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission))
+        .then(() => {
+          this.orderSubmissions(duplicate.type);
+        });
 
       return createdSubmission;
     } catch (err) {
@@ -361,10 +370,56 @@ export class SubmissionService {
     }
   }
 
+  async changeOrder(id: string, to: number, from: number): Promise<void> {
+    const movingSubmission = await this.get(id);
+    const submissions = (await this.getAll(movingSubmission.type)).sort(
+      (a, b) => a.order - b.order,
+    );
+    while (from < 0) {
+      from += submissions.length;
+    }
+    while (to < 0) {
+      to += submissions.length;
+    }
+    if (to >= submissions.length) {
+      let k = to - submissions.length + 1;
+      while (k--) {
+        submissions.push(undefined);
+      }
+    }
+    submissions.splice(to, 0, submissions.splice(from, 1)[0]);
+    await Promise.all(
+      submissions.map((record, index) => {
+        record.order = index;
+        return this.repository.update(record);
+      }),
+    );
+    this.orderSubmissions(movingSubmission.type); // somewhat doubles up, but ensures all UI get notified
+  }
+
+  async orderSubmissions(type: SubmissionType): Promise<void> {
+    const submissions = await this.getAll(type);
+    const ordered = submissions
+      .sort((a, b) => a.order - b.order)
+      .map((record, index) => {
+        record.order = index;
+        return record;
+      });
+    await Promise.all(ordered.map(record => this.repository.update(record)));
+
+    const orderRecord: Record<string, number> = {};
+    Object.values(ordered).forEach(submission => {
+      orderRecord[submission._id] = submission.order;
+    });
+    this.eventEmitter.emit(SubmissionEvent.REORDER, orderRecord);
+  }
+
   async validate(submission: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
     submission = await this.get(submission);
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
-    const problems: Problems = parts.length ? this.validatorService.validateParts(submission, parts) : {};
+    const problems: Problems = parts.length
+      ? this.validatorService.validateParts(submission, parts)
+      : {};
     const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part.asPlain())); // asPlain to expose the _id (a model might work better)
     return {

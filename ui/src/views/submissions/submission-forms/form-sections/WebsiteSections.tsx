@@ -1,15 +1,15 @@
 import React from 'react';
 import _ from 'lodash';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
-import { loginStatusStore, LoginStatusStore } from '../../../stores/login-status.store';
-import { WebsiteRegistry } from '../../../website-components/website-registry';
+import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { loginStatusStore, LoginStatusStore } from '../../../../stores/login-status.store';
+import { WebsiteRegistry } from '../../../../website-components/website-registry';
 import { Form, Typography, Tabs, Badge, Empty } from 'antd';
 import { inject, observer } from 'mobx-react';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
+import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { FileSubmission } from '../../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../../../electron-app/src/submission/interfaces/submission.interface';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { Problems } from '../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { Problems } from '../../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
 
 interface WebsiteSectionsProps {
   loginStatusStore?: LoginStatusStore;

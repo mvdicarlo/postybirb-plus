@@ -1,12 +1,12 @@
 import React from 'react';
 import * as sanitize from 'sanitize-html';
-import { uiStore } from '../../../stores/ui.store';
-import SubmissionService from '../../../services/submission.service';
-import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Website } from '../../../website-components/interfaces/website.interface';
+import { uiStore } from '../../../../stores/ui.store';
+import SubmissionService from '../../../../services/submission.service';
+import { FileSubmission } from '../../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { Website } from '../../../../website-components/interfaces/website.interface';
 import { Card, Alert, Modal, Spin, message } from 'antd';
 import { Editor } from '@tinymce/tinymce-react';
-import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from '../../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 
 interface Props {
   submission: FileSubmission;

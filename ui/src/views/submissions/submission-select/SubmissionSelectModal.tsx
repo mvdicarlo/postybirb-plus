@@ -5,6 +5,8 @@ import { SubmissionPackage } from '../../../../../electron-app/src/submission/in
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 
 interface Props {
+  below?: JSX.Element;
+  label?: string;
   multiple?: boolean;
   onClose: () => void;
   onOk: (submissions: SubmissionPackage<any>[]) => void;
@@ -43,7 +45,9 @@ export default class SubmissionSelectModal extends React.Component<Props, State>
             selectAll={this.props.selectAll}
             submissionType={this.props.submissionType}
             validOnly={this.props.validOnly || false}
+            label={this.props.label}
           />
+          {this.props.below ? <div className="mt-2">{this.props.below}</div> : null}
         </div>
       </Modal>
     );
