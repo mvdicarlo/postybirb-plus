@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Currently a reason to learn React. May end up being something more.",
   "main": "index.js",
   "scripts": {
