@@ -2,7 +2,8 @@ export interface Settings {
   advertise: boolean;
   emptyQueueOnFailedPost: boolean;
   postRetries: number;
-  openOnStartup: boolean;
+  openOnLogin: boolean;
+  openWindowOnStartup: boolean;
   useHardwareAcceleration: boolean;
   maxPNGSizeCompression: number;
   maxPNGSizeCompressionWithAlpha: number;

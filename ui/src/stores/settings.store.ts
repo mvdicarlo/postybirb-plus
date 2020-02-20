@@ -9,12 +9,13 @@ export class SettingsStore {
     advertise: true,
     emptyQueueOnFailedPost: true,
     postRetries: 1,
-    openOnStartup: true,
+    openOnLogin: false,
+    openWindowOnStartup: true,
     useHardwareAcceleration: false,
     maxPNGSizeCompression: 25,
     maxPNGSizeCompressionWithAlpha: 25,
     maxJPEGQualityCompression: 10,
-    maxJPEGSizeCompression: 30,
+    maxJPEGSizeCompression: 30
   };
 
   constructor() {

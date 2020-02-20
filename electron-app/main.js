@@ -147,6 +147,21 @@ function buildTray(image) {
     },
   ];
 
+  if (process.platform === 'win32' || process.platform === 'darwin') {
+    trayItems.splice(0, 0, {
+      label: 'Open on startup',
+      type: 'checkbox',
+      checked: settingsDB.get('openOnLogin').value(),
+      click(event) {
+        app.setLoginItemSettings({
+          openAtLogin: event.checked,
+          path: app.getPath('exe'),
+        });
+        settingsDB.set('openOnLogin', event.checked).write();
+      },
+    });
+  }
+
   const tray = new Tray(image);
   tray.setContextMenu(Menu.buildFromTemplate(trayItems));
   tray.setToolTip('PostyBirb');
