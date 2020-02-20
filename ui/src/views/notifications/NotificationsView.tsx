@@ -78,7 +78,7 @@ export default class NotificationsView extends React.Component<Props, State> {
     return (
       <div>
         <div onClick={() => this.setState({ visible: true })}>
-          <Badge dot={!!notifications.filter(n => !n.viewed).length}>
+          <Badge count={notifications.filter(n => !n.viewed).length} overflowCount={99}>
             <Icon type="bell" />
             <span>App Notifications</span>
           </Badge>

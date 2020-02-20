@@ -140,4 +140,20 @@ li .ant-light-list-item .error {
   padding: 0 !important;
 }
 
+.ant-dark-menu .ant-dark-badge-count,
+.ant-light-menu .ant-light-badge-count {
+  min-width: 10px;
+  height: 10px;
+  padding: 0 3px;
+  font-size: 9px;
+  line-height: 10px;
+  top: 7px;
+  right: -8px;
+}
+
+.ant-dark-menu-inline-collapsed .ant-dark-badge-count,
+.ant-dark-menu-inline-collapsed .ant-light-badge-count {
+  right: 0;
+}
+
 @tailwind utilities;
