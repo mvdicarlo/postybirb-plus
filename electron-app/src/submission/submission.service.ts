@@ -108,7 +108,9 @@ export class SubmissionService {
   }
 
   async getAllAndValidate(type?: SubmissionType): Promise<Array<SubmissionPackage<any>>> {
-    return await Promise.all((await this.getAll(type)).map(s => this.validate(s)));
+    return (await Promise.all((await this.getAll(type)).map(s => this.validate(s)))).filter(
+      s => Object.keys(s.parts).length,
+    ); // filter out submissions that are missing parts entirely (assumes it is currently being deleted)
   }
 
   postingStateChanged(): void {
@@ -444,7 +446,7 @@ export class SubmissionService {
     return {};
   }
 
-  async deleteSubmission(id: SubmissionEntityReference, skipCancel?: boolean): Promise<number> {
+  async deleteSubmission(id: SubmissionEntityReference, skipCancel?: boolean): Promise<void> {
     const submission = await this.get(id);
     id = submission._id;
     this.logger.log(id, 'Delete Submission');
@@ -461,9 +463,9 @@ export class SubmissionService {
         break;
     }
 
+    await this.repository.remove(id);
     await this.partService.removeBySubmissionId(id);
     this.eventEmitter.emit(SubmissionEvent.REMOVED, id);
-    return this.repository.remove(id);
   }
 
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<any>> {
