@@ -156,4 +156,11 @@ li .ant-light-list-item .error {
   right: 0;
 }
 
+.ant-dark-fullcalendar-fullscreen
+  .ant-dark-fullcalendar-month-panel-selected-cell
+  .ant-dark-fullcalendar-month,
+.ant-dark-fullcalendar-fullscreen .ant-dark-fullcalendar-selected-day .ant-dark-fullcalendar-date {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 @tailwind utilities;
