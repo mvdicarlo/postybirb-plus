@@ -74,14 +74,17 @@ async function initialize() {
 
   if (!shouldDisplayWindow) return; // observe user setting
   if (global.SERVER_ONLY_MODE) return;
-  mainWindowState = windowStateKeeper({
-    defaultWidth: 992,
-    defaultHeight: 800,
-  });
   createWindow();
 }
 
 function createWindow() {
+  if (!mainWindowState) {
+    mainWindowState = windowStateKeeper({
+      defaultWidth: 992,
+      defaultHeight: 800,
+    });
+  }
+  
   window = new BrowserWindow({
     show: false,
     width: mainWindowState.width,
