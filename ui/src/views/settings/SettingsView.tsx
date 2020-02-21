@@ -156,7 +156,7 @@ export default class SettingsView extends React.Component<Props> {
               </Form.Item>
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Display" key="2">
+          <Collapse.Panel header="Theme" key="2">
             <Form.Item label="Theme">
               <Radio.Group
                 value={this.props.uiStore!.state.theme}
@@ -177,10 +177,17 @@ export default class SettingsView extends React.Component<Props> {
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Startup" key="4">
-            <Form.Item label="Open PostyBirb on application startup">
+            <Form.Item label="Start PostyBirb on startup">
               <Switch
-                checked={settings.openOnStartup}
-                onChange={value => this.updateSetting('openOnStartup', value)}
+                disabled={/Linux/.test(navigator.platform)}
+                checked={settings.openOnLogin}
+                onChange={value => this.updateSetting('openOnLogin', value)}
+              />
+            </Form.Item>
+            <Form.Item label="Show PostyBirb Window on application startup">
+              <Switch
+                checked={settings.openWindowOnStartup}
+                onChange={value => this.updateSetting('openWindowOnStartup', value)}
               />
             </Form.Item>
           </Collapse.Panel>

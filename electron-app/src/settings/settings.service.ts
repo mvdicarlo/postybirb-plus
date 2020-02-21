@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import { Injectable, Logger } from '@nestjs/common';
 import * as lowdb from 'lowdb';
 import { SettingEvent } from './settings.events.enum';
@@ -21,6 +22,14 @@ export class SettingsService {
 
   setValue(setting: keyof Settings, value: any): void {
     this.logger.debug(`${setting} -> ${value}`, 'Update Setting');
+
+    if (setting === 'openOnLogin') {
+      app.setLoginItemSettings({
+        openAtLogin: value,
+        path: app.getPath('exe'),
+      });
+    }
+
     this.settings.set(setting, value).write();
     this.eventEmitter.emit(SettingEvent.UPDATED, this.settings.getState());
   }

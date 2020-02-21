@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "PostyBurb Plus",
   "main": "main.js",
   "author": "Michael DiCarlo",
@@ -115,7 +115,7 @@
   },
   "build": {
     "appId": "com.lemonynade.postybirb.plus",
-    "productName": "PostyBirb-Plus",
+    "productName": "PostyBirb Plus",
     "publish": {
       "provider": "github",
       "owner": "mvdicarlo",
@@ -145,6 +145,9 @@
         "snap"
       ]
     },
+    "nsis": {
+      "deleteAppDataOnUninstall": true
+    },
     "win": {
       "publisherName": [
         "Michael DiCarlo"
@@ -153,6 +156,12 @@
       "target": [
         {
           "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
           "arch": [
             "x64"
           ]
