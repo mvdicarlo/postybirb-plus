@@ -17,6 +17,7 @@ export class SSL {
     const notification = new Notification({
       title: 'PostyBirb',
       body: 'Please wait a few moments for PostyBirb to run some initial setup.',
+      silent: true,
     });
     notification.show();
 
