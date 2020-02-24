@@ -27,6 +27,7 @@ import { submissionStore } from '../../../../stores/submission.store';
 import PostService from '../../../../services/post.service';
 import FallbackStoryInput from '../form-components/FallbackStoryInput';
 import RemoteService from '../../../../services/remote.service';
+import SubmissionImageCropper from '../../submission-image-cropper/SubmissionImageCropper';
 import {
   Form,
   Button,
@@ -60,6 +61,10 @@ export interface SubmissionEditFormState {
   submissionType: SubmissionType;
   touched: boolean;
   hasError: boolean;
+  showThumbnailCropper: boolean;
+  thumbnailFileForCrop?: File;
+  imageCropperResolve?: (file: File) => void;
+  imageCropperReject?: () => void;
 }
 
 @inject('loginStatusStore')
@@ -90,7 +95,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     removedParts: [],
     submission: undefined,
     submissionType: SubmissionType.FILE,
-    touched: false
+    touched: false,
+    showThumbnailCropper: false
   };
 
   constructor(props: Props) {
@@ -403,6 +409,24 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     });
   }
 
+  cropThumbnail(file: File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.setState({
+        showThumbnailCropper: true,
+        thumbnailFileForCrop: file,
+        imageCropperResolve: resolve,
+        imageCropperReject: reject
+      });
+    }).finally(() => {
+      this.setState({
+        showThumbnailCropper: false,
+        thumbnailFileForCrop: undefined,
+        imageCropperResolve: undefined,
+        imageCropperReject: undefined
+      });
+    });
+  }
+
   removeThumbnail() {
     if ((this.state.submission as FileSubmission).thumbnail) {
       SubmissionService.removeThumbnail(this.state.submission!._id)
@@ -604,6 +628,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                             beforeUpload={file => {
                               return file.type.includes('image/');
                             }}
+                            transformFile={this.cropThumbnail.bind(this)}
                             onChange={this.fileUploadChange}
                             action={this.thumbnailFileChangeAction}
                             headers={{ Authorization: window.AUTH_ID }}
@@ -616,6 +641,12 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     >
                       <Card.Meta
                         description={submission.thumbnail ? null : 'No thumbnail provided'}
+                      />
+                      <SubmissionImageCropper
+                        visible={this.state.showThumbnailCropper}
+                        file={this.state.thumbnailFileForCrop!}
+                        onSubmit={this.state.imageCropperResolve!}
+                        onClose={this.state.imageCropperReject!}
                       />
                     </Card>
                   </div>
