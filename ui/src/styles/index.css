@@ -12,6 +12,10 @@ ul {
   color: inherit !important;
 }
 
+.bg-inherit {
+  background-color: inherit;
+}
+
 .text-link:hover {
   cursor: pointer;
   color: #40a9ff;
@@ -148,7 +152,7 @@ li .ant-light-list-item .error {
   font-size: 9px;
   line-height: 10px;
   top: 7px;
-  right: -8px;
+  right: -12px;
 }
 
 .ant-dark-menu-inline-collapsed .ant-dark-badge-count,

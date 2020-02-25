@@ -18,6 +18,7 @@ import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
+import { KofiIcon, DiscordIcon } from './SvgIcons';
 import {
   Icon,
   Layout,
@@ -93,49 +94,6 @@ export default class AppLayout extends React.Component<Props, State> {
   handleNavSelectChange = ({ key }) => {
     this.props.uiStore!.setActiveNav(key);
   };
-
-  getDiscordIcon() {
-    return (
-      <svg height="1em" width="1em" viewBox="0 0 245 240">
-        <path
-          fill="#FFFFFF"
-          d="M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1s-4.5-11.1-10.2-11.1z"
-        />
-        <path
-          fill="#FFFFFF"
-          d="M189.5 20h-134C44.2 20 35 29.2 35 40.6v135.2c0 11.4 9.2 20.6 20.5 20.6h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V40.6c0-11.4-9.2-20.6-20.5-20.6zm-38.6 130.6s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.7-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.1-10.5 28.1-10.5l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s13.7-.3 28.1 10.5c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"
-        />
-      </svg>
-    );
-  }
-
-  getKofiIcon() {
-    return (
-      <svg width="1em" height="1em" viewBox="0 0 644.8401 410.86875">
-        <g id="layer1" transform="translate(-37.579964,-135.49927)">
-          <g transform="matrix(1.1421528,0,0,-1.1421528,265.93398,460.73095)">
-            <g>
-              <path
-                fill="#ffffff"
-                fillOpacity="1"
-                fillRule="nonzero"
-                stroke="none"
-                d="m 0,0 c -19.946,-2.492 -36.151,-0.622 -36.151,-0.622 l 0,122.132 38.02,0 c 0,0 42.385,-11.839 42.385,-56.704 C 44.254,23.68 23.063,7.478 0,0 M 105.063,85.739 C 88.435,173.56 0.624,184.473 0.624,184.473 l -393.333,0 c -12.99,0 -14.588,-17.148 -14.588,-17.148 0,0 -1.752,-157.43 -0.481,-254.112 3.524,-52.093 55.597,-57.435 55.597,-57.435 0,0 177.701,0.52 257.2,1.039 52.41,9.181 57.674,55.155 57.155,80.3 93.527,-5.196 159.515,60.8 142.889,148.622"
-                transform="matrix(1.0944245,0,0,1.0944245,246.85536,82.861446)"
-              />
-              <path
-                fill="#ff5f5f"
-                fillOpacity="1"
-                fillRule="nonzero"
-                stroke="none"
-                d="m 0,0 c 4.445,-2.238 7.285,0.543 7.285,0.543 0,0 65.045,59.367 94.348,93.557 26.063,30.586 27.762,82.129 -16.997,101.388 -44.758,19.258 -81.584,-22.657 -81.584,-22.657 -31.935,35.123 -80.268,33.345 -102.623,9.575 -22.354,-23.77 -14.548,-64.568 2.129,-87.274 15.655,-21.314 84.465,-82.644 94.894,-93.016 0,0 0.76,-0.795 2.548,-2.116"
-              />
-            </g>
-          </g>
-        </g>
-      </svg>
-    );
-  }
 
   render() {
     const { uiStore } = this.props;
@@ -309,7 +267,7 @@ export default class AppLayout extends React.Component<Props, State> {
                   window.electron.shell.openInBrowser('https://discordapp.com/invite/jK5JQJF')
                 }
               >
-                <Icon component={this.getDiscordIcon.bind(this)} />
+                <Icon component={DiscordIcon} />
                 <span>Discord</span>
               </Menu.Item>
 
@@ -317,7 +275,7 @@ export default class AppLayout extends React.Component<Props, State> {
                 key="donate"
                 onClick={() => window.electron.shell.openInBrowser('http://ko-fi.com/A81124JD')}
               >
-                <Icon component={this.getKofiIcon.bind(this)} />
+                <Icon component={KofiIcon} />
                 <span>Donate</span>
               </Menu.Item>
 
@@ -389,7 +347,7 @@ export default class AppLayout extends React.Component<Props, State> {
               <AppHeader />
             </div>
             <Content className="container primary-layout-container">
-              <div className="pt-3 px-3 h-full overflow-y-auto" id="primary-container">
+              <div className="px-3 h-full overflow-y-auto bg-inherit" id="primary-container">
                 <Route exact path="/" component={Home} />
                 <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
                 <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
