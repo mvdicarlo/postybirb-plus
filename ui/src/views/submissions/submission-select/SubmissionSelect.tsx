@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'lodash';
 import { inject, observer } from 'mobx-react';
-import { SubmissionStore } from '../../../stores/submission.store';
+import { SubmissionStore, submissionStore } from '../../../stores/submission.store';
 import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { Select, Avatar } from 'antd';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
@@ -11,6 +11,8 @@ import SubmissionUtil from '../../../utils/submission.util';
 interface Props {
   className?: string;
   ignoreId?: string;
+  ignorePosting?: boolean;
+  ignoreScheduled?: boolean;
   label?: string;
   multiple?: boolean;
   onSelect: (submissions: SubmissionPackage<any>[]) => void;
@@ -26,16 +28,30 @@ export default class SubmissionSelect extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
     if (props.selectAll) {
-      let submissions = this.props
-        .submissionStore!.all.filter(s => s.submission.type === this.props.submissionType)
-        .filter(s => s.submission._id !== this.props.ignoreId);
-
-      if (this.props.validOnly) {
-        submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
-      }
-      
-      this.onChange(submissions.map(s => s.submission._id));
+      this.onChange(this.getSubmissions(props).map(s => s.submission._id));
     }
+  }
+
+  getSubmissions(props: Props) {
+    let submissions = props
+      .submissionStore!.all.filter(s => s.submission.type === props.submissionType)
+      .filter(s => s.submission._id !== props.ignoreId);
+
+    if (props.validOnly) {
+      submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
+    }
+
+    if (props.ignorePosting) {
+      submissions = submissions
+        .filter(s => !s.submission.isPosting)
+        .filter(s => !s.submission.isQueued);
+    }
+
+    if (props.ignoreScheduled) {
+      submissions = submissions.filter(s => !s.submission.schedule.isScheduled);
+    }
+
+    return submissions;
   }
 
   onChange(ids: string[]) {
@@ -45,13 +61,7 @@ export default class SubmissionSelect extends React.Component<Props> {
   }
 
   render() {
-    let submissions = this.props
-      .submissionStore!.all.filter(s => s.submission.type === this.props.submissionType)
-      .filter(s => s.submission._id !== this.props.ignoreId);
-
-    if (this.props.validOnly) {
-      submissions = submissions.filter(s => SubmissionUtil.getProblemCount(s.problems) === 0);
-    }
+    const submissions = this.getSubmissions(this.props);
 
     return (
       <Select

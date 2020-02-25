@@ -421,6 +421,8 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
               selectAll={false}
               onClose={() => this.setState({ saveVisible: false })}
               onOk={this.onSubmit}
+              ignorePosting={true}
+              ignoreScheduled={true}
             >
               <Alert
                 type="warning"

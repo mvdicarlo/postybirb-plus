@@ -567,6 +567,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
       const submissionFromStore = submissionStore.getSubmission(this.id);
       const isPosting = submissionFromStore && submissionFromStore.submission.isPosting;
+      const isQueued = submissionFromStore && submissionFromStore.submission.isQueued;
+      const isScheduled =
+        submissionFromStore && submissionFromStore.submission.schedule.isScheduled;
 
       return (
         <div>
@@ -860,7 +863,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               <Typography.Text type="danger">
                 Updates cannot be made while the submission is posting.
               </Typography.Text>
-            ) : (
+            ) : isScheduled || isQueued ? null : (
               <span>
                 {this.formHasChanges() ? (
                   <Popconfirm
