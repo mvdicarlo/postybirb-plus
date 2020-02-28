@@ -199,9 +199,9 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
     return (
       <List.Item
         actions={[
-          <a key="action-login" onClick={this.showModal}>
+          <span className="text-link" key="action-login" onClick={this.showModal}>
             Login
-          </a>,
+          </span>,
           <Popconfirm
             title={
               <div>
@@ -212,11 +212,11 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
             }
             onConfirm={() => this.deleteAccount(this.props.accountInfo._id)}
           >
-            <a key="action-delete">
+            <span className="text-link" key="action-delete">
               <Typography.Text type="danger">
                 <Icon type="delete" />
               </Typography.Text>
-            </a>
+            </span>
           </Popconfirm>
         ]}
       >

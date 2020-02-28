@@ -14,7 +14,8 @@ export default class ImageManipulator {
   private deferredLocation: string;
   private process: ChildProcess.ChildProcess;
   private img: Jimp;
-  private resizeWidth: number;
+  private resizePx: number;
+  private scalePercent: number;
   private quality: number;
   private convertOnAlpha: boolean;
   private resolve: any;
@@ -85,8 +86,13 @@ export default class ImageManipulator {
     return this;
   }
 
-  resize(width: number) {
-    this.resizeWidth = Math.floor(Math.max(1, width));
+  scale(scalePercent: number) {
+    this.scalePercent = scalePercent;
+    return this;
+  }
+
+  resize(scalePx: number) {
+    this.resizePx = Math.floor(Math.max(1, scalePx));
     return this;
   }
 
@@ -103,7 +109,7 @@ export default class ImageManipulator {
   }
 
   async getData(): Promise<{ buffer: Buffer; type: string }> {
-    if (!this.hasChanges) {
+    if (!this.hasChanges()) {
       return { buffer: this.buffer, type: this.originalType };
     }
     if (this.isDeferred) {
@@ -115,8 +121,19 @@ export default class ImageManipulator {
       }
       const clone = this.img.clone();
       clone.quality(this.quality);
-      if (this.resizeWidth < clone.bitmap.width) {
-        clone.resize(this.resizeWidth, Jimp.AUTO);
+      const ar = clone.bitmap.width / clone.bitmap.height;
+      if (ar >= 1) {
+        if (this.resizePx < clone.bitmap.width) {
+          clone.resize(this.resizePx, Jimp.AUTO);
+        }
+      } else {
+        if (this.resizePx < clone.bitmap.height) {
+          clone.resize(Jimp.AUTO, this.resizePx);
+        }
+      }
+
+      if (this.scalePercent) {
+        clone.scale(this.scalePercent);
       }
 
       let newType = this.type;
@@ -137,6 +154,10 @@ export default class ImageManipulator {
 
   getQuality(): number {
     return this.quality;
+  }
+
+  getScale(): number {
+    return this.scalePercent;
   }
 
   getWidth(): number {
@@ -193,11 +214,15 @@ export default class ImageManipulator {
       return true;
     }
 
-    if (this.resizeWidth) {
+    if (this.resizePx) {
       return true;
     }
 
     if (this.convertOnAlpha && this.originalType !== 'image/jpeg') {
+      return true;
+    }
+
+    if (this.scalePercent && this.scalePercent !== 1) {
       return true;
     }
 
@@ -215,7 +240,8 @@ export default class ImageManipulator {
         originalType: this.originalType,
         quality: this.quality,
         type: this.type,
-        width: this.resizeWidth,
+        resizePx: this.resizePx,
+        scalePercent: this.scalePercent,
       });
     }).then(async ({ location, type }) => {
       let buffer = this.buffer;

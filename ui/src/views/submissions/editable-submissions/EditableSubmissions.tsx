@@ -48,7 +48,12 @@ export class EditableSubmissions extends React.Component<Props, State> {
     scheduleManyModalVisible: false
   };
 
-  scheduleManyPeriod: any = {
+  scheduleManyPeriod: {
+    d: number;
+    h: number;
+    m: number;
+    time: moment.Moment;
+  } = {
     d: 0,
     h: 0,
     m: 1,
@@ -59,9 +64,9 @@ export class EditableSubmissions extends React.Component<Props, State> {
 
   deleteSubmissions(submissions: SubmissionPackage<any>[]) {
     this.setState({ deleteModalVisible: false });
-    Promise.all(submissions.map(s => SubmissionService.deleteSubmission(s.submission._id))).finally(
-      () => message.success('Submissions deleted.')
-    );
+    Promise.all(
+      submissions.map(s => SubmissionService.deleteSubmission(s.submission._id))
+    ).finally(() => message.success('Submissions deleted.'));
   }
 
   async postSubmissions(submissions: SubmissionPackage<any>[]) {
@@ -192,6 +197,8 @@ export class EditableSubmissions extends React.Component<Props, State> {
                           )}
                           onClose={() => this.setState({ deleteModalVisible: false })}
                           onOk={this.deleteSubmissions.bind(this)}
+                          ignorePosting={true}
+                          ignoreScheduled={true}
                         />
                         <SubmissionSelectModal
                           visible={this.state.postModalVisible}
@@ -206,6 +213,8 @@ export class EditableSubmissions extends React.Component<Props, State> {
                           )}
                           onClose={() => this.setState({ postModalVisible: false })}
                           onOk={this.postSubmissions.bind(this)}
+                          ignorePosting={true}
+                          ignoreScheduled={true}
                         >
                           <p>Submissions that have a schedule time will be scheduled instead</p>
                         </SubmissionSelectModal>
@@ -220,6 +229,8 @@ export class EditableSubmissions extends React.Component<Props, State> {
                             'submission.type',
                             SubmissionType.FILE
                           )}
+                          ignorePosting={true}
+                          ignoreScheduled={true}
                           onClose={() => this.setState({ scheduleManyModalVisible: false })}
                           onOk={this.scheduleSubmissions.bind(this)}
                           below={
@@ -231,9 +242,7 @@ export class EditableSubmissions extends React.Component<Props, State> {
                                   format="YYYY-MM-DD HH:mm"
                                   showTime={{ format: 'HH:mm', use12Hours: true }}
                                   onChange={value =>
-                                    (this.scheduleManyPeriod.time = value
-                                      ? value.valueOf()
-                                      : undefined)
+                                    (this.scheduleManyPeriod.time = value ? value : moment())
                                   }
                                 />
                               </Form.Item>
@@ -242,7 +251,7 @@ export class EditableSubmissions extends React.Component<Props, State> {
                                   <InputNumber
                                     defaultValue={this.scheduleManyPeriod.d}
                                     min={0}
-                                    onChange={value => (this.scheduleManyPeriod.d = value)}
+                                    onChange={value => (this.scheduleManyPeriod.d = value || 0)}
                                     precision={0}
                                   />
                                 </Form.Item>
@@ -250,7 +259,7 @@ export class EditableSubmissions extends React.Component<Props, State> {
                                   <InputNumber
                                     defaultValue={this.scheduleManyPeriod.h}
                                     min={0}
-                                    onChange={value => (this.scheduleManyPeriod.h = value)}
+                                    onChange={value => (this.scheduleManyPeriod.h = value || 0)}
                                     precision={0}
                                   />
                                 </Form.Item>
@@ -258,14 +267,14 @@ export class EditableSubmissions extends React.Component<Props, State> {
                                   <InputNumber
                                     defaultValue={this.scheduleManyPeriod.m}
                                     min={0}
-                                    onChange={value => (this.scheduleManyPeriod.m = value)}
+                                    onChange={value => (this.scheduleManyPeriod.m = value || 0)}
                                     precision={0}
                                   />
                                 </Form.Item>
                               </Form.Item>
                             </Form>
                           }
-                        ></SubmissionSelectModal>
+                        />
                       </div>
                     }
                   />

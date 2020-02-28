@@ -44,7 +44,12 @@ export class FileRepositoryService {
           frame0.getImage().read(),
           'image/jpeg',
         );
-        thumbnail = (await im.resize(300).getData()).buffer;
+        thumbnail = (
+          await im
+            .resize(300)
+            .setQuality(99)
+            .getData()
+        ).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
         const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
           file.buffer,
@@ -63,7 +68,10 @@ export class FileRepositoryService {
             data.type,
           )}`;
 
-          const thumbnailData = await im.resize(300).getData();
+          const thumbnailData = await im
+            .resize(300)
+            .setQuality(99)
+            .getData();
           thumbnail = thumbnailData.buffer;
           thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
             thumbnailData.type,
@@ -110,15 +118,26 @@ export class FileRepositoryService {
     await Promise.all(files.filter(f => !!f).map(f => this.removeSubmissionFile(f)));
   }
 
-  scaleImage(file: UploadedFile, w: number): UploadedFile {
+  scaleImage(file: UploadedFile, scalePx: number): UploadedFile {
     let image = nativeImage.createFromBuffer(file.buffer);
-    const { width } = image.getSize();
-    if (width > w) {
-      image = image.resize({
-        width: w,
-        height: w / image.getAspectRatio(),
-      });
+    const { width, height } = image.getSize();
+    const ar = image.getAspectRatio();
+    if (ar >= 1) {
+      if (width > scalePx) {
+        image = image.resize({
+          width: scalePx,
+          height: scalePx / ar,
+        });
+      }
+    } else {
+      if (height > scalePx) {
+        image = image.resize({
+          width: scalePx * ar,
+          height: scalePx,
+        });
+      }
     }
+
     const copy = _.cloneDeep(file);
     copy.buffer = image.toJPEG(100);
     copy.mimetype = 'image/jpeg';

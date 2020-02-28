@@ -30,7 +30,7 @@ export default class WebsiteValidator {
   static getTags(defaultTags: TagData, websiteTags: TagData): string[] {
     const extendDefault: boolean = _.get(websiteTags, 'extendDefault', true);
     return extendDefault
-      ? [...defaultTags.value, ..._.get(websiteTags, 'value', [])]
+      ? [..._.get(websiteTags, 'value', []), ...defaultTags.value]
       : [..._.get(websiteTags, 'value', [])];
   }
 

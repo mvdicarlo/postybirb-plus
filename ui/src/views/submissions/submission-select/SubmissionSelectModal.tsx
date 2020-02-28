@@ -6,6 +6,8 @@ import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 
 interface Props {
   below?: JSX.Element;
+  ignorePosting?: boolean;
+  ignoreScheduled?: boolean;
   label?: string;
   multiple?: boolean;
   onClose: () => void;
@@ -40,12 +42,14 @@ export default class SubmissionSelectModal extends React.Component<Props, State>
           {this.props.children ? <div className="mb-2">{this.props.children}</div> : null}
           <SubmissionSelect
             className="w-full"
+            ignorePosting={this.props.ignorePosting}
+            ignoreScheduled={this.props.ignoreScheduled}
+            label={this.props.label}
             multiple={this.props.multiple}
             onSelect={selected => this.setState({ selected })}
             selectAll={this.props.selectAll}
             submissionType={this.props.submissionType}
             validOnly={this.props.validOnly || false}
-            label={this.props.label}
           />
           {this.props.below ? <div className="mt-2">{this.props.below}</div> : null}
         </div>
