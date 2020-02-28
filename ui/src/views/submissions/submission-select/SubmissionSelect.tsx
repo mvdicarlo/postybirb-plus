@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'lodash';
 import { inject, observer } from 'mobx-react';
-import { SubmissionStore, submissionStore } from '../../../stores/submission.store';
+import { SubmissionStore } from '../../../stores/submission.store';
 import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { Select, Avatar } from 'antd';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';

@@ -578,8 +578,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               {this.isFileSubmission(submission) ? (
                 <Form.Item>
                   <Typography.Title level={3}>
-                    Files
-                    <a className="nav-section-anchor" href="#Files" id="#Files"></a>
+                    <span className="nav-section-anchor" id="#Files">Files</span>
                   </Typography.Title>
                   <div className="flex">
                     <Card
@@ -716,8 +715,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Schedule
-                  <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
+                  <span className="nav-section-anchor" id="#Schedule">Schedule</span>
                 </Typography.Title>
                 <DatePicker
                   value={this.state.postAt ? moment(this.state.postAt) : undefined}
@@ -730,11 +728,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Defaults
+                  <span className="nav-section-anchor" id="#Defaults">Defaults</span>
                   <Tooltip title="The default fields are used by all selected websites. You can override these defaults inside of each website section.">
                     <Icon className="text-sm ml-1 text-primary" type="question-circle" />
                   </Tooltip>
-                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
@@ -747,8 +744,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Websites
-                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                  <span className="nav-section-anchor" id="#Websites">Websites</span>
                 </Typography.Title>
                 <TreeSelect
                   multiple

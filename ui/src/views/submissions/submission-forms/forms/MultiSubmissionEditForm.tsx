@@ -337,8 +337,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
             <Form layout="vertical" style={{ flex: 10 }}>
               <Form.Item>
                 <Typography.Title level={3}>
-                  Defaults
-                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
+                  <span className="nav-section-anchor" id="#Defaults">Defaults</span>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
@@ -351,8 +350,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Websites
-                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                  <span className="nav-section-anchor" id="#Websites">Websites</span>
                 </Typography.Title>
                 <TreeSelect
                   multiple
