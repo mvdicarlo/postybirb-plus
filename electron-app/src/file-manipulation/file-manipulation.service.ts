@@ -87,20 +87,17 @@ export class FileManipulationService {
       reductionValue = this.settings.getValue<number>('maxPNGSizeCompressionWithAlpha');
     }
 
-    const width = im.getWidth();
-    const stepSize = originalSize / targetSize > 1.5 ? 20 : 10; // try to optimize # of runs for way larger files
-    const sizeSteps = this.getSteps(reductionValue, stepSize).map(step => (1 - step / 100) * width);
+    const scaleSize = originalSize / targetSize > 1.5 ? 20 : 10; // try to optimize # of runs for way larger files
+    const scaleSteps = this.getSteps(reductionValue, scaleSize).map(step => 1 - step / 100);
 
-    const lastStep = sizeSteps.pop();
-    im.resize(lastStep);
-    const lastScaled = await im.getData(); // check end first to see if its bother calculating anything between
+    const lastStep = scaleSteps.pop();
+    const lastScaled = await im.scale(lastStep).getData(); // check end first to see if we should calculate anything between
     if (lastScaled.buffer.length > targetSize) {
       return null;
     }
 
-    for (const wdth of sizeSteps) {
-      im.resize(wdth);
-      const scaled = await im.getData();
+    for (const scale of scaleSteps) {
+      const scaled = await im.scale(scale).getData();
       if (scaled.buffer.length <= targetSize) {
         return scaled.buffer;
       }
@@ -117,25 +114,19 @@ export class FileManipulationService {
     const maxQualityReduction = this.settings.getValue<number>('maxJPEGQualityCompression');
     const maxSizeReduction = this.settings.getValue<number>('maxJPEGSizeCompression');
 
-    im.toJPEG();
+    im.toJPEG().setQuality(99); // reduce to 99% quality
 
-    const width = im.getWidth();
-    const stepSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
-    const sizeSteps = this.getSteps(maxSizeReduction, stepSize).map(
-      step => (1 - step / 100) * width,
-    );
+    const scaleSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
+    const scaleSteps = this.getSteps(maxSizeReduction, scaleSize).map(step => 1 - step / 100);
 
-    const lastStep = sizeSteps[sizeSteps.length - 1];
-    im.resize(lastStep);
-    const lastScaled = await im.getData(); // check end first to see if its bother calculating anything between
+    const lastStep = scaleSteps[scaleSteps.length - 1];
+    const lastScaled = await im.scale(lastStep).getData(); // check end first to see if we should calculate anything between
     if (lastScaled.buffer.length <= targetSize) {
       if (lastScaled.buffer.length === targetSize) {
         return lastScaled.buffer;
       }
-      for (const wdth of sizeSteps.slice(0, -1)) {
-        im.resize(wdth);
-        const scaled = await im.getData();
-
+      for (const scale of scaleSteps.slice(0, -1)) {
+        const scaled = await im.scale(scale).getData();
         if (scaled.buffer.length <= targetSize) {
           return scaled.buffer;
         }
@@ -145,9 +136,9 @@ export class FileManipulationService {
 
     const qualitySteps = this.getSteps(maxQualityReduction, 2).map(step => (1 - step / 100) * 100);
     // Attempt combo of quality + size (which is probably pretty slow)
-    for (const wdth of sizeSteps) {
+    for (const scale of scaleSteps) {
       for (const quality of qualitySteps) {
-        im.toJPEG(quality).resize(wdth);
+        im.toJPEG(quality).scale(scale);
         const scaled = await im.getData();
         if (scaled.buffer.length <= targetSize) {
           return scaled.buffer;

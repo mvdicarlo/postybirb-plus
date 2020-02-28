@@ -10,13 +10,27 @@ let manipulator = null; // JIMP
 process.on('message', async msg => {
   let hasChanges = false;
   try {
-    let { convertOnAlpha, location, quality, type, width, originalType } = msg;
+    let { convertOnAlpha, location, quality, type, resizePx, originalType, scalePercent } = msg;
     if (!manipulator) {
       manipulator = await Jimp.read(location);
     }
     const clone = manipulator.clone();
-    if (width && width < clone.bitmap.width) {
-      clone.resize(width, Jimp.AUTO);
+    if (resizePx) {
+      const ar = clone.bitmap.width / clone.bitmap.height;
+      if (ar >= 1) {
+        if (resizePx < clone.bitmap.width) {
+          clone.resize(resizePx, Jimp.AUTO);
+          hasChanges = true;
+        }
+      } else {
+        if (resizePx < clone.bitmap.height) {
+          clone.resize(Jimp.AUTO, resizePx);
+          hasChanges = true;
+        }
+      }
+    }
+    if (scalePercent && scalePercent !== 1) {
+      clone.scale(scalePercent);
       hasChanges = true;
     }
     if (quality !== 100) {
