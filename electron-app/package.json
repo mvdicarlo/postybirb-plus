@@ -13,7 +13,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "postinstall": "electron-builder install-app-deps",
-    "build": "nest build",
+    "build": "npm run test && nest build",
     "build:linux": "electron-builder -l",
     "build:mac": "electron-builder -m",
     "build:windows": "electron-builder -w",
@@ -97,21 +97,6 @@
     "tsconfig-paths": "^3.9.0",
     "tslint": "^5.20.0",
     "typescript": "^3.6.3"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".spec.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "runner": "@jest-runner/electron/main"
   },
   "build": {
     "appId": "com.lemonynade.postybirb.plus",
