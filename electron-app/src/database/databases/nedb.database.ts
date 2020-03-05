@@ -1,14 +1,16 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { DATABASE_DIRECTORY } from 'src/directories';
-import * as path from 'path';
 import * as Datastore from 'nedb';
 import * as util from 'util';
 import { validate } from 'class-validator';
 import { classToPlain } from 'class-transformer';
-import Entity from './entity.base';
-import { EntityIntf } from './entity.base.interface';
+import Entity from '../models/entity.model';
+import { EntityIntf } from '../interfaces/entity.interface';
+import { Database } from '../database.abstract';
 
-export default abstract class EntityRepository<T extends Entity, K extends EntityIntf> {
+export default abstract class NedbDatabase<T extends Entity, K extends EntityIntf> extends Database<
+  T,
+  K
+> {
   protected readonly db: Datastore;
   protected _find: Function;
   protected _findOne: Function;
@@ -17,14 +19,12 @@ export default abstract class EntityRepository<T extends Entity, K extends Entit
   protected _update: Function;
 
   constructor(
-    private readonly databaseName: string,
-    private readonly clazz: new (...args: any[]) => T,
-    private readonly classDescriminatorFn?: (entity: K) => new (...args: any[]) => T,
+    protected readonly databaseOptions: object,
+    protected readonly clazz: new (...args: any[]) => T,
+    protected readonly classDescriminatorFn?: (entity: K) => new (...args: any[]) => T,
   ) {
-    this.db = new Datastore({
-      filename: path.join(DATABASE_DIRECTORY, `${databaseName}.db`),
-      autoload: true,
-    });
+    super(clazz, classDescriminatorFn);
+    this.db = new Datastore(databaseOptions);
 
     this._find = util.promisify(this.db.find.bind(this.db));
     this._findOne = util.promisify(this.db.findOne.bind(this.db));
@@ -125,18 +125,5 @@ export default abstract class EntityRepository<T extends Entity, K extends Entit
     return new Promise(resolve => {
       this.db.count(query || {}, (err, count) => resolve(count));
     });
-  }
-
-  private constructEntity(entity: K): T {
-    if (!entity) {
-      return null;
-    }
-
-    let newFn = this.clazz;
-    if (this.classDescriminatorFn) {
-      newFn = this.classDescriminatorFn(entity);
-    }
-
-    return new newFn(entity);
   }
 }

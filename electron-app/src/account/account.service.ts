@@ -18,7 +18,6 @@ import { SubmissionTemplateService } from 'src/submission/submission-template/su
 import UserAccountEntity from './models/user-account.entity';
 import { UserAccountDto } from './interfaces/user-account.dto.interface';
 
-// TODO ability to update alias
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);

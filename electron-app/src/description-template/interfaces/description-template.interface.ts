@@ -1,4 +1,4 @@
-import { EntityIntf } from '../../base/entity/entity.base.interface';
+import { EntityIntf } from '../../database/interfaces/entity.interface';
 
 export interface DescriptionTemplate extends EntityIntf {
   title: string;

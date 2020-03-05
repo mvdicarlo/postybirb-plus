@@ -1,4 +1,4 @@
-import Entity from 'src/base/entity/entity.base';
+import Entity from 'src/database/models/entity.model';
 import { SubmissionLog, PartWithResponse } from '../interfaces/submission-log.interface';
 import { Submission } from '../../interfaces/submission.interface';
 import { IsNotEmpty, IsArray, IsString } from 'class-validator';

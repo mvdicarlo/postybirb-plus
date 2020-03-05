@@ -1,4 +1,4 @@
-import Entity from 'src/base/entity/entity.base';
+import Entity from 'src/database/models/entity.model';
 import { SubmissionTemplate } from '../interfaces/submission-template.interface';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 import { Parts } from 'src/submission/submission-part/interfaces/submission-part.interface';

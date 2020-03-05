@@ -1,5 +1,5 @@
 import { UserAccount } from '../interfaces/user-account.interface';
-import Entity from '../../base/entity/entity.base';
+import Entity from 'src/database/models/entity.model';
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export default class UserAccountEntity extends Entity implements UserAccount {

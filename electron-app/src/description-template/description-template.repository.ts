@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import DescriptionTemplateEntity from './models/description-template.entity';
-import EntityRepository from 'src/base/entity/entity.repository.base';
+import PersistedDatabase from 'src/database/databases/persisted.database';
 import { DescriptionTemplate } from './interfaces/description-template.interface';
 
 @Injectable()
-export class DescriptionTemplateRepository extends EntityRepository<
+export class DescriptionTemplateRepository extends PersistedDatabase<
   DescriptionTemplateEntity,
   DescriptionTemplate
 > {

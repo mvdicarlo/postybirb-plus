@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import EntityRepository from 'src/base/entity/entity.repository.base';
+import PersistedDatabase from 'src/database/databases/persisted.database';
 import PostyBirbNotificationEntity from './models/postybirb-notification.entity';
 import { PostyBirbNotification } from './interfaces/postybirb-notification.interface';
 
 @Injectable()
-export class NotificationRepository extends EntityRepository<
+export class NotificationRepository extends PersistedDatabase<
   PostyBirbNotificationEntity,
   PostyBirbNotification
 > {

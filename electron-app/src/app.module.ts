@@ -28,7 +28,5 @@ import { FileManipulationModule } from './file-manipulation/file-manipulation.mo
     NotificationModule,
     FileManipulationModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

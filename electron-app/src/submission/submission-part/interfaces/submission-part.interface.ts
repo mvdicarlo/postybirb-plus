@@ -1,5 +1,5 @@
 import { DefaultOptions } from './default-options.interface';
-import { EntityIntf } from '../../../base/entity/entity.base.interface';
+import { EntityIntf } from '../../../database/interfaces/entity.interface';
 
 export interface SubmissionPart<T extends DefaultOptions> extends EntityIntf {
   data: T;

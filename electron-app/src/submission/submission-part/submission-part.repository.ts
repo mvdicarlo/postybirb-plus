@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import SubmissionPartEntity from './models/submission-part.entity';
-import EntityRepository from 'src/base/entity/entity.repository.base';
+import PersistedDatabase from 'src/database/databases/persisted.database';
 import { SubmissionPart } from './interfaces/submission-part.interface';
 
 @Injectable()
-export class SubmissionPartRepository extends EntityRepository<
+export class SubmissionPartRepository extends PersistedDatabase<
   SubmissionPartEntity<any>,
   SubmissionPart<any>
 > {

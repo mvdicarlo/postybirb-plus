@@ -1,4 +1,4 @@
-import Entity from 'src/base/entity/entity.base';
+import Entity from 'src/database/models/entity.model';
 import { PostyBirbNotification } from '../interfaces/postybirb-notification.interface';
 import { IsString, IsNotEmpty, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 import { NotificationType } from '../enums/notification-type.enum';
