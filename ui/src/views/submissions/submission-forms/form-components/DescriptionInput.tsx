@@ -11,10 +11,11 @@ import { uiStore } from '../../../../stores/ui.store';
 
 interface Props {
   defaultValue: DescriptionData;
-  label?: string;
-  hideOverwrite?: boolean;
-  onChange: (change: DescriptionData) => void;
   descriptionTemplateStore?: DescriptionTemplateStore;
+  hideOverwrite?: boolean;
+  label?: string;
+  onChange: (change: DescriptionData) => void;
+  overwriteDescriptionValue?: string;
 }
 
 interface State {
@@ -88,6 +89,9 @@ export default class DescriptionInput extends React.Component<Props, State> {
 
   changeOverwriteDefault = (checked: boolean) => {
     this.data.overwriteDefault = !checked;
+    if (!checked && this.props.overwriteDescriptionValue) {
+      this.data.value = this.props.overwriteDescriptionValue;
+    }
     this.update();
   };
 

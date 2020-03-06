@@ -183,6 +183,7 @@ export class WeasylFileSubmissionForm extends React.Component<
             defaultValue={data.description}
             onChange={this.handleDescriptionChange.bind(this)}
             label="Description"
+            overwriteDescriptionValue={_.get(this.props.defaultData, 'description.value')}
           />
           <Form.Item>
             <div className="flex">
