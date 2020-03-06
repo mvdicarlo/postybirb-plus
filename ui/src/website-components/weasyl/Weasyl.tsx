@@ -283,7 +283,7 @@ export class WeasylFileSubmissionForm extends React.Component<
               <div className="w-1/2">
                 <div>
                   <Checkbox
-                    checked={data.useThumbnail}
+                    checked={data.autoScale}
                     onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
                   >
                     Downscale images to fit size limit

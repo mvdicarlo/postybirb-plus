@@ -124,7 +124,7 @@ export class DiscordFileSubmissionForm extends React.Component<
               <div className="w-full">
                 <div>
                   <Checkbox
-                    checked={data.useThumbnail}
+                    checked={data.autoScale}
                     onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
                   >
                     Downscale images to fit size limit
