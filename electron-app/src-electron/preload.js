@@ -3,6 +3,7 @@ const { app, session } = remote;
 
 window.PORT = remote.getCurrentWindow().PORT;
 window.AUTH_ID = remote.getCurrentWindow().AUTH_ID;
+window.IS_DARK_THEME = remote.getCurrentWindow().IS_DARK_THEME;
 window.appVersion = app.getVersion();
 window.electron = {
   clipboard: {

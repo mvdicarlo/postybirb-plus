@@ -28,6 +28,7 @@ declare global {
     };
     AUTH_ID: string;
     PORT: number;
+    IS_DARK_THEME: boolean;
     appVersion: string;
   }
 }
