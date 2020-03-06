@@ -332,7 +332,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
       this.setHeaders();
 
       return (
-        <div>
+        <div className="submission-form">
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
               <Form.Item>

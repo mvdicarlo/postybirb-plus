@@ -572,7 +572,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
         submissionFromStore && submissionFromStore.submission.schedule.isScheduled;
 
       return (
-        <div>
+        <div className="submission-form">
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
               {this.isFileSubmission(submission) ? (
