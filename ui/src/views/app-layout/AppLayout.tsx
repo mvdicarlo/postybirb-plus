@@ -143,12 +143,10 @@ export default class AppLayout extends React.Component<Props, State> {
           </Tabs>
         </Modal>
         <Layout
-          style={{
-            height: '100vh'
-          }}
+          className="h-screen"
         >
           <Sider collapsible collapsed={state.navCollapsed} onCollapse={this.handleCollapsedChange}>
-            <div>
+            <div className="layout-header">
               <Link to="/">
                 <div
                   className="logo"
