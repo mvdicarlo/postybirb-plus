@@ -39,7 +39,7 @@ export class TagGroupService {
     this.eventEmitter.emit(TagGroupEvent.UPDATED, tagGroup);
   }
 
-  async deleteTagGroup(id: string) {
+  async remove(id: string) {
     this.logger.log(id, 'Delete Tag Group');
     await this.repository.remove(id);
     this.eventEmitter.emit(TagGroupEvent.REMOVED, id);

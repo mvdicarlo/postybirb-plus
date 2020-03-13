@@ -1,6 +1,9 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
 import { DescriptionTemplateEvent } from './enums/description-template.events.enum';
-import { DescriptionTemplateRepository } from './description-template.repository';
+import {
+  DescriptionTemplateRepository,
+  DescriptionTemplateDatabaseToken,
+} from './description-template.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import DescriptionTemplateEntity from './models/description-template.entity';
 
@@ -9,9 +12,18 @@ export class DescriptionTemplateService {
   private readonly logger = new Logger(DescriptionTemplateService.name);
 
   constructor(
+    @Inject(DescriptionTemplateDatabaseToken)
     private repository: DescriptionTemplateRepository,
     private readonly eventEmitter: EventsGateway,
   ) {}
+
+  async get(id: string) {
+    const entity = await this.repository.findOne(id);
+    if (!entity) {
+      throw new NotFoundException(`Description Template ${id} could not be found`);
+    }
+    return entity;
+  }
 
   getAll() {
     return this.repository.find();

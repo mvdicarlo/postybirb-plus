@@ -53,7 +53,7 @@ describe('TagGroupService', () => {
 
   it('should delete a tag group', async () => {
     await tagGroupService.create(entity);
-    await tagGroupService.deleteTagGroup(entity._id);
+    await tagGroupService.remove(entity._id);
     await expect(tagGroupService.get(entity._id)).rejects.toBeDefined();
   });
 });

@@ -12,4 +12,8 @@ export default class DescriptionTemplateEntity extends Entity implements Descrip
 
   @IsString()
   content: string;
+
+  constructor(partial?: Partial<DescriptionTemplate>) {
+    super(partial);
+  }
 }

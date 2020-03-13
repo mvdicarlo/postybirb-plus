@@ -23,6 +23,6 @@ export class TagGroupController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.service.deleteTagGroup(id);
+    return this.service.remove(id);
   }
 }

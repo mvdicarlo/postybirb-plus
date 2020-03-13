@@ -1,14 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import DescriptionTemplateEntity from './models/description-template.entity';
 import PersistedDatabase from 'src/database/databases/persisted.database';
 import { DescriptionTemplate } from './interfaces/description-template.interface';
+import MemoryDatabase from 'src/database/databases/memory.database';
 
-@Injectable()
-export class DescriptionTemplateRepository extends PersistedDatabase<
-  DescriptionTemplateEntity,
-  DescriptionTemplate
-> {
-  constructor() {
-    super('description-template', DescriptionTemplateEntity);
-  }
-}
+export const DescriptionTemplateDatabaseToken = 'DescriptionTemplateDatabaseToken';
+export type DescriptionTemplateRepository =
+  | PersistedDatabase<DescriptionTemplateEntity, DescriptionTemplate>
+  | MemoryDatabase<DescriptionTemplateEntity, DescriptionTemplate>;
