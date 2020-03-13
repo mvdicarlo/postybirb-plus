@@ -4,7 +4,7 @@ import { DefaultDiscordOptions } from './discord.interface';
 import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import WebsiteValidator from '../utils/website-validator.util';
+import WebsiteValidator from '../../utils/website-validator.util';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
@@ -15,7 +15,8 @@ import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize';
+import FileSize from 'src/utils/filesize.util';
+import FormContent from 'src/utils/form-content.util';
 
 interface DiscordLoginData {
   name: string;
@@ -117,7 +118,7 @@ export class Discord extends Website {
     });
 
     const description = this.defaultDescriptionParser(
-      WebsiteValidator.getDescription(
+      FormContent.getDescription(
         defaultPart.data.description,
         submissionPart.data.description,
       ),
