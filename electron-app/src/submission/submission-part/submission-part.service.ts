@@ -1,5 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { SubmissionPartRepository } from './submission-part.repository';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import {
+  SubmissionPartRepository,
+  SubmissionPartRepositoryToken,
+} from './submission-part.repository';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { Submission } from '../interfaces/submission.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
@@ -12,6 +15,7 @@ export class SubmissionPartService {
   private readonly logger = new Logger(SubmissionPartService.name);
 
   constructor(
+    @Inject(SubmissionPartRepositoryToken)
     private readonly repository: SubmissionPartRepository,
     private readonly websiteProvider: WebsiteProvider,
   ) {}

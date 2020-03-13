@@ -17,11 +17,11 @@ import { SubmissionEvent } from './enums/submission.events.enum';
 import { SubmissionPackage } from './interfaces/submission-package.interface';
 import { SubmissionPart, Parts } from './submission-part/interfaces/submission-part.interface';
 import { SubmissionPartService } from './submission-part/submission-part.service';
-import { SubmissionRepository } from './submission.repository';
+import { SubmissionRepository, SubmissionRepositoryToken } from './submission.repository';
 import { SubmissionType } from './enums/submission-type.enum';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { ValidatorService } from './validator/validator.service';
-import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
+import { UploadedFile } from 'src/file-manager/interfaces/uploaded-file.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
 import { PostService } from './post/post.service';
@@ -43,6 +43,7 @@ export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
 
   constructor(
+    @Inject(SubmissionRepositoryToken)
     private readonly repository: SubmissionRepository,
     private readonly partService: SubmissionPartService,
     private fileSubmissionService: FileSubmissionService,

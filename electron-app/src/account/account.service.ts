@@ -6,7 +6,7 @@ import {
   forwardRef,
   Inject,
 } from '@nestjs/common';
-import { AccountRepository } from './account.repository';
+import { AccountRepository, AccountRepositoryToken } from './account.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
@@ -27,6 +27,7 @@ export class AccountService {
   private readonly loginCheckMap: { [key: number]: string[] } = [];
 
   constructor(
+    @Inject(AccountRepositoryToken)
     private readonly repository: AccountRepository,
     private readonly eventEmitter: EventsGateway,
     private readonly websiteProvider: WebsiteProvider,

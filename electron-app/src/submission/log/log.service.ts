@@ -1,7 +1,7 @@
 import { app } from 'electron';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { PartWithResponse } from './interfaces/submission-log.interface';
-import { SubmissionLogRepository } from './log.repository';
+import { SubmissionLogRepository, SubmissionLogRepositoryToken } from './log.repository';
 import { SubmissionType } from '../enums/submission-type.enum';
 import SubmissionLogEntity from './models/submission-log.entity';
 import SubmissionEntity from '../models/submission.entity';
@@ -13,6 +13,7 @@ export class LogService {
   private readonly MAX_LOGS: number = 30;
 
   constructor(
+    @Inject(SubmissionLogRepositoryToken)
     private readonly repository: SubmissionLogRepository,
     private readonly partService: SubmissionPartService,
   ) {}

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { FileRepositoryService } from './file-repository.service';
+import { FileManagerService } from './file-manager.service';
 import { FileManipulationModule } from 'src/file-manipulation/file-manipulation.module';
 
 @Module({
   imports: [FileManipulationModule],
-  providers: [FileRepositoryService],
-  exports: [FileRepositoryService],
+  providers: [FileManagerService],
+  exports: [FileManagerService],
 })
-export class FileRepositoryModule {}
+export class FileManagerModule {}

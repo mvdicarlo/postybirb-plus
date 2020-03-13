@@ -1,17 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import { Submission } from './interfaces/submission.interface';
 import PersistedDatabase from 'src/database/databases/persisted.database';
 import SubmissionEntity from './models/submission.entity';
-import FileSubmissionEntity from './file-submission/models/file-submission.entity';
+import MemoryDatabase from 'src/database/databases/memory.database';
 
-@Injectable()
-export class SubmissionRepository extends PersistedDatabase<SubmissionEntity, Submission> {
-  constructor() {
-    super('submissions', SubmissionEntity, (entity: any) => {
-      if (entity.primary) {
-        return FileSubmissionEntity;
-      }
-      return SubmissionEntity;
-    });
-  }
-}
+export const SubmissionRepositoryToken = 'SubmissionRepositoryToken';
+export type SubmissionRepository =
+  | PersistedDatabase<SubmissionEntity, Submission>
+  | MemoryDatabase<SubmissionEntity, Submission>;

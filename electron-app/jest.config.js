@@ -1,4 +1,4 @@
-process.env.test = true;
+process.env.TEST = true;
 
 module.exports = {
   moduleDirectories: ['node_modules', './'],

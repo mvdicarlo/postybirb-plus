@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { FileSubmission } from './interfaces/file-submission.interface';
-import { FileRepositoryService } from 'src/file-repository/file-repository.service';
-import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
+import { FileManagerService } from 'src/file-manager/file-manager.service';
+import { UploadedFile } from 'src/file-manager/interfaces/uploaded-file.interface';
 import { getSubmissionType, FileSubmissionType } from './enums/file-submission-type.enum';
 import FileSubmissionEntity from './models/file-submission.entity';
 import SubmissionEntity from '../models/submission.entity';
@@ -10,7 +10,7 @@ import SubmissionEntity from '../models/submission.entity';
 export class FileSubmissionService {
   private readonly logger = new Logger(FileSubmissionService.name);
 
-  constructor(private readonly fileRepository: FileRepositoryService) {}
+  constructor(private readonly fileRepository: FileManagerService) {}
 
   async createSubmission(
     submission: SubmissionEntity,

@@ -16,7 +16,7 @@ import { Poster } from './poster';
 import { LogService } from '../log/log.service';
 import { PostStatuses, PostInfo } from './interfaces/post-status.interface';
 import { EventsGateway } from 'src/events/events.gateway';
-import { PostEvent } from './post.events.enum';
+import { PostEvent } from './enums/post.events.enum';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';

@@ -6,7 +6,7 @@ import NedbDatabase from './databases/nedb.database';
 import { Provider } from '@nestjs/common/interfaces/modules/provider.interface';
 
 interface DatabaseFactoryOptions<T, K> {
-  classDescriminatorFn?: (entity: K) => new (...args: any[]) => T;
+  descriminator?: (entity: K) => new (...args: any[]) => T;
   entity: new (...args: any[]) => T;
   databaseName?: string;
 }
@@ -29,7 +29,7 @@ export class DatabaseFactory {
   public static memory<T extends Entity, K extends EntityIntf>(
     options: DatabaseFactoryOptions<T, K>,
   ): NedbDatabase<T, K> {
-    return new MemoryDatabase<T, K>(options.entity, options.classDescriminatorFn);
+    return new MemoryDatabase<T, K>(options.entity, options.descriminator);
   }
 
   public static persisted<T extends Entity, K extends EntityIntf>(
@@ -38,7 +38,7 @@ export class DatabaseFactory {
     return new PersistedDatabase<T, K>(
       options.databaseName,
       options.entity,
-      options.classDescriminatorFn,
+      options.descriminator,
     );
   }
 }
