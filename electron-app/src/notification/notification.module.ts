@@ -1,13 +1,22 @@
 import { Module, Global } from '@nestjs/common';
 import { NotificationController } from './notification.controller';
 import { NotificationService } from './notification.service';
-import { NotificationRepository } from './notification.repository';
+import { NotificationRepositoryToken } from './notification.repository';
 import { UiNotificationService } from './ui-notification/ui-notification.service';
+import { DatabaseFactory } from 'src/database/database.factory';
+import PostyBirbNotificationEntity from './models/postybirb-notification.entity';
 
 @Global()
 @Module({
   controllers: [NotificationController],
-  providers: [NotificationService, NotificationRepository, UiNotificationService],
+  providers: [
+    NotificationService,
+    DatabaseFactory.forProvider(NotificationRepositoryToken, {
+      databaseName: 'notification',
+      entity: PostyBirbNotificationEntity,
+    }),
+    UiNotificationService,
+  ],
   exports: [NotificationService, UiNotificationService],
 })
 export class NotificationModule {}

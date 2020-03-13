@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
 import { DescriptionTemplateEvent } from './enums/description-template.events.enum';
 import {
   DescriptionTemplateRepository,
-  DescriptionTemplateDatabaseToken,
+  DescriptionTemplateRepositoryToken,
 } from './description-template.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import DescriptionTemplateEntity from './models/description-template.entity';
@@ -12,7 +12,7 @@ export class DescriptionTemplateService {
   private readonly logger = new Logger(DescriptionTemplateService.name);
 
   constructor(
-    @Inject(DescriptionTemplateDatabaseToken)
+    @Inject(DescriptionTemplateRepositoryToken)
     private repository: DescriptionTemplateRepository,
     private readonly eventEmitter: EventsGateway,
   ) {}

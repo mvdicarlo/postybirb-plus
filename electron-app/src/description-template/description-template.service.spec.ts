@@ -3,7 +3,7 @@ import MemoryDatabase from 'src/database/databases/memory.database';
 import { mockEventEmitterProvider } from 'test/common';
 import { DescriptionTemplateService } from './description-template.service';
 import DescriptionTemplateEntity from './models/description-template.entity';
-import { DescriptionTemplateDatabaseToken } from './description-template.repository';
+import { DescriptionTemplateRepositoryToken } from './description-template.repository';
 import { DescriptionTemplate } from './interfaces/description-template.interface';
 
 describe('DescriptionTemplateService', () => {
@@ -16,7 +16,7 @@ describe('DescriptionTemplateService', () => {
         DescriptionTemplateService,
         mockEventEmitterProvider,
         {
-          provide: DescriptionTemplateDatabaseToken,
+          provide: DescriptionTemplateRepositoryToken,
           useValue: new MemoryDatabase<DescriptionTemplateEntity, DescriptionTemplate>(
             DescriptionTemplateEntity,
           ),
@@ -37,7 +37,9 @@ describe('DescriptionTemplateService', () => {
 
   it('should create', async () => {
     await service.create(entity);
-    expect((await service.getAll()).length).toBeGreaterThan(0);
+    const found = await service.get(entity._id);
+    delete found.created;
+    expect(found).toEqual(entity);
   });
 
   it('should create and update', async () => {

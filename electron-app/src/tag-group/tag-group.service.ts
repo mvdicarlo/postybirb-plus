@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject, NotFoundException } from '@nestjs/common';
-import { TagGroupRepository, TagGroupDatabaseToken } from './tag-group.repository';
+import { TagGroupRepository, TagGroupRepositoryToken } from './tag-group.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { TagGroupEvent } from './enums/tag-group.events.enum';
 import TagGroupEntity from './models/tag-group.entity';
@@ -9,7 +9,7 @@ export class TagGroupService {
   private readonly logger = new Logger(TagGroupService.name);
 
   constructor(
-    @Inject(TagGroupDatabaseToken)
+    @Inject(TagGroupRepositoryToken)
     private readonly repository: TagGroupRepository,
     private readonly eventEmitter: EventsGateway,
   ) {}

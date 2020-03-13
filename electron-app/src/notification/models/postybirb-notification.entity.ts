@@ -1,11 +1,14 @@
 import Entity from 'src/database/models/entity.model';
-import { PostyBirbNotification } from '../interfaces/postybirb-notification.interface';
+import {
+  PostyBirbNotification,
+  NotificationType as PBNotificationType,
+} from '../interfaces/postybirb-notification.interface';
 import { IsString, IsNotEmpty, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 import { NotificationType } from '../enums/notification-type.enum';
 
 export default class PostyBirbNotificationEntity extends Entity implements PostyBirbNotification {
   @IsEnum(NotificationType)
-  type: NotificationType;
+  type: NotificationType | PBNotificationType;
 
   @IsString()
   @IsNotEmpty()
@@ -18,4 +21,8 @@ export default class PostyBirbNotificationEntity extends Entity implements Posty
   @IsBoolean()
   @IsOptional()
   viewed: boolean;
+
+  constructor(partial?: Partial<PostyBirbNotificationEntity>) {
+    super(partial);
+  }
 }

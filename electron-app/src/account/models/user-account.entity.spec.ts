@@ -41,18 +41,15 @@ describe('UserAccountEntity', () => {
     it('should convert to class', async () => {
       const entity = plainToClass(UserAccountEntity, plain);
       expect(entity instanceof UserAccountEntity).toBe(true);
-      Object.keys(plain).forEach(key => {
-        expect(entity[key]).toEqual(plain[key]);
-      });
+      expect(entity).toEqual(plain);
+
     });
 
     it('should convert to plain', async () => {
       const entity = plainToClass(UserAccountEntity, plain);
       const converted = classToPlain(entity);
-      expect(converted === plain).toEqual(false);
-      Object.keys(plain).forEach(key => {
-        expect(converted[key]).toEqual(plain[key]);
-      });
+      expect(converted === plain).toBe(false);
+      expect(plain).toEqual(converted);
     });
   });
 });
