@@ -1,14 +1,15 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DATABASE_DIRECTORY } from 'src/directories';
 import * as path from 'path';
 import Entity from '../models/entity.model';
 import { EntityIntf } from '../interfaces/entity.interface';
 import NedbDatabase from './nedb.database';
 
-export default abstract class PersistedDatabase<
-  T extends Entity,
-  K extends EntityIntf
-> extends NedbDatabase<T, K> {
+@Injectable()
+export default class PersistedDatabase<T extends Entity, K extends EntityIntf> extends NedbDatabase<
+  T,
+  K
+> {
   constructor(
     private readonly databaseName: string,
     protected readonly clazz: new (...args: any[]) => T,

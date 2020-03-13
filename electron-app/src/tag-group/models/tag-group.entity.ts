@@ -8,9 +8,10 @@ export default class TagGroupEntity extends Entity implements TagGroup {
   alias: string;
 
   @IsArray()
+  @IsNotEmpty()
   tags: string[];
 
-  constructor(partial: Partial<TagGroup>) {
+  constructor(partial?: Partial<TagGroup>) {
     super(partial);
   }
 }

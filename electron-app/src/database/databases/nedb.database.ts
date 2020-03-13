@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import * as Datastore from 'nedb';
 import * as util from 'util';
-import { validate } from 'class-validator';
+import { validateOrReject } from 'class-validator';
 import { classToPlain } from 'class-transformer';
 import Entity from '../models/entity.model';
 import { EntityIntf } from '../interfaces/entity.interface';
@@ -34,23 +34,13 @@ export default abstract class NedbDatabase<T extends Entity, K extends EntityInt
   }
 
   async find(search?: any): Promise<T[]> {
-    try {
-      const docs = await this._find(search || {});
-      return docs.map(doc => this.constructEntity(doc));
-    } catch (err) {
-      throw new NotFoundException(err);
-    } finally {
-      this.db.persistence.compactDatafile();
-    }
+    const docs = await this._find(search || {});
+    return docs.map(doc => this.constructEntity(doc));
   }
 
   async findOne(id: string): Promise<T> {
-    try {
-      const doc = await this._findOne({ _id: id });
-      return this.constructEntity(doc);
-    } catch (err) {
-      throw new NotFoundException(err);
-    }
+    const doc = await this._findOne({ _id: id });
+    return this.constructEntity(doc);
   }
 
   async remove(id: string): Promise<number> {
@@ -85,7 +75,7 @@ export default abstract class NedbDatabase<T extends Entity, K extends EntityInt
 
   async save(entity: T): Promise<T> {
     try {
-      await validate(entity);
+      await validateOrReject(entity);
       const obj = classToPlain<T>(entity) as EntityIntf;
       obj.created = Date.now();
       const savedEntity = await this._insert(obj);
@@ -99,7 +89,7 @@ export default abstract class NedbDatabase<T extends Entity, K extends EntityInt
 
   async update(entity: T): Promise<number> {
     try {
-      await validate(entity);
+      await validateOrReject(entity);
       const obj = classToPlain<T>(entity) as EntityIntf;
       // Disallow id updates
       delete obj._id;
