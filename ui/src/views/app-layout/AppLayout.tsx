@@ -19,6 +19,8 @@ import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../website-components/website-registry';
 import { inject, observer } from 'mobx-react';
 import { KofiIcon, DiscordIcon } from './SvgIcons';
+import NotificationsView from '../notifications/NotificationsView';
+import CustomShortcuts from '../custom-shortcuts/CustomShortcuts';
 import {
   Icon,
   Layout,
@@ -31,7 +33,6 @@ import {
   Tabs,
   message
 } from 'antd';
-import NotificationsView from '../notifications/NotificationsView';
 
 const { Content, Sider } = Layout;
 
@@ -41,6 +42,7 @@ interface Props {
 
 interface State {
   accountsVisible: boolean;
+  descriptionShortcutsVisible: boolean;
   descriptionTemplateVisible: boolean;
   settingsVisible: boolean;
   tagGroupVisible: boolean;
@@ -51,6 +53,7 @@ interface State {
 export default class AppLayout extends React.Component<Props, State> {
   public state: any = {
     accountsVisible: false,
+    descriptionShortcutsVisible: false,
     descriptionTemplateVisible: false,
     settingsVisible: false,
     tagGroupVisible: false
@@ -142,9 +145,7 @@ export default class AppLayout extends React.Component<Props, State> {
             </Tabs.TabPane>
           </Tabs>
         </Modal>
-        <Layout
-          className="h-screen"
-        >
+        <Layout className="h-screen">
           <Sider collapsible collapsed={state.navCollapsed} onCollapse={this.handleCollapsedChange}>
             <div className="layout-header">
               <Link to="/">
@@ -244,6 +245,15 @@ export default class AppLayout extends React.Component<Props, State> {
                 </Menu.Item>
                 <Menu.Item
                   key="tag-groups"
+                  onClick={() => this.setState({ descriptionShortcutsVisible: true })}
+                >
+                  <span>
+                    <Icon type="pic-right" />
+                    <span>Shortcuts</span>
+                  </span>
+                </Menu.Item>
+                <Menu.Item
+                  key="tag-groups"
                   onClick={() => this.setState({ tagGroupVisible: true })}
                 >
                   <span>
@@ -301,6 +311,15 @@ export default class AppLayout extends React.Component<Props, State> {
               width="50vw"
             >
               <DescriptionTemplates />
+            </Drawer>
+            <Drawer
+              title="Custom Description Shortcuts"
+              visible={this.state.descriptionShortcutsVisible}
+              destroyOnClose={true}
+              onClose={() => this.setState({ descriptionShortcutsVisible: false })}
+              width="50vw"
+            >
+              <CustomShortcuts />
             </Drawer>
             <Drawer
               title={

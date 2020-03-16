@@ -8,7 +8,7 @@ export class UsernameParser {
   public static parse(html: string, code: string, replacement: string): string {
     if (!html) { return ''; }
 
-    const regex = new RegExp(`:${code}(.+?):`, 'gi');
+    const regex = new RegExp(`{${code}:(.+?)}`, 'gi');
     html = html.replace(regex, (match, first) => {
       if (!first) { return match; }
       const trimmedMatch = first.replace(/<(?:[^>'"]*|(['"]).*?\1)*>/gi, '').trim();
@@ -33,7 +33,7 @@ export class UsernameParser {
   ): string {
     if (!html) { return ''; }
 
-    const regex = new RegExp(`:${code}(.+?):`, 'gi');
+    const regex = new RegExp(`{${code}:(.+?)}`, 'gi');
     html = html.replace(regex, (match, first) => {
       if (!first) { return match; }
       let trimmedMatch = first.replace(/<(?:[^>'"]*|(['"]).*?\1)*>/gi, '').trim();

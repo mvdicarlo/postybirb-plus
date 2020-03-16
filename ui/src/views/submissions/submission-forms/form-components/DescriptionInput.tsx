@@ -135,7 +135,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
               content={
                 <div>
                   <em>
-                    Example: :twminnownade: -> https://twitter.com/minnownade (would appear as
+                    Example: {'{tw:minnownade}'} -> https://twitter.com/minnownade (would appear as
                     @minnownade on Twitter)
                   </em>
                   {Object.entries(WebsiteService.usernameShortcuts)
