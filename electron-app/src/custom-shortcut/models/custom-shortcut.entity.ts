@@ -12,7 +12,7 @@ export default class CustomShortcutEntity extends Entity implements CustomShortc
 
   @IsBoolean()
   @IsNotEmpty()
-  isStatic: boolean;
+  isDynamic: boolean;
 
   constructor(partial?: Partial<CustomShortcutEntity>) {
     super(partial);

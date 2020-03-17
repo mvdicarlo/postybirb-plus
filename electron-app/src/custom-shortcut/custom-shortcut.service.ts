@@ -50,7 +50,7 @@ export class CustomShortcutService {
     const exists = await this.get(update._id);
     exists.content = update.content;
     exists.shortcut = update.shortcut;
-    exists.isStatic = update.isStatic;
+    exists.isDynamic = update.isDynamic;
     await this.repository.update(exists);
 
     this.eventEmitter.emit(CustomShortcutEvent.UPDATED, exists);
