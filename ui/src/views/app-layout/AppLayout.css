@@ -35,6 +35,12 @@
   font-size: 0 !important;
 }
 
+.ant-light-layout-sider .ant-light-menu,
+.ant-dark-layout-sider .ant-dark-menu {
+  height: calc(100% - 64px);
+  overflow: auto;
+}
+
 .ant-light-page-header,
 .ant-light-page-header-content,
 .ant-dark-page-header,
