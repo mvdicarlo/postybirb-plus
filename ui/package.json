@@ -4,6 +4,7 @@
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
+  "description": "(UI) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "dependencies": {
     "@tinymce/tinymce-react": "^3.3.2",
     "@types/jest": "24.0.22",

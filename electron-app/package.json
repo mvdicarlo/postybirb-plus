@@ -1,7 +1,7 @@
 {
   "name": "postybirb-plus",
   "version": "3.0.4",
-  "description": "PostyBurb Plus",
+  "description": "(ClientServer) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "main": "main.js",
   "author": "Michael DiCarlo",
   "license": "BSD-3-Clause",
@@ -11,6 +11,7 @@
     "url": "git+https://mvdicarlo@github.com/mvdicarlo/postybirb-plus.git"
   },
   "scripts": {
+    "nest": "nest",
     "prebuild": "rimraf dist",
     "postinstall": "electron-builder install-app-deps",
     "build": "nest build",
@@ -22,7 +23,7 @@
     "release:linux": "electron-builder -l -p always",
     "clean": "rimraf release",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "npm run prebuild; nest build; electron main --develop",
+    "start": "npm run prebuild && nest build && electron main --develop",
     "start:electron": "electron main --develop",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

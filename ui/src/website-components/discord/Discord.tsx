@@ -28,8 +28,10 @@ const defaultOptions: DefaultDiscordOptions = {
 };
 
 export class Discord implements Website {
+  internalName: string = 'Discord';
   name: string = 'Discord';
   supportsAdditionalFiles: boolean = true;
+  supportsTags: boolean = false;
   LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
   FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultDiscordOptions>) => (

@@ -1,36 +1,35 @@
 import { Test } from '@nestjs/testing';
-import { CustomShortcutService } from './custom-shortcut.service';
-import { CustomShortcutRepositoryToken } from './custom-shortcut.repository';
-import CustomShortcutEntity from './models/custom-shortcut.entity';
 import { mockEventEmitterProvider } from 'test/common';
 import MemoryDatabase from 'src/database/databases/memory.database';
-import { CustomShortcut } from './interfaces/custom-shortcut.interface';
+import { TagConverterService } from './tag-converter.service';
+import TagConverterEntity from './models/tag-converter.entity';
+import { TagConverterRepositoryToken } from './tag-converter.repository';
+import { TagConverter } from './interfaces/tag-converter.interface';
 
-describe('CustomShortcutService', () => {
-  let service: CustomShortcutService;
-  let entity: CustomShortcutEntity;
+describe('TagConverterService', () => {
+  let service: TagConverterService;
+  let entity: TagConverterEntity;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        CustomShortcutService,
+        TagConverterService,
         mockEventEmitterProvider,
         {
-          provide: CustomShortcutRepositoryToken,
-          useValue: new MemoryDatabase<CustomShortcutEntity, CustomShortcut>(CustomShortcutEntity),
+          provide: TagConverterRepositoryToken,
+          useValue: new MemoryDatabase<TagConverterEntity, TagConverter>(TagConverterEntity),
         },
       ],
     }).compile();
 
-    service = moduleRef.get<CustomShortcutService>(CustomShortcutService);
+    service = moduleRef.get<TagConverterService>(TagConverterService);
   });
 
   beforeEach(() => {
-    entity = new CustomShortcutEntity({
+    entity = new TagConverterEntity({
       _id: `test-${Date.now()}`,
-      shortcut: `test-${Date.now()}`,
-      content: 'content',
-      isDynamic: false,
+      tag: `test`,
+      conversions: {},
     });
   });
 
@@ -44,11 +43,11 @@ describe('CustomShortcutService', () => {
   it('should create and update', async () => {
     await service.create(entity);
     const found = await service.get(entity._id);
-    const newContent = 'updated content';
-    found.content = newContent;
+    const newTag = 'updated';
+    found.tag = newTag;
     await service.update(found);
     const found2 = await service.get(entity._id);
-    expect(found2.content).toEqual(newContent);
+    expect(found2.tag).toEqual(newTag);
   });
 
   it('should delete', async () => {

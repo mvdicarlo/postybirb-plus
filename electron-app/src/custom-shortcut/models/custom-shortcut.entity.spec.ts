@@ -11,7 +11,7 @@ describe('CustomShortcutEntity', () => {
       _id: 'id',
       shortcut: 'alias',
       content: 'content',
-      isStatic: false,
+      isDynamic: false,
       created: Date.now(),
     };
   });

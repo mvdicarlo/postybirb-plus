@@ -13,6 +13,7 @@ import { updateStore } from './stores/update.store';
 import { postStatusStore } from './stores/post-status.store';
 import { notificationStore } from './stores/notification.store';
 import { customShortcutStore } from './stores/custom-shortcut.store';
+import { tagConverterStore } from './stores/tag-converter.store';
 
 export default class App extends React.Component {
   render() {
@@ -30,6 +31,7 @@ export default class App extends React.Component {
         postStatusStore={postStatusStore}
         notificationStore={notificationStore}
         customShortcutStore={customShortcutStore}
+        tagConverterStore={tagConverterStore}
       >
         <AppLayout />
       </Provider>

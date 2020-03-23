@@ -21,6 +21,7 @@ import { inject, observer } from 'mobx-react';
 import { KofiIcon, DiscordIcon } from './SvgIcons';
 import NotificationsView from '../notifications/NotificationsView';
 import CustomShortcuts from '../custom-shortcuts/CustomShortcuts';
+import TagConverters from '../tag-converters/TagConverters';
 import {
   Icon,
   Layout,
@@ -46,6 +47,7 @@ interface State {
   descriptionTemplateVisible: boolean;
   settingsVisible: boolean;
   tagGroupVisible: boolean;
+  tagConverterVisible: boolean;
 }
 
 @inject('uiStore')
@@ -56,7 +58,8 @@ export default class AppLayout extends React.Component<Props, State> {
     descriptionShortcutsVisible: false,
     descriptionTemplateVisible: false,
     settingsVisible: false,
-    tagGroupVisible: false
+    tagGroupVisible: false,
+    tagConverterVisible: false,
   };
 
   private readonly websites = Object.keys(WebsiteRegistry.websites);
@@ -244,12 +247,21 @@ export default class AppLayout extends React.Component<Props, State> {
                   </span>
                 </Menu.Item>
                 <Menu.Item
-                  key="tag-groups"
+                  key="custom-shortcuts"
                   onClick={() => this.setState({ descriptionShortcutsVisible: true })}
                 >
                   <span>
                     <Icon type="pic-right" />
                     <span>Shortcuts</span>
+                  </span>
+                </Menu.Item>
+                <Menu.Item
+                  key="tag-converters"
+                  onClick={() => this.setState({ tagConverterVisible: true })}
+                >
+                  <span>
+                    <Icon type="share-alt" />
+                    <span>Tag Converters</span>
                   </span>
                 </Menu.Item>
                 <Menu.Item
@@ -294,6 +306,15 @@ export default class AppLayout extends React.Component<Props, State> {
                 </span>
               </Menu.Item>
             </Menu>
+            <Drawer
+              title="Tag Converters"
+              visible={this.state.tagConverterVisible}
+              destroyOnClose={true}
+              onClose={() => this.setState({ tagConverterVisible: false })}
+              width="50vw"
+            >
+              <TagConverters />
+            </Drawer>
             <Drawer
               title="Tag Groups"
               visible={this.state.tagGroupVisible}

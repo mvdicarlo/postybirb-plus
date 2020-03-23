@@ -13,6 +13,7 @@ import { RemoteModule } from './remote/remote.module';
 import { NotificationModule } from './notification/notification.module';
 import { FileManipulationModule } from './file-manipulation/file-manipulation.module';
 import { CustomShortcutModule } from './custom-shortcut/custom-shortcut.module';
+import { TagConverterModule } from './tag-converter/tag-converter.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CustomShortcutModule } from './custom-shortcut/custom-shortcut.module';
     NotificationModule,
     FileManipulationModule,
     CustomShortcutModule,
+    TagConverterModule,
   ],
 })
 export class AppModule {}
