@@ -5,6 +5,7 @@ import { UploadedFile } from 'src/file-manager/interfaces/uploaded-file.interfac
 import { getSubmissionType, FileSubmissionType } from './enums/file-submission-type.enum';
 import FileSubmissionEntity from './models/file-submission.entity';
 import SubmissionEntity from '../models/submission.entity';
+import SubmissionCreateModel from '../models/submission-create.model';
 
 @Injectable()
 export class FileSubmissionService {
@@ -14,7 +15,7 @@ export class FileSubmissionService {
 
   async createSubmission(
     submission: SubmissionEntity,
-    data: { file: UploadedFile; path: string },
+    data: SubmissionCreateModel,
   ): Promise<FileSubmission> {
     const { file, path } = data;
     if (!file) {

@@ -96,6 +96,7 @@ export default class ImportDataSelect extends React.Component<Props, State> {
               submissionType={this.props.submissionType}
               ignoreId={this.props.ignoreId}
               label="Import From"
+              onDeselect={() => this.setState({ selected: undefined, selectedFields: [] })}
               onSelect={(id, type, parts) => {
                 this.setState({
                   selected: parts,

@@ -14,6 +14,7 @@ type TemplateType = 'TEMPLATE' | 'SUBMISSION';
 interface Props {
   ignoreId?: string;
   label?: string;
+  onDeselect: () => void;
   onSelect: (id: string, type: TemplateType, parts: Record<string, SubmissionPart<any>>) => void;
   showSubmissions?: boolean;
   showTemplates?: boolean;
@@ -119,10 +120,18 @@ export default class SubmissionTemplateSelect extends React.Component<Props> {
     this.props.onSelect(id, type as TemplateType, _.cloneDeep(parts));
   };
 
+  handleDeselect = () => {
+    this.props.onDeselect();
+  };
+
   render() {
     return (
       <Form.Item label={this.props.label || ''}>
-        <Select allowClear={true} placeholder={this.getPlaceholder()} onSelect={this.handleSelect}>
+        <Select allowClear={true} placeholder={this.getPlaceholder()} onSelect={this.handleSelect} onDeselect={this.handleDeselect} onChange={(value) => {
+          if (!value) {
+            this.handleDeselect();
+          }
+        }}>
           {this.getOptGroups()}
         </Select>
       </Form.Item>
