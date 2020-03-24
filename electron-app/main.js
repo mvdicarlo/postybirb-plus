@@ -1,5 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, Menu, nativeImage, Tray } = require('electron');
+const { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 
 const hasLock = app.requestSingleInstanceLock();
@@ -84,7 +84,7 @@ function createWindow() {
       defaultHeight: 800,
     });
   }
-  
+
   window = new BrowserWindow({
     show: false,
     width: mainWindowState.width,
@@ -94,6 +94,7 @@ function createWindow() {
     autoHideMenuBar: true,
     icon: path.join(__dirname, '/build/assets/icons/minnowicon.png'),
     title: 'PostyBirb',
+    darkTheme: nativeTheme.shouldUseDarkColors,
     webPreferences: {
       devTools: global.DEBUG_MODE,
       allowRunningInsecureContent: false,
@@ -107,6 +108,7 @@ function createWindow() {
 
   window.PORT = process.env.PORT;
   window.AUTH_ID = global.AUTH_ID;
+  window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
   if (global.DEBUG_MODE) {
     window.webContents.openDevTools();
   } else {

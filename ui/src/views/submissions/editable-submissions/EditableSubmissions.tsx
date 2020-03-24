@@ -25,6 +25,8 @@ import {
 import { EditableSubmissionListItem } from './EditableSubmissionListItem';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { RcFile } from 'antd/lib/upload';
+import SubmissionTemplateSelect from '../submission-template-select/SubmissionTemplateSelect';
+import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 const { Dragger } = Upload;
 
 interface Props {
@@ -303,19 +305,19 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
     name: 'file',
     multiple: true,
     showUploadList: false,
-    action: (file: RcFile) =>
-      Promise.resolve(
-        `https://localhost:${window['PORT']}/submission/create/${
-          SubmissionType.FILE
-        }?path=${encodeURIComponent(file['path'])}`
-      ),
-    onChange(info) {
-      const { status } = info.file;
-      if (status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
-      }
+    beforeUpload: (file: RcFile) => {
+      SubmissionService.create({
+        type: SubmissionType.FILE,
+        file: file,
+        path: file['path']
+      })
+        .then(() => {
+          message.success(`${file.name} file uploaded successfully.`);
+        })
+        .catch(() => {
+          message.error(`${file.name} file upload failed.`);
+        });
+      return Promise.reject(); // don't want to upload using component method
     }
   };
 
@@ -371,6 +373,7 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
 interface NotificationSubmissionCreateState {
   modalVisible: boolean;
   value: string;
+  parts?: Record<string, SubmissionPart<any>>;
 }
 
 class NotificationSubmissionCreator extends React.Component<
@@ -379,12 +382,17 @@ class NotificationSubmissionCreator extends React.Component<
 > {
   state: NotificationSubmissionCreateState = {
     modalVisible: false,
-    value: ''
+    value: '',
+    parts: undefined
   };
 
   createSubmission() {
     if (this.state.value) {
-      SubmissionService.create(SubmissionType.NOTIFICATION, this.state.value)
+      SubmissionService.create({
+        type: SubmissionType.NOTIFICATION,
+        title: this.state.value,
+        parts: this.state.parts ? JSON.stringify(Object.values(this.state.parts)) : undefined
+      })
         .then(() => message.success('Submission created.'))
         .catch(() => message.error('Failed to create submission.'));
       this.hideModal();
@@ -414,14 +422,25 @@ class NotificationSubmissionCreator extends React.Component<
           okButtonProps={{ disabled: !this.state.value.length }}
           onCancel={this.hideModal.bind(this)}
           onOk={this.createSubmission.bind(this)}
-          title="Notification Name"
+          title="New Notification"
           visible={this.state.modalVisible}
         >
-          <Input
-            className="w-full"
-            value={this.state.value}
-            onChange={this.onNameChange.bind(this)}
-          />
+          <Form layout="vertical">
+            <Form.Item label="Name" required={true}>
+              <Input
+                className="w-full"
+                value={this.state.value}
+                onChange={this.onNameChange.bind(this)}
+                required={true}
+              />
+            </Form.Item>
+            <SubmissionTemplateSelect
+              label="With Template"
+              submissionType={SubmissionType.NOTIFICATION}
+              onDeselect={() => this.setState({ parts: undefined })}
+              onSelect={(id, type, parts) => this.setState({ parts })}
+            />
+          </Form>
         </Modal>
       </div>
     );

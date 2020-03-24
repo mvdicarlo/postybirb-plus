@@ -1,0 +1,5 @@
+export enum TagConverterEvent {
+  CREATED = '[TAG CONVERTER] CREATED',
+  REMOVED = '[TAG CONVERTER] REMOVED',
+  UPDATED = '[TAG CONVERTER] UPDATED',
+}

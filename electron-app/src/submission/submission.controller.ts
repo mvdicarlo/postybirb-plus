@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
 import SubmissionScheduleModel from './models/submission-schedule.model';
 import SubmissionLogEntity from './log/models/submission-log.entity';
+import SubmissionCreateModel from './models/submission-create.model';
 
 @Controller('submission')
 export class SubmissionController {
@@ -48,16 +49,11 @@ export class SubmissionController {
     return this.service.deleteSubmission(id);
   }
 
-  @Post('create/:type')
+  @Post('create')
   @UseInterceptors(FileInterceptor('file'))
-  async create(@UploadedFile() file, @Param('type') type: SubmissionType, @Query() query: any) {
-    return this.service.create({
-      type,
-      data: {
-        ...query,
-        file,
-      },
-    });
+  async create(@Body() create: SubmissionCreateModel, @UploadedFile() file) {
+    create.file = file;
+    return this.service.create(create);
   }
 
   @Post('recreate')

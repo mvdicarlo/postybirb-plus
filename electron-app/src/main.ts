@@ -6,8 +6,10 @@ import { SSL } from './ssl';
 import * as compression from 'compression';
 import { AuthGuard } from './auth.guard';
 import { CustomLogger } from './custom.logger';
+import { ensure } from './directories';
 
 async function bootstrap() {
+  ensure();
   const { key, cert } = SSL.getOrCreate();
   const app = await NestFactory.create(AppModule, {
     httpsOptions: {

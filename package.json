@@ -1,7 +1,7 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.3",
-  "description": "Currently a reason to learn React. May end up being something more.",
+  "version": "3.0.4",
+  "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
   "main": "index.js",
   "scripts": {
     "build:ui": "cd ui && yarn install && yarn run build",

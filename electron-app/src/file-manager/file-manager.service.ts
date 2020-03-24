@@ -5,7 +5,7 @@ import { FileRecord } from 'src/submission/file-submission/interfaces/file-recor
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directories';
-import { UploadedFile } from './uploaded-file.interface';
+import { UploadedFile } from './interfaces/uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
@@ -14,8 +14,8 @@ import { detect } from 'chardet';
 import { ImageManipulationPoolService } from 'src/file-manipulation/pools/image-manipulation-pool.service';
 
 @Injectable()
-export class FileRepositoryService {
-  private readonly logger: Logger = new Logger(FileRepositoryService.name);
+export class FileManagerService {
+  private readonly logger: Logger = new Logger(FileManagerService.name);
 
   constructor(private readonly imageManipulationPool: ImageManipulationPoolService) {}
 

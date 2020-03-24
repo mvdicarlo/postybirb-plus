@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UpdateController } from './update.controller';
 import { UpdateService } from './update.service';
-import { SubmissionModule } from 'src/submission/submission.module';
+import { PostModule } from 'src/submission/post/post.module';
 
 @Module({
-  imports: [SubmissionModule],
+  imports: [PostModule],
   controllers: [UpdateController],
   providers: [UpdateService],
 })

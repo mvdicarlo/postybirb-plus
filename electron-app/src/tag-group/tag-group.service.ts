@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { TagGroupRepository } from './tag-group.repository';
+import { Injectable, Logger, Inject, NotFoundException } from '@nestjs/common';
+import { TagGroupRepository, TagGroupRepositoryToken } from './tag-group.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { TagGroupEvent } from './enums/tag-group.events.enum';
 import TagGroupEntity from './models/tag-group.entity';
@@ -9,9 +9,18 @@ export class TagGroupService {
   private readonly logger = new Logger(TagGroupService.name);
 
   constructor(
+    @Inject(TagGroupRepositoryToken)
     private readonly repository: TagGroupRepository,
     private readonly eventEmitter: EventsGateway,
   ) {}
+
+  async get(id: string) {
+    const entity = await this.repository.findOne(id);
+    if (!entity) {
+      throw new NotFoundException(`Tag Group ${id} could not be found`);
+    }
+    return entity;
+  }
 
   getAll() {
     return this.repository.find();
@@ -30,7 +39,7 @@ export class TagGroupService {
     this.eventEmitter.emit(TagGroupEvent.UPDATED, tagGroup);
   }
 
-  async deleteTagGroup(id: string) {
+  async remove(id: string) {
     this.logger.log(id, 'Delete Tag Group');
     await this.repository.remove(id);
     this.eventEmitter.emit(TagGroupEvent.REMOVED, id);

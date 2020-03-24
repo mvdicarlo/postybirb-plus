@@ -8,17 +8,24 @@
   font-size: 1.5em;
 }
 
+.layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: inherit;
+}
+
 .update .ant-light-progress-text,
 .update .ant-dark-progress-text {
   color: hsla(0, 0%, 100%, 0.65) !important;
 }
 
 .ant-light-modal-body .release-notes * {
-  color: rgba(0,0,0,.85);
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .ant-dark-modal-body .release-notes * {
-  color: hsla(0,0%,100%,.85);
+  color: hsla(0, 0%, 100%, 0.85);
 }
 
 .ant-light-layout-sider-collapsed .logo,
@@ -26,6 +33,12 @@
   color: transparent;
   background-position: center;
   font-size: 0 !important;
+}
+
+.ant-light-layout-sider .ant-light-menu,
+.ant-dark-layout-sider .ant-dark-menu {
+  height: calc(100% - 64px);
+  overflow: auto;
 }
 
 .ant-light-page-header,
@@ -47,4 +60,14 @@
 
 .ant-dark-layout .header > * {
   border-bottom: 1px solid #030303;
+}
+
+.ant-light-layout-sider,
+.ant-dark-layout-sider {
+  overflow: auto;
+}
+
+.ant-light-layout-sider-children,
+.ant-dark-layout-sider-children {
+  background-color: inherit;
 }

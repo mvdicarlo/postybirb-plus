@@ -1,4 +1,4 @@
-import { EntityIntf } from '../../base/entity/entity.base.interface';
+import { EntityIntf } from '../../database/interfaces/entity.interface';
 export type NotificationType = 'SUCCESS' | 'ERROR' | 'WARNING' | 'INFO';
 
 export interface PostyBirbNotification extends EntityIntf {

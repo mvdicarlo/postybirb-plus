@@ -17,8 +17,8 @@ export class DescriptionTemplateController {
   }
 
   @Patch('update')
-  async update(@Body() tagGroup: DescriptionTemplateEntity) {
-    return this.service.update(tagGroup);
+  async update(@Body() updateDto: DescriptionTemplateEntity) {
+    return this.service.update(updateDto);
   }
 
   @Delete(':id')

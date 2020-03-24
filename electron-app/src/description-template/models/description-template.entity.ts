@@ -1,4 +1,4 @@
-import Entity from 'src/base/entity/entity.base';
+import Entity from 'src/database/models/entity.model';
 import { DescriptionTemplate } from '../interfaces/description-template.interface';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
@@ -12,4 +12,8 @@ export default class DescriptionTemplateEntity extends Entity implements Descrip
 
   @IsString()
   content: string;
+
+  constructor(partial?: Partial<DescriptionTemplate>) {
+    super(partial);
+  }
 }

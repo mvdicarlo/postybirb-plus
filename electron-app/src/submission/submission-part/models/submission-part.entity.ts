@@ -1,4 +1,4 @@
-import Entity from 'src/base/entity/entity.base';
+import Entity from 'src/database/models/entity.model';
 import { SubmissionPart, PostStatus } from '../interfaces/submission-part.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { IsBoolean, IsObject, IsNotEmpty, IsString, IsOptional } from 'class-validator';

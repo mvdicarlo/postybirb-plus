@@ -28,8 +28,10 @@ const defaultOptions: DefaultDiscordOptions = {
 };
 
 export class Discord implements Website {
+  internalName: string = 'Discord';
   name: string = 'Discord';
   supportsAdditionalFiles: boolean = true;
+  supportsTags: boolean = false;
   LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
   FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultDiscordOptions>) => (
@@ -118,13 +120,14 @@ export class DiscordFileSubmissionForm extends React.Component<
             defaultValue={data.description}
             onChange={this.handleDescriptionChange.bind(this)}
             label="Description"
+            overwriteDescriptionValue={_.get(this.props.defaultData, 'description.value')}
           />
           <Form.Item>
             <div className="flex">
               <div className="w-full">
                 <div>
                   <Checkbox
-                    checked={data.useThumbnail}
+                    checked={data.autoScale}
                     onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
                   >
                     Downscale images to fit size limit

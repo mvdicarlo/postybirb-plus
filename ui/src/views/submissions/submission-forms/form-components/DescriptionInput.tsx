@@ -8,25 +8,25 @@ import { DescriptionData } from '../../../../../../electron-app/src/submission/s
 import WebsiteService from '../../../../services/website.service';
 import { WebsiteRegistry } from '../../../../website-components/website-registry';
 import { uiStore } from '../../../../stores/ui.store';
+import { CustomShortcutStore } from '../../../../stores/custom-shortcut.store';
 
 interface Props {
+  customShortcutStore?: CustomShortcutStore;
   defaultValue: DescriptionData;
-  label?: string;
-  hideOverwrite?: boolean;
-  onChange: (change: DescriptionData) => void;
   descriptionTemplateStore?: DescriptionTemplateStore;
+  hideOverwrite?: boolean;
+  hideShortcuts?: boolean;
+  label?: string;
+  onChange: (change: DescriptionData) => void;
+  overwriteDescriptionValue?: string;
 }
 
-interface State {
-  shortcutsHovered: boolean;
-}
+interface State {}
 
-@inject('descriptionTemplateStore')
+@inject('descriptionTemplateStore', 'customShortcutStore')
 @observer
 export default class DescriptionInput extends React.Component<Props, State> {
-  state: State = {
-    shortcutsHovered: false
-  };
+  state: State = {};
 
   private data: DescriptionData = {
     overwriteDefault: false,
@@ -88,6 +88,9 @@ export default class DescriptionInput extends React.Component<Props, State> {
 
   changeOverwriteDefault = (checked: boolean) => {
     this.data.overwriteDefault = !checked;
+    if (!checked && this.props.overwriteDescriptionValue) {
+      this.data.value = this.props.overwriteDescriptionValue;
+    }
     this.update();
   };
 
@@ -118,47 +121,72 @@ export default class DescriptionInput extends React.Component<Props, State> {
       </div>
     );
 
+    const customShortcuts = this.props.customShortcutStore!.shortcuts;
+
     return (
       <Form.Item
         label={this.props.label}
         extra={
-          <div>
-            <Popover
-              title="Username Shortcuts"
-              visible={this.state.shortcutsHovered}
-              trigger="hover"
-              onVisibleChange={visible => this.setState({ shortcutsHovered: visible })}
-              content={
-                <div>
-                  <em>
-                    Example: :twminnownade: -> https://twitter.com/minnownade (would appear as
-                    @minnownade on Twitter)
-                  </em>
-                  {Object.entries(WebsiteService.usernameShortcuts)
-                    .sort((a, b) => a[0].localeCompare(b[0]))
-                    .map(([key, value]) => {
-                      return (
-                        <div>
-                          <strong>{WebsiteRegistry.websites[key].name}</strong>
-                          <ul>
-                            {value.map(val => {
-                              return (
-                                <li>
-                                  <span>{val.key} - </span>
-                                  <Typography.Text type="secondary">{val.url}</Typography.Text>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      );
-                    })}
-                </div>
-              }
-            >
-              <Button size="small">Username Shortcuts</Button>
-            </Popover>
-          </div>
+          this.props.hideShortcuts ? null : (
+            <div>
+              <Popover
+                title="Username Shortcuts"
+                onVisibleChange={visible => this.setState({ shortcutsHovered: visible })}
+                content={
+                  <div>
+                    <em>
+                      Example: {'{tw:minnownade}'} -> https://twitter.com/minnownade (would appear
+                      as @minnownade on Twitter)
+                    </em>
+                    {Object.entries(WebsiteService.usernameShortcuts)
+                      .sort((a, b) => a[0].localeCompare(b[0]))
+                      .map(([key, value]) => {
+                        return (
+                          <div>
+                            <strong>{WebsiteRegistry.websites[key].name}</strong>
+                            <ul>
+                              {value.map(val => {
+                                return (
+                                  <li>
+                                    <span>{val.key} - </span>
+                                    <Typography.Text type="secondary">{val.url}</Typography.Text>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                  </div>
+                }
+              >
+                <Button size="small">Username Shortcuts</Button>
+              </Popover>
+              <Popover
+                className="ml-1"
+                title="Custom Shortcuts"
+                content={
+                  <div>
+                    <ul>
+                      {customShortcuts
+                        .sort((a, b) => a.shortcut.localeCompare(b.shortcut))
+                        .map(shortcut => {
+                          return (
+                            <li>
+                              <code>{`{${shortcut.shortcut}${
+                                shortcut.isDynamic ? ':<dynamic content>' : ''
+                              }}`}</code>
+                            </li>
+                          );
+                        })}
+                    </ul>
+                  </div>
+                }
+              >
+                <Button size="small">Username Shortcuts</Button>
+              </Popover>
+            </div>
+          )
         }
       >
         {overwriteSwitch}

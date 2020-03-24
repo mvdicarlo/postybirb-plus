@@ -1,6 +1,6 @@
 import { TagGroup } from '../interfaces/tag-group.interface';
 import { IsArray, IsString, IsNotEmpty } from 'class-validator';
-import Entity from '../../base/entity/entity.base';
+import Entity from '../../database/models/entity.model';
 
 export default class TagGroupEntity extends Entity implements TagGroup {
   @IsString()
@@ -8,5 +8,10 @@ export default class TagGroupEntity extends Entity implements TagGroup {
   alias: string;
 
   @IsArray()
+  @IsNotEmpty()
   tags: string[];
+
+  constructor(partial?: Partial<TagGroup>) {
+    super(partial);
+  }
 }

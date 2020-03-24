@@ -1,48 +1,45 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { FileRepositoryModule } from 'src/file-repository/file-repository.module';
+import { FileManagerModule } from 'src/file-manager/file-manager.module';
 import { WebsitesModule } from 'src/websites/websites.module';
-import { SettingsModule } from 'src/settings/settings.module';
 import { FileManipulationModule } from 'src/file-manipulation/file-manipulation.module';
 import { AccountModule } from 'src/account/account.module';
 
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import { SubmissionController } from './submission.controller';
-import { SubmissionPartRepository } from './submission-part/submission-part.repository';
-import { SubmissionPartService } from './submission-part/submission-part.service';
-import { SubmissionRepository } from './submission.repository';
+import { SubmissionRepositoryToken } from './submission.repository';
 import { SubmissionService } from './submission.service';
-import { ValidatorService } from './validator/validator.service';
 import { SubmissionTemplateController } from './submission-template/submission-template.controller';
-import { SubmissionTemplateService } from './submission-template/submission-template.service';
-import { SubmissionTemplateRepository } from './submission-template/submission-template.repository';
-import { PostController } from './post/post.controller';
-import { PostService } from './post/post.service';
-import { LogController } from './log/log.controller';
-import { LogService } from './log/log.service';
-import { SubmissionLogRepository } from './log/log.repository';
+import { ValidatorModule } from './validator/validator.module';
+import { SubmissionPartModule } from './submission-part/submission-part.module';
+import { PostModule } from './post/post.module';
+import { SubmissionTemplateModule } from './submission-template/submission-template.module';
+import { DatabaseFactory } from 'src/database/database.factory';
+import SubmissionEntity from './models/submission.entity';
+import FileSubmissionEntity from './file-submission/models/file-submission.entity';
 
 @Module({
   imports: [
-    FileRepositoryModule,
+    FileManagerModule,
     WebsitesModule,
-    SettingsModule,
     forwardRef(() => AccountModule),
+    forwardRef(() => PostModule),
     FileManipulationModule,
+    ValidatorModule,
+    SubmissionPartModule,
+    SubmissionTemplateModule,
   ],
-  controllers: [SubmissionController, SubmissionTemplateController, PostController, LogController],
+  controllers: [SubmissionController],
   providers: [
     FileSubmissionService,
-    SubmissionPartRepository,
-    SubmissionPartService,
-    SubmissionRepository,
     SubmissionService,
-    ValidatorService,
-    SubmissionTemplateService,
-    SubmissionTemplateRepository,
-    PostService,
-    LogService,
-    SubmissionLogRepository,
+    DatabaseFactory.forProvider(SubmissionRepositoryToken, {
+      databaseName: 'submissions',
+      entity: SubmissionEntity,
+      descriminator: (entity: any) => {
+        return entity.primary ? FileSubmissionEntity : SubmissionEntity;
+      },
+    }),
   ],
-  exports: [SubmissionService, SubmissionPartService, SubmissionTemplateService, PostService],
+  exports: [SubmissionService],
 })
 export class SubmissionModule {}

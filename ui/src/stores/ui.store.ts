@@ -18,7 +18,7 @@ export class UIStore {
     hasPendingChanges: false,
     navCollapsed: false,
     navId: 0,
-    theme: 'light',
+    theme: window.IS_DARK_THEME ? 'dark' : 'light',
     websiteFilter: [],
     activeNav: 'home'
   };

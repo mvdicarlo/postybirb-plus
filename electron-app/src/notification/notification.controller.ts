@@ -18,8 +18,8 @@ export class NotificationController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     if (id === 'all') {
-      return this.service.deleteAll();
+      return this.service.removeAll();
     }
-    return this.service.deleteNotification(id);
+    return this.service.remove(id);
   }
 }

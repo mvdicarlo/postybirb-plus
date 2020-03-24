@@ -5,7 +5,7 @@ import { LoginResponse } from 'src/websites/interfaces/login-response.interface'
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { Website } from 'src/websites/website.base';
-import WebsiteValidator from 'src/websites/utils/website-validator.util';
+import WebsiteValidator from 'src/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
@@ -18,7 +18,8 @@ import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize';
+import FileSize from 'src/utils/filesize.util';
+import FormContent from 'src/utils/form-content.util';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -123,7 +124,7 @@ export class Weasyl extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (WebsiteValidator.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
+    if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
       problems.push('Requires at least 2 tags.');
     }
 

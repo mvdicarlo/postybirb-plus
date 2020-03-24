@@ -331,7 +331,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
       this.setHeaders();
 
       return (
-        <div>
+        <div className="submission-form">
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
               <Form.Item>
