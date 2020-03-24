@@ -33,7 +33,7 @@ export default class SubmissionService {
   static createFromClipboard() {
     const formData: FormData = new FormData();
     formData.set('file', window.electron.clipboard.read());
-    return axios.post(`/submission/create/${SubmissionType.FILE}`, formData);
+    return axios.post('/submission/create/', formData);
   }
 
   static deleteSubmission(id: string) {
