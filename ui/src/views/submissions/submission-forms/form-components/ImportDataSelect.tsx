@@ -2,13 +2,12 @@ import React from 'react';
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { LoginStatusStore } from '../../../../stores/login-status.store';
-import { SubmissionStore } from '../../../../stores/submission.store';
-import { Modal, Select, Button, Form, TreeSelect } from 'antd';
+import { Modal, Button, Form, TreeSelect } from 'antd';
 import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../../website-components/website-registry';
-import SubmissionUtil from '../../../../utils/submission.util';
-import { SubmissionTemplateStore } from '../../../../stores/submission-template.store';
+import SubmissionTemplateSelect from '../../submission-template-select/SubmissionTemplateSelect';
+import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
 
 interface Props {
   className?: string;
@@ -16,9 +15,7 @@ interface Props {
   label?: string;
   loginStatusStore?: LoginStatusStore;
   onPropsSelect: (props: Array<SubmissionPart<any>>) => void;
-  submissionStore?: SubmissionStore;
-  submissionTemplateStore?: SubmissionTemplateStore;
-  submissionType: string;
+  submissionType: SubmissionType;
 }
 
 interface State {
@@ -27,7 +24,7 @@ interface State {
   selectedFields: string[];
 }
 
-@inject('loginStatusStore', 'submissionStore', 'submissionTemplateStore')
+@inject('loginStatusStore')
 @observer
 export default class ImportDataSelect extends React.Component<Props, State> {
   state: State = {
@@ -77,18 +74,6 @@ export default class ImportDataSelect extends React.Component<Props, State> {
     return [];
   };
 
-  findById(id: string | number): { [key: string]: SubmissionPart<any> } | undefined {
-    const foundTemplate = this.props.submissionTemplateStore!.all.find(t => t._id === id);
-    if (foundTemplate) {
-      return foundTemplate.parts;
-    }
-
-    const foundSubmission = this.props.submissionStore!.all.find(s => s.submission._id === id);
-    if (foundSubmission) {
-      return foundSubmission.parts;
-    }
-  }
-
   render() {
     const title = this.props.label || 'Import';
     return (
@@ -107,42 +92,17 @@ export default class ImportDataSelect extends React.Component<Props, State> {
           visible={this.state.modalOpen}
         >
           <Form layout="vertical">
-            <Form.Item label="Import From">
-              <Select
-                onSelect={(value: any) => {
-                  const parts = this.findById(value);
-                  this.setState({
-                    selected: parts,
-                    selectedFields: parts ? Object.values(parts).map(p => p.accountId) : []
-                  });
-                }}
-              >
-                <Select.OptGroup label="Templates">
-                  {_.sortBy(
-                    this.props.submissionTemplateStore!.all.filter(
-                      t => t.type === this.props.submissionType
-                    ),
-                    'alias'
-                  ).map(t => (
-                    <Select.Option value={t._id}>{t.alias}</Select.Option>
-                  ))}
-                </Select.OptGroup>
-                <Select.OptGroup label="Submissions">
-                  {_.sortBy(
-                    this.props.submissionStore!.all.filter(
-                      s =>
-                        s.submission._id !== this.props.ignoreId &&
-                        s.submission.type === this.props.submissionType
-                    ),
-                    s => SubmissionUtil.getSubmissionTitle(s)
-                  ).map(s => (
-                    <Select.Option value={s.submission._id}>
-                      {SubmissionUtil.getSubmissionTitle(s)}
-                    </Select.Option>
-                  ))}
-                </Select.OptGroup>
-              </Select>
-            </Form.Item>
+            <SubmissionTemplateSelect
+              submissionType={this.props.submissionType}
+              ignoreId={this.props.ignoreId}
+              label="Import From"
+              onSelect={(id, type, parts) => {
+                this.setState({
+                  selected: parts,
+                  selectedFields: parts ? Object.values(parts).map(p => p.accountId) : []
+                });
+              }}
+            />
 
             <Form.Item label="Sections To Import">
               <TreeSelect
