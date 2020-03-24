@@ -19,6 +19,7 @@ init:
 
 install:
   - cmd: powershell Install-Product node 12 x64
+  - sh: nvm install 12.14.1
   - sh: nvm use 12.14.1
   - yarn
 
