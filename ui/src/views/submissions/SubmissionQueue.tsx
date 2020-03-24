@@ -119,8 +119,8 @@ export default class SubmissionQueue extends React.Component<Props> {
             renderItem={item => (
               <List.Item
                 actions={[
-                  <Link to={`/edit/submission/${item._id}`}>
-                    <span key="schedule-edit">Edit</span>
+                  <Link to={`/edit/submission/${item.type}/${item._id}`}>
+                    <span key="queued-edit">Edit</span>
                   </Link>,
                   <span
                     className="text-warning"

@@ -14,6 +14,7 @@ import { FileSubmission } from '../../../../electron-app/src/submission/file-sub
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import { WeasylCategories } from './WeasylCategories';
 
 const defaultOptions: DefaultWeasylOptions = {
   title: undefined,
@@ -35,8 +36,10 @@ const defaultOptions: DefaultWeasylOptions = {
 };
 
 export class Weasyl implements Website {
+  internalName: string = 'Weasyl';
   name: string = 'Weasyl';
   supportsAdditionalFiles: boolean = false;
+  supportsTags: boolean = true;
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
   );
@@ -70,101 +73,6 @@ export class WeasylFileSubmissionForm extends React.Component<
   state: WeasylFileSubmissionState = {
     problems: [],
     folders: []
-  };
-
-  private categoryMap = {
-    IMAGE: [
-      {
-        id: '1010',
-        name: 'Sketch'
-      },
-      {
-        id: '1020',
-        name: 'Traditional'
-      },
-      {
-        id: '1030',
-        name: 'Digital'
-      },
-      {
-        id: '1040',
-        name: 'Animation'
-      },
-      {
-        id: '1050',
-        name: 'Photography'
-      },
-      {
-        id: '1060',
-        name: 'Design / Interface'
-      },
-      {
-        id: '1070',
-        name: 'Modeling / Sculpture'
-      },
-      {
-        id: '1075',
-        name: 'Crafts / Jewelry'
-      },
-      {
-        id: '1080',
-        name: 'Desktop / Wallpaper'
-      },
-      {
-        id: '1999',
-        name: 'Other'
-      }
-    ],
-    TEXT: [
-      {
-        id: '2010',
-        name: 'Story'
-      },
-      {
-        id: '2020',
-        name: 'Poetry / Lyrics'
-      },
-      {
-        id: '2030',
-        name: 'Script / Screenplay'
-      },
-      {
-        id: '2999',
-        name: 'Other'
-      }
-    ],
-    VIDEO: [
-      {
-        id: '3500',
-        name: 'Embedded Video'
-      },
-      {
-        id: '3999',
-        name: 'Other'
-      }
-    ],
-    AUDIO: [
-      {
-        id: '3010',
-        name: 'Original Music'
-      },
-      {
-        id: '3020',
-        name: 'Cover Version'
-      },
-      {
-        id: '3030',
-        name: 'Remix / Mashup'
-      },
-      {
-        id: '3040',
-        name: 'Speech / Reading'
-      },
-      {
-        id: '3999',
-        name: 'Other'
-      }
-    ]
   };
 
   constructor(props: SubmissionSectionProps<FileSubmission, DefaultWeasylOptions>) {
@@ -277,13 +185,14 @@ export class WeasylFileSubmissionForm extends React.Component<
             defaultValue={data.description}
             onChange={this.handleDescriptionChange.bind(this)}
             label="Description"
+            overwriteDescriptionValue={_.get(this.props.defaultData, 'description.value')}
           />
           <Form.Item>
             <div className="flex">
               <div className="w-1/2">
                 <div>
                   <Checkbox
-                    checked={data.useThumbnail}
+                    checked={data.autoScale}
                     onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
                   >
                     Downscale images to fit size limit
@@ -322,10 +231,10 @@ export class WeasylFileSubmissionForm extends React.Component<
                     onSelect={this.handleSelectChange.bind(this, 'category')}
                   >
                     {this.props.submission
-                      ? this.categoryMap[this.props.submission.primary.type].map(item => (
+                      ? WeasylCategories[this.props.submission.primary.type].map(item => (
                           <Select.Option value={item.id}>{item.name}</Select.Option>
                         ))
-                      : Object.entries(this.categoryMap).map(([key, values]) => (
+                      : Object.entries(WeasylCategories).map(([key, values]) => (
                           <Select.OptGroup label={key}>
                             {values.map(item => (
                               <Select.Option value={item.id}>{item.name}</Select.Option>

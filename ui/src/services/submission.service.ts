@@ -7,14 +7,19 @@ import { SubmissionType } from '../shared/enums/submission-type.enum';
 import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
 import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionCreate } from '../../../electron-app/src/submission/interfaces/submission-create.interface';
 
 export default class SubmissionService {
   static checkProblems(id: string, parts: Array<FormSubmissionPart<any>>) {
     return axios.post<Problems>('/submission/dryValidate', { id, parts });
   }
 
-  static create(type: SubmissionType, title: string) {
-    return axios.post(`/submission/create/${type}?title=${title ? encodeURIComponent(title) : ''}`);
+  static create(create: SubmissionCreate) {
+    const data = new FormData();
+    Object.entries(create).forEach(([key, value]) => {
+      data.set(key, value);
+    });
+    return axios.post('/submission/create', data);
   }
 
   static changeFallback(id: string, file: File) {
@@ -28,7 +33,7 @@ export default class SubmissionService {
   static createFromClipboard() {
     const formData: FormData = new FormData();
     formData.set('file', window.electron.clipboard.read());
-    return axios.post(`/submission/create/${SubmissionType.FILE}`, formData);
+    return axios.post('/submission/create/', formData);
   }
 
   static deleteSubmission(id: string) {

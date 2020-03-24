@@ -54,7 +54,7 @@ export class ScheduledSubmissionListItem extends React.Component<ListItemProps, 
           <span className="text-link" key="schedule-post-now" onClick={this.postNow.bind(this)}>
             Post Now
           </span>,
-          <Link to={`/edit/submission/${item.submission._id}`}>
+          <Link to={`/edit/submission/${item.submission.type}/${item.submission._id}`}>
             <span key="schedule-edit">Edit</span>
           </Link>,
           <span

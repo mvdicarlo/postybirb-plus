@@ -1,8 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
 import * as _ from 'lodash';
-import { SubmissionTemplateRepository } from './submission-template.repository';
+import { SubmissionTemplateRepository, SubmissionTemplateRepositoryToken } from './submission-template.repository';
 import { EventsGateway } from 'src/events/events.gateway';
-import { SubmissionTemplateEvent } from './submission-template.events.enum';
+import { SubmissionTemplateEvent } from './enums/submission-template.events.enum';
 import { CreateSubmissionTemplateModel } from './models/create-template.model';
 import { UpdateSubmissionTemplateModel } from './models/update-template.model';
 import { SubmissionTemplate } from './interfaces/submission-template.interface';
@@ -16,6 +16,7 @@ export class SubmissionTemplateService {
   private readonly logger = new Logger(SubmissionTemplateService.name);
 
   constructor(
+    @Inject(SubmissionTemplateRepositoryToken)
     private readonly repository: SubmissionTemplateRepository,
     private readonly eventEmitter: EventsGateway,
   ) {}

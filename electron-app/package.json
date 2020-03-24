@@ -1,7 +1,7 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.2",
-  "description": "PostyBurb Plus",
+  "version": "3.0.4",
+  "description": "(ClientServer) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "main": "main.js",
   "author": "Michael DiCarlo",
   "license": "BSD-3-Clause",
@@ -11,6 +11,7 @@
     "url": "git+https://mvdicarlo@github.com/mvdicarlo/postybirb-plus.git"
   },
   "scripts": {
+    "nest": "nest",
     "prebuild": "rimraf dist",
     "postinstall": "electron-builder install-app-deps",
     "build": "nest build",
@@ -22,7 +23,7 @@
     "release:linux": "electron-builder -l -p always",
     "clean": "rimraf release",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "npm run prebuild; nest build; electron main --develop",
+    "start": "npm run prebuild && nest build && electron main --develop",
     "start:electron": "electron main --develop",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -35,12 +36,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^6.10.14",
-    "@nestjs/core": "^6.10.14",
-    "@nestjs/platform-express": "^6.10.14",
-    "@nestjs/platform-socket.io": "^6.10.14",
+    "@nestjs/common": "^6.11.11",
+    "@nestjs/core": "^6.11.11",
+    "@nestjs/platform-express": "^6.11.11",
+    "@nestjs/platform-socket.io": "^6.11.11",
     "@nestjs/schedule": "^0.1.1",
-    "@nestjs/websockets": "^6.10.14",
+    "@nestjs/websockets": "^6.11.11",
     "chardet": "^0.8.0",
     "cheerio": "^1.0.0-rc.3",
     "class-transformer": "^0.2.3",
@@ -73,9 +74,9 @@
   },
   "devDependencies": {
     "@jest-runner/electron": "^2.0.3",
-    "@nestjs/cli": "^6.10.14",
+    "@nestjs/cli": "^6.11.11",
     "@nestjs/schematics": "^6.7.6",
-    "@nestjs/testing": "^6.10.14",
+    "@nestjs/testing": "^6.11.11",
     "@types/express": "^4.17.1",
     "@types/fs-extra": "^8.0.1",
     "@types/jest": "^24.0.18",
@@ -97,21 +98,6 @@
     "tsconfig-paths": "^3.9.0",
     "tslint": "^5.20.0",
     "typescript": "^3.6.3"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": "src",
-    "testRegex": ".spec.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "runner": "@jest-runner/electron/main"
   },
   "build": {
     "appId": "com.lemonynade.postybirb.plus",

@@ -77,6 +77,8 @@ export default class SubmissionView extends React.Component<Props> {
 
     return (
       <Tabs
+        className="overflow-visible bg-inherit"
+        tabBarStyle={{ zIndex: 10, backgroundColor: 'inherit', position: 'sticky', top: 0 }}
         defaultActiveKey={this.defaultKey}
         onTabClick={(key: string) => {
           this.props.history.replace(`/${this.type}/${key}`);

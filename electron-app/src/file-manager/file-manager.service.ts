@@ -5,7 +5,7 @@ import { FileRecord } from 'src/submission/file-submission/interfaces/file-recor
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { Injectable, Logger } from '@nestjs/common';
 import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/directories';
-import { UploadedFile } from './uploaded-file.interface';
+import { UploadedFile } from './interfaces/uploaded-file.interface';
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
@@ -14,8 +14,8 @@ import { detect } from 'chardet';
 import { ImageManipulationPoolService } from 'src/file-manipulation/pools/image-manipulation-pool.service';
 
 @Injectable()
-export class FileRepositoryService {
-  private readonly logger: Logger = new Logger(FileRepositoryService.name);
+export class FileManagerService {
+  private readonly logger: Logger = new Logger(FileManagerService.name);
 
   constructor(private readonly imageManipulationPool: ImageManipulationPoolService) {}
 
@@ -44,7 +44,12 @@ export class FileRepositoryService {
           frame0.getImage().read(),
           'image/jpeg',
         );
-        thumbnail = (await im.resize(300).getData()).buffer;
+        thumbnail = (
+          await im
+            .resize(300)
+            .setQuality(99)
+            .getData()
+        ).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
         const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
           file.buffer,
@@ -63,7 +68,10 @@ export class FileRepositoryService {
             data.type,
           )}`;
 
-          const thumbnailData = await im.resize(300).getData();
+          const thumbnailData = await im
+            .resize(300)
+            .setQuality(99)
+            .getData();
           thumbnail = thumbnailData.buffer;
           thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
             thumbnailData.type,
@@ -110,15 +118,26 @@ export class FileRepositoryService {
     await Promise.all(files.filter(f => !!f).map(f => this.removeSubmissionFile(f)));
   }
 
-  scaleImage(file: UploadedFile, w: number): UploadedFile {
+  scaleImage(file: UploadedFile, scalePx: number): UploadedFile {
     let image = nativeImage.createFromBuffer(file.buffer);
-    const { width } = image.getSize();
-    if (width > w) {
-      image = image.resize({
-        width: w,
-        height: w / image.getAspectRatio(),
-      });
+    const { width, height } = image.getSize();
+    const ar = image.getAspectRatio();
+    if (ar >= 1) {
+      if (width > scalePx) {
+        image = image.resize({
+          width: scalePx,
+          height: scalePx / ar,
+        });
+      }
+    } else {
+      if (height > scalePx) {
+        image = image.resize({
+          width: scalePx * ar,
+          height: scalePx,
+        });
+      }
     }
+
     const copy = _.cloneDeep(file);
     copy.buffer = image.toJPEG(100);
     copy.mimetype = 'image/jpeg';

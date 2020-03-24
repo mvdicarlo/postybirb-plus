@@ -17,11 +17,11 @@ import { SubmissionEvent } from './enums/submission.events.enum';
 import { SubmissionPackage } from './interfaces/submission-package.interface';
 import { SubmissionPart, Parts } from './submission-part/interfaces/submission-part.interface';
 import { SubmissionPartService } from './submission-part/submission-part.service';
-import { SubmissionRepository } from './submission.repository';
+import { SubmissionRepository, SubmissionRepositoryToken } from './submission.repository';
 import { SubmissionType } from './enums/submission-type.enum';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { ValidatorService } from './validator/validator.service';
-import { UploadedFile } from 'src/file-repository/uploaded-file.interface';
+import { UploadedFile } from 'src/file-manager/interfaces/uploaded-file.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { FileRecord } from './file-submission/interfaces/file-record.interface';
 import { PostService } from './post/post.service';
@@ -35,6 +35,7 @@ import { FileSubmission } from './file-submission/interfaces/file-submission.int
 import { AccountService } from 'src/account/account.service';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
 import { FileSubmissionType } from './file-submission/enums/file-submission-type.enum';
+import SubmissionCreateModel from './models/submission-create.model';
 
 type SubmissionEntityReference = string | SubmissionEntity;
 
@@ -43,6 +44,7 @@ export class SubmissionService {
   private readonly logger = new Logger(SubmissionService.name);
 
   constructor(
+    @Inject(SubmissionRepositoryToken)
     private readonly repository: SubmissionRepository,
     private readonly partService: SubmissionPartService,
     private fileSubmissionService: FileSubmissionService,
@@ -116,13 +118,14 @@ export class SubmissionService {
   postingStateChanged(): void {
     this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
-  async create(createDto: SubmissionCreate): Promise<SubmissionEntity> {
+
+  async create(createDto: SubmissionCreateModel): Promise<SubmissionEntity> {
     if (!SubmissionType[createDto.type]) {
       throw new BadRequestException(`Unknown submission type: ${createDto.type}`);
     }
 
     const submission: SubmissionEntity = new SubmissionEntity({
-      title: createDto.data.title,
+      title: createDto.title,
       schedule: new SubmissionScheduleModel(),
       type: createDto.type,
       sources: [],
@@ -134,7 +137,7 @@ export class SubmissionService {
       case SubmissionType.FILE:
         completedSubmission = await this.fileSubmissionService.createSubmission(
           submission,
-          createDto.data,
+          createDto,
         );
         break;
       case SubmissionType.NOTIFICATION:
@@ -143,8 +146,21 @@ export class SubmissionService {
     }
 
     try {
-      await this.repository.save(completedSubmission);
+      const submission = await this.repository.save(completedSubmission);
       await this.partService.createDefaultPart(completedSubmission);
+      if (createDto.parts) {
+        const parts: Array<SubmissionPart<any>> = JSON.parse(createDto.parts);
+        await Promise.all(
+          parts.map(part => {
+            delete part._id;
+            delete part.lastUpdated;
+            delete part.created;
+            part.submissionId = submission._id;
+            const entity = new SubmissionPartEntity(part);
+            return this.partService.createOrUpdateSubmissionPart(entity, submission.type);
+          }),
+        );
+      }
     } catch (err) {
       // Clean up bad data on failure
       this.logger.error(err, 'Create Failure');
@@ -158,23 +174,21 @@ export class SubmissionService {
 
   async recreate(log: SubmissionLogEntity): Promise<Submission> {
     const { submission, parts, defaultPart } = log;
-    const createData: SubmissionCreate = {
+    const createData: SubmissionCreateModel = new SubmissionCreateModel({
       type: submission.type,
-      data: {
-        title: submission.title,
-      },
-    };
+      title: submission.title,
+    });
 
     if (createData.type === SubmissionType.FILE) {
-      createData.data = {
-        path: (submission as FileSubmission).primary.originalPath,
-        file: {
-          originalname: (submission as FileSubmission).primary.name,
-          mimetype: (submission as FileSubmission).primary.mimetype,
-          buffer: await fs
-            .readFile((submission as FileSubmission).primary.originalPath)
-            .catch(() => Buffer.from([])), // empty if no file found
-        },
+      createData.path = (submission as FileSubmission).primary.originalPath;
+      createData.file = {
+        originalname: (submission as FileSubmission).primary.name,
+        mimetype: (submission as FileSubmission).primary.mimetype,
+        encoding: '',
+        fieldname: 'file',
+        buffer: await fs
+          .readFile((submission as FileSubmission).primary.originalPath)
+          .catch(() => Buffer.from([])), // empty if no file found
       };
     }
 

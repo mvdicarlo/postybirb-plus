@@ -69,8 +69,7 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
       sections.push(
         <Form.Item>
           <Typography.Title style={{ marginBottom: '0' }} level={3}>
-            {website}
-            <a className="nav-section-anchor" href={`#${website}`} id={`#${website}`}></a>
+            <span className="nav-section-anchor" id={`#${website}`}>{website}</span>
           </Typography.Title>
           <Tabs>
             {childrenSections.map(section => (

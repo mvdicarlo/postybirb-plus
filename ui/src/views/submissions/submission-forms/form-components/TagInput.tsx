@@ -207,7 +207,10 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps> {
                 </div>
               }
             >
-              <a onClick={() => this.props.onSelect(g.tags)}>{g.alias}</a>
+              {
+                // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                <a onClick={() => this.props.onSelect(g.tags)}>{g.alias}</a>
+              }
             </Tooltip>
           </Menu.Item>
         ))}
@@ -216,9 +219,9 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps> {
     return (
       <div className="mr-2">
         <Dropdown overlay={menu}>
-          <a className="ant-light-dropdown-link ant-dark-dropdown-link">
+          <span className="ant-light-dropdown-link ant-dark-dropdown-link text-link">
             Apply Tag Group <Icon type="down" />
-          </a>
+          </span>
         </Dropdown>
       </div>
     );

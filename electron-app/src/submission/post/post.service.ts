@@ -16,7 +16,7 @@ import { Poster } from './poster';
 import { LogService } from '../log/log.service';
 import { PostStatuses, PostInfo } from './interfaces/post-status.interface';
 import { EventsGateway } from 'src/events/events.gateway';
-import { PostEvent } from './post.events.enum';
+import { PostEvent } from './enums/post.events.enum';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
@@ -68,7 +68,7 @@ export class PostService {
     if (!this.isPosting(submission.type)) {
       this.post(submission).catch(() => {
         if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-          this.notificationService.createNotification({
+          this.notificationService.create({
             type: NotificationType.WARNING,
             body: `${_.capitalize(
               submission.type,
@@ -280,7 +280,7 @@ export class PostService {
             posters.length === posters.filter(p => p.status === 'SUCCESS').length;
           if (canDelete) {
             const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
-            this.notificationService.createNotification(
+            this.notificationService.create(
               {
                 type: NotificationType.SUCCESS,
                 body,
@@ -292,7 +292,7 @@ export class PostService {
             );
             this.submissionService.deleteSubmission(submission._id, true);
           } else {
-            this.notificationService.createNotification(
+            this.notificationService.create(
               {
                 type: NotificationType.ERROR,
                 body: posters
@@ -367,7 +367,7 @@ export class PostService {
   private clearQueueIfRequired(submission: Submission) {
     if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
       this.emptyQueue(submission.type);
-      this.notificationService.createNotification(
+      this.notificationService.create(
         {
           type: NotificationType.WARNING,
           body: `${_.capitalize(

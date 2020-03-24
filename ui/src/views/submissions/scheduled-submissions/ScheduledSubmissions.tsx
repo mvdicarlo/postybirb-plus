@@ -44,7 +44,7 @@ export default class ScheduledSubmissions extends React.Component<Props> {
                   ).toLocaleTimeString()}]`}
                 >
                   <span className="mr-1">{SubmissionUtil.getSubmissionTitle(s)}</span>
-                  <span>{new Date(s.submission.schedule.postAt!).toLocaleTimeString()}</span>
+                  <span className="block">{new Date(s.submission.schedule.postAt!).toLocaleTimeString()}</span>
                 </span>
               }
             />

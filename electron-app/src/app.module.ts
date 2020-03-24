@@ -12,6 +12,8 @@ import { AccountModule } from './account/account.module';
 import { RemoteModule } from './remote/remote.module';
 import { NotificationModule } from './notification/notification.module';
 import { FileManipulationModule } from './file-manipulation/file-manipulation.module';
+import { CustomShortcutModule } from './custom-shortcut/custom-shortcut.module';
+import { TagConverterModule } from './tag-converter/tag-converter.module';
 
 @Module({
   imports: [
@@ -27,8 +29,8 @@ import { FileManipulationModule } from './file-manipulation/file-manipulation.mo
     RemoteModule,
     NotificationModule,
     FileManipulationModule,
+    CustomShortcutModule,
+    TagConverterModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

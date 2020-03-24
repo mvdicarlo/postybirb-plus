@@ -27,6 +27,7 @@ import { submissionStore } from '../../../../stores/submission.store';
 import PostService from '../../../../services/post.service';
 import FallbackStoryInput from '../form-components/FallbackStoryInput';
 import RemoteService from '../../../../services/remote.service';
+import SubmissionImageCropper from '../../submission-image-cropper/SubmissionImageCropper';
 import {
   Form,
   Button,
@@ -60,6 +61,10 @@ export interface SubmissionEditFormState {
   submissionType: SubmissionType;
   touched: boolean;
   hasError: boolean;
+  showThumbnailCropper: boolean;
+  thumbnailFileForCrop?: File;
+  imageCropperResolve?: (file: File) => void;
+  imageCropperReject?: () => void;
 }
 
 @inject('loginStatusStore')
@@ -90,7 +95,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     removedParts: [],
     submission: undefined,
     submissionType: SubmissionType.FILE,
-    touched: false
+    touched: false,
+    showThumbnailCropper: false
   };
 
   constructor(props: Props) {
@@ -403,6 +409,24 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     });
   }
 
+  cropThumbnail(file: File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.setState({
+        showThumbnailCropper: true,
+        thumbnailFileForCrop: file,
+        imageCropperResolve: resolve,
+        imageCropperReject: reject
+      });
+    }).finally(() => {
+      this.setState({
+        showThumbnailCropper: false,
+        thumbnailFileForCrop: undefined,
+        imageCropperResolve: undefined,
+        imageCropperReject: undefined
+      });
+    });
+  }
+
   removeThumbnail() {
     if ((this.state.submission as FileSubmission).thumbnail) {
       SubmissionService.removeThumbnail(this.state.submission!._id)
@@ -543,16 +567,18 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
       const submissionFromStore = submissionStore.getSubmission(this.id);
       const isPosting = submissionFromStore && submissionFromStore.submission.isPosting;
+      const isQueued = submissionFromStore && submissionFromStore.submission.isQueued;
+      const isScheduled =
+        submissionFromStore && submissionFromStore.submission.schedule.isScheduled;
 
       return (
-        <div>
+        <div className="submission-form">
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
               {this.isFileSubmission(submission) ? (
                 <Form.Item>
                   <Typography.Title level={3}>
-                    Files
-                    <a className="nav-section-anchor" href="#Files" id="#Files"></a>
+                    <span className="nav-section-anchor" id="#Files">Files</span>
                   </Typography.Title>
                   <div className="flex">
                     <Card
@@ -604,6 +630,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                             beforeUpload={file => {
                               return file.type.includes('image/');
                             }}
+                            transformFile={this.cropThumbnail.bind(this)}
                             onChange={this.fileUploadChange}
                             action={this.thumbnailFileChangeAction}
                             headers={{ Authorization: window.AUTH_ID }}
@@ -616,6 +643,12 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     >
                       <Card.Meta
                         description={submission.thumbnail ? null : 'No thumbnail provided'}
+                      />
+                      <SubmissionImageCropper
+                        visible={this.state.showThumbnailCropper}
+                        file={this.state.thumbnailFileForCrop!}
+                        onSubmit={this.state.imageCropperResolve!}
+                        onClose={this.state.imageCropperReject!}
                       />
                     </Card>
                   </div>
@@ -682,8 +715,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Schedule
-                  <a className="nav-section-anchor" href="#Schedule" id="#Schedule"></a>
+                  <span className="nav-section-anchor" id="#Schedule">Schedule</span>
                 </Typography.Title>
                 <DatePicker
                   value={this.state.postAt ? moment(this.state.postAt) : undefined}
@@ -696,11 +728,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Defaults
+                  <span className="nav-section-anchor" id="#Defaults">Defaults</span>
                   <Tooltip title="The default fields are used by all selected websites. You can override these defaults inside of each website section.">
                     <Icon className="text-sm ml-1 text-primary" type="question-circle" />
                   </Tooltip>
-                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
@@ -713,8 +744,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Websites
-                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                  <span className="nav-section-anchor" id="#Websites">Websites</span>
                 </Typography.Title>
                 <TreeSelect
                   multiple
@@ -829,7 +859,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               <Typography.Text type="danger">
                 Updates cannot be made while the submission is posting.
               </Typography.Text>
-            ) : (
+            ) : isScheduled || isQueued ? null : (
               <span>
                 {this.formHasChanges() ? (
                   <Popconfirm

@@ -331,13 +331,12 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
       this.setHeaders();
 
       return (
-        <div>
+        <div className="submission-form">
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
               <Form.Item>
                 <Typography.Title level={3}>
-                  Defaults
-                  <a className="nav-section-anchor" href="#Defaults" id="#Defaults"></a>
+                  <span className="nav-section-anchor" id="#Defaults">Defaults</span>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
@@ -350,8 +349,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
 
               <Form.Item>
                 <Typography.Title level={3}>
-                  Websites
-                  <a className="nav-section-anchor" href="#Websites" id="#Websites"></a>
+                  <span className="nav-section-anchor" id="#Websites">Websites</span>
                 </Typography.Title>
                 <TreeSelect
                   multiple

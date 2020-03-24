@@ -1,8 +1,8 @@
-import { EntityIntf } from './entity.base.interface';
+import { EntityIntf } from '../interfaces/entity.interface';
 import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 import * as _ from 'lodash';
 import * as uuid from 'uuid/v1';
-import { Expose, classToPlain } from 'class-transformer';
+import { classToPlain } from 'class-transformer';
 
 export default class Entity implements EntityIntf {
   @IsNotEmpty()

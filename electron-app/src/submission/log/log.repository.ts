@@ -1,11 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import { SubmissionLog } from './interfaces/submission-log.interface';
-import EntityRepository from 'src/base/entity/entity.repository.base';
+import PersistedDatabase from 'src/database/databases/persisted.database';
 import SubmissionLogEntity from './models/submission-log.entity';
+import MemoryDatabase from 'src/database/databases/memory.database';
 
-@Injectable()
-export class SubmissionLogRepository extends EntityRepository<SubmissionLogEntity, SubmissionLog> {
-  constructor() {
-    super('submission-logs', SubmissionLogEntity);
-  }
-}
+export const SubmissionLogRepositoryToken = 'SubmissionLogRepositoryToken';
+export type SubmissionLogRepository =
+  | PersistedDatabase<SubmissionLogEntity, SubmissionLog>
+  | MemoryDatabase<SubmissionLogEntity, SubmissionLog>;

@@ -6,7 +6,6 @@ import {
   DefaultOptions,
   DefaultFileOptions,
 } from '../submission-part/interfaces/default-options.interface';
-import WebsiteValidator from 'src/websites/utils/website-validator.util';
 import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
 import { FilePostData } from './interfaces/file-post-data.interface';
 import { Website } from 'src/websites/website.base';
@@ -21,6 +20,7 @@ import { Submission } from '../interfaces/submission.interface';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
 import { FileManipulationService } from 'src/file-manipulation/file-manipulation.service';
+import FormContent from 'src/utils/form-content.util';
 
 export interface Poster {
   on(
@@ -158,7 +158,7 @@ export class Poster extends EventEmitter {
       }
 
       let description = this.website.preparseDescription(
-        WebsiteValidator.getDescription(
+        FormContent.getDescription(
           this.defaultPart.data.description,
           this.part.data.description,
         ),
@@ -182,7 +182,7 @@ export class Poster extends EventEmitter {
         rating: this.part.data.rating || this.defaultPart.data.rating,
         sources: this.sources,
         submission: this.submission,
-        tags: WebsiteValidator.getTags(this.defaultPart.data.tags, this.part.data.tags),
+        tags: FormContent.getTags(this.defaultPart.data.tags, this.part.data.tags),
         title: this.part.data.title || this.defaultPart.data.title || this.submission.title,
       };
 
@@ -195,7 +195,7 @@ export class Poster extends EventEmitter {
             buffer: this.submission.primary.buffer,
             options: {
               contentType: this.submission.primary.mimetype,
-              filename: this.submission.primary.name,
+              filename: this.parseFileName(this.submission.primary.name),
             },
           },
         };
@@ -217,7 +217,7 @@ export class Poster extends EventEmitter {
             buffer: this.submission.thumbnail.buffer,
             options: {
               contentType: this.submission.thumbnail.mimetype,
-              filename: this.submission.thumbnail.name,
+              filename: this.parseFileName(this.submission.thumbnail.name),
             },
           };
         }
@@ -235,7 +235,7 @@ export class Poster extends EventEmitter {
                     buffer: record.buffer,
                     options: {
                       contentType: record.mimetype,
-                      filename: record.name,
+                      filename: this.parseFileName(record.name),
                     },
                   },
                 };
@@ -339,6 +339,10 @@ export class Poster extends EventEmitter {
 
   private isFileSubmission(submission: Submission): submission is FileSubmission {
     return submission instanceof FileSubmissionEntity;
+  }
+
+  private parseFileName(name: string): string {
+    return name.replace(/#/g, '_');
   }
 
   addSource(source: string) {
