@@ -2,25 +2,15 @@ import * as _ from 'lodash';
 import { EventEmitter } from 'events';
 import { AccountService } from '../../account/account.service';
 import { PostData } from './interfaces/post-data.interface';
-import {
-  DefaultOptions,
-  DefaultFileOptions,
-} from '../submission-part/interfaces/default-options.interface';
-import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
-import { FilePostData } from './interfaces/file-post-data.interface';
+import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
 import { Website } from 'src/websites/website.base';
 import { SettingsService } from 'src/settings/settings.service';
-import { AdInsertParser } from 'src/description-parsing/miscellaneous/ad.parser';
-import { WebsitesService } from 'src/websites/websites.service';
-import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import { PostResponse } from './interfaces/post-response.interface';
 import SubmissionEntity from '../models/submission.entity';
-import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 import { Submission } from '../interfaces/submission.interface';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
-import { FileManipulationService } from 'src/file-manipulation/file-manipulation.service';
-import FormContent from 'src/utils/form-content.util';
+import { ParserService } from '../parser/parser.service';
 
 export interface Poster {
   on(
@@ -105,14 +95,13 @@ export class Poster extends EventEmitter {
   retries: number = 0;
 
   constructor(
-    private accountService: AccountService,
-    private settingsService: SettingsService,
-    private websitesService: WebsitesService,
-    public fileManipulator: FileManipulationService,
-    private website: Website,
-    private submission: SubmissionEntity,
-    public part: SubmissionPartEntity<any>,
-    private defaultPart: SubmissionPartEntity<DefaultOptions>,
+    private readonly accountService: AccountService,
+    private readonly parser: ParserService,
+    private readonly settingsService: SettingsService,
+    private readonly website: Website,
+    private readonly submission: SubmissionEntity,
+    public readonly part: SubmissionPartEntity<any>,
+    private readonly defaultPart: SubmissionPartEntity<DefaultOptions>,
     public waitForExternalStart: boolean,
     timeUntilPost: number,
   ) {
@@ -153,118 +142,25 @@ export class Poster extends EventEmitter {
         });
         return;
       }
+
       if (!loginStatus.loggedIn) {
         throw new Error('Not logged in');
       }
 
-      let description = this.website.preparseDescription(
-        FormContent.getDescription(
-          this.defaultPart.data.description,
-          this.part.data.description,
-        ),
+      const data: PostData<Submission> = await this.parser.parse(
+        this.website,
+        this.submission,
+        this.defaultPart,
+        this.part,
       );
 
-      Object.values(this.websitesService.getUsernameShortcuts()).forEach(shortcuts => {
-        shortcuts.forEach(sc => (description = UsernameParser.parse(description, sc.key, sc.url)));
-      });
-
-      description = this.website.parseDescription(description);
-      if (this.website.enableAdvertisement) {
-        if (this.settingsService.getValue<boolean>('advertise')) {
-          description = AdInsertParser.parse(description, this.website.defaultDescriptionParser);
-        }
-      }
-
-      const data: PostData<Submission> = {
-        description,
-        options: this.part.data,
-        part: this.part,
-        rating: this.part.data.rating || this.defaultPart.data.rating,
-        sources: this.sources,
-        submission: this.submission,
-        tags: FormContent.getTags(this.defaultPart.data.tags, this.part.data.tags),
-        title: this.part.data.title || this.defaultPart.data.title || this.submission.title,
-      };
-
-      if (this.isFileSubmission(this.submission)) {
-        const fileData: FilePostData = data as FilePostData;
-        const options: DefaultFileOptions = data.options as DefaultFileOptions;
-        fileData.primary = {
-          type: this.submission.primary.type,
-          file: {
-            buffer: this.submission.primary.buffer,
-            options: {
-              contentType: this.submission.primary.mimetype,
-              filename: this.parseFileName(this.submission.primary.name),
-            },
-          },
-        };
-
-        if (options.autoScale && this.fileManipulator.canScale(this.submission.primary.mimetype)) {
-          const scaleOptions = this.website.getScalingOptions(this.submission.primary);
-          const scaled = await this.fileManipulator.scale(
-            this.submission.primary.buffer,
-            this.submission.primary.mimetype,
-            scaleOptions.maxSize,
-            { convertToJPEG: scaleOptions.converToJPEG },
-          );
-          fileData.primary.file.buffer = scaled.buffer;
-          fileData.primary.file.options.contentType = scaled.mimetype;
-        }
-
-        if (this.submission.thumbnail && (this.part.data as DefaultFileOptions).useThumbnail) {
-          fileData.thumbnail = {
-            buffer: this.submission.thumbnail.buffer,
-            options: {
-              contentType: this.submission.thumbnail.mimetype,
-              filename: this.parseFileName(this.submission.thumbnail.name),
-            },
-          };
-        }
-
-        const additional = (this.submission.additional || []).filter(
-          record => !record.ignoredAccounts!.includes(this.part.accountId),
-        );
-
-        fileData.additional = this.website.acceptsAdditionalFiles
-          ? await Promise.all(
-              additional.map(async record => {
-                const rec = {
-                  type: record.type,
-                  file: {
-                    buffer: record.buffer,
-                    options: {
-                      contentType: record.mimetype,
-                      filename: this.parseFileName(record.name),
-                    },
-                  },
-                };
-
-                if (options.autoScale && this.fileManipulator.canScale(record.mimetype)) {
-                  const scaleOptions = this.website.getScalingOptions(record);
-                  const scaled = await this.fileManipulator.scale(
-                    record.buffer,
-                    record.mimetype,
-                    scaleOptions.maxSize,
-                    { convertToJPEG: scaleOptions.converToJPEG },
-                  );
-                  rec.file.buffer = scaled.buffer;
-                  rec.file.options.contentType = scaled.mimetype;
-                }
-
-                return rec;
-              }),
-            )
-          : [];
-
-        if (this.cancelled) {
-          this.isDone = true;
-          this.emit('cancelled', {
-            submission: this.submission,
-            part: this.part,
-          });
-          return;
-        }
+      if (this.cancelled) {
+        this.isDone = true;
+        this.emit('cancelled', {
+          submission: this.submission,
+          part: this.part,
+        });
+        return;
       }
 
       this.isPosting = true;
@@ -335,14 +231,6 @@ export class Poster extends EventEmitter {
       source: response.source,
       status: this.status,
     });
-  }
-
-  private isFileSubmission(submission: Submission): submission is FileSubmission {
-    return submission instanceof FileSubmissionEntity;
-  }
-
-  private parseFileName(name: string): string {
-    return name.replace(/#/g, '_');
   }
 
   addSource(source: string) {

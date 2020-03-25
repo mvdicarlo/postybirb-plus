@@ -17,7 +17,9 @@ export default class SubmissionService {
   static create(create: SubmissionCreate) {
     const data = new FormData();
     Object.entries(create).forEach(([key, value]) => {
-      data.set(key, value);
+      if (value) {
+        data.set(key, value);
+      }
     });
     return axios.post('/submission/create', data);
   }

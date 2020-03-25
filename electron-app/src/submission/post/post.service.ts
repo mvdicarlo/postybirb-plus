@@ -9,7 +9,6 @@ import { SettingsService } from 'src/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { AccountService } from 'src/account/account.service';
 import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
-import { WebsitesService } from 'src/websites/websites.service';
 import { Website } from 'src/websites/website.base';
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { Poster } from './poster';
@@ -23,8 +22,8 @@ import FileSubmissionEntity from '../file-submission/models/file-submission.enti
 import { nativeImage } from 'electron';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/enums/notification-type.enum';
-import { FileManipulationService } from 'src/file-manipulation/file-manipulation.service';
 import { UiNotificationService } from 'src/notification/ui-notification/ui-notification.service';
+import { ParserService } from '../parser/parser.service';
 
 @Injectable()
 export class PostService {
@@ -52,9 +51,8 @@ export class PostService {
     @Inject(forwardRef(() => SubmissionService))
     private readonly submissionService: SubmissionService,
     private readonly accountService: AccountService,
+    private readonly parserService: ParserService,
     private readonly websites: WebsiteProvider,
-    private readonly websitesService: WebsitesService,
-    private readonly fileManipulator: FileManipulationService,
     private readonly settings: SettingsService,
     private readonly partService: SubmissionPartService,
     private readonly logService: LogService,
@@ -352,9 +350,8 @@ export class PostService {
     const knownSources = [...sources, ...(part.data.sources || [])];
     return new Poster(
       this.accountService,
+      this.parserService,
       this.settings,
-      this.websitesService,
-      this.fileManipulator,
       this.websites.getWebsiteModule(part.website),
       submission,
       part,

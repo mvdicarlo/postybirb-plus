@@ -14,5 +14,6 @@ import { DatabaseFactory } from 'src/database/database.factory';
       databaseName: 'tag-converter',
     }),
   ],
+  exports: [TagConverterService],
 })
 export class TagConverterModule {}

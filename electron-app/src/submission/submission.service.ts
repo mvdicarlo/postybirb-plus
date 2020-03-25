@@ -163,7 +163,7 @@ export class SubmissionService {
       }
     } catch (err) {
       // Clean up bad data on failure
-      this.logger.error(err, 'Create Failure');
+      this.logger.error(err.message, err.stack, 'Create Failure');
       await this.deleteSubmission(completedSubmission);
       throw new InternalServerErrorException(err);
     }

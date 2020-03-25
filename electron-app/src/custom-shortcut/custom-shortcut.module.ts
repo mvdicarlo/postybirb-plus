@@ -14,5 +14,6 @@ import { DatabaseFactory } from 'src/database/database.factory';
       databaseName: 'custom-shortcut',
     }),
   ],
+  exports: [CustomShortcutService],
 })
 export class CustomShortcutModule {}

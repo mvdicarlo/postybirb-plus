@@ -3,15 +3,14 @@ import { FileSubmission } from 'src/submission/file-submission/interfaces/file-s
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 
 export interface FilePostData extends PostData<FileSubmission> {
-  primary: {
-    type: FileSubmissionType;
-    file: PostFile;
-  };
+  primary: PostFileRecord;
   thumbnail?: PostFile;
-  additional: Array<{
-    type: FileSubmissionType;
-    file: PostFile;
-  }>;
+  additional: Array<PostFileRecord>;
+}
+
+export interface PostFileRecord {
+  type: FileSubmissionType;
+  file: PostFile;
 }
 
 export interface PostFile {

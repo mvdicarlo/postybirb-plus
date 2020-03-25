@@ -19,7 +19,7 @@ export class CustomLogger extends Logger {
     exitOnError: false,
   });
 
-  error(message: string, trace?: string, context?: string) {
+  error(message: any, trace?: string, context?: string) {
     super.error(message, trace, context);
     CustomLogger.logger.error(`[${context || this.context}] ${message}\n${trace}`);
   }

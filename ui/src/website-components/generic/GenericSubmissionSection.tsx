@@ -83,6 +83,7 @@ export default class GenericSubmissionSection extends React.Component<
             defaultValue={data.description}
             onChange={this.handleDescriptionChange.bind(this)}
             label="Description"
+            overwriteDescriptionValue={_.get(this.props.defaultData, 'description.value')}
           />
         </div>
       </div>

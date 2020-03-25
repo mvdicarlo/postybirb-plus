@@ -127,7 +127,8 @@ export default class DescriptionInput extends React.Component<Props, State> {
       <Form.Item
         label={this.props.label}
         extra={
-          this.props.hideShortcuts ? null : (
+          this.props.hideShortcuts ||
+          (!this.data.overwriteDefault && !this.props.hideOverwrite) ? null : (
             <div>
               <Popover
                 title="Username Shortcuts"

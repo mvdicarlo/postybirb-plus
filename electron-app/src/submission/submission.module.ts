@@ -14,6 +14,7 @@ import { SubmissionPartModule } from './submission-part/submission-part.module';
 import { PostModule } from './post/post.module';
 import { SubmissionTemplateModule } from './submission-template/submission-template.module';
 import { DatabaseFactory } from 'src/database/database.factory';
+import { ParserModule } from './parser/parser.module';
 import SubmissionEntity from './models/submission.entity';
 import FileSubmissionEntity from './file-submission/models/file-submission.entity';
 
@@ -27,6 +28,7 @@ import FileSubmissionEntity from './file-submission/models/file-submission.entit
     ValidatorModule,
     SubmissionPartModule,
     SubmissionTemplateModule,
+    ParserModule,
   ],
   controllers: [SubmissionController],
   providers: [

@@ -26,6 +26,11 @@ export class TagConverterService {
     return this.repository.find();
   }
 
+  async getTagConvertersForWebsite(website: string) {
+    const converters = await this.getAll();
+    return converters.filter(converter => converter.hasConversion(website));
+  }
+
   async create(customShortcutDto: TagConverterEntity) {
     this.logger.log(customShortcutDto, 'Tag Converter Shortcut');
     if (!(await this.isUnique(customShortcutDto.tag))) {
