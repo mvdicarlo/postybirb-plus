@@ -28,7 +28,7 @@ export default class AppUpdate extends React.Component<Props, State> {
       return (
         <div className="update">
           <Progress
-            percent={this.props.updateStore!.state.percent}
+            percent={Math.floor(this.props.updateStore!.state.percent)}
             status={this.props.updateStore!.state.percent === 100 ? 'success' : 'active'}
           />
         </div>

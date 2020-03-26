@@ -104,17 +104,11 @@ export class UpdateService {
       throw new BadRequestException('Already updating');
     }
 
-    // TODO need to check for posting status
-    const isPosting: boolean = false;
-    if (isPosting) {
-      this.eventEmitter.emit(UpdateEvent.BLOCKED, true);
-      return;
-    }
-
     this.logger.log('Updating PostyBirb...');
 
     this.isUpdating = true;
     this.updateAvailable.isUpdating = true;
+    this.updateAvailable.error = '';
 
     this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
     autoUpdater.downloadUpdate();

@@ -48,7 +48,7 @@ export const updateStore = new UpdateStore();
 
 socket.on(UpdateEvent.AVAILABLE, (data: UpdateState) => updateStore.updateAvailable(data));
 
-socket.on(UpdateEvent.ERROR, (err: string) => {
+socket.on(UpdateEvent.ERROR, (err: any) => {
   updateStore.setError(err);
   notification.error({
     message: 'PostyBirb Update Failed',
@@ -59,7 +59,7 @@ socket.on(UpdateEvent.ERROR, (err: string) => {
           <br />
           It is suggested that you go to the website and update using the latest download.
         </div>
-        <div>{err}</div>
+        <div>{err.code}</div>
       </div>
     ),
     prefixCls: `ant-${uiStore.state.theme}-notification`
