@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { SettingsStore } from '../../stores/settings.store';
 import SettingsService from '../../services/settings.service';
 import { Settings } from '../../../../electron-app/src/settings/settings.interface';
-import { Form, Collapse, Switch, Tooltip, InputNumber, Radio, Input } from 'antd';
+import { Form, Collapse, Switch, Tooltip, InputNumber, Radio, Input, Typography } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 
 interface Props {
@@ -200,6 +200,9 @@ export default class SettingsView extends React.Component<Props> {
                 application restart).
               </strong>
             </p>
+            <Typography.Paragraph copyable={{ text: window.AUTH_ID }}>
+              My Authorization Code: <em>{window.AUTH_ID}</em>
+            </Typography.Paragraph>
             <Form.Item label="URL">
               <Input
                 placeholder={`https://localhost:${window.PORT}`}
