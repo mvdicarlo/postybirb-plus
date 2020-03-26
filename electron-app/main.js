@@ -11,7 +11,7 @@ if (!hasLock) {
 process.env.PORT = process.env.PORT || 9247;
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
-global.BASE_DIRECTORY = `${app.getPath('documents')}/PostyBirb`;
+global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
 global.CHILD_PROCESS_IDS = [];
 
 if (DEBUG_MODE) {

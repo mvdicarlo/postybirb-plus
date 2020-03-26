@@ -13,7 +13,7 @@ export class RemoteController {
 
   @Get('static')
   serveStaticFile(@Query() query: { uri: string }, @Res() res: Response) {
-    if (!query.uri || !query.uri.includes(global.BASE_DIRECTORY)) {
+    if (!query.uri || !query.uri.startsWith(global.BASE_DIRECTORY)) {
       res.sendStatus(404);
       return;
     }
