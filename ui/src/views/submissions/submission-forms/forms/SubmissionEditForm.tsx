@@ -576,9 +576,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
               {this.isFileSubmission(submission) ? (
-                <Form.Item>
+                <Form.Item className="form-section">
                   <Typography.Title level={3}>
-                    <span className="nav-section-anchor" id="#Files">Files</span>
+                    <span className="form-section-header nav-section-anchor" id="#Files">Files</span>
                   </Typography.Title>
                   <div className="flex">
                     <Card
@@ -713,9 +713,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 </Form.Item>
               ) : null}
 
-              <Form.Item>
+              <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="nav-section-anchor" id="#Schedule">Schedule</span>
+                  <span className="form-section-header nav-section-anchor" id="#Schedule">Schedule</span>
                 </Typography.Title>
                 <DatePicker
                   value={this.state.postAt ? moment(this.state.postAt) : undefined}
@@ -726,9 +726,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 />
               </Form.Item>
 
-              <Form.Item>
+              <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="nav-section-anchor" id="#Defaults">Defaults</span>
+                  <span className="form-section-header nav-section-anchor" id="#Defaults">Defaults</span>
                   <Tooltip title="The default fields are used by all selected websites. You can override these defaults inside of each website section.">
                     <Icon className="text-sm ml-1 text-primary" type="question-circle" />
                   </Tooltip>
@@ -742,9 +742,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 />
               </Form.Item>
 
-              <Form.Item>
+              <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="nav-section-anchor" id="#Websites">Websites</span>
+                  <span className="form-section-header nav-section-anchor" id="#Websites">Websites</span>
                 </Typography.Title>
                 <TreeSelect
                   multiple
