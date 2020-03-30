@@ -17,11 +17,8 @@ export default class UpdateService {
       .get('http://postybirb.com/version.html')
       .then(res => res.data)
       .then(html => {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        const status = div.querySelector('[name="updates"]');
-        if (status && (status as any).value) {
-          const value: string = (status as any).value;
+        const value = html.match(/name="updates" value="(.*?)"/)[1];
+        if (value) {
           notification.info({
             message: 'Notice',
             description: value,
