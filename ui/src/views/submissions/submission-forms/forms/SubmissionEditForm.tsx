@@ -578,23 +578,32 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               {this.isFileSubmission(submission) ? (
                 <Form.Item className="form-section">
                   <Typography.Title level={3}>
-                    <span className="form-section-header nav-section-anchor" id="#Files">Files</span>
+                    <span className="form-section-header nav-section-anchor" id="#Files">
+                      Files
+                    </span>
                   </Typography.Title>
                   <div className="flex">
                     <Card
-                      className="flex-1"
+                      className="flex-1 file-card"
                       title="Primary"
                       size="small"
                       cover={
-                        <img
-                          alt={submission.primary.name}
-                          title={submission.primary.name}
-                          src={RemoteService.getFileUrl(submission.primary.preview)}
-                        />
+                        <Upload.Dragger
+                          className="h-full w-full"
+                          showUploadList={false}
+                          onChange={this.fileUploadChange}
+                          action={this.primaryFileChangeAction}
+                          headers={{ Authorization: window.AUTH_ID }}
+                        >
+                          <img
+                            alt={submission.primary.name}
+                            title={submission.primary.name}
+                            src={RemoteService.getFileUrl(submission.primary.preview)}
+                          />
+                        </Upload.Dragger>
                       }
                       extra={
                         <Upload
-                          accept="image/jpeg,image/jpg,image/png"
                           showUploadList={false}
                           onChange={this.fileUploadChange}
                           action={this.primaryFileChangeAction}
@@ -606,17 +615,32 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                       bodyStyle={{ padding: '0' }}
                     ></Card>
                     <Card
-                      className="flex-1 ml-2"
+                      className="flex-1 ml-2 file-card"
                       title="Thumbnail"
                       size="small"
                       cover={
-                        submission.thumbnail ? (
-                          <img
-                            alt={submission.thumbnail.name}
-                            title={submission.thumbnail.name}
-                            src={RemoteService.getFileUrl(submission.thumbnail.preview)}
-                          />
-                        ) : null
+                        <Upload.Dragger
+                          className="h-full w-full"
+                          accept="image/jpeg,image/jpg,image/png"
+                          showUploadList={false}
+                          beforeUpload={file => {
+                            return file.type.includes('image/');
+                          }}
+                          transformFile={this.cropThumbnail.bind(this)}
+                          onChange={this.fileUploadChange}
+                          action={this.thumbnailFileChangeAction}
+                          headers={{ Authorization: window.AUTH_ID }}
+                        >
+                          {submission.thumbnail ? (
+                            <img
+                              alt={submission.thumbnail.name}
+                              title={submission.thumbnail.name}
+                              src={RemoteService.getFileUrl(submission.thumbnail.preview)}
+                            />
+                          ) : (
+                            'No thumbnail provided'
+                          )}
+                        </Upload.Dragger>
                       }
                       extra={
                         submission.thumbnail ? (
@@ -639,11 +663,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           </Upload>
                         )
                       }
-                      bodyStyle={!submission.thumbnail ? {} : { padding: '0' }}
+                      bodyStyle={{ padding: '0' }}
                     >
-                      <Card.Meta
-                        description={submission.thumbnail ? null : 'No thumbnail provided'}
-                      />
                       <SubmissionImageCropper
                         visible={this.state.showThumbnailCropper}
                         file={this.state.thumbnailFileForCrop!}
@@ -715,7 +736,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Schedule">Schedule</span>
+                  <span className="form-section-header nav-section-anchor" id="#Schedule">
+                    Schedule
+                  </span>
                 </Typography.Title>
                 <DatePicker
                   value={this.state.postAt ? moment(this.state.postAt) : undefined}
@@ -728,7 +751,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Defaults">Defaults</span>
+                  <span className="form-section-header nav-section-anchor" id="#Defaults">
+                    Defaults
+                  </span>
                   <Tooltip title="The default fields are used by all selected websites. You can override these defaults inside of each website section.">
                     <Icon className="text-sm ml-1 text-primary" type="question-circle" />
                   </Tooltip>
@@ -744,7 +769,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Websites">Websites</span>
+                  <span className="form-section-header nav-section-anchor" id="#Websites">
+                    Websites
+                  </span>
                 </Typography.Title>
                 <TreeSelect
                   multiple
