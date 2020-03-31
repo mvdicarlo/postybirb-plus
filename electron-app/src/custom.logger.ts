@@ -4,6 +4,10 @@ import * as winston from 'winston';
 import * as path from 'path';
 import 'winston-daily-rotate-file';
 
+process.on('uncaughtException', err =>
+  CustomLogger.error(err.message, err.stack, 'Uncaught Exception'),
+);
+
 export class CustomLogger extends Logger {
   static logger = winston.createLogger({
     transports: [

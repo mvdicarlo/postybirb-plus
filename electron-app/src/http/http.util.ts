@@ -27,6 +27,26 @@ export default class Http {
     },
   });
 
+  static parseCookies(cookies: Electron.Cookie[]) {
+    return cookies.map(c => `${c.name}=${c.value}`).join('; ');
+  }
+
+  static async retrieveCookies(
+    uri: string,
+    ses: Electron.Session,
+    cookies?: string,
+  ): Promise<string> {
+    if (cookies) {
+      return cookies;
+    }
+
+    const sessionCookies = await ses.cookies.get({
+      url: new URL(uri).origin,
+    });
+
+    return Http.parseCookies(sessionCookies);
+  }
+
   static async get<T>(
     uri: string,
     partitionId: string,
@@ -35,13 +55,7 @@ export default class Http {
     const ses = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
-    if (!headers.cookie) {
-      const cookies = await ses.cookies.get({
-        url: new URL(uri).origin,
-      });
-
-      headers.cookie = cookies.map(c => `${c.name}=${c.value}`).join('; ');
-    }
+    headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
 
     const opts: request.CoreOptions = Object.assign(
       {
@@ -70,13 +84,7 @@ export default class Http {
     const ses = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
-    if (!headers.cookie) {
-      const cookies = await ses.cookies.get({
-        url: new URL(uri).origin,
-      });
-
-      headers.cookie = cookies.map(c => `${c.name}=${c.value}`).join('; ');
-    }
+    headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
 
     const opts: request.CoreOptions = Object.assign(
       {
