@@ -230,8 +230,8 @@ export class WeasylFileSubmissionForm extends React.Component<
                     value={data.category}
                     onSelect={this.handleSelectChange.bind(this, 'category')}
                   >
-                    {this.props.submission
-                      ? WeasylCategories[this.props.submission.primary.type].map(item => (
+                    {this.props.submission && WeasylCategories[this.props.submission.primary.type]
+                      ? (WeasylCategories[this.props.submission.primary.type] || []).map(item => (
                           <Select.Option value={item.id}>{item.name}</Select.Option>
                         ))
                       : Object.entries(WeasylCategories).map(([key, values]) => (
