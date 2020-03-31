@@ -677,7 +677,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     <Card
                       title="Additional Files"
                       size="small"
-                      className="mt-2"
+                      className="mt-2 additional-file-card"
                       extra={
                         <Upload
                           onChange={this.fileUploadChange}

@@ -39,6 +39,14 @@
   width: auto;
 }
 
+.additional-file-card .ant-light-card-cover img,
+.additional-file-card .ant-dark-card-cover img {
+  height: 100px;
+  width: auto;
+  margin: auto;
+  max-width: 100%;
+}
+
 .calendar-events {
   list-style: none;
   margin: 0;
