@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build:ui": "cd ui && npm install && yarn run build",
-    "build:app": "cd electron-app && yarn install && yarn run build",
+    "build:app": "cd electron-app && npm install && yarn run build",
     "build": "yarn run build:ui && yarn run build:app",
     "release:windows": "yarn run build && cd electron-app && yarn run release:windows",
     "release:linux": "yarn run build && cd electron-app && yarn run release:linux"
