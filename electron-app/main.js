@@ -8,6 +8,9 @@ if (!hasLock) {
   return;
 }
 
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+
 process.env.PORT = process.env.PORT || 9247;
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
@@ -103,6 +106,7 @@ function createWindow() {
       webviewTag: true,
       contextIsolation: false,
       spellcheck: true,
+      backgroundThrottling: false,
     },
   });
 
