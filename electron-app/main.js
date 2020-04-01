@@ -38,10 +38,14 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('com.lemonynade.postybirb.plus');
 }
 
+const loader = require('./loader/loader');
 app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
-app.on('ready', () => {
+app.on('ready', async () => {
+  if (!global.SERVER_ONLY_MODE) {
+    await loader.show();
+  }
   nest = require('./dist/main');
   initialize();
 });
@@ -66,7 +70,6 @@ async function initialize() {
   let shouldDisplayWindow = true;
   if (!initializedOnce) {
     await nest();
-    console.log('\033[1m\x1b[36m', `\n\nAUTH ID: ${global.AUTH_ID}\n\n`, '\x1b[0m\033[0m');
     const menu = Menu.buildFromTemplate(require('./src-electron/menu'));
     Menu.setApplicationMenu(menu);
     const image = buildAppImage();
@@ -75,7 +78,11 @@ async function initialize() {
     shouldDisplayWindow = settingsDB.getState().openOnStartup;
   }
 
-  if (!shouldDisplayWindow) return; // observe user setting
+  if (!shouldDisplayWindow) {
+    // observe user setting
+    loader.hide();
+    return;
+  }
   if (global.SERVER_ONLY_MODE) return;
   createWindow();
 }
@@ -113,14 +120,18 @@ function createWindow() {
   window.PORT = process.env.PORT;
   window.AUTH_ID = global.AUTH_ID;
   window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
-  if (global.DEBUG_MODE) {
-    window.webContents.openDevTools();
-  } else {
+  if (!global.DEBUG_MODE) {
     mainWindowState.manage(window);
   }
 
   window.loadFile(`./build/index.html`);
-  window.once('ready-to-show', () => window.show());
+  window.once('ready-to-show', () => {
+    loader.hide();
+    window.show();
+    if (global.DEBUG_MODE) {
+      window.webContents.openDevTools();
+    }
+  });
   window.webContents.on('new-window', event => event.preventDefault());
   window.on('closed', () => (window = null));
 }

@@ -1,6 +1,6 @@
 import * as forge from 'node-forge';
 import * as fs from 'fs-extra';
-import { app, Notification } from 'electron';
+import { app } from 'electron';
 import * as path from 'path';
 
 (forge as any).options.usePureJavaScript = true;
@@ -13,13 +13,6 @@ export class SSL {
         cert: fs.readFileSync(path.join(app.getPath('userData'), 'data', 'cert.pem')),
       };
     }
-
-    const notification = new Notification({
-      title: 'PostyBirb',
-      body: 'Please wait a few moments for PostyBirb to run some initial setup.',
-      silent: true,
-    });
-    notification.show();
 
     const pki = forge.pki;
     const keys = pki.rsa.generateKeyPair(2048);
@@ -49,7 +42,6 @@ export class SSL {
     fs.writeFile(path.join(app.getPath('userData'), 'data', 'cert.pem'), pem_cert);
     fs.writeFile(path.join(app.getPath('userData'), 'data', 'key.pem'), pem_privateKey);
 
-    notification.close();
     return { cert: pem_cert, key: pem_privateKey };
   }
 }
