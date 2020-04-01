@@ -42,9 +42,9 @@ const loader = require('./loader/loader');
 app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
-app.on('ready', async () => {
+app.on('ready', () => {
   if (!global.SERVER_ONLY_MODE) {
-    await loader.show();
+    loader.show();
   }
   nest = require('./dist/main');
   initialize();
