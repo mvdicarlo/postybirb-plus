@@ -1,4 +1,4 @@
-const { BrowserWindow, nativeTheme } = require('electron');
+const { BrowserWindow } = require('electron');
 const path = require('path');
 
 const height = 350;
@@ -22,7 +22,6 @@ function show() {
       closable: false,
       width,
       height,
-      darkTheme: nativeTheme.shouldUseDarkColors,
       title: 'PostyBirb',
       center: true,
     });
