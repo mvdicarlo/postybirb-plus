@@ -369,25 +369,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   };
 
   primaryFileChangeAction = (file: RcFile) =>
-    Promise.resolve(
-      `https://localhost:${window['PORT']}/submission/change/primary/${
-        this.state.submission!._id
-      }/${encodeURIComponent(file['path'])}`
-    );
+    `https://localhost:${window['PORT']}/submission/change/primary/${this.state.submission!._id}`;
 
   thumbnailFileChangeAction = (file: RcFile) =>
-    Promise.resolve(
-      `https://localhost:${window['PORT']}/submission/change/thumbnail/${
-        this.state.submission!._id
-      }/${encodeURIComponent(file['path'])}`
-    );
+    `https://localhost:${window['PORT']}/submission/change/thumbnail/${this.state.submission!._id}`;
 
   additionalFileChangeAction = (file: RcFile) =>
-    Promise.resolve(
-      `https://localhost:${window['PORT']}/submission/add/additional/${
-        this.state.submission!._id
-      }/${encodeURIComponent(file['path'])}`
-    );
+    `https://localhost:${window['PORT']}/submission/add/additional/${this.state.submission!._id}`;
 
   fileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
     const { status } = info.file;
@@ -594,6 +582,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           onChange={this.fileUploadChange}
                           action={this.primaryFileChangeAction}
                           headers={{ Authorization: window.AUTH_ID }}
+                          data={file => ({ path: file['path'] })}
                         >
                           <img
                             alt={submission.primary.name}
@@ -608,6 +597,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           onChange={this.fileUploadChange}
                           action={this.primaryFileChangeAction}
                           headers={{ Authorization: window.AUTH_ID }}
+                          data={file => ({ path: file['path'] })}
                         >
                           <span className="text-link">Change</span>
                         </Upload>
@@ -621,15 +611,16 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                       cover={
                         <Upload.Dragger
                           className="h-full w-full"
-                          accept="image/jpeg,image/jpg,image/png"
+                          accept="image/jpeg,image/png"
                           showUploadList={false}
                           beforeUpload={file => {
-                            return file.type.includes('image/');
+                            if (!file.type.includes('image/')) return false;
+                            return this.cropThumbnail(file);
                           }}
-                          transformFile={this.cropThumbnail.bind(this)}
                           onChange={this.fileUploadChange}
                           action={this.thumbnailFileChangeAction}
                           headers={{ Authorization: window.AUTH_ID }}
+                          data={file => ({ path: file['path'] })}
                         >
                           {submission.thumbnail ? (
                             <img
@@ -649,15 +640,16 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           </span>
                         ) : (
                           <Upload
-                            accept="image/jpeg,image/jpg,image/png"
+                            accept="image/jpeg,image/png"
                             showUploadList={false}
                             beforeUpload={file => {
-                              return file.type.includes('image/');
+                              if (!file.type.includes('image/')) return false;
+                              return this.cropThumbnail(file);
                             }}
-                            transformFile={this.cropThumbnail.bind(this)}
                             onChange={this.fileUploadChange}
                             action={this.thumbnailFileChangeAction}
                             headers={{ Authorization: window.AUTH_ID }}
+                            data={file => ({ path: file['path'] })}
                           >
                             <span className="text-link">Set</span>
                           </Upload>
@@ -685,6 +677,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                           multiple={false}
                           showUploadList={false}
                           headers={{ Authorization: window.AUTH_ID }}
+                          data={file => ({ path: file['path'] })}
                         >
                           <span className="text-link">Add</span>
                         </Upload>
@@ -701,7 +694,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                               actions={[
                                 <Icon type="delete" onClick={() => this.removeAdditionalFile(f)} />
                               ]}
-                              cover={<img alt={f.name} src={RemoteService.getFileUrl(f.preview)} />}
+                              cover={
+                                <img
+                                  alt={f.name}
+                                  title={f.name}
+                                  src={RemoteService.getFileUrl(f.preview)}
+                                />
+                              }
                             >
                               <TreeSelect
                                 multiple

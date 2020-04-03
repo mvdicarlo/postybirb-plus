@@ -21,6 +21,14 @@ import SubmissionScheduleModel from './models/submission-schedule.model';
 import SubmissionLogEntity from './log/models/submission-log.entity';
 import SubmissionCreateModel from './models/submission-create.model';
 
+interface FileChangeBodyDTO {
+  path: string;
+}
+
+interface FileChangeParamsDTO {
+  id: string;
+}
+
 @Controller('submission')
 export class SubmissionController {
   constructor(private readonly service: SubmissionService) {}
@@ -72,7 +80,7 @@ export class SubmissionController {
   }
 
   @Post('changeOrder')
-  async changeOrder(@Body() body: { id: string, from: number; to: number }) {
+  async changeOrder(@Body() body: { id: string; from: number; to: number }) {
     return this.service.changeOrder(body.id, body.to, body.from);
   }
 
@@ -120,10 +128,14 @@ export class SubmissionController {
     return this.service.removeFileSubmissionAdditionalFile(params.id, params.location);
   }
 
-  @Post('change/primary/:id/:path')
+  @Post('change/primary/:id')
   @UseInterceptors(FileInterceptor('file'))
-  async changePrimary(@UploadedFile() file, @Param() params) {
-    return this.service.changeFileSubmissionPrimaryFile(file, params.id, params.path);
+  async changePrimary(
+    @UploadedFile() file,
+    @Param() params: FileChangeParamsDTO,
+    @Body() body: FileChangeBodyDTO,
+  ) {
+    return this.service.changeFileSubmissionPrimaryFile(file, params.id, body.path);
   }
 
   @Post('change/fallback/:id')
@@ -132,16 +144,24 @@ export class SubmissionController {
     return this.service.setFallbackFile(file, id);
   }
 
-  @Post('change/thumbnail/:id/:path')
+  @Post('change/thumbnail/:id')
   @UseInterceptors(FileInterceptor('file'))
-  async changeThumbnail(@UploadedFile() file, @Param() params) {
-    return this.service.changeFileSubmissionThumbnailFile(file, params.id, params.path);
+  async changeThumbnail(
+    @UploadedFile() file,
+    @Param() params: FileChangeParamsDTO,
+    @Body() body: FileChangeBodyDTO,
+  ) {
+    return this.service.changeFileSubmissionThumbnailFile(file, params.id, body.path);
   }
 
-  @Post('add/additional/:id/:path')
+  @Post('add/additional/:id')
   @UseInterceptors(FileInterceptor('file'))
-  async addAdditionalFile(@UploadedFile() file, @Param() params) {
-    return this.service.addFileSubmissionAdditionalFile(file, params.id, params.path);
+  async addAdditionalFile(
+    @UploadedFile() file,
+    @Param() params: FileChangeParamsDTO,
+    @Body() body: FileChangeBodyDTO,
+  ) {
+    return this.service.addFileSubmissionAdditionalFile(file, params.id, body.path);
   }
 
   @Patch('update/additional/:id')

@@ -12,7 +12,6 @@ import { EventsGateway } from 'src/events/events.gateway';
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import { Problems } from './validator/interfaces/problems.interface';
 import { Submission } from './interfaces/submission.interface';
-import { SubmissionCreate } from './interfaces/submission-create.interface';
 import { SubmissionEvent } from './enums/submission.events.enum';
 import { SubmissionPackage } from './interfaces/submission-package.interface';
 import { SubmissionPart, Parts } from './submission-part/interfaces/submission-part.interface';

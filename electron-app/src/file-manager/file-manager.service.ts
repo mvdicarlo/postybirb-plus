@@ -89,11 +89,18 @@ export class FileManagerService {
     } else {
       // Non-image saving
       thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
-      thumbnail = (await app.getFileIcon(path)).toJPEG(100);
+      try {
+        thumbnail = (await app.getFileIcon(path)).toJPEG(100);
+      } catch (err) {
+        // Ignore? Should only fail on remote.
+      }
     }
 
     await fs.outputFile(submissionFilePath, file.buffer);
-    await fs.outputFile(thumbnailFilePath, thumbnail);
+    await fs.outputFile(
+      thumbnailFilePath,
+      thumbnail ? thumbnail : (await app.getFileIcon(submissionFilePath)).toJPEG(100),
+    );
     return {
       thumbnailLocation: thumbnailFilePath,
       submissionLocation: submissionFilePath,
