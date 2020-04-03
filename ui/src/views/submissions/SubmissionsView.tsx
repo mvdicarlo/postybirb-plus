@@ -45,9 +45,7 @@ export default class SubmissionView extends React.Component<Props> {
     } else {
       this.defaultKey = hashPart || 'submissions';
     }
-  }
 
-  render() {
     headerStore.updateHeaderState({
       title: 'Submissions',
       routes: [
@@ -57,7 +55,9 @@ export default class SubmissionView extends React.Component<Props> {
         }
       ]
     });
+  }
 
+  render() {
     const submissions =
       this.type === SubmissionType.FILE
         ? this.props.submissionStore!.fileSubmissions

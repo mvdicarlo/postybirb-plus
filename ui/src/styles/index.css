@@ -159,6 +159,10 @@ li .ant-light-list-item .error {
   right: 0;
 }
 
+.ant-dark-page-header-back-button {
+  color: hsla(0, 0%, 100%, 0.85);
+}
+
 .ant-dark-fullcalendar-fullscreen
   .ant-dark-fullcalendar-month-panel-selected-cell
   .ant-dark-fullcalendar-month,

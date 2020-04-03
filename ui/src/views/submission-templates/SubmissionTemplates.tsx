@@ -1,6 +1,7 @@
 import React from 'react';
 import * as _ from 'lodash';
 import { SubmissionTemplateStore } from '../../stores/submission-template.store';
+import { headerStore } from '../../stores/header.store';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 import { SubmissionTemplate } from '../../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
@@ -27,10 +28,23 @@ interface Props {
 @inject('submissionTemplateStore')
 @observer
 export default class SubmissionTemplates extends React.Component<Props> {
+  constructor(props: Props) {
+    super(props);
+    headerStore.updateHeaderState({
+      title: 'Submission Templates',
+      routes: [
+        {
+          path: `/submission-templates`,
+          breadcrumbName: `Submission Templates`
+        }
+      ]
+    });
+  }
+
   render() {
     return (
       <div className="submission-templates">
-        <div className="mb-2">
+        <div className="my-2">
           <SubmissionTemplateCreator />
         </div>
         <List

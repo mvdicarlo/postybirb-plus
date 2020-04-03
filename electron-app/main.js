@@ -106,7 +106,7 @@ function createWindow() {
     title: 'PostyBirb',
     darkTheme: nativeTheme.shouldUseDarkColors,
     webPreferences: {
-      devTools: global.DEBUG_MODE,
+      devTools: true,
       allowRunningInsecureContent: false,
       nodeIntegration: false,
       preload: path.join(__dirname, 'src-electron', 'preload.js'),
