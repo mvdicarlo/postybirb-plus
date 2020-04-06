@@ -10,6 +10,9 @@ import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { ScalingOptions } from './interfaces/scaling-options.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 
 export abstract class Website {
   abstract readonly BASE_URL: string;
@@ -30,6 +33,14 @@ export abstract class Website {
 
   abstract checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
 
+  protected createPostResponse(postResponse: Partial<PostResponse>): PostResponse {
+    return {
+      ...postResponse,
+      time: new Date().toLocaleString(),
+      website: this.constructor.name,
+    };
+  }
+
   getAccountInfo(id: string) {
     return this.accountInformation.get(id) || {};
   }
@@ -45,9 +56,9 @@ export abstract class Website {
 
   abstract getScalingOptions(file: FileRecord): ScalingOptions;
 
-  abstract postStatusSubmission(data: any): Promise<any>;
+  abstract postNotificationSubmission(data: PostData<Submission>, accountData: any): Promise<PostResponse>;
 
-  abstract postFileSubmission(data: any): Promise<any>;
+  abstract postFileSubmission(data: FilePostData, accountData: any): Promise<PostResponse>;
 
   preparseDescription(text: string): string {
     if (!text) {
@@ -85,7 +96,7 @@ export abstract class Website {
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts;
 
-  abstract validateStatusSubmission(
+  abstract validateNotificationSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,

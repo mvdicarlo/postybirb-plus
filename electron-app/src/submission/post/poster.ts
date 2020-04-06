@@ -11,6 +11,7 @@ import { Submission } from '../interfaces/submission.interface';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
 import { ParserService } from '../parser/parser.service';
+import { FilePostData } from './interfaces/file-post-data.interface';
 
 export interface Poster {
   on(
@@ -188,14 +189,18 @@ export class Poster extends EventEmitter {
   }
 
   private async attemptPost(data: PostData<Submission>): Promise<PostResponse> {
-    // TODO post
     let totalTries = this.retries + 1;
     let error = null;
     while (totalTries) {
       try {
         totalTries--;
-        await this.fakePost();
-        this.done({ website: this.part.website });
+        // const res = await this.fakePost();
+        const accountData: any = await this.accountService.getAccountData(this.part.accountId);
+        const res = await (this.isFilePost(data)
+          ? this.website.postFileSubmission(data, accountData)
+          : this.website.postNotificationSubmission(data, accountData));
+        this.status = 'SUCCESS';
+        this.done(res);
         return;
       } catch (err) {
         error = err;
@@ -210,8 +215,7 @@ export class Poster extends EventEmitter {
       if (random > 90) {
         setTimeout(
           function() {
-            this.status = 'SUCCESS';
-            resolve();
+            resolve({ website: this.part.website });
           }.bind(this),
           _.random(8000),
         );
@@ -231,6 +235,10 @@ export class Poster extends EventEmitter {
       source: response.source,
       status: this.status,
     });
+  }
+
+  private isFilePost(data: PostData<Submission>): data is FilePostData {
+    return !!data['primary'];
   }
 
   addSource(source: string) {

@@ -3,4 +3,5 @@ import { DefaultFileOptions } from '../../submission/submission-part/interfaces/
 export interface DefaultDiscordOptions extends DefaultFileOptions {
   embed: boolean;
   spoiler: boolean;
+  useTitle: boolean;
 }

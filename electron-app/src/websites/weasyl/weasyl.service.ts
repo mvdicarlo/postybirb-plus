@@ -20,6 +20,9 @@ import { FileRecord } from 'src/submission/file-submission/interfaces/file-recor
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import FileSize from 'src/utils/filesize.util';
 import FormContent from 'src/utils/form-content.util';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -72,11 +75,11 @@ export class Weasyl extends Website {
       .replace(/<\/div><br>/g, '</div><div><br></div>');
   }
 
-  postStatusSubmission(data: any): Promise<any> {
+  postNotificationSubmission(data: PostData<Submission>): Promise<PostResponse> {
     throw new NotImplementedException('Method not implemented.');
   }
 
-  postFileSubmission(data: any): Promise<any> {
+  postFileSubmission(data: FilePostData): Promise<PostResponse> {
     throw new NotImplementedException('Method not implemented.');
   }
 
@@ -181,7 +184,7 @@ export class Weasyl extends Website {
     return { problems, warnings };
   }
 
-  validateStatusSubmission(
+  validateNotificationSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
   ): ValidationParts {

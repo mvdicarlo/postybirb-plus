@@ -4,7 +4,6 @@ import { DefaultDiscordOptions } from './discord.interface';
 import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import WebsiteValidator from '../../utils/website-validator.util';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
@@ -17,6 +16,9 @@ import { FileRecord } from 'src/submission/file-submission/interfaces/file-recor
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import FileSize from 'src/utils/filesize.util';
 import FormContent from 'src/utils/form-content.util';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 
 interface DiscordLoginData {
   name: string;
@@ -53,11 +55,11 @@ export class Discord extends Website {
     return { maxSize: FileSize.MBtoBytes(8) };
   }
 
-  postStatusSubmission(data: any): Promise<any> {
+  postNotificationSubmission(data: PostData<Submission>, accountData: DiscordLoginData): Promise<PostResponse> {
     throw new NotImplementedException('Method not implemented.');
   }
 
-  postFileSubmission(data: any): Promise<any> {
+  postFileSubmission(data: FilePostData, accountData: DiscordLoginData): Promise<PostResponse> {
     throw new NotImplementedException('Method not implemented.');
   }
 
@@ -131,7 +133,7 @@ export class Discord extends Website {
     return { problems, warnings };
   }
 
-  validateStatusSubmission(
+  validateNotificationSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
   ): ValidationParts {

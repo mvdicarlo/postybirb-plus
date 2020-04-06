@@ -14,6 +14,7 @@ import { Submission } from '../../../../electron-app/src/submission/interfaces/s
 const defaultOptions: DefaultDiscordOptions = {
   embed: true,
   spoiler: false,
+  useTitle: true,
   tags: {
     extendDefault: true,
     value: []
@@ -131,6 +132,14 @@ export class DiscordFileSubmissionForm extends React.Component<
                     onChange={this.handleCheckboxChange.bind(this, 'autoScale')}
                   >
                     Downscale images to fit size limit
+                  </Checkbox>
+                </div>
+                <div>
+                  <Checkbox
+                    checked={data.useTitle}
+                    onChange={this.handleCheckboxChange.bind(this, 'useTitle')}
+                  >
+                    Use Title
                   </Checkbox>
                 </div>
                 <div>

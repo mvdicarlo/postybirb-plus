@@ -23,8 +23,8 @@ export class AccountService {
   private readonly logger = new Logger(AccountService.name);
 
   private readonly loginStatuses: UserAccountDto[] = [];
-  private readonly loginCheckTimers: { [key: number]: any } = [];
-  private readonly loginCheckMap: { [key: number]: string[] } = [];
+  private readonly loginCheckTimers: Record<number, any> = [];
+  private readonly loginCheckMap: Record<number, string[]> = [];
 
   constructor(
     @Inject(AccountRepositoryToken)
@@ -68,6 +68,10 @@ export class AccountService {
       this.loginCheckMap[refreshInterval] = this.loginCheckMap[refreshInterval] || [];
       this.loginCheckMap[refreshInterval].push(website.constructor.name);
     });
+  }
+
+  async getAccountData(id: string) {
+    return (await this.repository.findOne(id)).data || {};
   }
 
   async createAccount(createAccount: UserAccountEntity) {
