@@ -19,6 +19,7 @@ import FormContent from 'src/utils/form-content.util';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import Http from 'src/http/http.util';
 
 interface DiscordLoginData {
   name: string;
@@ -32,6 +33,7 @@ export class Discord extends Website {
   readonly BASE_URL: string = '';
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
+  readonly enableAdvertisement: boolean = false;
 
   readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
@@ -55,12 +57,80 @@ export class Discord extends Website {
     return { maxSize: FileSize.MBtoBytes(8) };
   }
 
-  postNotificationSubmission(data: PostData<Submission>, accountData: DiscordLoginData): Promise<PostResponse> {
-    throw new NotImplementedException('Method not implemented.');
+  async postNotificationSubmission(
+    data: PostData<Submission, DefaultDiscordOptions>,
+    accountData: DiscordLoginData,
+  ): Promise<PostResponse> {
+    let description = `${data.options.useTitle ? `**${data.title}**\n\n` : ''}${data.description}`
+      .substring(0, 2000)
+      .trim();
+
+    const json = {
+      content: description,
+      username: 'PostyBirb',
+      allowed_mentions: {
+        parse: ['everyone', 'users', 'roles'],
+      },
+    };
+
+    const res = await Http.post<any>(accountData.webhook.trim(), '', {
+      data: json,
+      type: 'json',
+      skipCookies: true,
+    });
+
+    if (res.error || res.response.statusCode >= 300) {
+      return Promise.reject(
+        this.createPostResponse({
+          error: res.error,
+          message: 'Webhook Failure',
+          additionalInfo: res.body,
+        }),
+      );
+    }
+
+    return this.createPostResponse({ additionalInfo: res.body });
   }
 
-  postFileSubmission(data: FilePostData, accountData: DiscordLoginData): Promise<PostResponse> {
-    throw new NotImplementedException('Method not implemented.');
+  async postFileSubmission(
+    data: FilePostData<DefaultDiscordOptions>,
+    accountData: DiscordLoginData,
+  ): Promise<PostResponse> {
+    await this.postNotificationSubmission(
+      data as PostData<Submission, DefaultDiscordOptions>,
+      accountData,
+    );
+    const formData = {
+      username: 'PostyBirb',
+    };
+
+    let error = null;
+    const files = [data.primary, ...data.additional];
+    for (const file of files) {
+      if (data.options.spoiler) {
+        file.file.options.filename = `SPOILER_${file.file.options.filename}`;
+      }
+
+      const res = await Http.post<any>(accountData.webhook.trim(), '', {
+        data: { ...formData, file: file.file },
+        type: 'multipart',
+        skipCookies: true,
+      });
+
+      if (res.error || res.response.statusCode >= 300) {
+        error = this.createPostResponse({
+          error: res.error,
+          message: 'Webhook Failure',
+          additionalInfo: res.body,
+        });
+      }
+    }
+
+    if (error) {
+      return Promise.reject(error);
+    }
+
+    return this.createPostResponse({});
   }
 
   preparseDescription(text: string): string {
@@ -72,6 +142,7 @@ export class Discord extends Website {
   }
 
   parseDescription(text: string): string {
+    text = super.parseDescription(text);
     const links =
       text.match(
         /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gm,
@@ -120,10 +191,7 @@ export class Discord extends Website {
     });
 
     const description = this.defaultDescriptionParser(
-      FormContent.getDescription(
-        defaultPart.data.description,
-        submissionPart.data.description,
-      ),
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
     if (description.length > 2000) {

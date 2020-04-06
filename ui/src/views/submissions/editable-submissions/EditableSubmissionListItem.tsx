@@ -180,7 +180,12 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
         index={item.submission.order}
       >
         {(provided: DraggableProvided) => (
-          <div className={`ant-${uiStore.state.theme}-list-item ant-${uiStore.state.theme}-list-split`} {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+          <div
+            className={`ant-${uiStore.state.theme}-list-item ant-${uiStore.state.theme}-list-split`}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            ref={provided.innerRef}
+          >
             <List.Item
               className={`p-0 ${hasFailure ? 'error' : ''}`}
               extra={
@@ -256,7 +261,11 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
                     )}
                   </div>
                 }
-                title={SubmissionUtil.getSubmissionTitle(item)}
+                title={
+                  <span className={hasFailure ? 'text-danger' : ''}>{`${
+                    hasFailure ? '[FAILED] ' : ''
+                  }${SubmissionUtil.getSubmissionTitle(item)}`}</span>
+                }
                 description={
                   <div>
                     <span>

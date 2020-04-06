@@ -12,7 +12,6 @@ import { FileSubmission } from '../../../../electron-app/src/submission/file-sub
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 
 const defaultOptions: DefaultDiscordOptions = {
-  embed: true,
   spoiler: false,
   useTitle: true,
   tags: {
@@ -140,14 +139,6 @@ export class DiscordFileSubmissionForm extends React.Component<
                     onChange={this.handleCheckboxChange.bind(this, 'useTitle')}
                   >
                     Use Title
-                  </Checkbox>
-                </div>
-                <div>
-                  <Checkbox
-                    checked={data.embed}
-                    onChange={this.handleCheckboxChange.bind(this, 'embed')}
-                  >
-                    Embed description
                   </Checkbox>
                 </div>
                 <div>

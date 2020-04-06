@@ -19,9 +19,10 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
 
   constructor(props: LoginDialogProps) {
     super(props);
-    this.setState({
+    this.state = {
+      ...this.state,
       ...(props.data as State)
-    });
+    };
   }
 
   submit() {

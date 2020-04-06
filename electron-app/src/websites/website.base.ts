@@ -3,7 +3,7 @@ import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import * as _ from 'lodash';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { DefaultOptions, DefaultFileOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
@@ -56,9 +56,9 @@ export abstract class Website {
 
   abstract getScalingOptions(file: FileRecord): ScalingOptions;
 
-  abstract postNotificationSubmission(data: PostData<Submission>, accountData: any): Promise<PostResponse>;
+  abstract async postNotificationSubmission(data: PostData<Submission, any>, accountData: any): Promise<PostResponse>;
 
-  abstract postFileSubmission(data: FilePostData, accountData: any): Promise<PostResponse>;
+  abstract async postFileSubmission(data: FilePostData<DefaultFileOptions>, accountData: any): Promise<PostResponse>;
 
   preparseDescription(text: string): string {
     if (!text) {

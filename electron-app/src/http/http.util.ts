@@ -1,11 +1,13 @@
 import * as request from 'request';
 import { session } from 'electron';
 import 'url';
+import * as _ from 'lodash';
 
 interface GetOptions {
   headers?: any;
   updateCookies?: boolean;
   requestOptions?: request.CoreOptions;
+  skipCookies?: boolean;
 }
 
 interface PostOptions extends GetOptions {
@@ -55,7 +57,9 @@ export default class Http {
     const ses = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
-    headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+    if (!options.skipCookies) {
+      headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+    }
 
     const opts: request.CoreOptions = Object.assign(
       {
@@ -69,7 +73,7 @@ export default class Http {
           response,
           error,
           body,
-          returnUrl: response.request.uri.href,
+          returnUrl: _.get(response, 'request.uri.href'),
         };
         resolve(res);
       });
@@ -84,7 +88,9 @@ export default class Http {
     const ses = session.fromPartition(`persist:${partitionId}`);
 
     const headers = options.headers || {};
-    headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+    if (!options.skipCookies) {
+      headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+    }
 
     const opts: request.CoreOptions = Object.assign(
       {
@@ -105,12 +111,12 @@ export default class Http {
     }
 
     return new Promise(resolve => {
-      Http.Request.get(uri, opts, (error, response, body) => {
+      Http.Request.post(uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           error,
           response,
           body,
-          returnUrl: response.request.uri.href,
+          returnUrl: _.get(response, 'request.uri.href'),
         };
         resolve(res);
       });

@@ -2,7 +2,10 @@ import * as _ from 'lodash';
 import { EventEmitter } from 'events';
 import { AccountService } from '../../account/account.service';
 import { PostData } from './interfaces/post-data.interface';
-import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+import {
+  DefaultOptions,
+  DefaultFileOptions,
+} from '../submission-part/interfaces/default-options.interface';
 import { Website } from 'src/websites/website.base';
 import { SettingsService } from 'src/settings/settings.service';
 import { PostResponse } from './interfaces/post-response.interface';
@@ -148,7 +151,7 @@ export class Poster extends EventEmitter {
         throw new Error('Not logged in');
       }
 
-      const data: PostData<Submission> = await this.parser.parse(
+      const data: PostData<Submission, DefaultOptions> = await this.parser.parse(
         this.website,
         this.submission,
         this.defaultPart,
@@ -188,7 +191,7 @@ export class Poster extends EventEmitter {
     }
   }
 
-  private async attemptPost(data: PostData<Submission>): Promise<PostResponse> {
+  private async attemptPost(data: PostData<Submission, any>): Promise<PostResponse> {
     let totalTries = this.retries + 1;
     let error = null;
     while (totalTries) {
@@ -237,7 +240,9 @@ export class Poster extends EventEmitter {
     });
   }
 
-  private isFilePost(data: PostData<Submission>): data is FilePostData {
+  private isFilePost(
+    data: PostData<Submission, DefaultOptions>,
+  ): data is FilePostData<DefaultFileOptions> {
     return !!data['primary'];
   }
 

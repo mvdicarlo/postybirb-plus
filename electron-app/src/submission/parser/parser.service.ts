@@ -43,11 +43,11 @@ export class ParserService {
     submission: SubmissionEntity,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
-  ): Promise<PostData<Submission>> {
+  ): Promise<PostData<Submission, DefaultOptions>> {
     const description = await this.parseDescription(website, defaultPart, websitePart);
     const tags = await this.parseTags(website, defaultPart, websitePart);
 
-    const data: PostData<Submission> = {
+    const data: PostData<Submission, any> = {
       description,
       options: websitePart.data || {},
       part: websitePart,
@@ -60,7 +60,7 @@ export class ParserService {
 
     if (this.isFileSubmission(submission)) {
       await this.parseFileSubmission(
-        data as FilePostData,
+        data as FilePostData<DefaultFileOptions>,
         website,
         submission,
         defaultPart,
@@ -175,7 +175,7 @@ export class ParserService {
   }
 
   private async parseFileSubmission(
-    data: FilePostData,
+    data: FilePostData<DefaultFileOptions>,
     website: Website,
     submission: FileSubmission,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
@@ -206,7 +206,7 @@ export class ParserService {
     return {
       type: file.type,
       file: {
-        buffer: file.buffer,
+        value: file.buffer,
         options: {
           contentType: file.mimetype,
           filename: this.parseFileName(file.name),
@@ -233,7 +233,7 @@ export class ParserService {
         record.file.options.filename = this.fixFileExtension(mimetype, file.name);
       }
       record.file.options.contentType = mimetype;
-      record.file.buffer = buffer;
+      record.file.value = buffer;
     }
 
     return record;

@@ -75,11 +75,11 @@ export class Weasyl extends Website {
       .replace(/<\/div><br>/g, '</div><div><br></div>');
   }
 
-  postNotificationSubmission(data: PostData<Submission>): Promise<PostResponse> {
+  async postNotificationSubmission(data: PostData<Submission, DefaultWeasylOptions>): Promise<PostResponse> {
     throw new NotImplementedException('Method not implemented.');
   }
 
-  postFileSubmission(data: FilePostData): Promise<PostResponse> {
+  async postFileSubmission(data: FilePostData<DefaultWeasylOptions>): Promise<PostResponse> {
     throw new NotImplementedException('Method not implemented.');
   }
 
