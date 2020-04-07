@@ -15,7 +15,7 @@ interface PostOptions extends GetOptions {
   type?: 'form' | 'multipart' | 'json';
 }
 
-interface HttpResponse<T> {
+export interface HttpResponse<T> {
   body: T;
   error: any;
   response: request.Response;
@@ -64,6 +64,7 @@ export default class Http {
     const opts: request.CoreOptions = Object.assign(
       {
         headers,
+        followAllRedirects: true,
       },
       options.requestOptions,
     );
@@ -95,6 +96,7 @@ export default class Http {
     const opts: request.CoreOptions = Object.assign(
       {
         headers,
+        followAllRedirects: true,
       },
       options.requestOptions,
     );

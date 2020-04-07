@@ -3,7 +3,6 @@ import { SubmissionUpdate } from '../../../electron-app/src/submission/interface
 import { SubmissionOverwrite } from '../../../electron-app/src/submission/interfaces/submission-overwrite.interface';
 import { FormSubmissionPart } from '../views/submissions/submission-forms/interfaces/form-submission-part.interface';
 import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
-import { SubmissionType } from '../shared/enums/submission-type.enum';
 import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
 import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
 import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';

@@ -1,6 +1,5 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
-import DescriptionInput from '../submissions/submission-forms/form-components/DescriptionInput';
 import { TagConverterStore } from '../../stores/tag-converter.store';
 import TagConverterService from '../../services/tag-converter.service';
 import { TagConverter } from '../../../../electron-app/src/tag-converter/interfaces/tag-converter.interface';

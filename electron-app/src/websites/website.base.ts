@@ -3,7 +3,10 @@ import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import * as _ from 'lodash';
 import { SubmissionType } from 'src/submission/enums/submission-type.enum';
-import { DefaultOptions, DefaultFileOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import {
+  DefaultOptions,
+  DefaultFileOptions,
+} from 'src/submission/submission-part/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
@@ -13,6 +16,7 @@ import { ScalingOptions } from './interfaces/scaling-options.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { HttpResponse } from 'src/http/http.util';
 
 export abstract class Website {
   abstract readonly BASE_URL: string;
@@ -35,6 +39,7 @@ export abstract class Website {
 
   protected createPostResponse(postResponse: Partial<PostResponse>): PostResponse {
     return {
+      message: postResponse.error ? 'Unknown Error' : '',
       ...postResponse,
       time: new Date().toLocaleString(),
       website: this.constructor.name,
@@ -56,9 +61,24 @@ export abstract class Website {
 
   abstract getScalingOptions(file: FileRecord): ScalingOptions;
 
-  abstract async postNotificationSubmission(data: PostData<Submission, any>, accountData: any): Promise<PostResponse>;
+  abstract async postNotificationSubmission(
+    data: PostData<Submission, any>,
+    accountData: any,
+  ): Promise<PostResponse>;
 
-  abstract async postFileSubmission(data: FilePostData<DefaultFileOptions>, accountData: any): Promise<PostResponse>;
+  abstract async postFileSubmission(
+    data: FilePostData<DefaultFileOptions>,
+    accountData: any,
+  ): Promise<PostResponse>;
+
+  protected verifyResponse(response: HttpResponse<any>): void {
+    if (response.error || response.response.statusCode > 303) {
+      throw this.createPostResponse({
+        error: response.error || response.response.statusCode,
+        additionalInfo: response.body,
+      });
+    }
+  }
 
   preparseDescription(text: string): string {
     if (!text) {
@@ -78,7 +98,7 @@ export abstract class Website {
     return tags
       .filter(tag => {
         const t: string = tag.trim();
-        return t.length >= (options.minLength || 0) && t.length <= (options.maxLength || 100);
+        return t.length >= (options.minLength || 1) && t.length <= (options.maxLength || 100);
       })
       .map(tag => tag.replace(/\s/g, options.spaceReplacer));
   }

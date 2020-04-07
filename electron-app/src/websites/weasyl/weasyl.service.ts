@@ -23,6 +23,9 @@ import FormContent from 'src/utils/form-content.util';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import HtmlParserUtil from 'src/utils/html-parser.util';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -75,12 +78,149 @@ export class Weasyl extends Website {
       .replace(/<\/div><br>/g, '</div><div><br></div>');
   }
 
-  async postNotificationSubmission(data: PostData<Submission, DefaultWeasylOptions>): Promise<PostResponse> {
-    throw new NotImplementedException('Method not implemented.');
+  private convertRating(rating: SubmissionRating) {
+    switch (rating) {
+      case SubmissionRating.MATURE:
+        return 30;
+      case SubmissionRating.ADULT:
+      case SubmissionRating.EXTREME:
+        return 40;
+      case SubmissionRating.GENERAL:
+      default:
+        return 10;
+    }
+  }
+
+  private getContentType(type: FileSubmissionType) {
+    switch (type) {
+      case FileSubmissionType.TEXT:
+        return 'literary';
+      case FileSubmissionType.AUDIO:
+      case FileSubmissionType.VIDEO:
+        return 'multimedia';
+      case FileSubmissionType.IMAGE:
+      default:
+        return 'visual';
+    }
+  }
+
+  async postNotificationSubmission(
+    data: PostData<Submission, DefaultWeasylOptions>,
+  ): Promise<PostResponse> {
+    const page = await Http.get<string>(`${this.BASE_URL}/submit/journal`, data.part.accountId);
+    this.verifyResponse(page);
+
+    const form = {
+      token: HtmlParserUtil.getInputValue(page.body, 'token'),
+      title: data.title,
+      rating: this.convertRating(data.rating),
+      content: data.description,
+      tags: this.parseTags(data.tags).join(' '),
+    };
+
+    const postResponse = await Http.post<string>(
+      `${this.BASE_URL}/submit/journal`,
+      data.part.accountId,
+      {
+        type: 'multipart',
+        data: form,
+      },
+    );
+    this.verifyResponse(postResponse);
+
+    return this.createPostResponse({});
   }
 
   async postFileSubmission(data: FilePostData<DefaultWeasylOptions>): Promise<PostResponse> {
-    throw new NotImplementedException('Method not implemented.');
+    const type = this.getContentType(data.primary.type);
+    const url = `${this.BASE_URL}/submit/${type}`;
+
+    const page = await Http.get<string>(url, data.part.accountId);
+    this.verifyResponse(page);
+
+    const form: any = {
+      token: HtmlParserUtil.getInputValue(page.body, 'token'),
+      title: data.title,
+      rating: this.convertRating(data.rating),
+      content: data.description,
+      tags: this.parseTags(data.tags).join(' '),
+      submitfile: data.primary.file,
+    };
+
+    if (data.thumbnail) {
+      form.thumbfile = data.thumbnail;
+    }
+
+    if (
+      data.primary.type === FileSubmissionType.TEXT ||
+      data.primary.type === FileSubmissionType.AUDIO ||
+      data.primary.type === FileSubmissionType.VIDEO
+    ) {
+      if (data.thumbnail) {
+        form.coverfile = data.thumbnail;
+      }
+    } else {
+      form.coverfile = '';
+    }
+
+    const { options } = data;
+    if (options.notify) form.nonotification = 'on';
+    if (options.critique) form.critique = 'on';
+    form.folderid = options.folder || '';
+    form.subtype = options.category || '';
+
+    const postResponse = await Http.post<string>(url, data.part.accountId, {
+      type: 'multipart',
+      data: form,
+    });
+
+    const { body } = postResponse;
+    if (body.includes('You have already made a submission with this submission file')) {
+      return this.createPostResponse({
+        message: 'You have already made a submission with this submission file',
+      });
+    }
+
+    if (body.includes('Submission Information')) {
+      // Standard return
+      return this.createPostResponse({
+        source: postResponse.returnUrl,
+      });
+    } else if (
+      // If they set a rating when they logged in
+      body.includes(
+        'This page contains content that you cannot view according to your current allowed ratings',
+      )
+    ) {
+      return this.createPostResponse({
+        source: postResponse.returnUrl,
+      });
+    } else if (body.includes('Weasyl experienced a technical issue')) {
+      // Unknown issue so do a second check
+      const recheck = await Http.get<string>(postResponse.returnUrl, data.part.accountId, {
+        skipCookies: true,
+      });
+      if (recheck.body.includes('Submission Information')) {
+        return this.createPostResponse({
+          source: postResponse.returnUrl,
+        });
+      } else {
+        return Promise.reject(
+          this.createPostResponse({
+            message: 'Weasyl experienced a technical issue and cannot verify if posting completed',
+            additionalInfo: recheck.body,
+          }),
+        );
+      }
+    }
+
+    // No success found
+    return Promise.reject(
+      this.createPostResponse({
+        message: 'Unknown response from Weasyl',
+        additionalInfo: postResponse.body,
+      }),
+    );
   }
 
   async retrieveFolders(id: string, loginName: string): Promise<void> {
@@ -137,7 +277,7 @@ export class Weasyl extends Website {
         'folders',
         [],
       );
-      if (folders.find(f => f.id === submissionPart.data.folder)) {
+      if (!folders.find(f => f.id === submissionPart.data.folder)) {
         warnings.push('Folder not found.');
       }
     }
