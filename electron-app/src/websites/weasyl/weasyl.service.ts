@@ -25,6 +25,7 @@ import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import HtmlParserUtil from 'src/utils/html-parser.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { MarkdownParser } from 'src/description-parsing/markdown/markdown.parser';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -56,6 +57,14 @@ export class Weasyl extends Website {
 
   getScalingOptions(file: FileRecord): ScalingOptions {
     return { maxSize: FileSize.MBtoBytes(10) };
+  }
+
+  fallbackFileParser(html: string) {
+    return {
+      text: MarkdownParser.parse(html),
+      type: 'text/markdown',
+      extension: 'md',
+    };
   }
 
   preparseDescription(text: string): string {
@@ -132,23 +141,25 @@ export class Weasyl extends Website {
     const page = await Http.get<string>(url, data.part.accountId);
     this.verifyResponse(page);
 
+    let postFile = data.primary.file;
+    if (data.primary.type === FileSubmissionType.TEXT) {
+      if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
+        postFile = data.fallback;
+      }
+    }
+
     const form: any = {
       token: HtmlParserUtil.getInputValue(page.body, 'token'),
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
       tags: this.parseTags(data.tags).join(' '),
-      submitfile: data.primary.file,
+      submitfile: postFile,
+      redirect: url,
     };
 
     if (data.thumbnail) {
       form.thumbfile = data.thumbnail;
-    }
-
-    if (data.primary.type === FileSubmissionType.TEXT) {
-      if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
-        form.submitfile = data.fallback;
-      }
     }
 
     if (
@@ -158,9 +169,9 @@ export class Weasyl extends Website {
     ) {
       if (data.thumbnail) {
         form.coverfile = data.thumbnail;
+      } else {
+        form.coverfile = '';
       }
-    } else {
-      form.coverfile = '';
     }
 
     const { options } = data;

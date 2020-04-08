@@ -17,6 +17,7 @@ import { PostResponse } from 'src/submission/post/interfaces/post-response.inter
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { HttpResponse } from 'src/http/http.util';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 
 export abstract class Website {
   abstract readonly BASE_URL: string;
@@ -78,6 +79,10 @@ export abstract class Website {
         additionalInfo: `${info ? `${info}\n\n` : ''}${response.body}`,
       });
     }
+  }
+
+  fallbackFileParser(html: string): { text: string; type: string; extension: string } {
+    return { text: PlaintextParser.parse(html), type: 'text/plain', extension: 'txt' };
   }
 
   preparseDescription(text: string): string {
