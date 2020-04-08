@@ -104,6 +104,8 @@ export class ParserService {
       description = AdInsertParser.parse(description, website.defaultDescriptionParser);
     }
 
+    description = website.postParseDescription(description);
+
     return description.trim();
   }
 
@@ -187,6 +189,10 @@ export class ParserService {
 
     if (submission.thumbnail && options.useThumbnail) {
       data.thumbnail = this.fileRecordAsPostFileRecord(submission.thumbnail).file;
+    }
+
+    if (submission.fallback) {
+      data.fallback = this.fileRecordAsPostFileRecord(submission.fallback).file;
     }
 
     if (website.acceptsAdditionalFiles) {

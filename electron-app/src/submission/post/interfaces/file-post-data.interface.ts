@@ -6,6 +6,7 @@ import { DefaultFileOptions } from 'src/submission/submission-part/interfaces/de
 export interface FilePostData<T extends DefaultFileOptions> extends PostData<FileSubmission, T> {
   primary: PostFileRecord;
   thumbnail?: PostFile;
+  fallback?: PostFile;
   additional: Array<PostFileRecord>;
 }
 

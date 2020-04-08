@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Website } from '../website.base';
 import { DefaultDiscordOptions } from './discord.interface';
 import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
@@ -35,7 +35,6 @@ export class Discord extends Website {
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
 
-  readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
   readonly defaultDescriptionParser = PlaintextParser.parse;
 

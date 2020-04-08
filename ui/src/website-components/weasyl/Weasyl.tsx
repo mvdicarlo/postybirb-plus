@@ -57,7 +57,7 @@ export class Weasyl implements Website {
   }
 
   supportsTextType(type: string): boolean {
-    return ['text/md', 'text/plain', 'text/pdf'].includes(type);
+    return ['text/md', 'text/plain', 'text/pdf', 'application/pdf'].includes(type);
   }
 }
 

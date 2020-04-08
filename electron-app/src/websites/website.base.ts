@@ -22,7 +22,7 @@ export abstract class Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
   abstract readonly defaultFileSubmissionOptions: any;
-  abstract readonly defaultStatusOptions?: any;
+  readonly defaultStatusOptions: any = {};
 
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
@@ -71,11 +71,11 @@ export abstract class Website {
     accountData: any,
   ): Promise<PostResponse>;
 
-  protected verifyResponse(response: HttpResponse<any>): void {
+  protected verifyResponse(response: HttpResponse<any>, info?: string): void {
     if (response.error || response.response.statusCode > 303) {
       throw this.createPostResponse({
         error: response.error || response.response.statusCode,
-        additionalInfo: response.body,
+        additionalInfo: `${info ? `${info}\n\n` : ''}${response.body}`,
       });
     }
   }
@@ -89,6 +89,10 @@ export abstract class Website {
 
   parseDescription(text: string): string {
     return this.defaultDescriptionParser(text);
+  }
+
+  postParseDescription(text: string): string {
+    return text;
   }
 
   parseTags(

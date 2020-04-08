@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import Http from 'src/http/http.util';
-import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
@@ -25,7 +25,6 @@ import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import HtmlParserUtil from 'src/utils/html-parser.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
-import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -34,7 +33,6 @@ export class Weasyl extends Website {
   readonly BASE_URL: string = 'https://www.weasyl.com';
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
 
-  readonly defaultStatusOptions: any = {};
   readonly defaultFileSubmissionOptions: DefaultWeasylOptions = WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   readonly usernameShortcuts = [
@@ -45,18 +43,14 @@ export class Weasyl extends Website {
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
+    const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<any>(`${this.BASE_URL}/api/whoami`, data._id, {
       requestOptions: { json: true },
     });
-    const status: LoginResponse = { loggedIn: false, username: null };
-    try {
-      const login: string = _.get(res.body, 'login');
-      status.loggedIn = !!login;
-      status.username = login;
-      await this.retrieveFolders(data._id, status.username);
-    } catch (e) {
-      /* Swallow */
-    }
+    const login: string = _.get(res.body, 'login');
+    status.loggedIn = !!login;
+    status.username = login;
+    await this.retrieveFolders(data._id, status.username);
     return status;
   }
 
@@ -149,6 +143,12 @@ export class Weasyl extends Website {
 
     if (data.thumbnail) {
       form.thumbfile = data.thumbnail;
+    }
+
+    if (data.primary.type === FileSubmissionType.TEXT) {
+      if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
+        form.submitfile = data.fallback;
+      }
     }
 
     if (

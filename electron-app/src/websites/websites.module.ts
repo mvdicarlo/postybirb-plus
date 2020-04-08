@@ -6,10 +6,12 @@ import { DiscordController } from './discord/discord.controller';
 import { Discord } from './discord/discord.service';
 import { WebsitesController } from './websites.controller';
 import { WebsitesService } from './websites.service';
+import { Furiffic } from './furiffic/furiffic.service';
+import { FurifficController } from './furiffic/furiffic.controller';
 
 @Module({
-  controllers: [WeasylController, DiscordController, WebsitesController],
-  providers: [Weasyl, WebsiteProvider, Discord, WebsitesService],
+  controllers: [WeasylController, DiscordController, WebsitesController, FurifficController],
+  providers: [Weasyl, WebsiteProvider, Discord, WebsitesService, Furiffic],
   exports: [WebsiteProvider, WebsitesService],
 })
 export class WebsitesModule {}

@@ -70,10 +70,6 @@ export class AccountService {
     });
   }
 
-  async getAccountData(id: string) {
-    return (await this.repository.findOne(id)).data || {};
-  }
-
   async createAccount(createAccount: UserAccountEntity) {
     this.logger.log(createAccount, 'Create Account');
 
@@ -162,7 +158,13 @@ export class AccountService {
 
     this.logger.debug(account._id, 'Login Check');
     const website = this.websiteProvider.getWebsiteModule(account.website);
-    const response: LoginResponse = await website.checkLoginStatus(account);
+    let response: LoginResponse = { loggedIn: false, username: null };
+
+    try {
+      response = await website.checkLoginStatus(account);
+    } catch (err) {
+      this.logger.error(err, err.stack, `${website} Login Check Failure`);
+    }
 
     const login: UserAccountDto = {
       _id: account._id,
