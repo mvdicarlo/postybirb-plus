@@ -210,7 +210,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
           ].getDefaults(),
           isNew: true,
-          created: Date.now(),
+          created: Date.now()
         };
       });
 
@@ -336,12 +336,12 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
             <Form layout="vertical" style={{ flex: 10 }}>
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Defaults">Defaults</span>
+                  <span className="form-section-header nav-section-anchor" id="#Defaults">
+                    Defaults
+                  </span>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
-                  problems={[]}
-                  warnings={[]}
                   onUpdate={this.onUpdate}
                   submission={{} as any}
                 />
@@ -349,7 +349,9 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
 
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Websites">Websites</span>
+                  <span className="form-section-header nav-section-anchor" id="#Websites">
+                    Websites
+                  </span>
                 </Typography.Title>
                 <TreeSelect
                   multiple

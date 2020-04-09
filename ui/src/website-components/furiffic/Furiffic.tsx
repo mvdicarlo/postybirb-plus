@@ -3,14 +3,14 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { DefaultFurifficOptions } from '../../../../electron-app/src/websites/furiffic/furiffic.interface';
+import { FurifficOptions } from '../../../../electron-app/src/websites/furiffic/furiffic.interface';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 
-const defaultOptions: DefaultFurifficOptions = {
+const defaultOptions: FurifficOptions = {
   title: undefined,
   useThumbnail: true,
   autoScale: true,
@@ -34,12 +34,52 @@ export class Furiffic implements Website {
     <GenericLoginDialog url="https://www.furiffic.com/" {...props} />
   );
 
-  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultFurifficOptions>) => (
-    <GenericFileSubmissionSection key={props.part.accountId} {...props} />
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, FurifficOptions>) => (
+    <GenericFileSubmissionSection
+      key={props.part.accountId}
+      {...props}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          {
+            value: 'general',
+            name: 'Tame'
+          },
+          {
+            value: 'mature',
+            name: 'Mature'
+          },
+          {
+            value: 'adult',
+            name: 'Adult'
+          }
+        ]
+      }}
+    />
   );
 
   NotificationSubmissionForm = (props: SubmissionSectionProps<Submission, DefaultOptions>) => (
-    <GenericSubmissionSection key={props.part.accountId} {...props} />
+    <GenericSubmissionSection
+      key={props.part.accountId}
+      {...props}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          {
+            value: 'general',
+            name: 'Tame'
+          },
+          {
+            value: 'mature',
+            name: 'Mature'
+          },
+          {
+            value: 'adult',
+            name: 'Adult'
+          }
+        ]
+      }}
+    />
   );
 
   getDefaults() {

@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { Website } from '../website.base';
-import { DefaultFurifficOptions } from './furiffic.interface';
+import { FurifficOptions } from './furiffic.interface';
 import { FURIFFIC_DEFAULT_FILE_SUBMISSION_OPTIONS } from './furiffic.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
@@ -48,7 +48,7 @@ export class Furiffic extends Website {
   ];
 
   readonly acceptsAdditionalFiles: boolean = false;
-  readonly defaultFileSubmissionOptions: DefaultFurifficOptions = FURIFFIC_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly defaultFileSubmissionOptions: FurifficOptions = FURIFFIC_DEFAULT_FILE_SUBMISSION_OPTIONS;
   readonly defaultDescriptionParser = BBCodeParser.parse;
 
   readonly usernameShortcuts = [
@@ -107,7 +107,7 @@ export class Furiffic extends Website {
   }
 
   async postNotificationSubmission(
-    data: PostData<Submission, DefaultFurifficOptions>,
+    data: PostData<Submission, FurifficOptions>,
   ): Promise<PostResponse> {
     const username = this.getAccountInfo(data.part.accountId).username;
     const res = await Http.get<string>(
@@ -145,7 +145,7 @@ export class Furiffic extends Website {
     return this.createPostResponse({});
   }
 
-  async postFileSubmission(data: FilePostData<DefaultFurifficOptions>): Promise<PostResponse> {
+  async postFileSubmission(data: FilePostData<FurifficOptions>): Promise<PostResponse> {
     let postFile = data.primary.file;
     if (data.primary.type === FileSubmissionType.TEXT) {
       if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
@@ -254,7 +254,7 @@ export class Furiffic extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultFurifficOptions>,
+    submissionPart: SubmissionPart<FurifficOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

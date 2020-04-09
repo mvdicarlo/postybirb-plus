@@ -52,16 +52,14 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
                   defaultData: defaultPart.data,
                   part: child,
                   onUpdate: props.onUpdate,
-                  problems: _.get(props.problems[child.accountId], 'problems', []),
-                  warnings: _.get(props.problems[child.accountId], 'warnings', []),
+                  problems: props.problems[child.accountId],
                   submission: props.submission! as FileSubmission
                 })
               : WebsiteRegistry.websites[child.website].NotificationSubmissionForm!({
                   defaultData: defaultPart.data,
                   part: child,
                   onUpdate: props.onUpdate,
-                  problems: _.get(props.problems[child.accountId], 'problems', []),
-                  warnings: _.get(props.problems[child.accountId], 'warnings', []),
+                  problems: props.problems[child.accountId],
                   submission: props.submission!
                 })
         };

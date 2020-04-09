@@ -9,7 +9,7 @@ import WebsiteValidator from 'src/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
-import { DefaultWeasylOptions } from './weasyl.interface';
+import { WeasylOptions } from './weasyl.interface';
 import { Folder } from 'src/websites/interfaces/folder.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
@@ -34,7 +34,7 @@ export class Weasyl extends Website {
   readonly BASE_URL: string = 'https://www.weasyl.com';
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
 
-  readonly defaultFileSubmissionOptions: DefaultWeasylOptions = WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly defaultFileSubmissionOptions: WeasylOptions = WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS;
 
   readonly usernameShortcuts = [
     {
@@ -108,7 +108,7 @@ export class Weasyl extends Website {
   }
 
   async postNotificationSubmission(
-    data: PostData<Submission, DefaultWeasylOptions>,
+    data: PostData<Submission, WeasylOptions>,
   ): Promise<PostResponse> {
     const page = await Http.get<string>(`${this.BASE_URL}/submit/journal`, data.part.accountId);
     this.verifyResponse(page);
@@ -134,7 +134,7 @@ export class Weasyl extends Website {
     return this.createPostResponse({});
   }
 
-  async postFileSubmission(data: FilePostData<DefaultWeasylOptions>): Promise<PostResponse> {
+  async postFileSubmission(data: FilePostData<WeasylOptions>): Promise<PostResponse> {
     const type = this.getContentType(data.primary.type);
     const url = `${this.BASE_URL}/submit/${type}`;
 
@@ -271,7 +271,7 @@ export class Weasyl extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultWeasylOptions>,
+    submissionPart: SubmissionPart<WeasylOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -333,12 +333,5 @@ export class Weasyl extends Website {
     }
 
     return { problems, warnings };
-  }
-
-  validateNotificationSubmission(
-    submission: Submission,
-    submissionPart: SubmissionPart<any>,
-  ): ValidationParts {
-    return { problems: [], warnings: [] };
   }
 }

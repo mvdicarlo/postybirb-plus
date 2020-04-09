@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Website } from '../website.base';
-import { DefaultDiscordOptions } from './discord.interface';
+import { DiscordOptions } from './discord.interface';
 import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
@@ -35,7 +35,7 @@ export class Discord extends Website {
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
 
-  readonly defaultFileSubmissionOptions: DefaultDiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly defaultFileSubmissionOptions: DiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
   readonly defaultDescriptionParser = PlaintextParser.parse;
 
   readonly usernameShortcuts = [];
@@ -57,7 +57,7 @@ export class Discord extends Website {
   }
 
   async postNotificationSubmission(
-    data: PostData<Submission, DefaultDiscordOptions>,
+    data: PostData<Submission, DiscordOptions>,
     accountData: DiscordLoginData,
   ): Promise<PostResponse> {
     let description = `${data.options.useTitle ? `**${data.title}**\n\n` : ''}${data.description}`
@@ -92,11 +92,11 @@ export class Discord extends Website {
   }
 
   async postFileSubmission(
-    data: FilePostData<DefaultDiscordOptions>,
+    data: FilePostData<DiscordOptions>,
     accountData: DiscordLoginData,
   ): Promise<PostResponse> {
     await this.postNotificationSubmission(
-      data as PostData<Submission, DefaultDiscordOptions>,
+      data as PostData<Submission, DiscordOptions>,
       accountData,
     );
     const formData = {
@@ -159,7 +159,7 @@ export class Discord extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultDiscordOptions>,
+    submissionPart: SubmissionPart<DiscordOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -173,9 +173,9 @@ export class Discord extends Website {
       ),
     ];
 
+    const maxMB: number = 8;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-      const maxMB: number = 8;
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (
           isAutoscaling &&
@@ -198,12 +198,5 @@ export class Discord extends Website {
     }
 
     return { problems, warnings };
-  }
-
-  validateNotificationSubmission(
-    submission: Submission,
-    submissionPart: SubmissionPart<any>,
-  ): ValidationParts {
-    return { problems: [], warnings: [] };
   }
 }

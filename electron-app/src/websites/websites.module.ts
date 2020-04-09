@@ -8,10 +8,12 @@ import { WebsitesController } from './websites.controller';
 import { WebsitesService } from './websites.service';
 import { Furiffic } from './furiffic/furiffic.service';
 import { FurifficController } from './furiffic/furiffic.controller';
+import { PiczelModule } from './piczel/piczel.module';
 
 @Module({
   controllers: [WeasylController, DiscordController, WebsitesController, FurifficController],
   providers: [Weasyl, WebsiteProvider, Discord, WebsitesService, Furiffic],
   exports: [WebsiteProvider, WebsitesService],
+  imports: [PiczelModule],
 })
 export class WebsitesModule {}

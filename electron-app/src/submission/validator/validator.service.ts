@@ -8,6 +8,7 @@ import { SubmissionType } from '../enums/submission-type.enum';
 import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
 import { ValidationParts } from './interfaces/validation-parts.interface';
 import { Website } from 'src/websites/website.base';
+import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 
 @Injectable()
 export class ValidatorService {
@@ -45,7 +46,7 @@ export class ValidatorService {
     const parsedPart = this.parsePart(part, defaultPart);
     switch (submission.type) {
       case SubmissionType.FILE:
-        return website.validateFileSubmission(submission, parsedPart, defaultPart);
+        return website.validateFileSubmission(submission as FileSubmissionEntity, parsedPart, defaultPart);
       case SubmissionType.NOTIFICATION:
         return website.validateNotificationSubmission(submission, parsedPart, defaultPart);
     }

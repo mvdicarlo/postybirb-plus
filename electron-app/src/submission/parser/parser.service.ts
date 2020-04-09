@@ -161,7 +161,7 @@ export class ParserService {
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
   ): SubmissionRating {
-    return websitePart.data.rating || defaultPart.data.rating;
+    return (websitePart.data.rating || defaultPart.data.rating).toLowerCase();
   }
 
   public getTitle(
@@ -193,7 +193,9 @@ export class ParserService {
 
     if (submission.fallback) {
       data.fallback = this.fileRecordAsPostFileRecord(submission.fallback).file;
-      const { text, type, extension } = website.fallbackFileParser(data.fallback.value.toString('utf8'));
+      const { text, type, extension } = website.fallbackFileParser(
+        data.fallback.value.toString('utf8'),
+      );
       data.fallback.options.contentType = type;
       data.fallback.options.filename = data.fallback.options.filename.replace('html', extension);
       data.fallback.value = Buffer.from(text, 'utf8');

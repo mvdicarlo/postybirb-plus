@@ -5,8 +5,9 @@ import { SubmissionSectionProps } from '../../views/submissions/submission-forms
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/submission-forms/form-components/DescriptionInput';
-import { Alert, Form, Input } from 'antd';
+import { Form, Input, Radio } from 'antd';
 import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import SectionProblems from '../../views/submissions/submission-forms/form-sections/SectionProblems';
 
 const defaultOptions: DefaultOptions = {
   tags: {
@@ -49,20 +50,10 @@ export default class GenericSubmissionSection extends React.Component<
 
   render() {
     const { data } = this.props.part;
+    const showRating = _.get(this.props.ratingOptions, 'show', false);
     return (
       <div>
-        {this.props.problems.length ? (
-          <Alert
-            type="error"
-            message={
-              <ul>
-                {this.props.problems.map(problem => (
-                  <li>{problem}</li>
-                ))}
-              </ul>
-            }
-          />
-        ) : null}
+        <SectionProblems problems={this.props.problems} />
         <div>
           <Form.Item label="Title">
             <Input
@@ -83,6 +74,34 @@ export default class GenericSubmissionSection extends React.Component<
             label="Description"
             overwriteDescriptionValue={_.get(this.props.defaultData, 'description.value')}
           />
+          {showRating ? (
+            <Form.Item label="Rating">
+              {this.props.ratingOptions!.ratings ? (
+                <Radio.Group
+                  onChange={this.handleChange.bind(this, 'rating')}
+                  value={data.rating}
+                  buttonStyle="solid"
+                >
+                  <Radio.Button value={null}>Default</Radio.Button>
+                  {this.props.ratingOptions!.ratings.map(v => (
+                    <Radio.Button value={v.value}>{v.name}</Radio.Button>
+                  ))}
+                </Radio.Group>
+              ) : (
+                <Radio.Group
+                  onChange={this.handleChange.bind(this, 'rating')}
+                  value={data.rating}
+                  buttonStyle="solid"
+                >
+                  <Radio.Button value={null}>Default</Radio.Button>
+                  <Radio.Button value="general">General</Radio.Button>
+                  <Radio.Button value="mature">Mature</Radio.Button>
+                  <Radio.Button value="adult">Adult</Radio.Button>
+                  <Radio.Button value="extreme">Extreme</Radio.Button>
+                </Radio.Group>
+              )}
+            </Form.Item>
+          ) : null}
         </div>
       </div>
     );

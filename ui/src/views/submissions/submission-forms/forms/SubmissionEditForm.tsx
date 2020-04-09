@@ -44,6 +44,7 @@ import {
   Alert,
   Tooltip
 } from 'antd';
+import { Problem } from '../../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
 
 interface Props {
   match: Match;
@@ -55,7 +56,7 @@ export interface SubmissionEditFormState {
   loading: boolean;
   parts: { [key: string]: FormSubmissionPart<any> };
   postAt: number | undefined;
-  problems: { [key: string]: any };
+  problems: { [key: string]: Problem };
   removedParts: string[];
   submission?: Submission;
   submissionType: SubmissionType;
@@ -759,8 +760,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
-                  problems={this.state.problems.default.problems}
-                  warnings={this.state.problems.default.warnings}
+                  problems={this.state.problems.default}
                   onUpdate={this.onUpdate}
                   submission={this.state.submission!}
                 />

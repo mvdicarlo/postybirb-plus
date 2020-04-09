@@ -2,16 +2,17 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { DefaultDiscordOptions } from '../../../../electron-app/src/websites/discord/discord.interface';
+import { DiscordOptions } from '../../../../electron-app/src/websites/discord/discord.interface';
 import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/submission-forms/form-components/DescriptionInput';
 import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
-import { Alert, Form, Input, Checkbox } from 'antd';
+import { Form, Input, Checkbox } from 'antd';
 import DiscordLogin from './DiscordLogin';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import SectionProblems from '../../views/submissions/submission-forms/form-sections/SectionProblems';
 
-const defaultOptions: DefaultDiscordOptions = {
+const defaultOptions: DiscordOptions = {
   spoiler: false,
   useTitle: true,
   tags: {
@@ -34,13 +35,13 @@ export class Discord implements Website {
   supportsTags: boolean = false;
   LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
-  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DefaultDiscordOptions>) => (
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DiscordOptions>) => (
     <DiscordFileSubmissionForm key={props.part.accountId} {...props} />
   );
 
-  NotificationSubmissionForm = (
-    props: SubmissionSectionProps<Submission, DefaultDiscordOptions>
-  ) => <DiscordFileSubmissionForm key={props.part.accountId} {...props} />;
+  NotificationSubmissionForm = (props: SubmissionSectionProps<Submission, DiscordOptions>) => (
+    <DiscordFileSubmissionForm key={props.part.accountId} {...props} />
+  );
 
   getDefaults() {
     return _.cloneDeep(defaultOptions);
@@ -48,28 +49,28 @@ export class Discord implements Website {
 }
 
 export class DiscordFileSubmissionForm extends React.Component<
-  SubmissionSectionProps<Submission, DefaultDiscordOptions>
+  SubmissionSectionProps<Submission, DiscordOptions>
 > {
   handleChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DefaultDiscordOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DiscordOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.value;
     this.props.onUpdate(part);
   }
 
   handleTagChange(update: any) {
-    const part: SubmissionPart<DefaultDiscordOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DiscordOptions> = _.cloneDeep(this.props.part);
     part.data.tags = update;
     this.props.onUpdate(part);
   }
 
   handleDescriptionChange(update) {
-    const part: SubmissionPart<DefaultDiscordOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DiscordOptions> = _.cloneDeep(this.props.part);
     part.data.description = update;
     this.props.onUpdate(part);
   }
 
   handleCheckboxChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DefaultDiscordOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<DiscordOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.checked;
     this.props.onUpdate(part);
   }
@@ -78,30 +79,7 @@ export class DiscordFileSubmissionForm extends React.Component<
     const { data } = this.props.part;
     return (
       <div>
-        {this.props.problems.length ? (
-          <Alert
-            type="error"
-            message={
-              <ul>
-                {this.props.problems.map(problem => (
-                  <li>{problem}</li>
-                ))}
-              </ul>
-            }
-          />
-        ) : null}
-        {this.props.warnings.length ? (
-          <Alert
-            type="warning"
-            message={
-              <ul>
-                {this.props.warnings.map(warning => (
-                  <li>{warning}</li>
-                ))}
-              </ul>
-            }
-          />
-        ) : null}
+        <SectionProblems problems={this.props.problems} />
         <div>
           <Form.Item label="Title">
             <Input

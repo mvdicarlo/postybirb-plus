@@ -1,6 +1,6 @@
 export enum SubmissionRating {
-  GENERAL = 'GENERAL',
-  MATURE = 'MATURE',
-  ADULT = 'ADULT',
-  EXTREME = 'EXTREME',
+  GENERAL = 'general',
+  MATURE = 'mature',
+  ADULT = 'adult',
+  EXTREME = 'extreme',
 }
