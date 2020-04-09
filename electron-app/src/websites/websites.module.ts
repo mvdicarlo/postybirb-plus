@@ -1,19 +1,16 @@
 import { Module } from '@nestjs/common';
-import { WeasylController } from './weasyl/weasyl.controller';
-import { Weasyl } from './weasyl/weasyl.service';
 import { WebsiteProvider } from './website-provider.service';
-import { DiscordController } from './discord/discord.controller';
-import { Discord } from './discord/discord.service';
-import { WebsitesController } from './websites.controller';
 import { WebsitesService } from './websites.service';
-import { Furiffic } from './furiffic/furiffic.service';
-import { FurifficController } from './furiffic/furiffic.controller';
 import { PiczelModule } from './piczel/piczel.module';
+import { WeasylModule } from './weasyl/weasyl.module';
+import { FurifficModule } from './furiffic/furiffic.module';
+import { DiscordModule } from './discord/discord.module';
+import { WebsitesController } from './websites.controller';
 
 @Module({
-  controllers: [WeasylController, DiscordController, WebsitesController, FurifficController],
-  providers: [Weasyl, WebsiteProvider, Discord, WebsitesService, Furiffic],
+  controllers: [WebsitesController],
+  providers: [WebsiteProvider, WebsitesService],
   exports: [WebsiteProvider, WebsitesService],
-  imports: [PiczelModule],
+  imports: [PiczelModule, WeasylModule, FurifficModule, DiscordModule],
 })
 export class WebsitesModule {}
