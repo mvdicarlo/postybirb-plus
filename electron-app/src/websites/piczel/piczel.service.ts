@@ -151,6 +151,17 @@ export class Piczel extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
+    if (submissionPart.data.folder) {
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(submissionPart.accountId),
+        'folders',
+        [],
+      );
+      if (!folders.find(f => f.id === submissionPart.data.folder)) {
+        warnings.push('Folder not found.');
+      }
+    }
+
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(

@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
+const util = require('./utils');
 
 const settingsPath = path.join(BASE_DIRECTORY, 'data', 'settings.json');
 fs.ensureFileSync(settingsPath);
@@ -15,7 +16,7 @@ settings
     postRetries: 0,
     openWindowOnStartup: true,
     openOnLogin: false,
-    useHardwareAcceleration: process.platform === 'win32' || process.platform === 'darwin',
+    useHardwareAcceleration: !util.isLinux(),
     maxPNGSizeCompression: 50,
     maxPNGSizeCompressionWithAlpha: 60,
     maxJPEGQualityCompression: 15,
@@ -23,10 +24,7 @@ settings
   })
   .write();
 
-if (
-  !settings.getState().useHardwareAcceleration ||
-  !(process.platform === 'win32' || process.platform === 'darwin')
-) {
+if (!settings.getState().useHardwareAcceleration || util.isLinux()) {
   console.log('Hardware acceleration disabled');
   app.disableHardwareAcceleration();
 }

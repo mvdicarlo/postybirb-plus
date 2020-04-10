@@ -24,7 +24,7 @@ import { FileSubmission } from 'src/submission/file-submission/interfaces/file-s
 export abstract class Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
-  abstract readonly defaultFileSubmissionOptions: any;
+  abstract readonly defaultFileSubmissionOptions: object;
   readonly defaultStatusOptions: any = {};
 
   readonly acceptsAdditionalFiles: boolean = false;

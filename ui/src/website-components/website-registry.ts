@@ -3,9 +3,11 @@ import { Weasyl } from './weasyl/Weasyl';
 import { Discord } from './discord/Discord';
 import { Furiffic } from './furiffic/Furiffic';
 import { Piczel } from './piczel/Piczel';
+import { Derpibooru } from './derpibooru/Derpibooru';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
+    Derpibooru: new Derpibooru(),
     Discord: new Discord(),
     Furiffic: new Furiffic(),
     Piczel: new Piczel(),

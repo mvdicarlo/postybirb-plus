@@ -2,6 +2,7 @@ import * as request from 'request';
 import { session } from 'electron';
 import 'url';
 import * as _ from 'lodash';
+import CookieConverter from 'src/utils/cookie-converter.util';
 
 interface GetOptions {
   headers?: any;
@@ -47,6 +48,27 @@ export default class Http {
     });
 
     return Http.parseCookies(sessionCookies);
+  }
+
+  static async saveSessionCookies(uri: string, partitionId: string) {
+    const ses = session.fromPartition(`persist:${partitionId}`);
+    const url = new URL(uri).origin;
+    const cookies = await ses.cookies.get({
+      url,
+    });
+    let expirationDate = new Date();
+    expirationDate.setMonth(expirationDate.getMonth() + 1);
+    await Promise.all(
+      cookies
+        .filter(c => c.session)
+        .map(c => {
+          const cookie: Electron.CookiesSetDetails = {
+            ...CookieConverter.convertCookie(c),
+            expirationDate: expirationDate.valueOf() / 1000,
+          };
+          return ses.cookies.set(cookie);
+        }),
+    );
   }
 
   static async get<T>(

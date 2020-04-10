@@ -1,102 +1,150 @@
 const { app, shell } = require('electron');
+const util = require('./utils');
 
-const template = [{
+const template = [
+  {
     label: 'Edit',
-    submenu: [{
+    submenu: [
+      {
         role: 'undo',
-    }, {
+      },
+      {
         role: 'redo',
-    }, {
+      },
+      {
         type: 'separator',
-    }, {
+      },
+      {
         role: 'cut',
-    }, {
+      },
+      {
         role: 'copy',
-    }, {
+      },
+      {
         role: 'paste',
-    }, {
+      },
+      {
         role: 'pasteandmatchstyle',
-    }, {
+      },
+      {
         role: 'delete',
-    }, {
+      },
+      {
         role: 'selectall',
-    }],
-}, {
+      },
+    ],
+  },
+  {
     label: 'View',
-    submenu: [{
+    submenu: [
+      {
         role: 'reload',
-    }, {
+      },
+      {
         role: 'forcereload',
-    }, {
+      },
+      {
         role: 'toggledevtools',
-    }, {
+      },
+      {
         type: 'separator',
-    }, {
+      },
+      {
         role: 'resetzoom',
-    }, {
+      },
+      {
         role: 'zoomin',
-    }, {
+      },
+      {
         role: 'zoomout',
-    }, {
+      },
+      {
         type: 'separator',
-    }, {
+      },
+      {
         role: 'togglefullscreen',
-    }],
-}, {
+      },
+    ],
+  },
+  {
     role: 'window',
-    submenu: [{
+    submenu: [
+      {
         role: 'minimize',
-    }, {
+      },
+      {
         role: 'close',
-    }, {
+      },
+      {
         role: 'quit',
-    }],
-}, {
+      },
+    ],
+  },
+  {
     role: 'help',
-    submenu: [{
+    submenu: [
+      {
         label: 'Learn More',
         click() {
-            shell.openExternal('https://postybirb.com');
+          shell.openExternal('https://postybirb.com');
         },
-    }],
-}];
+      },
+    ],
+  },
+];
 
-if (process.platform === 'darwin') {
-    template.unshift({
-        label: app.name,
-        submenu: [{
-            role: 'about',
-        }, {
-            type: 'separator',
-        }, {
-            role: 'services',
-            submenu: [],
-        }, {
-            type: 'separator',
-        }, {
-            role: 'hide',
-        }, {
-            role: 'hideothers',
-        }, {
-            role: 'unhide',
-        }, {
-            type: 'separator',
-        }, {
-            role: 'quit',
-        }],
-    });
-
-    template[3].submenu = [{
-        role: 'close',
-    }, {
-        role: 'minimize',
-    }, {
-        role: 'zoom',
-    }, {
+if (util.isOSX()) {
+  template.unshift({
+    label: app.name,
+    submenu: [
+      {
+        role: 'about',
+      },
+      {
         type: 'separator',
-    }, {
-        role: 'front',
-    }];
+      },
+      {
+        role: 'services',
+        submenu: [],
+      },
+      {
+        type: 'separator',
+      },
+      {
+        role: 'hide',
+      },
+      {
+        role: 'hideothers',
+      },
+      {
+        role: 'unhide',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        role: 'quit',
+      },
+    ],
+  });
+
+  template[3].submenu = [
+    {
+      role: 'close',
+    },
+    {
+      role: 'minimize',
+    },
+    {
+      role: 'zoom',
+    },
+    {
+      type: 'separator',
+    },
+    {
+      role: 'front',
+    },
+  ];
 }
 
 module.exports = template;

@@ -1,6 +1,7 @@
 const path = require('path');
 const { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray } = require('electron');
 const windowStateKeeper = require('electron-window-state');
+const util = require('./src-electron/utils');
 
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
@@ -34,7 +35,7 @@ let initializedOnce = false;
 let mainWindowState = null;
 
 // Enable windows 10 notifications
-if (process.platform === 'win32') {
+if (util.isWindows()) {
   app.setAppUserModelId('com.lemonynade.postybirb.plus');
 }
 
@@ -78,12 +79,13 @@ async function initialize() {
     shouldDisplayWindow = settingsDB.getState().openOnStartup;
   }
 
+  if (global.SERVER_ONLY_MODE) return;
+
   if (!shouldDisplayWindow) {
     // observe user setting
     loader.hide();
     return;
   }
-  if (global.SERVER_ONLY_MODE) return;
   createWindow();
 }
 
@@ -140,7 +142,7 @@ function buildAppImage() {
   let image = nativeImage.createFromPath(
     path.join(__dirname, '/build/assets/icons/minnowicon.png'),
   );
-  if (process.platform === 'darwin') {
+  if (util.isOSX()) {
     image = image.resize({
       width: 16,
       height: 16,
@@ -167,7 +169,7 @@ function buildTray(image) {
     },
   ];
 
-  if (process.platform === 'win32' || process.platform === 'darwin') {
+  if (!util.isLinux()) {
     trayItems.splice(0, 0, {
       label: 'Open on startup',
       type: 'checkbox',

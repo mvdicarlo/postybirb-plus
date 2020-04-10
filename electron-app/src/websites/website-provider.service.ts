@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
 import { Weasyl } from './weasyl/weasyl.service';
 import { Website } from './website.base';
 import { Discord } from './discord/discord.service';
 import { Furiffic } from './furiffic/furiffic.service';
 import { Piczel } from './piczel/piczel.service';
+import { Derpibooru } from './derpibooru/derpibooru.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -12,11 +12,11 @@ export class WebsiteProvider {
   private readonly websiteModulesMap: Record<string, Website> = {};
 
   constructor(
-    private moduleRef: ModuleRef,
     readonly weasyl: Weasyl,
     readonly discord: Discord,
     readonly furiffic: Furiffic,
     readonly piczel: Piczel,
+    readonly derpibooru: Derpibooru,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(
