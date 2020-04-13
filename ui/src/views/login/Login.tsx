@@ -53,7 +53,7 @@ export class Login extends React.Component<Props> {
             key={key}
             website={website}
             accounts={this.props.loginStatusStore!.statuses.filter(
-              status => status.website === website.name
+              status => status.website === website.internalName
             )}
           />
         ))}
@@ -85,8 +85,8 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
   createAccount = () => {
     if (this.state.newAccountAlias && this.state.newAccountAlias.trim()) {
       LoginService.createAccount(
-        `${this.props.website.name}-${Date.now()}`,
-        this.props.website.name,
+        `${this.props.website.internalName}-${Date.now()}`,
+        this.props.website.internalName,
         this.state.newAccountAlias
       )
         .then(() => message.success('Account created'))

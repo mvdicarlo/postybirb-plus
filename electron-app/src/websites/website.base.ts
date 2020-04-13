@@ -25,7 +25,7 @@ export abstract class Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
   abstract readonly defaultFileSubmissionOptions: object;
-  readonly defaultStatusOptions: any = {};
+  readonly defaultNotificationOptions: any = {};
 
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
@@ -60,11 +60,11 @@ export abstract class Website {
       case SubmissionType.FILE:
         return _.cloneDeep(this.defaultFileSubmissionOptions);
       case SubmissionType.NOTIFICATION:
-        return _.cloneDeep(this.defaultStatusOptions);
+        return _.cloneDeep(this.defaultNotificationOptions);
     }
   }
 
-  abstract getScalingOptions(file: FileRecord): ScalingOptions;
+  abstract getScalingOptions(file: FileRecord): ScalingOptions | undefined;
 
   abstract async postFileSubmission(
     data: FilePostData<DefaultFileOptions>,

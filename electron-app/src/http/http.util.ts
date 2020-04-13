@@ -12,7 +12,7 @@ interface GetOptions {
 }
 
 interface PostOptions extends GetOptions {
-  data: any;
+  data?: any;
   type?: 'form' | 'multipart' | 'json';
 }
 

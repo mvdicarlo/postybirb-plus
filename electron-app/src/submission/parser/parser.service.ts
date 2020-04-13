@@ -235,17 +235,19 @@ export class ParserService {
     const record = this.fileRecordAsPostFileRecord(file);
     if (canScale && this.fileManipulator.canScale(file.mimetype)) {
       const scaleOptions = website.getScalingOptions(file);
-      const { buffer, mimetype } = await this.fileManipulator.scale(
-        file.buffer,
-        file.mimetype,
-        scaleOptions.maxSize,
-        { convertToJPEG: scaleOptions.converToJPEG },
-      );
-      if (mimetype !== file.mimetype) {
-        record.file.options.filename = this.fixFileExtension(mimetype, file.name);
+      if (scaleOptions) {
+        const { buffer, mimetype } = await this.fileManipulator.scale(
+          file.buffer,
+          file.mimetype,
+          scaleOptions.maxSize,
+          { convertToJPEG: scaleOptions.converToJPEG },
+        );
+        if (mimetype !== file.mimetype) {
+          record.file.options.filename = this.fixFileExtension(mimetype, file.name);
+        }
+        record.file.options.contentType = mimetype;
+        record.file.value = buffer;
       }
-      record.file.options.contentType = mimetype;
-      record.file.value = buffer;
     }
 
     return record;

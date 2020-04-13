@@ -5,6 +5,7 @@ import { Discord } from './discord/discord.service';
 import { Furiffic } from './furiffic/furiffic.service';
 import { Piczel } from './piczel/piczel.service';
 import { Derpibooru } from './derpibooru/derpibooru.service';
+import { KoFi } from './ko-fi/ko-fi.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -17,6 +18,7 @@ export class WebsiteProvider {
     readonly furiffic: Furiffic,
     readonly piczel: Piczel,
     readonly derpibooru: Derpibooru,
+    private readonly kofi: KoFi,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(
