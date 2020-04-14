@@ -524,8 +524,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     });
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     console.error(error);
+    alert(`${error.message}\n\n${error.stack}`);
     return { hasError: true };
   }
 

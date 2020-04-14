@@ -5,6 +5,7 @@ import { Furiffic } from './furiffic/Furiffic';
 import { Piczel } from './piczel/Piczel';
 import { Derpibooru } from './derpibooru/Derpibooru';
 import { KoFi } from './kofi/KoFi';
+import { Inkbunny } from './inkbunny/Inkbunny';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -12,6 +13,7 @@ export class WebsiteRegistry {
     Discord: new Discord(),
     Furiffic: new Furiffic(),
     KoFi: new KoFi(),
+    Inkbunny: new Inkbunny(),
     Piczel: new Piczel(),
     Weasyl: new Weasyl()
   };

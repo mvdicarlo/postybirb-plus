@@ -105,10 +105,13 @@ export default class Http {
 
   static async post<T>(
     uri: string,
-    partitionId: string,
+    partitionId: string | undefined,
     options: PostOptions,
   ): Promise<HttpResponse<T>> {
-    const ses = session.fromPartition(`persist:${partitionId}`);
+    let ses: Electron.Session;
+    if (partitionId) {
+      ses = session.fromPartition(`persist:${partitionId}`);
+    }
 
     const headers = options.headers || {};
     if (!options.skipCookies) {

@@ -3,22 +3,24 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { PiczelOptions } from '../../../../electron-app/src/websites/piczel/piczel.interface';
 import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/submission-forms/form-components/DescriptionInput';
 import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
-import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Form, Input, Checkbox, Select, Radio } from 'antd';
-import WebsiteService from '../../services/website.service';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import SectionProblems from '../../views/submissions/submission-forms/form-sections/SectionProblems';
+import { InkbunnyOptions } from '../../../../electron-app/src/websites/inkbunny/inkbunny.interface';
+import InkbunnyLogin from './InkbunnyLogin';
 
-const defaultOptions: PiczelOptions = {
-  title: undefined,
+const defaultOptions: InkbunnyOptions = {
+  blockGuests: false,
+  friendsOnly: false,
+  notify: true,
+  scraps: false,
+  submissionType: undefined,
+  rating: null,
   useThumbnail: true,
   autoScale: true,
-  folder: null,
-  rating: null,
   tags: {
     extendDefault: true,
     value: []
@@ -29,17 +31,15 @@ const defaultOptions: PiczelOptions = {
   }
 };
 
-export class Piczel implements Website {
-  internalName: string = 'Piczel';
-  name: string = 'Piczel';
+export class Inkbunny implements Website {
+  internalName: string = 'Inkbunny';
+  name: string = 'Inkbunny';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://piczel.tv/login" {...props} />
-  );
+  LoginDialog = (props: LoginDialogProps) => <InkbunnyLogin {...props} />;
 
-  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, PiczelOptions>) => (
-    <PiczelFileSubmissionForm key={props.part.accountId} {...props} />
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, InkbunnyOptions>) => (
+    <InkbunnyFileSubmissionForm key={props.part.accountId} {...props} />
   );
 
   getDefaults() {
@@ -47,62 +47,35 @@ export class Piczel implements Website {
   }
 }
 
-interface PiczelFileSubmissionState {
-  folders: Folder[];
-}
-
-export class PiczelFileSubmissionForm extends React.Component<
-  SubmissionSectionProps<FileSubmission, PiczelOptions>,
-  PiczelFileSubmissionState
+export class InkbunnyFileSubmissionForm extends React.Component<
+  SubmissionSectionProps<FileSubmission, InkbunnyOptions>
 > {
-  state: PiczelFileSubmissionState = {
-    folders: []
-  };
-
-  constructor(props: SubmissionSectionProps<FileSubmission, PiczelOptions>) {
-    super(props);
-    this.state = {
-      folders: []
-    };
-
-    // Not sure if I should move this call elsewhere
-    WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
-      ({ data }) => {
-        if (data && data.length) {
-          if (!_.isEqual(this.state.folders, data)) {
-            this.setState({ folders: data });
-          }
-        }
-      }
-    );
-  }
-
   handleChange(fieldName: string, { target }) {
-    const part: SubmissionPart<PiczelOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<InkbunnyOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.value;
     this.props.onUpdate(part);
   }
 
   handleTagChange(update: any) {
-    const part: SubmissionPart<PiczelOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<InkbunnyOptions> = _.cloneDeep(this.props.part);
     part.data.tags = update;
     this.props.onUpdate(part);
   }
 
   handleDescriptionChange(update) {
-    const part: SubmissionPart<PiczelOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<InkbunnyOptions> = _.cloneDeep(this.props.part);
     part.data.description = update;
     this.props.onUpdate(part);
   }
 
   handleSelectChange(fieldName: string, value: any) {
-    const part: SubmissionPart<PiczelOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<InkbunnyOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = value;
     this.props.onUpdate(part);
   }
 
   handleCheckboxChange(fieldName: string, { target }) {
-    const part: SubmissionPart<PiczelOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<InkbunnyOptions> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.checked;
     this.props.onUpdate(part);
   }
@@ -125,6 +98,9 @@ export class PiczelFileSubmissionForm extends React.Component<
             defaultValue={data.tags}
             defaultTags={this.props.defaultData!.tags}
             label="Tags"
+            tagOptions={{
+              minTags: 4
+            }}
           />
           <DescriptionInput
             defaultValue={data.description}
@@ -139,7 +115,10 @@ export class PiczelFileSubmissionForm extends React.Component<
               buttonStyle="solid"
             >
               <Radio.Button value={null}>Default</Radio.Button>
-              <Radio.Button value="adult">NSFW</Radio.Button>
+              <Radio.Button value="2">Nudity - Nonsexual</Radio.Button>
+              <Radio.Button value="3">Violence - Mild</Radio.Button>
+              <Radio.Button value="4">Sexual Themes - Erotic</Radio.Button>
+              <Radio.Button value="5">Strong Violence</Radio.Button>
             </Radio.Group>
           </Form.Item>
           <Form.Item>
@@ -161,17 +140,62 @@ export class PiczelFileSubmissionForm extends React.Component<
                     Use thumbnail (if provided)
                   </Checkbox>
                 </div>
+                <div>
+                  <Checkbox
+                    checked={data.blockGuests}
+                    onChange={this.handleCheckboxChange.bind(this, 'blockGuests')}
+                  >
+                    Block Guests
+                  </Checkbox>
+                </div>
+                <div>
+                  <Checkbox
+                    checked={data.friendsOnly}
+                    onChange={this.handleCheckboxChange.bind(this, 'friendsOnly')}
+                  >
+                    Friends Only
+                  </Checkbox>
+                </div>
+                <div>
+                  <Checkbox
+                    checked={data.notify}
+                    onChange={this.handleCheckboxChange.bind(this, 'notify')}
+                  >
+                    Notify Watchers
+                  </Checkbox>
+                </div>
+                <div>
+                  <Checkbox
+                    checked={data.scraps}
+                    onChange={this.handleCheckboxChange.bind(this, 'scraps')}
+                  >
+                    Send to scraps
+                  </Checkbox>
+                </div>
               </div>
               <div className="w-1/2">
-                <Form.Item label="Folder">
+                <Form.Item label="Category">
                   <Select
                     style={{ width: '100%' }}
-                    value={data.folder}
-                    onSelect={this.handleSelectChange.bind(this, 'folder')}
+                    value={data.submissionType}
+                    onSelect={this.handleSelectChange.bind(this, 'submissionType')}
                   >
-                    {this.state.folders.map(f => (
-                      <Select.Option value={f.id}>{f.title}</Select.Option>
-                    ))}
+                    <Select.Option value="1">Picture/Pinup</Select.Option>
+                    <Select.Option value="2">Sketch</Select.Option>
+                    <Select.Option value="3">Picture Series</Select.Option>
+                    <Select.Option value="4">Comic</Select.Option>
+                    <Select.Option value="5">Portfolio</Select.Option>
+                    <Select.Option value="6">Shoockwave/Flash - Animation</Select.Option>
+                    <Select.Option value="7">Shockwave/Flash - Interactive</Select.Option>
+                    <Select.Option value="8">Video - Feature Length</Select.Option>
+                    <Select.Option value="9">Video - Animation/3D/CGI</Select.Option>
+                    <Select.Option value="10">Music - Single Track</Select.Option>
+                    <Select.Option value="11">Music - Album</Select.Option>
+                    <Select.Option value="12">Writing - Document</Select.Option>
+                    <Select.Option value="13">Character Sheet</Select.Option>
+                    <Select.Option value="14">
+                      Photography - Fursuit/Sculpture/Jewelry/etc
+                    </Select.Option>
                   </Select>
                 </Form.Item>
               </div>
