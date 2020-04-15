@@ -9,11 +9,12 @@ import { WebsitesController } from './websites.controller';
 import { DerpibooruModule } from './derpibooru/derpibooru.module';
 import { KoFiModule } from './ko-fi/ko-fi.module';
 import { InkbunnyModule } from './inkbunny/inkbunny.module';
+import { SoFurryModule } from './so-furry/so-furry.module';
 
 @Module({
   controllers: [WebsitesController],
   providers: [WebsiteProvider, WebsitesService],
   exports: [WebsiteProvider, WebsitesService],
-  imports: [PiczelModule, WeasylModule, FurifficModule, DiscordModule, DerpibooruModule, KoFiModule, InkbunnyModule],
+  imports: [PiczelModule, WeasylModule, FurifficModule, DiscordModule, DerpibooruModule, KoFiModule, InkbunnyModule, SoFurryModule],
 })
 export class WebsitesModule {}

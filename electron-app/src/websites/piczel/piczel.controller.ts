@@ -1,12 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { Piczel } from './piczel.service';
+import { GenericWebsiteController } from '../generic/generic.controller';
 
 @Controller('piczel')
-export class PiczelController {
-  constructor(private readonly service: Piczel) {}
-
-  @Get('/folders/:id')
-  getFolders(@Param('id') id: string) {
-    return this.service.getAccountInfo(id, 'folders') || [];
+export class PiczelController extends GenericWebsiteController {
+  constructor(readonly service: Piczel) {
+    super(service);
   }
 }

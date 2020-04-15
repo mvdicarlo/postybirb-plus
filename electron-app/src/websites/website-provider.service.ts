@@ -7,6 +7,7 @@ import { Piczel } from './piczel/piczel.service';
 import { Derpibooru } from './derpibooru/derpibooru.service';
 import { KoFi } from './ko-fi/ko-fi.service';
 import { Inkbunny } from './inkbunny/inkbunny.service';
+import { SoFurry } from './so-furry/so-furry.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -21,6 +22,7 @@ export class WebsiteProvider {
     readonly derpibooru: Derpibooru,
     readonly kofi: KoFi,
     readonly inkbunny: Inkbunny,
+    readonly sofurry: SoFurry,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

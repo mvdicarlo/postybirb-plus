@@ -6,6 +6,7 @@ import { Piczel } from './piczel/Piczel';
 import { Derpibooru } from './derpibooru/Derpibooru';
 import { KoFi } from './kofi/KoFi';
 import { Inkbunny } from './inkbunny/Inkbunny';
+import { SoFurry } from './sofurry/SoFurry';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -15,6 +16,7 @@ export class WebsiteRegistry {
     KoFi: new KoFi(),
     Inkbunny: new Inkbunny(),
     Piczel: new Piczel(),
+    SoFurry: new SoFurry(),
     Weasyl: new Weasyl()
   };
 

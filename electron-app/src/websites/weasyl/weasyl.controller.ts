@@ -1,12 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { Weasyl } from './weasyl.service';
+import { GenericWebsiteController } from '../generic/generic.controller';
 
 @Controller('weasyl')
-export class WeasylController {
-  constructor(private readonly service: Weasyl) {}
-
-  @Get('/info/:id')
-  getInfo(@Param('id') id: string) {
-    return this.service.getAccountInfo(id);
+export class WeasylController extends GenericWebsiteController {
+  constructor(readonly service: Weasyl) {
+    super(service);
   }
 }

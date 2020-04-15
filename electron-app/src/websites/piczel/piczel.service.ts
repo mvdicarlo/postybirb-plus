@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import Http from 'src/http/http.util';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
@@ -24,8 +24,6 @@ import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 
 @Injectable()
 export class Piczel extends Website {
-  private readonly logger = new Logger(Piczel.name);
-
   readonly BASE_URL: string = 'https://piczel.tv';
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = true;
