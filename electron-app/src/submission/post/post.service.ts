@@ -29,23 +29,23 @@ import { ParserService } from '../parser/parser.service';
 export class PostService {
   private readonly logger = new Logger(PostService.name);
 
-  private posting: { [key: string]: SubmissionEntity } = {
+  private posting: Record<string, SubmissionEntity> = {
     [SubmissionType.FILE]: null,
     [SubmissionType.NOTIFICATION]: null,
   };
 
-  private postingParts: { [key: string]: Poster[] } = {
+  private postingParts: Record<string, Poster[]> = {
     [SubmissionType.FILE]: [],
     [SubmissionType.NOTIFICATION]: [],
   };
 
-  private submissionQueue: { [key: string]: SubmissionEntity[] } = {
+  private submissionQueue: Record<string, SubmissionEntity[]> = {
     [SubmissionType.FILE]: [],
     [SubmissionType.NOTIFICATION]: [],
   };
 
   // TODO save this somewhere
-  private accountPostTimeMap: { [key: string]: number } = {};
+  private accountPostTimeMap: Record<string, number> = {};
 
   constructor(
     @Inject(forwardRef(() => SubmissionService))
@@ -66,6 +66,10 @@ export class PostService {
     if (!this.isPosting(submission.type)) {
       this.post(submission).catch(() => {
         if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+          if (!this.hasAnyQueued(submission.type)) {
+            return;
+          }
+          this.emptyQueue(submission.type);
           this.notificationService.create({
             type: NotificationType.WARNING,
             body: `${_.capitalize(
@@ -120,6 +124,10 @@ export class PostService {
 
   isCurrentlyQueued(submission: Submission): boolean {
     return !!this.submissionQueue[submission.type].find(s => s._id === submission._id);
+  }
+
+  hasAnyQueued(type: SubmissionType): boolean {
+    return !!this.submissionQueue[type].length;
   }
 
   getPostingStatus(): PostStatuses {
@@ -205,9 +213,9 @@ export class PostService {
             this.accountPostTimeMap[`${data.part.accountId}-${data.part.website}`] = Date.now();
           }
 
-          if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-            this.emptyQueue(submission.type);
-          }
+          // if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+          //   this.emptyQueue(submission.type);
+          // }
 
           // Save part and then check/notify
           this.partService
@@ -308,6 +316,19 @@ export class PostService {
                 ? nativeImage.createFromPath(submission.primary.preview)
                 : undefined,
             );
+            this.uiNotificationService.createUINotification(
+              NotificationType.ERROR,
+              20,
+              posters
+                .map(
+                  p =>
+                    `${p.part.website}: ${p.response.message ||
+                      p.response.error ||
+                      'Unknown error occurred.'}`,
+                )
+                .join('\n'),
+              `Post Failure: ${submission.title}`,
+            );
           }
         });
 
@@ -324,10 +345,11 @@ export class PostService {
   }
 
   private async clearAndPostNext(type: SubmissionType) {
-    const next = this.submissionQueue[type].pop();
+    const next = this.submissionQueue[type][0];
     this.postingParts[type] = [];
     this.posting[type] = null;
     if (next) {
+      this.submissionQueue[type].shift();
       try {
         this.notifyPostingStatusChanged();
         await this.post(next);
@@ -363,6 +385,9 @@ export class PostService {
 
   private clearQueueIfRequired(submission: Submission) {
     if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+      if (!this.hasAnyQueued(submission.type)) {
+        return;
+      }
       this.emptyQueue(submission.type);
       this.notificationService.create(
         {
@@ -388,6 +413,7 @@ export class PostService {
   }
 
   emptyQueue(type: SubmissionType) {
+    this.logger.debug(`Emptying Queue ${type}`);
     this.submissionQueue[type] = [];
     this.notifyPostingStatusChanged();
     this.notifyPostingStateChanged();
