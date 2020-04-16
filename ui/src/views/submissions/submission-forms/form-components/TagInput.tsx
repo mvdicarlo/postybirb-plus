@@ -8,7 +8,7 @@ import { Switch, Select, Form, Typography, Menu, Dropdown, Tooltip, Icon, Tag } 
 
 const { Text } = Typography;
 
-interface TagOptions {
+export interface TagOptions {
   maxTags?: number;
   minTags?: number;
   mode?: 'count' | 'length';

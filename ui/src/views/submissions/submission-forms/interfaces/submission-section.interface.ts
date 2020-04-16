@@ -9,12 +9,4 @@ export interface SubmissionSectionProps<T extends Submission, K extends DefaultO
   part: SubmissionPart<K>;
   problems?: Problem;
   submission: T;
-  hideThumbnailOptions?: boolean;
-  ratingOptions?: {
-    show: boolean;
-    ratings?: {
-      value: 'general' | 'mature' | 'adult' | 'extreme';
-      name: string;
-    }[];
-  };
 }
