@@ -41,6 +41,7 @@ export class KoFi implements Website {
       key={props.part.accountId}
       {...props}
       ratingOptions={{ show: false }}
+      hideThumbnailOptions={true}
     />
   );
 

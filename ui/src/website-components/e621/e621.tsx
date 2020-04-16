@@ -1,22 +1,23 @@
 import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { DerpibooruOptions } from '../../../../electron-app/src/websites/derpibooru/derpibooru.interface';
+import { e621Options } from '../../../../electron-app/src/websites/e621/e621.interface';
 import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/submission-forms/form-components/DescriptionInput';
 import { SubmissionPart } from '../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { Form, Input, Radio, Checkbox } from 'antd';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import SectionProblems from '../../views/submissions/submission-forms/form-sections/SectionProblems';
+import E621Login from './e621Login';
 
-const defaultOptions: DerpibooruOptions = {
+const defaultOptions: e621Options = {
   title: undefined,
   useThumbnail: true,
   autoScale: true,
   rating: null,
-  source: null,
+  sources: [],
+  parentId: undefined,
   tags: {
     extendDefault: true,
     value: []
@@ -27,17 +28,15 @@ const defaultOptions: DerpibooruOptions = {
   }
 };
 
-export class Derpibooru implements Website {
-  internalName: string = 'Derpibooru';
-  name: string = 'Derpibooru';
+export class e621 implements Website {
+  internalName: string = 'e621';
+  name: string = 'e621';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://derpibooru.org/session/new" {...props} />
-  );
+  LoginDialog = (props: LoginDialogProps) => <E621Login {...props} />;
 
-  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, DerpibooruOptions>) => (
-    <DerpibooruFileSubmissionForm key={props.part.accountId} {...props} />
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, e621Options>) => (
+    <E621FileSubmissionForm key={props.part.accountId} {...props} />
   );
 
   getDefaults() {
@@ -45,44 +44,56 @@ export class Derpibooru implements Website {
   }
 }
 
-export class DerpibooruFileSubmissionForm extends React.Component<
-  SubmissionSectionProps<FileSubmission, DerpibooruOptions>
+export class E621FileSubmissionForm extends React.Component<
+  SubmissionSectionProps<FileSubmission, e621Options>
 > {
-  constructor(props: SubmissionSectionProps<FileSubmission, DerpibooruOptions>) {
-    super(props);
-    this.state = {
-      folders: []
-    };
-  }
-
   handleChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DerpibooruOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.value;
     this.props.onUpdate(part);
   }
 
   handleTagChange(update: any) {
-    const part: SubmissionPart<DerpibooruOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
     part.data.tags = update;
     this.props.onUpdate(part);
   }
 
   handleDescriptionChange(update) {
-    const part: SubmissionPart<DerpibooruOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
     part.data.description = update;
     this.props.onUpdate(part);
   }
 
   handleSelectChange(fieldName: string, value: any) {
-    const part: SubmissionPart<DerpibooruOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
     part.data[fieldName] = value;
     this.props.onUpdate(part);
   }
 
   handleCheckboxChange(fieldName: string, { target }) {
-    const part: SubmissionPart<DerpibooruOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
     part.data[fieldName] = target.checked;
     this.props.onUpdate(part);
+  }
+
+  handleSourceChange(index: number, { target }) {
+    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
+    part.data.sources[index] = target.value;
+    this.props.onUpdate(part);
+  }
+
+  getSourceSection() {
+    const sources: JSX.Element[] = [];
+    const { data } = this.props.part;
+    for (let i = 0; i < 5; i++) {
+      sources.push(
+        <Form.Item label={`Source ${i + 1}`}>
+          <Input value={data.sources[i]} onChange={this.handleSourceChange.bind(this, i)} />
+        </Form.Item>
+      );
+    }
+    return sources;
   }
 
   render() {
@@ -105,10 +116,9 @@ export class DerpibooruFileSubmissionForm extends React.Component<
               buttonStyle="solid"
             >
               <Radio.Button value={null}>Default</Radio.Button>
-              <Radio.Button value="general">General</Radio.Button>
-              <Radio.Button value="mature">Mature</Radio.Button>
-              <Radio.Button value="adult">Adult</Radio.Button>
-              <Radio.Button value="extreme">Extreme</Radio.Button>
+              <Radio.Button value="general">Safe</Radio.Button>
+              <Radio.Button value="mature">Questionable</Radio.Button>
+              <Radio.Button value="adult">Explicit</Radio.Button>
             </Radio.Group>
           </Form.Item>
           <TagInput
@@ -139,12 +149,10 @@ export class DerpibooruFileSubmissionForm extends React.Component<
                 </div>
               </div>
               <div className="w-1/2">
-                <Form.Item label="Source URL">
-                  <Input
-                    value={data.source || ''}
-                    onChange={this.handleChange.bind(this, 'source')}
-                  />
+                <Form.Item label="Parent Id">
+                  <Input onChange={this.handleChange.bind(this, 'parentId')} />
                 </Form.Item>
+                {this.getSourceSection()}
               </div>
             </div>
           </Form.Item>

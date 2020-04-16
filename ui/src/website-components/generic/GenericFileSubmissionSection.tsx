@@ -53,6 +53,7 @@ export default class GenericFileSubmissionSection extends React.Component<
   render() {
     const { data } = this.props.part;
     const showRating = _.get(this.props.ratingOptions, 'show', false);
+    const hideThumbnailOptions = !!this.props.hideThumbnailOptions;
     return (
       <div>
         <SectionProblems problems={this.props.problems} />
@@ -114,14 +115,16 @@ export default class GenericFileSubmissionSection extends React.Component<
                   Downscale images to fit size limit
                 </Checkbox>
               </div>
-              <div>
-                <Checkbox
-                  checked={data.useThumbnail}
-                  onChange={this.handleCheckboxChange.bind(this, 'useThumbnail')}
-                >
-                  Use thumbnail (if provided)
-                </Checkbox>
-              </div>
+              {!hideThumbnailOptions ? (
+                <div>
+                  <Checkbox
+                    checked={data.useThumbnail}
+                    onChange={this.handleCheckboxChange.bind(this, 'useThumbnail')}
+                  >
+                    Use thumbnail (if provided)
+                  </Checkbox>
+                </div>
+              ) : null}
             </div>
           </Form.Item>
         </div>

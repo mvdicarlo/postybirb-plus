@@ -153,14 +153,6 @@ export class PiczelFileSubmissionForm extends React.Component<
                     Downscale images to fit size limit
                   </Checkbox>
                 </div>
-                <div>
-                  <Checkbox
-                    checked={data.useThumbnail}
-                    onChange={this.handleCheckboxChange.bind(this, 'useThumbnail')}
-                  >
-                    Use thumbnail (if provided)
-                  </Checkbox>
-                </div>
               </div>
               <div className="w-1/2">
                 <Form.Item label="Folder">
