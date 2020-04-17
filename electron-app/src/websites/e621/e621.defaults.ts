@@ -1,6 +1,6 @@
 import { e621Options } from './e621.interface';
 
-export const E621_DEFAULT_FILE_SUBMISSION_OPTIONS: e621Options = {
+export const e621DefaultFileOptions: e621Options = {
   sources: [],
   parentId: undefined,
   tags: {

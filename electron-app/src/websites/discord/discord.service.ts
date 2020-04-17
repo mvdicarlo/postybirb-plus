@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Website } from '../website.base';
 import { DiscordOptions } from './discord.interface';
-import { DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS } from './discord.defaults';
+import { DiscordDefaultFileOptions } from './discord.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
@@ -35,7 +35,7 @@ export class Discord extends Website {
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
 
-  readonly defaultFileSubmissionOptions: DiscordOptions = DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: DiscordOptions = DiscordDefaultFileOptions;
   readonly defaultDescriptionParser = PlaintextParser.parse;
 
   readonly usernameShortcuts = [];

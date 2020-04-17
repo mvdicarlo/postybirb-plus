@@ -24,8 +24,8 @@ import { FileSubmission } from 'src/submission/file-submission/interfaces/file-s
 export abstract class Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
-  abstract readonly defaultFileSubmissionOptions: object;
-  readonly defaultNotificationOptions: any = {};
+  abstract readonly fileSubmissionOptions: object;
+  readonly notificationOptions: object;
 
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
@@ -58,9 +58,9 @@ export abstract class Website {
   getDefaultOptions(submissionType: SubmissionType) {
     switch (submissionType) {
       case SubmissionType.FILE:
-        return _.cloneDeep(this.defaultFileSubmissionOptions);
+        return _.cloneDeep(this.fileSubmissionOptions);
       case SubmissionType.NOTIFICATION:
-        return _.cloneDeep(this.defaultNotificationOptions);
+        return _.cloneDeep(this.notificationOptions || this.fileSubmissionOptions); // TODO make it so fallback isn't what I do here. Should force notification options to be specified
     }
   }
 

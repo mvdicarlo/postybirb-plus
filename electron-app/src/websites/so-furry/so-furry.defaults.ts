@@ -1,6 +1,6 @@
 import { SoFurryOptions } from './so-furry.interface';
 
-export const SOFURRY_DEFAULT_FILE_SUBMISSION_OPTIONS: SoFurryOptions = {
+export const SoFurryDefaultFileOptions: SoFurryOptions = {
   folder: '0',
   viewOptions: '0',
   thumbnailAsCoverArt: false,

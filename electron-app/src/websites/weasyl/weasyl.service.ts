@@ -8,7 +8,7 @@ import { Website } from 'src/websites/website.base';
 import WebsiteValidator from 'src/utils/website-validator.util';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import { WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './weasyl.defaults';
+import { WeasylDefaultFileOptions } from './weasyl.defaults';
 import { WeasylOptions } from './weasyl.interface';
 import { Folder } from 'src/websites/interfaces/folder.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
@@ -34,7 +34,7 @@ export class Weasyl extends Website {
   readonly BASE_URL: string = 'https://www.weasyl.com';
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
 
-  readonly defaultFileSubmissionOptions: WeasylOptions = WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: WeasylOptions = WeasylDefaultFileOptions;
 
   readonly usernameShortcuts = [
     {

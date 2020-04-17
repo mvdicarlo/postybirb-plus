@@ -1,6 +1,6 @@
 import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
 
-export const FURAFFINITY_DEFAULT_FILE_SUBMISSION_OPTIONS: FurAffinityFileOptions = {
+export const FurAffinityDefaultFileOptions: FurAffinityFileOptions = {
   category: '1',
   disableComments: false,
   folders: [],
@@ -22,7 +22,7 @@ export const FURAFFINITY_DEFAULT_FILE_SUBMISSION_OPTIONS: FurAffinityFileOptions
   autoScale: true,
 };
 
-export const FURAFFINITY_DEFAULT_NOTIFICATION_SUBMISSION_OPTIONS: FurAffinityNotificationOptions = {
+export const FurAffinityDefaultNotificationOptions: FurAffinityNotificationOptions = {
   feature: true,
   tags: {
     extendDefault: true,

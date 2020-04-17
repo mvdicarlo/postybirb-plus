@@ -1,6 +1,6 @@
 import { WeasylOptions } from './weasyl.interface';
 
-export const WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS: WeasylOptions = {
+export const WeasylDefaultFileOptions: WeasylOptions = {
   notify: true,
   critique: false,
   folder: null,

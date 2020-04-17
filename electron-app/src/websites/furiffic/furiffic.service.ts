@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { Website } from '../website.base';
 import { FurifficOptions } from './furiffic.interface';
-import { FURIFFIC_DEFAULT_FILE_SUBMISSION_OPTIONS } from './furiffic.defaults';
+import { FurifficDefaultFileOptions } from './furiffic.defaults';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
@@ -48,7 +48,7 @@ export class Furiffic extends Website {
   ];
 
   readonly acceptsAdditionalFiles: boolean = false;
-  readonly defaultFileSubmissionOptions: FurifficOptions = FURIFFIC_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: FurifficOptions = FurifficDefaultFileOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
 
   readonly usernameShortcuts = [

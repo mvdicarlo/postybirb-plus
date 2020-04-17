@@ -21,7 +21,7 @@ import WebsiteValidator from 'src/utils/website-validator.util';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
-import { E621_DEFAULT_FILE_SUBMISSION_OPTIONS } from './e621.defaults';
+import { e621DefaultFileOptions } from './e621.defaults';
 import { e621Options } from './e621.interface';
 import { e621Account } from './e621-account.interface';
 import Http from 'src/http/http.util';
@@ -31,7 +31,7 @@ export class e621 extends Website {
   readonly BASE_URL: string = 'https://e621.net';
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webm'];
   readonly acceptsSourceUrls: boolean = true;
-  readonly defaultFileSubmissionOptions: object = E621_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: object = e621DefaultFileOptions;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly enableAdvertisement: boolean = false;
 

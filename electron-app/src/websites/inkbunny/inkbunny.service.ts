@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Website } from '../website.base';
 import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
-import { INKBUNNY_DEFAULT_FILE_SUBMISSION_OPTIONS } from './inkbunny.defaults';
+import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
 import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
@@ -47,7 +47,7 @@ export class Inkbunny extends Website {
   ];
   readonly acceptsAdditionalFiles: boolean = true;
   readonly defaultDescriptionParser = BBCodeParser.parse;
-  readonly defaultFileSubmissionOptions: object = INKBUNNY_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: object = InkbunnyDefaultFileOptions;
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ib',

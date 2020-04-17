@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Website } from '../website.base';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
-import { GENERIC_DEFAULT_FILE_SUBMISSION_OPTIONS } from '../generic/generic.defaults';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 import Http from 'src/http/http.util';
 import HtmlParserUtil from 'src/utils/html-parser.util';
 import {
@@ -26,7 +26,7 @@ import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.par
 export class KoFi extends Website {
   readonly BASE_URL: string = 'https://ko-fi.com';
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png'];
-  readonly defaultFileSubmissionOptions: object = GENERIC_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: object = GenericDefaultFileOptions;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };

@@ -1,6 +1,6 @@
 import { DiscordOptions } from './discord.interface';
 
-export const DISCORD_DEFAULT_FILE_SUBMISSION_OPTIONS: DiscordOptions = {
+export const DiscordDefaultFileOptions: DiscordOptions = {
   spoiler: false,
   useTitle: true,
   tags: {

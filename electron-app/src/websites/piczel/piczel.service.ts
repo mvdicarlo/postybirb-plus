@@ -19,7 +19,7 @@ import { PostResponse } from 'src/submission/post/interfaces/post-response.inter
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PiczelOptions } from './piczel.interface';
-import { PICZEL_DEFAULT_FILE_SUBMISSION_OPTIONS } from './piczel.defaults';
+import { PiczelDefaultFileOptions } from './piczel.defaults';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 
 @Injectable()
@@ -28,7 +28,7 @@ export class Piczel extends Website {
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = true;
 
-  readonly defaultFileSubmissionOptions: PiczelOptions = PICZEL_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: PiczelOptions = PiczelDefaultFileOptions;
 
   readonly usernameShortcuts = [
     {

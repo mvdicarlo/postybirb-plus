@@ -1,6 +1,6 @@
 import { DefaultFileOptions } from '../../submission/submission-part/interfaces/default-options.interface';
 
-export const GENERIC_DEFAULT_FILE_SUBMISSION_OPTIONS: DefaultFileOptions = {
+export const GenericDefaultFileOptions: DefaultFileOptions = {
   tags: {
     extendDefault: true,
     value: [],

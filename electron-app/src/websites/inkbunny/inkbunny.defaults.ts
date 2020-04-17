@@ -1,6 +1,6 @@
 import { InkbunnyOptions } from './inkbunny.interface';
 
-export const INKBUNNY_DEFAULT_FILE_SUBMISSION_OPTIONS: InkbunnyOptions = {
+export const InkbunnyDefaultFileOptions: InkbunnyOptions = {
   blockGuests: false,
   friendsOnly: false,
   notify: true,

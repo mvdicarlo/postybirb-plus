@@ -23,7 +23,7 @@ import FormContent from 'src/utils/form-content.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import { DERPIBOORU_DEFAULT_FILE_SUBMISSION_OPTIONS } from './derpibooru.defaults';
+import { DerpibooruDefaultFileOptions } from './derpibooru.defaults';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 import BrowserWindowUtil from 'src/utils/browser-window.util';
 import { DerpibooruOptions } from './derpibooru.interface';
@@ -34,7 +34,7 @@ export class Derpibooru extends Website {
 
   BASE_URL: string = 'https://derpibooru.org';
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'svg', 'gif', 'webm'];
-  defaultFileSubmissionOptions: object = DERPIBOORU_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  fileSubmissionOptions: object = DerpibooruDefaultFileOptions;
   acceptsSourceUrls: boolean = true;
   enableAdvertisement: boolean = false;
   defaultDescriptionParser = PlaintextParser.parse;

@@ -1,6 +1,6 @@
 import { FurifficOptions } from './furiffic.interface';
 
-export const FURIFFIC_DEFAULT_FILE_SUBMISSION_OPTIONS: FurifficOptions = {
+export const FurifficDefaultFileOptions: FurifficOptions = {
   tags: {
     extendDefault: true,
     value: [],

@@ -1,6 +1,6 @@
 import { PiczelOptions } from './piczel.interface';
 
-export const PICZEL_DEFAULT_FILE_SUBMISSION_OPTIONS: PiczelOptions = {
+export const PiczelDefaultFileOptions: PiczelOptions = {
   folder: null,
   tags: {
     extendDefault: true,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Website } from '../website.base';
 import { SoFurryOptions } from './so-furry.interface';
-import { SOFURRY_DEFAULT_FILE_SUBMISSION_OPTIONS } from './so-furry.defaults';
+import { SoFurryDefaultFileOptions } from './so-furry.defaults';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import Http from 'src/http/http.util';
@@ -32,7 +32,7 @@ export class SoFurry extends Website {
   readonly BASE_URL: string = 'https://www.sofurry.com';
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3'];
 
-  readonly defaultFileSubmissionOptions: SoFurryOptions = SOFURRY_DEFAULT_FILE_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions: SoFurryOptions = SoFurryDefaultFileOptions;
 
   readonly usernameShortcuts = [
     {

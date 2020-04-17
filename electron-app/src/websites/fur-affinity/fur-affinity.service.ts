@@ -2,8 +2,8 @@ import * as cheerio from 'cheerio';
 import { Injectable } from '@nestjs/common';
 import { Website } from '../website.base';
 import {
-  FURAFFINITY_DEFAULT_FILE_SUBMISSION_OPTIONS,
-  FURAFFINITY_DEFAULT_NOTIFICATION_SUBMISSION_OPTIONS,
+  FurAffinityDefaultFileOptions,
+  FurAffinityDefaultNotificationOptions,
 } from './fur-affinity.defaults';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
@@ -35,8 +35,8 @@ import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 export class FurAffinity extends Website {
   readonly BASE_URL = 'https://www.furaffinity.net';
   readonly waitBetweenPostsInterval = 45000;
-  readonly defaultFileSubmissionOptions = FURAFFINITY_DEFAULT_FILE_SUBMISSION_OPTIONS;
-  readonly defaultNotificationOptions = FURAFFINITY_DEFAULT_NOTIFICATION_SUBMISSION_OPTIONS;
+  readonly fileSubmissionOptions = FurAffinityDefaultFileOptions;
+  readonly notificationOptions = FurAffinityDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
   readonly usernameShortcuts = [
     {

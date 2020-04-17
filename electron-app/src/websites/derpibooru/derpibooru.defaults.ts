@@ -1,6 +1,6 @@
 import { DerpibooruOptions } from './derpibooru.interface';
 
-export const DERPIBOORU_DEFAULT_FILE_SUBMISSION_OPTIONS: DerpibooruOptions = {
+export const DerpibooruDefaultFileOptions: DerpibooruOptions = {
   source: null,
   tags: {
     extendDefault: true,
