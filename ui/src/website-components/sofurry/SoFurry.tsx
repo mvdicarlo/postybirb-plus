@@ -12,6 +12,7 @@ import { Submission } from '../../../../electron-app/src/submission/interfaces/s
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { GenericSelectProps } from '../generic/GenericSelectProps';
 
 const defaultOptions: SoFurryOptions = {
   title: undefined,
@@ -117,6 +118,7 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
     elements.push(
       <Form.Item label="Folder">
         <Select
+          {...GenericSelectProps}
           style={{ width: '100%' }}
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}
@@ -159,6 +161,7 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
     elements.push(
       <Form.Item label="Folder">
         <Select
+          {...GenericSelectProps}
           style={{ width: '100%' }}
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}

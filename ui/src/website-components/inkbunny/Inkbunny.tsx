@@ -7,6 +7,7 @@ import { InkbunnyOptions } from '../../../../electron-app/src/websites/inkbunny/
 import InkbunnyLogin from './InkbunnyLogin';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { GenericSelectProps } from '../generic/GenericSelectProps';
 
 const defaultOptions: InkbunnyOptions = {
   blockGuests: false,
@@ -72,6 +73,7 @@ export class InkbunnyFileSubmissionForm extends GenericFileSubmissionSection<Ink
     elements.push(
       <Form.Item label="Category">
         <Select
+          {...GenericSelectProps}
           style={{ width: '100%' }}
           value={data.submissionType}
           onSelect={this.setValue.bind(this, 'submissionType')}

@@ -1,5 +1,3 @@
-import React from 'react';
-import * as _ from 'lodash';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import WebsiteFormSection from '../form-sections/WebsiteFormSection';

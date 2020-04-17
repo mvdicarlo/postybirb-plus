@@ -208,7 +208,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
-          ].getDefaults(),
+          ].getDefaults(this.submissionType),
           isNew: true,
           created: Date.now(),
         };

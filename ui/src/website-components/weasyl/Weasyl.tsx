@@ -14,6 +14,7 @@ import { DefaultOptions } from '../../../../electron-app/src/submission/submissi
 import { WeasylCategories } from './WeasylCategories';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { GenericSelectProps } from '../generic/GenericSelectProps';
 
 const defaultOptions: WeasylOptions = {
   title: undefined,
@@ -133,6 +134,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
       ...[
         <Form.Item label="Category">
           <Select
+            {...GenericSelectProps}
             style={{ width: '100%' }}
             value={data.category}
             onSelect={this.setValue.bind(this, 'category')}
@@ -152,6 +154,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
         </Form.Item>,
         <Form.Item label="Folder">
           <Select
+            {...GenericSelectProps}
             style={{ width: '100%' }}
             value={data.folder}
             onSelect={this.setValue.bind(this, 'folder')}

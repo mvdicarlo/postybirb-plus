@@ -311,7 +311,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
-          ].getDefaults(),
+          ].getDefaults(this.original.submission.type),
           isNew: true,
           created: Date.now()
         };

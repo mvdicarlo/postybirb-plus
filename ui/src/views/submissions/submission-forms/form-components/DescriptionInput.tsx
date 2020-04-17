@@ -184,7 +184,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
                   </div>
                 }
               >
-                <Button size="small">Username Shortcuts</Button>
+                <Button size="small">Custom Shortcuts</Button>
               </Popover>
             </div>
           )

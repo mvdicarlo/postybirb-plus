@@ -11,6 +11,7 @@ import { KoFiModule } from './ko-fi/ko-fi.module';
 import { InkbunnyModule } from './inkbunny/inkbunny.module';
 import { SoFurryModule } from './so-furry/so-furry.module';
 import { E621Module } from './e621/e621.module';
+import { FurAffinityModule } from './fur-affinity/fur-affinity.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -26,6 +27,7 @@ import { E621Module } from './e621/e621.module';
     InkbunnyModule,
     SoFurryModule,
     E621Module,
+    FurAffinityModule,
   ],
 })
 export class WebsitesModule {}

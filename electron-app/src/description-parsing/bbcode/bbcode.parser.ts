@@ -71,6 +71,7 @@ export class BBCodeParser {
     // html = html.replace(/(\S)\n/gi, '$1 ');
     html = _.unescape(html);
 
+    console.log(html)
     return html.trim();
   }
 

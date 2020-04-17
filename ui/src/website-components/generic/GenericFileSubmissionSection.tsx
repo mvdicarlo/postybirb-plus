@@ -1,5 +1,4 @@
 import React from 'react';
-import * as _ from 'lodash';
 import { Checkbox } from 'antd';
 import { DefaultFileOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';

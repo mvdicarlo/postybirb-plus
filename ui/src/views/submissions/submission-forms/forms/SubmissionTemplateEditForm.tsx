@@ -208,7 +208,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
-          ].getDefaults(),
+          ].getDefaults(this.original.type),
           isNew: true,
           created: Date.now()
         };

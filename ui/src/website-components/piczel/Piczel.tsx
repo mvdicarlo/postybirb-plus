@@ -10,6 +10,7 @@ import WebsiteService from '../../services/website.service';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { GenericSelectProps } from '../generic/GenericSelectProps';
 
 const defaultOptions: PiczelOptions = {
   title: undefined,
@@ -81,6 +82,7 @@ export class PiczelFileSubmissionForm extends GenericFileSubmissionSection<Picze
     elements.push(
       <Form.Item label="Folder">
         <Select
+          {...GenericSelectProps}
           style={{ width: '100%' }}
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}

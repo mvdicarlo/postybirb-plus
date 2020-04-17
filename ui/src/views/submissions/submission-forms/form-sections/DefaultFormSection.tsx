@@ -4,7 +4,7 @@ import { SubmissionPart } from '../../../../../../electron-app/src/submission/su
 import { SubmissionSectionProps } from '../interfaces/submission-section.interface';
 import TagInput from '../form-components/TagInput';
 import DescriptionInput from '../form-components/DescriptionInput';
-import { Form, Input, Radio, Alert } from 'antd';
+import { Form, Input, Radio } from 'antd';
 import { Submission } from '../../../../../../electron-app/src/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import SectionProblems from './SectionProblems';

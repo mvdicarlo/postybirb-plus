@@ -2,6 +2,7 @@ import { UserAccountDto } from '../../../../electron-app/src/account/interfaces/
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
 
 export interface LoginDialogProps {
   account: UserAccountDto;
@@ -17,6 +18,6 @@ export interface Website {
   LoginDialog: (props: LoginDialogProps) => JSX.Element;
   FileSubmissionForm: (props: WebsiteSectionProps<FileSubmission, any>) => JSX.Element;
   NotificationSubmissionForm?: (props: WebsiteSectionProps<Submission, any>) => JSX.Element;
-  getDefaults(): any;
+  getDefaults(type: SubmissionType): any;
   supportsTextType?(type: string);
 }

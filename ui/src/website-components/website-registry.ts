@@ -8,12 +8,14 @@ import { KoFi } from './kofi/KoFi';
 import { Inkbunny } from './inkbunny/Inkbunny';
 import { SoFurry } from './sofurry/SoFurry';
 import { e621 } from './e621/e621';
+import { FurAffinity } from './fur-affinity/FurAffinity';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
     Derpibooru: new Derpibooru(),
     Discord: new Discord(),
     e621: new e621(),
+    FurAffinity: new FurAffinity(),
     Furiffic: new Furiffic(),
     KoFi: new KoFi(),
     Inkbunny: new Inkbunny(),

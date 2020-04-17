@@ -23,6 +23,7 @@ import { FileSubmission } from '../file-submission/interfaces/file-submission.in
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 import { FilePostData, PostFileRecord } from '../post/interfaces/file-post-data.interface';
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
+import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 
 @Injectable()
 export class ParserService {
@@ -82,6 +83,7 @@ export class ParserService {
     ).trim();
 
     if (description.length) {
+      description = HTMLFormatParser.parse(description);
       // Replace custom shortcuts
       description = await this.parseCustomDescriptionShortcuts(description);
 
