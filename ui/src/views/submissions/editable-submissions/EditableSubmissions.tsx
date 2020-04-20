@@ -387,7 +387,7 @@ class NotificationSubmissionCreator extends React.Component<
   };
 
   createSubmission() {
-    if (this.state.value) {
+    if (this.isValid()) {
       SubmissionService.create({
         type: SubmissionType.NOTIFICATION,
         title: this.state.value,
@@ -411,6 +411,10 @@ class NotificationSubmissionCreator extends React.Component<
     this.setState({ value: target.value });
   }
 
+  isValid(): boolean {
+    return !!this.state.value && !!this.state.value.trim().length;
+  }
+
   render() {
     return (
       <div>
@@ -419,13 +423,13 @@ class NotificationSubmissionCreator extends React.Component<
         </Button>
         <Modal
           destroyOnClose={true}
-          okButtonProps={{ disabled: !this.state.value.length }}
+          okButtonProps={{ disabled: !this.isValid() }}
           onCancel={this.hideModal.bind(this)}
           onOk={this.createSubmission.bind(this)}
           title="New Notification"
           visible={this.state.modalVisible}
         >
-          <Form layout="vertical">
+          <Form layout="vertical" onSubmit={this.createSubmission.bind(this)}>
             <Form.Item label="Name" required={true}>
               <Input
                 className="w-full"
