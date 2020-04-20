@@ -9,6 +9,7 @@ import { Inkbunny } from './inkbunny/Inkbunny';
 import { SoFurry } from './sofurry/SoFurry';
 import { e621 } from './e621/e621';
 import { FurAffinity } from './fur-affinity/FurAffinity';
+import { SubscribeStar } from './subscribe-star/SubscribeStar';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -21,6 +22,7 @@ export class WebsiteRegistry {
     Inkbunny: new Inkbunny(),
     Piczel: new Piczel(),
     SoFurry: new SoFurry(),
+    SubscribeStar: new SubscribeStar(),
     Weasyl: new Weasyl()
   };
 

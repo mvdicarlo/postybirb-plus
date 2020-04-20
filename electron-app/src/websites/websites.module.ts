@@ -12,6 +12,7 @@ import { InkbunnyModule } from './inkbunny/inkbunny.module';
 import { SoFurryModule } from './so-furry/so-furry.module';
 import { E621Module } from './e621/e621.module';
 import { FurAffinityModule } from './fur-affinity/fur-affinity.module';
+import { SubscribeStarModule } from './subscribe-star/subscribe-star.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -28,6 +29,7 @@ import { FurAffinityModule } from './fur-affinity/fur-affinity.module';
     SoFurryModule,
     E621Module,
     FurAffinityModule,
+    SubscribeStarModule,
   ],
 })
 export class WebsitesModule {}

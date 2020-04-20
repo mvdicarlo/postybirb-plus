@@ -3,7 +3,7 @@ import { session } from 'electron';
 import 'url';
 import * as _ from 'lodash';
 import CookieConverter from 'src/utils/cookie-converter.util';
-
+import * as setCookie from 'set-cookie-parser';
 interface GetOptions {
   headers?: any;
   updateCookies?: boolean;
@@ -57,7 +57,7 @@ export default class Http {
       url,
     });
     let expirationDate = new Date();
-    expirationDate.setMonth(expirationDate.getMonth() + 1);
+    expirationDate = new Date(expirationDate.setMonth(expirationDate.getMonth() + 2));
     await Promise.all(
       cookies
         .filter(c => c.session)
@@ -91,13 +91,26 @@ export default class Http {
       options.requestOptions,
     );
     return new Promise(resolve => {
-      Http.Request.get(uri, opts, (error, response, body) => {
+      Http.Request.get(uri, opts, async (error, response, body) => {
         const res: HttpResponse<T> = {
           response,
           error,
           body,
           returnUrl: _.get(response, 'request.uri.href'),
         };
+
+        if (options.updateCookies && response.headers['set-cookie']) {
+          const cookies = setCookie.parse(response);
+          const ses = session.fromPartition(`persist:${partitionId}`);
+          let future = new Date();
+          future = new Date(future.setMonth(future.getMonth() + 4));
+          for (const c of cookies) {
+            c.domain = c.domain || response.request.host;
+            const cc = CookieConverter.convertCookie(c);
+            cc.expirationDate = future.valueOf() / 1000;
+            await ses.cookies.set(cc);
+          }
+        }
         resolve(res);
       });
     });

@@ -10,6 +10,7 @@ import { Inkbunny } from './inkbunny/inkbunny.service';
 import { SoFurry } from './so-furry/so-furry.service';
 import { e621 } from './e621/e621.service';
 import { FurAffinity } from './fur-affinity/fur-affinity.service';
+import { SubscribeStar } from './subscribe-star/subscribe-star.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -27,6 +28,7 @@ export class WebsiteProvider {
     readonly sofurry: SoFurry,
     readonly e621: e621,
     readonly furaffinity: FurAffinity,
+    readonly subscribestar: SubscribeStar,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(
