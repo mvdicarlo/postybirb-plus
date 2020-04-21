@@ -429,9 +429,16 @@ class NotificationSubmissionCreator extends React.Component<
           title="New Notification"
           visible={this.state.modalVisible}
         >
-          <Form layout="vertical" onSubmit={this.createSubmission.bind(this)}>
+          <Form
+            layout="vertical"
+            onSubmit={e => {
+              e.preventDefault();
+              this.createSubmission();
+            }}
+          >
             <Form.Item label="Name" required={true}>
               <Input
+                autoFocus
                 className="w-full"
                 value={this.state.value}
                 onChange={this.onNameChange.bind(this)}

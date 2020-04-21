@@ -38,13 +38,15 @@ export default class CustomShortcuts extends React.Component<Props> {
     newShortcutValue: ''
   };
 
-  createNewShortcut(shortcut: string) {
-    this.setState({ createModalVisible: false });
-    CustomShortcutService.create({
-      shortcut,
-      content: '',
-      isDynamic: false
-    });
+  createNewShortcut() {
+    if (this.isValid()) {
+      this.setState({ createModalVisible: false });
+      CustomShortcutService.create({
+        shortcut: this.state.newShortcutValue,
+        content: '',
+        isDynamic: false
+      });
+    }
   }
 
   isUniqueShortcut(shortcut: string): boolean {
@@ -62,6 +64,12 @@ export default class CustomShortcuts extends React.Component<Props> {
 
   onNameChange({ target }) {
     this.setState({ newShortcutValue: target.value.replace(/[^a-zA-Z0-9]/g, '') });
+  }
+
+  isValid(): boolean {
+    return (
+      !!this.state.newShortcutValue.length && this.isUniqueShortcut(this.state.newShortcutValue)
+    );
   }
 
   render() {
@@ -100,21 +108,27 @@ export default class CustomShortcuts extends React.Component<Props> {
         <Modal
           destroyOnClose={true}
           okButtonProps={{
-            disabled:
-              !this.state.newShortcutValue.length ||
-              !this.isUniqueShortcut(this.state.newShortcutValue)
+            disabled: !this.isValid()
           }}
           onCancel={this.hideCreationModal.bind(this)}
-          onOk={() => this.createNewShortcut(this.state.newShortcutValue)}
+          onOk={this.createNewShortcut.bind(this)}
           title="Shortcut (Must be unique)"
           visible={this.state.createModalVisible}
         >
-          <code>{`{${this.state.newShortcutValue}}`}</code>
-          <Input
-            className="w-full"
-            value={this.state.newShortcutValue}
-            onChange={this.onNameChange.bind(this)}
-          />
+          <Form
+            onSubmit={e => {
+              e.preventDefault();
+              this.createNewShortcut();
+            }}
+          >
+            <code>{`{${this.state.newShortcutValue}}`}</code>
+            <Input
+              autoFocus
+              className="w-full"
+              value={this.state.newShortcutValue}
+              onChange={this.onNameChange.bind(this)}
+            />
+          </Form>
         </Modal>
       </div>
     );
