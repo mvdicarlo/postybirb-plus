@@ -118,7 +118,7 @@ export class Weasyl extends Website {
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
-      tags: this.parseTags(data.tags).join(' '),
+      tags: this.formatTags(data.tags),
     };
 
     const postResponse = await Http.post<string>(
@@ -153,7 +153,7 @@ export class Weasyl extends Website {
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
-      tags: this.parseTags(data.tags).join(' '),
+      tags: this.formatTags(data.tags),
       submitfile: postFile,
       redirect: url,
     };
@@ -267,6 +267,10 @@ export class Weasyl extends Website {
     });
 
     this.accountInformation.set(id, { folders: convertedFolders });
+  }
+
+  formatTags(tags: string[]) {
+    return super.formatTags(tags).join(' ');
   }
 
   validateFileSubmission(

@@ -127,7 +127,7 @@ export class Furiffic extends Website {
       thumbnailFile: '',
       visibility: 'public',
       rating: this.getRating(data.rating),
-      'tags[]': this.parseTags(data.tags),
+      'tags[]': this.formatTags(data.tags),
       __csrf: body.match(/window\.csrfSeed\s=\s(.*?);/)[1].trim(),
     };
 
@@ -210,7 +210,7 @@ export class Furiffic extends Website {
       visibility: 'public',
       folderVisibility: 'any',
       description: `[p]${data.description}[/p]`,
-      'tags[]': this.parseTags(data.tags),
+      'tags[]': this.formatTags(data.tags),
     };
 
     if (data.thumbnail) {

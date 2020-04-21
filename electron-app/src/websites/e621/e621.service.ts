@@ -91,9 +91,7 @@ export class e621 extends Website {
     const form: any = {
       login: accountData.username,
       api_key: accountData.key,
-      'upload[tag_string]': this.parseTags(data.tags)
-        .join(' ')
-        .trim(),
+      'upload[tag_string]': this.formatTags(data.tags),
       'upload[file]': data.primary.file,
       'upload[rating]': this.getRating(data.rating),
       'upload[description]': data.description,
@@ -141,6 +139,13 @@ export class e621 extends Website {
       default:
         return 'safe';
     }
+  }
+
+  formatTags(tags: string[]) {
+    return super
+      .formatTags(tags)
+      .join(' ')
+      .trim();
   }
 
   postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {

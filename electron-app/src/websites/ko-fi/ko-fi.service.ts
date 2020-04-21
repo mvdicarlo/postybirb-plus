@@ -123,7 +123,7 @@ export class KoFi extends Website {
       noFeaturedImage: 'false',
       showFeaturedImageOnPost: 'true',
       embedUrl: '',
-      tags: this.parseTags(data.tags).join(','),
+      tags: this.formatTags(data.tags),
       postAudience: 'public',
     };
 
@@ -170,6 +170,10 @@ export class KoFi extends Website {
     this.verifyResponse(publish, 'Validate Publish');
 
     return this.createPostResponse({});
+  }
+
+  formatTags(tags: string[]) {
+    return super.formatTags(tags).join(',');
   }
 
   validateFileSubmission(

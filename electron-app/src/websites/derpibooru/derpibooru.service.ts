@@ -120,7 +120,7 @@ export class Derpibooru extends Website {
         'document.body.querySelectorAll("form")[3]',
       )),
       _method: 'post',
-      'image[tag_input]': tags.join(', ').trim(),
+      'image[tag_input]': this.formatTags(tags),
       'image[image]': data.primary.file,
       'image[description]': data.description,
       'image[source_url]': data.options.source || data.sources[0] || '',
@@ -133,6 +133,13 @@ export class Derpibooru extends Website {
 
     this.verifyResponse(postResponse);
     return this.createPostResponse({});
+  }
+
+  formatTags(tags: string[]) {
+    return super
+      .formatTags(tags)
+      .join(', ')
+      .trim();
   }
 
   postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {

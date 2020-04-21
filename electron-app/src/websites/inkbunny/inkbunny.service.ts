@@ -150,15 +150,7 @@ export class Inkbunny extends Website {
       submission_id: upload.body.submission_id,
       title: data.title,
       desc: data.description,
-      keywords: data.tags
-        .map(tag => {
-          return tag
-            .trim()
-            .replace(/\s/gm, '_')
-            .replace(/\\/gm, '/');
-        })
-        .join(',')
-        .trim(),
+      keywords: this.formatTags(data.tags),
     };
 
     const rating = this.getRating(data.rating);
@@ -203,6 +195,21 @@ export class Inkbunny extends Website {
 
   postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {
     throw new Error('Method not implemented.');
+  }
+
+  parseTags(tags: string[]) {
+    return tags.map(tag => {
+      return tag
+        .trim()
+        .replace(/\s/gm, '_')
+        .replace(/\\/gm, '/');
+    });
+  }
+
+  formatTags(tags: string[]) {
+    return super.formatTags(tags)
+      .join(',')
+      .trim();
   }
 
   validateFileSubmission(

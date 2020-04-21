@@ -88,7 +88,7 @@ export class Piczel extends Website {
       nsfw: data.rating !== SubmissionRating.GENERAL,
       description: data.description,
       title: data.title || 'New Submission',
-      tags: this.parseTags(data.tags),
+      tags: this.formatTags(data.tags),
       files: [data.primary, ...data.additional]
         .filter(f => f)
         .map(f => ({

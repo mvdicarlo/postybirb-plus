@@ -120,7 +120,7 @@ export class SoFurry extends Website {
       'UploadForm[binarycontent_5]': data.thumbnail || '',
       'UploadForm[P_title]': data.title,
       'UploadForm[description]': data.description.replace(/<\/div>(\n|\r)/g, '</div>'),
-      'UploadForm[formtags]': data.tags.join(', '),
+      'UploadForm[formtags]': this.formatTags(data.tags),
       'UploadForm[contentLevel]': this.getRating(data.rating),
       'UploadForm[P_hidePublic]': '0',
       'UploadForm[folderId]': data.options.folder || '0',
@@ -167,7 +167,7 @@ export class SoFurry extends Website {
       'UploadForm[P_title]': data.title,
       'UploadForm[textcontent]': data.description,
       'UploadForm[description]': PlaintextParser.parse(data.description.split('\n')[0]),
-      'UploadForm[formtags]': data.tags.join(', '),
+      'UploadForm[formtags]': this.formatTags(data.tags),
       'UploadForm[contentLevel]': this.getRating(data.rating),
       'UploadForm[P_hidePublic]': '0',
       'UploadForm[folderId]': data.options.folder || '0',
@@ -190,6 +190,10 @@ export class SoFurry extends Website {
     }
 
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
+  }
+
+  formatTags(tags: string[]) {
+    return tags.join(', ');
   }
 
   validateFileSubmission(
