@@ -13,8 +13,8 @@ export interface LoginDialogProps {
 export interface Website {
   internalName: string;
   name: string;
-  supportsAdditionalFiles: boolean;
-  supportsTags: boolean;
+  supportsAdditionalFiles?: boolean;
+  supportsTags?: boolean;
   LoginDialog: (props: LoginDialogProps) => JSX.Element;
   FileSubmissionForm: (props: WebsiteSectionProps<FileSubmission, any>) => JSX.Element;
   NotificationSubmissionForm?: (props: WebsiteSectionProps<Submission, any>) => JSX.Element;

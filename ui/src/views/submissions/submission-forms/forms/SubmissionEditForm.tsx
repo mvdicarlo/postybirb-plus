@@ -713,7 +713,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                                 defaultValue={f.ignoredAccounts}
                                 treeData={this.getWebsiteTreeData(
                                   status =>
-                                    WebsiteRegistry.websites[status.website].supportsAdditionalFiles
+                                    !!WebsiteRegistry.websites[status.website]
+                                      .supportsAdditionalFiles
                                 )}
                                 onChange={value => this.handleAdditionalIgnoredAccounts(f, value)}
                                 placeholder="Ignored accounts"

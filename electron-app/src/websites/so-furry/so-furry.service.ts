@@ -176,8 +176,6 @@ export class SoFurry extends Website {
       save: 'Publish',
     };
 
-    console.log(url, form);
-
     const post = await Http.post<string>(url, data.part.accountId, {
       type: 'multipart',
       data: form,

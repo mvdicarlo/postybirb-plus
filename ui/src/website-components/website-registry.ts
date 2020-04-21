@@ -10,6 +10,7 @@ import { SoFurry } from './sofurry/SoFurry';
 import { e621 } from './e621/e621';
 import { FurAffinity } from './fur-affinity/FurAffinity';
 import { SubscribeStar } from './subscribe-star/SubscribeStar';
+import { Route50 } from './route-50/Route50';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -21,6 +22,7 @@ export class WebsiteRegistry {
     KoFi: new KoFi(),
     Inkbunny: new Inkbunny(),
     Piczel: new Piczel(),
+    Route50: new Route50(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
     Weasyl: new Weasyl()

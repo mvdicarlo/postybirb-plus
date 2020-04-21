@@ -342,7 +342,7 @@ export class FurAffinity extends Website {
     }
   }
 
-  private formatTags(tags: string[]): string {
+  formatTags(tags: string[]): string {
     const maxLength = 250;
     tags = super.parseTags(tags).map(tag => tag.replace(/(\/|\\)/gm, '_'));
     const filteredTags = tags.filter(tag => tag.length >= 3);

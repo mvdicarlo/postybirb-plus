@@ -21,6 +21,12 @@ import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.par
 import { FallbackInformation } from './interfaces/fallback-information.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 
+interface TagParseOptions {
+  spaceReplacer: string;
+  minLength?: number;
+  maxLength?: number;
+}
+
 export abstract class Website {
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
@@ -82,7 +88,7 @@ export abstract class Website {
 
   parseTags(
     tags: string[],
-    options = { spaceReplacer: '_', minLength: 1, maxLength: 100 },
+    options: TagParseOptions = { spaceReplacer: '_', minLength: 1, maxLength: 100 },
   ): string[] {
     return tags
       .filter(tag => {
@@ -90,6 +96,10 @@ export abstract class Website {
         return t.length >= (options.minLength || 1) && t.length <= (options.maxLength || 100);
       })
       .map(tag => tag.replace(/\s/g, options.spaceReplacer));
+  }
+
+  protected formatTags(tags: string[], options?: TagParseOptions): any {
+    return this.parseTags(tags, options);
   }
 
   parseDescription(text: string): string {

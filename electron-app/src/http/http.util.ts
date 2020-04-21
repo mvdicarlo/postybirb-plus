@@ -76,8 +76,8 @@ export default class Http {
     partitionId: string,
     options: GetOptions = {},
   ): Promise<HttpResponse<T>> {
+    options = options || {};
     const ses = session.fromPartition(`persist:${partitionId}`);
-
     const headers = options.headers || {};
     if (!options.skipCookies) {
       headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
@@ -122,6 +122,7 @@ export default class Http {
     options: PostOptions,
   ): Promise<HttpResponse<T>> {
     let ses: Electron.Session;
+    options = options || {};
     if (partitionId) {
       ses = session.fromPartition(`persist:${partitionId}`);
     }
