@@ -92,6 +92,12 @@ export class Route50 extends Website {
       coc: '1',
     };
 
+    if (data.primary.type === FileSubmissionType.TEXT) {
+      if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
+        form.file = data.fallback;
+      }
+    }
+
     const post = await Http.post<string>(`${this.BASE_URL}/galleries/submit`, data.part.accountId, {
       type: 'multipart',
       data: form,
@@ -128,9 +134,18 @@ export class Route50 extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
-      );
+      if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
+        problems.push(
+          `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+        );
+        problems.push('A fallback file is required.');
+      } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
+        warnings.push('The fallback text will be used.');
+      } else {
+        problems.push(
+          `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+        );
+      }
     }
 
     const { type, size, name } = submission.primary;
