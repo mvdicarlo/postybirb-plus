@@ -17,7 +17,8 @@ import {
   Popconfirm,
   Icon,
   Typography,
-  Badge
+  Badge,
+  Form
 } from 'antd';
 import RemoteService from '../../services/remote.service';
 
@@ -123,7 +124,19 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
           closeIcon={false}
           title="Create Account"
         >
-          <Input placeholder="Account Alias" maxLength={64} onChange={this.setAccountAlias} />
+          <Form
+            onSubmit={e => {
+              e.preventDefault();
+              this.createAccount();
+            }}
+          >
+            <Input
+              autoFocus
+              placeholder="Account Alias"
+              maxLength={64}
+              onChange={this.setAccountAlias}
+            />
+          </Form>
         </Modal>
       </Card>
     );
