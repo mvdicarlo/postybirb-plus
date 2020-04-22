@@ -163,7 +163,7 @@ export class AccountService {
     try {
       response = await website.checkLoginStatus(account);
     } catch (err) {
-      this.logger.error(err, err.stack, `${website} Login Check Failure`);
+      this.logger.error(err, err.stack, `${account.website} Login Check Failure`);
     }
 
     const login: UserAccountDto = {

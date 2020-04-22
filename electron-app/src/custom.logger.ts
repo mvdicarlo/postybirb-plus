@@ -4,20 +4,17 @@ import * as winston from 'winston';
 import * as path from 'path';
 import 'winston-daily-rotate-file';
 
-process.on('uncaughtException', err =>
-  CustomLogger.error(err.message, err.stack, 'Uncaught Exception'),
-);
-
 export class CustomLogger extends Logger {
   static logger = winston.createLogger({
     transports: [
       new winston.transports.DailyRotateFile({
         filename: 'app-%DATE%.log',
-        datePattern: 'YYY-MM-DD',
+        datePattern: 'YYYY-MM-DD',
         maxSize: '20m',
         maxFiles: 15,
         dirname: path.join(app.getPath('userData'), 'logs'),
         auditFile: path.join(app.getPath('userData'), 'logs', 'log-audit.json'),
+        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
       }),
     ],
     exitOnError: false,
@@ -25,6 +22,9 @@ export class CustomLogger extends Logger {
 
   error(message: any, trace?: string, context?: string) {
     super.error(message, trace, context);
+    console.log('content', context);
+    console.log(trace);
+    console.log(context);
     CustomLogger.logger.error(`[${context || this.context}] ${message}\n${trace}`);
   }
 
@@ -36,7 +36,10 @@ export class CustomLogger extends Logger {
           typeof message === 'object' ? JSON.stringify(message, null, 1) : message
         }`,
       );
-    } else if (!message.match(/(Mapped|Module)/)) {
+    } else if (
+      !message.match(/(Mapped|Module)/) &&
+      !(context || this.context).match(/(Resolver|Factory|Routes)/)
+    ) {
       CustomLogger.logger.info(`[${context || this.context}] ${message}`);
     }
   }

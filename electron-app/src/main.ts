@@ -8,6 +8,8 @@ import { AuthGuard } from './auth.guard';
 import { CustomLogger } from './custom.logger';
 import { ensure } from './directories';
 
+const logger: CustomLogger = new CustomLogger();
+
 async function bootstrap() {
   ensure();
   const { key, cert } = SSL.getOrCreate();
@@ -16,7 +18,7 @@ async function bootstrap() {
       key,
       cert,
     },
-    logger: new CustomLogger(),
+    logger,
   });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalGuards(new AuthGuard());
@@ -25,5 +27,7 @@ async function bootstrap() {
   app.use(compression());
   await app.listen(process.env.PORT);
 }
+
+process.on('uncaughtException', err => logger.error(err.message, err.stack, 'Uncaught Exception'));
 
 module.exports = bootstrap;
