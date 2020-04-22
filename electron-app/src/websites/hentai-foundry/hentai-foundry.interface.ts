@@ -3,7 +3,7 @@ import { DefaultFileOptions } from '../../submission/submission-part/interfaces/
 export interface HentaiFoundryFileOptions extends DefaultFileOptions {
   scraps: boolean;
   disableComments: boolean;
-  category: string;
+  category?: string;
   nudityRating: string;
   violenceRating: string;
   profanityRating: string;

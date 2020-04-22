@@ -291,7 +291,7 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
                 >
                   <img
                     alt="preview"
-                    style={{ width: '100%' }}
+                    className="w-full"
                     src={
                       (item.submission as FileSubmission).primary.type === 'IMAGE'
                         ? (item.submission as FileSubmission).primary.location

@@ -74,7 +74,7 @@ export class InkbunnyFileSubmissionForm extends GenericFileSubmissionSection<Ink
       <Form.Item label="Category">
         <Select
           {...GenericSelectProps}
-          style={{ width: '100%' }}
+          className="w-full"
           value={data.submissionType}
           onSelect={this.setValue.bind(this, 'submissionType')}
         >

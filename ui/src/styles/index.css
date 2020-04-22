@@ -64,6 +64,10 @@ ul {
   margin-top: 10px;
 }
 
+.ant-dark-select-dropdown-menu-item-active:not(.ant-dark-select-dropdown-menu-item-disabled) {
+  background-color: hsla(0, 0%, 100%, 0.04);
+}
+
 li .ant-dark-list-item .error {
   @apply bg-red-900;
 }

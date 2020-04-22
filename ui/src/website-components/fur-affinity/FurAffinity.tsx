@@ -162,7 +162,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
         <Form.Item label="Category">
           <Select
             {...GenericSelectProps}
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.category}
             onSelect={this.setValue.bind(this, 'category')}
           >
@@ -172,7 +172,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
         <Form.Item label="Theme">
           <Select
             {...GenericSelectProps}
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.theme}
             onSelect={this.setValue.bind(this, 'theme')}
           >
@@ -182,7 +182,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
         <Form.Item label="Species">
           <Select
             {...GenericSelectProps}
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.species}
             onSelect={this.setValue.bind(this, 'species')}
           >
@@ -192,7 +192,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
         <Form.Item label="Gender">
           <Select
             {...GenericSelectProps}
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.gender}
             onSelect={this.setValue.bind(this, 'gender')}
           >
@@ -203,7 +203,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
           <Select
             {...GenericSelectProps}
             mode="multiple"
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.folders}
             onChange={this.setValue.bind(this, 'folders')}
             allowClear={true}

@@ -134,7 +134,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
         <Form.Item label="Category">
           <Select
             {...GenericSelectProps}
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.category}
             onSelect={this.setValue.bind(this, 'category')}
           >
@@ -154,7 +154,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
         <Form.Item label="Folder">
           <Select
             {...GenericSelectProps}
-            style={{ width: '100%' }}
+            className="w-full"
             value={data.folder}
             onSelect={this.setValue.bind(this, 'folder')}
           >

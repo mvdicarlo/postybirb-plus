@@ -351,7 +351,7 @@ export default class AppLayout extends React.Component<Props, State> {
                       mode="multiple"
                       size="small"
                       placeholder="Hide websites"
-                      style={{ width: '100%' }}
+                      className="w-full"
                       defaultValue={this.props.uiStore!.websiteFilter}
                       onChange={this.updateWebsiteFilter}
                       allowClear={true}

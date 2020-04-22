@@ -100,7 +100,7 @@ export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSe
       <Form.Item label="Access Tier">
         <Select
           {...GenericSelectProps}
-          style={{ width: '100%' }}
+          className="w-full"
           value={data.tier}
           onSelect={this.setValue.bind(this, 'tier')}
         >
@@ -122,7 +122,7 @@ export class SubscribeStarFileSubmissionForm extends GenericFileSubmissionSectio
       <Form.Item label="Access Tier">
         <Select
           {...GenericSelectProps}
-          style={{ width: '100%' }}
+          className="w-full"
           value={data.tier}
           onSelect={this.setValue.bind(this, 'tier')}
         >

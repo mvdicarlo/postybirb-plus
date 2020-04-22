@@ -83,7 +83,7 @@ export class PiczelFileSubmissionForm extends GenericFileSubmissionSection<Picze
       <Form.Item label="Folder">
         <Select
           {...GenericSelectProps}
-          style={{ width: '100%' }}
+          className="w-full"
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}
         >

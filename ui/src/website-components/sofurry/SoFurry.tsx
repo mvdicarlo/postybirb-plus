@@ -119,7 +119,7 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
       <Form.Item label="Folder">
         <Select
           {...GenericSelectProps}
-          style={{ width: '100%' }}
+          className="w-full"
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}
         >
@@ -162,7 +162,7 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
       <Form.Item label="Folder">
         <Select
           {...GenericSelectProps}
-          style={{ width: '100%' }}
+          className="w-full"
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}
         >
