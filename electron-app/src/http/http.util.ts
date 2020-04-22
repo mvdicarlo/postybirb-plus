@@ -69,6 +69,7 @@ export default class Http {
           return ses.cookies.set(cookie);
         }),
     );
+    ses.flushStorageData();
   }
 
   static async get<T>(
@@ -103,7 +104,7 @@ export default class Http {
           const cookies = setCookie.parse(response);
           const ses = session.fromPartition(`persist:${partitionId}`);
           let future = new Date();
-          future = new Date(future.setMonth(future.getMonth() + 4));
+          future = new Date(future.setMonth(future.getMonth() + 2));
           for (const c of cookies) {
             c.domain = c.domain || response.request.host;
             const cc = CookieConverter.convertCookie(c);

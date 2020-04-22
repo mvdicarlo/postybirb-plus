@@ -14,6 +14,7 @@ import { E621Module } from './e621/e621.module';
 import { FurAffinityModule } from './fur-affinity/fur-affinity.module';
 import { SubscribeStarModule } from './subscribe-star/subscribe-star.module';
 import { Route50Module } from './route50/route50.module';
+import { HentaiFoundryModule } from './hentai-foundry/hentai-foundry.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -32,6 +33,7 @@ import { Route50Module } from './route50/route50.module';
     FurAffinityModule,
     SubscribeStarModule,
     Route50Module,
+    HentaiFoundryModule,
   ],
 })
 export class WebsitesModule {}

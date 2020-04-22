@@ -2,7 +2,6 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WeasylOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Form, Checkbox, Select } from 'antd';
@@ -110,7 +109,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
     folders: []
   };
 
-  constructor(props: SubmissionSectionProps<FileSubmission, WeasylOptions>) {
+  constructor(props: WebsiteSectionProps<FileSubmission, WeasylOptions>) {
     super(props);
     this.state = {
       folders: []

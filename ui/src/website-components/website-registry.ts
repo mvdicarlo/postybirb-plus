@@ -11,6 +11,7 @@ import { e621 } from './e621/e621';
 import { FurAffinity } from './fur-affinity/FurAffinity';
 import { SubscribeStar } from './subscribe-star/SubscribeStar';
 import { Route50 } from './route-50/Route50';
+import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -19,8 +20,9 @@ export class WebsiteRegistry {
     e621: new e621(),
     FurAffinity: new FurAffinity(),
     Furiffic: new Furiffic(),
-    KoFi: new KoFi(),
+    HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
+    KoFi: new KoFi(),
     Piczel: new Piczel(),
     Route50: new Route50(),
     SoFurry: new SoFurry(),

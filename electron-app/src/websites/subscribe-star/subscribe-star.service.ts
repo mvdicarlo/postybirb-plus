@@ -29,7 +29,7 @@ import { nativeImage } from 'electron';
 export class SubscribeStar extends Website {
   readonly BASE_URL = 'https://www.subscribestar.com';
   readonly fileSubmissionOptions = SubscribeStarDefaultFileOptions;
-  readonly notificationOptions = SubscribeStarDefaultNotificationOptions;
+  readonly notificationSubmissionOptions = SubscribeStarDefaultNotificationOptions;
   readonly acceptsAdditionalFiles = true;
   readonly usernameShortcuts = [
     {

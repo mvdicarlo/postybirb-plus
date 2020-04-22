@@ -36,7 +36,7 @@ export class FurAffinity extends Website {
   readonly BASE_URL = 'https://www.furaffinity.net';
   readonly waitBetweenPostsInterval = 45000;
   readonly fileSubmissionOptions = FurAffinityDefaultFileOptions;
-  readonly notificationOptions = FurAffinityDefaultNotificationOptions;
+  readonly notificationSubmissionOptions = FurAffinityDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
   readonly usernameShortcuts = [
     {
