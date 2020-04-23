@@ -65,7 +65,7 @@ export class SoFurry extends Website {
       .children()
       .toArray()
       .forEach(o => {
-        folders.push({ id: $(o).attr('value'), title: $(o).text() });
+        folders.push({ value: $(o).attr('value'), label: $(o).text() });
       });
 
     this.storeAccountInformation(profileId, 'folders', folders);
@@ -215,7 +215,7 @@ export class SoFurry extends Website {
         'folders',
         [],
       );
-      if (!folders.find(f => f.id === submissionPart.data.folder)) {
+      if (!folders.find(f => f.value === submissionPart.data.folder)) {
         warnings.push('Folder not found.');
       }
     }

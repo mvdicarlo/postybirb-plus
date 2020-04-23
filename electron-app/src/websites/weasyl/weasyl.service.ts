@@ -248,8 +248,8 @@ export class Weasyl extends Website {
     const folders = res.body.folders || [];
     folders.forEach(f => {
       const folder: Folder = {
-        title: f.title,
-        id: f.folder_id,
+        label: f.title,
+        value: f.folder_id,
       };
 
       convertedFolders.push(folder);
@@ -257,8 +257,8 @@ export class Weasyl extends Website {
       if (f.subfolders) {
         f.subfolders.forEach(sf => {
           const subfolder: Folder = {
-            title: `${folder.title} / ${sf.title}`,
-            id: sf.folder_id,
+            label: `${folder.label} / ${sf.title}`,
+            value: sf.folder_id,
           };
 
           convertedFolders.push(subfolder);
@@ -292,7 +292,7 @@ export class Weasyl extends Website {
         'folders',
         [],
       );
-      if (!folders.find(f => f.id === submissionPart.data.folder)) {
+      if (!folders.find(f => f.value === submissionPart.data.folder)) {
         warnings.push('Folder not found.');
       }
     }

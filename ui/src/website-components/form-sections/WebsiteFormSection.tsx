@@ -52,6 +52,9 @@ export default abstract class WebsiteFormSection<
 
   abstract renderLeftForm(data: K): JSX.Element[];
   abstract renderRightForm(data: K): JSX.Element[];
+  renderWideForm(data: K): JSX.Element[] {
+    return [];
+  }
 
   render(): JSX.Element {
     const { data } = this.props.part;
@@ -59,6 +62,9 @@ export default abstract class WebsiteFormSection<
     const showTags = _.get(this.props.tagOptions, 'show', true);
     const hideTitle = !!this.props.hideTitle;
     const hideDescription = !!this.props.hideDescription;
+    const wideForm = this.renderWideForm(data);
+    const rightForm = this.renderRightForm(data);
+    const leftForm = this.renderLeftForm(data);
     return (
       <div>
         <SectionProblems problems={this.props.problems} />
@@ -102,8 +108,13 @@ export default abstract class WebsiteFormSection<
           ) : null}
           <Form.Item>
             <div className="flex flex-wrap">
-              <div className="w-1/2">{this.renderLeftForm(data)}</div>
-              <div className="w-1/2">{this.renderRightForm(data)}</div>
+              {leftForm.length ? (
+                <div className={rightForm.length ? 'w-1/2' : 'w-full'}>{leftForm}</div>
+              ) : null}
+              {rightForm.length ? (
+                <div className={leftForm.length ? 'w-1/2' : 'w-full'}>{rightForm}</div>
+              ) : null}
+              {wideForm.length ? <div className="w-full">{wideForm}</div> : null}
             </div>
           </Form.Item>
         </div>

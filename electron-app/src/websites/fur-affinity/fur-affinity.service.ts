@@ -87,21 +87,21 @@ export class FurAffinity extends Website {
         const $el = $(el);
         if (el.name === 'option') {
           if ($el.attr('value') === '0') return;
-          const folder = { id: $el.attr('value'), title: $el.text() };
+          const folder: Folder = { value: $el.attr('value'), label: $el.text() };
           folders.push(folder);
           flatFolders.push(folder);
         } else {
           const optgroup: Folder = {
-            title: $el.attr('label'),
-            subfolders: [],
+            label: $el.attr('label'),
+            children: [],
           };
           $el.children().each((i, opt) => {
             const $opt = $(opt);
-            const f = {
-              id: $opt.attr('value'),
-              title: $opt.text(),
+            const f: Folder = {
+              value: $opt.attr('value'),
+              label: $opt.text(),
             };
-            optgroup.subfolders.push(f);
+            optgroup.children.push(f);
             flatFolders.push(f);
           });
           folders.push(optgroup);
@@ -382,7 +382,7 @@ export class FurAffinity extends Website {
         [],
       );
       submissionPart.data.folders.forEach(folder => {
-        if (!folders.find(f => f.id === folder)) {
+        if (!folders.find(f => f.value === folder)) {
           warnings.push(`Folder (${folder}) not found.`);
         }
       });

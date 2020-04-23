@@ -91,11 +91,12 @@ export abstract class Website {
     options: TagParseOptions = { spaceReplacer: '_', minLength: 1, maxLength: 100 },
   ): string[] {
     return tags
+      .map(tag => tag.trim())
+      .filter(tag => tag)
       .filter(tag => {
-        const t: string = tag.trim();
-        return t.length >= (options.minLength || 1) && t.length <= (options.maxLength || 100);
+        return tag.length >= (options.minLength || 1) && tag.length <= (options.maxLength || 100);
       })
-      .map(tag => tag.replace(/\s/g, options.spaceReplacer));
+      .map(tag => tag.replace(/\s/g, options.spaceReplacer).trim());
   }
 
   protected formatTags(tags: string[], options?: TagParseOptions): any {

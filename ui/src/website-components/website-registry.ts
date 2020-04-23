@@ -12,9 +12,11 @@ import { FurAffinity } from './fur-affinity/FurAffinity';
 import { SubscribeStar } from './subscribe-star/SubscribeStar';
 import { Route50 } from './route-50/Route50';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
+import { Aryion } from './aryion/Aryion';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
+    Aryion: new Aryion(),
     Derpibooru: new Derpibooru(),
     Discord: new Discord(),
     e621: new e621(),

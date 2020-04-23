@@ -209,16 +209,16 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
             allowClear={true}
           >
             {this.state.folders.map(folder => {
-              if (folder.subfolders && folder.subfolders.length) {
+              if (folder.children && folder.children.length) {
                 return (
-                  <Select.OptGroup label={folder.title}>
-                    {folder.subfolders.map(subfolder => (
-                      <Select.Option value={subfolder.id}>{subfolder.title}</Select.Option>
+                  <Select.OptGroup label={folder.label}>
+                    {folder.children.map(subfolder => (
+                      <Select.Option value={subfolder.value}>{subfolder.label}</Select.Option>
                     ))}
                   </Select.OptGroup>
                 );
               } else {
-                return <Select.Option value={folder.id}>{folder.title}</Select.Option>;
+                return <Select.Option value={folder.value}>{folder.label}</Select.Option>;
               }
             })}
           </Select>

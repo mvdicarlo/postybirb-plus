@@ -63,12 +63,12 @@ export class Piczel extends Website {
       },
     );
 
-    const folders: Folder[] = [{ id: undefined, title: 'None' }];
+    const folders: Folder[] = [{ value: undefined, label: 'None' }];
 
     folders.push(
       ...res.body.map(f => ({
-        id: f.id.toString(),
-        title: f.name,
+        value: f.id.toString(),
+        label: f.name,
       })),
     );
 
@@ -155,7 +155,7 @@ export class Piczel extends Website {
         'folders',
         [],
       );
-      if (!folders.find(f => f.id === submissionPart.data.folder)) {
+      if (!folders.find(f => f.value === submissionPart.data.folder)) {
         warnings.push('Folder not found.');
       }
     }

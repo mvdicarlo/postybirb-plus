@@ -124,7 +124,7 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
           onSelect={this.setValue.bind(this, 'folder')}
         >
           {this.state.folders.map(f => (
-            <Select.Option value={f.id}>{f.title}</Select.Option>
+            <Select.Option value={f.value}>{f.label}</Select.Option>
           ))}
         </Select>
       </Form.Item>
@@ -167,7 +167,7 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
           onSelect={this.setValue.bind(this, 'folder')}
         >
           {this.state.folders.map(f => (
-            <Select.Option value={f.id}>{f.title}</Select.Option>
+            <Select.Option value={f.value}>{f.label}</Select.Option>
           ))}
         </Select>
       </Form.Item>
