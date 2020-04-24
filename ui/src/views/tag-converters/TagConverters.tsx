@@ -36,12 +36,16 @@ export default class TagConverters extends React.Component<Props> {
     newTagValue: ''
   };
 
-  createNew(tag: string) {
-    this.setState({ createModalVisible: false });
-    TagConverterService.create({
-      tag,
-      conversions: {}
-    });
+  createNew() {
+    if (this.isValid()) {
+      this.setState({ createModalVisible: false });
+      TagConverterService.create({
+        tag: this.state.newTagValue,
+        conversions: {}
+      });
+    } else {
+      message.warn('Tag is not valid.');
+    }
   }
 
   isUnique(tag: string): boolean {
@@ -63,6 +67,10 @@ export default class TagConverters extends React.Component<Props> {
         .trim()
         .replace(/("|;|\\|\[|\]|\{|\}|\||!|@|\$|%|\^|&|\*|\+|=|<|>||`|~|,)/g, '')
     });
+  }
+
+  isValid(): boolean {
+    return !!this.state.newTagValue.length && this.isUnique(this.state.newTagValue);
   }
 
   render() {
@@ -96,18 +104,27 @@ export default class TagConverters extends React.Component<Props> {
         <Modal
           destroyOnClose={true}
           okButtonProps={{
-            disabled: !this.state.newTagValue.length || !this.isUnique(this.state.newTagValue)
+            disabled: !this.isValid()
           }}
           onCancel={this.hideCreationModal.bind(this)}
-          onOk={() => this.createNew(this.state.newTagValue)}
+          onOk={this.createNew.bind(this)}
           title="Tag (Must be unique)"
           visible={this.state.createModalVisible}
         >
-          <Input
-            className="w-full"
-            value={this.state.newTagValue}
-            onChange={this.onNameChange.bind(this)}
-          />
+          <Form
+            onSubmit={e => {
+              e.preventDefault();
+              this.createNew();
+            }}
+          >
+            <Input
+              autoFocus
+              required
+              className="w-full"
+              value={this.state.newTagValue}
+              onChange={this.onNameChange.bind(this)}
+            />
+          </Form>
         </Modal>
       </div>
     );

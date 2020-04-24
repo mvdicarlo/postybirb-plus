@@ -124,6 +124,7 @@ export default class CustomShortcuts extends React.Component<Props> {
             <code>{`{${this.state.newShortcutValue}}`}</code>
             <Input
               autoFocus
+              required
               className="w-full"
               value={this.state.newShortcutValue}
               onChange={this.onNameChange.bind(this)}

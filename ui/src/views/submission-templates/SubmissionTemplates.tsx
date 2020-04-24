@@ -70,10 +70,14 @@ class SubmissionTemplateCreator extends React.Component<any, SubmissionTemplateC
   };
 
   createTemplate() {
-    SubmissionTemplateService.createTemplate(this.state.alias, this.state.selectedType!)
-      .then(() => message.success('Submission template created.'))
-      .catch(() => message.error('Failed to create submission template.'));
-    this.hideModal();
+    if (this.templateIsValid()) {
+      SubmissionTemplateService.createTemplate(this.state.alias, this.state.selectedType!)
+        .then(() => message.success('Submission template created.'))
+        .catch(() => message.error('Failed to create submission template.'));
+      this.hideModal();
+    } else {
+      message.warn('Template is not valid.');
+    }
   }
 
   hideModal() {
@@ -102,9 +106,17 @@ class SubmissionTemplateCreator extends React.Component<any, SubmissionTemplateC
           onOk={this.createTemplate.bind(this)}
           okButtonProps={{ disabled: !this.templateIsValid() }}
         >
-          <Form layout="vertical">
+          <Form
+            layout="vertical"
+            onSubmit={e => {
+              e.preventDefault();
+              this.createTemplate();
+            }}
+          >
             <Form.Item label="Name" required>
               <Input
+                autoFocus
+                required
                 value={this.state.alias}
                 onChange={({ target }) => this.setState({ alias: target.value })}
               />
@@ -146,10 +158,14 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
   }
 
   updateName() {
-    SubmissionTemplateService.renameTemplate(this.props._id, this.state.renameValue)
-      .then(() => message.success('Submission template renamed'))
-      .catch(() => message.error('Failed to rename submission template.'));
-    this.hideRenameModal();
+    if (this.renameIsValid()) {
+      SubmissionTemplateService.renameTemplate(this.props._id, this.state.renameValue)
+        .then(() => message.success('Submission template renamed'))
+        .catch(() => message.error('Failed to rename submission template.'));
+      this.hideRenameModal();
+    } else {
+      message.warn('Name is not valid or is the same.');
+    }
   }
 
   renameIsValid(): boolean {
@@ -199,12 +215,21 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
                 okButtonProps={{ disabled: !this.renameIsValid() }}
                 destroyOnClose={true}
               >
-                <Input
-                  className="w-full"
-                  onInput={this.setRenameValue.bind(this)}
-                  value={this.state.renameValue}
-                  placeholder="Submission template name"
-                />
+                <Form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    this.updateName();
+                  }}
+                >
+                  <Input
+                    className="w-full"
+                    required
+                    autoFocus
+                    onInput={this.setRenameValue.bind(this)}
+                    value={this.state.renameValue}
+                    placeholder="Submission template name"
+                  />
+                </Form>
               </Modal>
             </div>
           }

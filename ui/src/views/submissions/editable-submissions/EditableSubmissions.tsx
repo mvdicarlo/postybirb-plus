@@ -436,13 +436,13 @@ class NotificationSubmissionCreator extends React.Component<
               this.createSubmission();
             }}
           >
-            <Form.Item label="Name" required={true}>
+            <Form.Item label="Name" required>
               <Input
                 autoFocus
+                required
                 className="w-full"
                 value={this.state.value}
                 onChange={this.onNameChange.bind(this)}
-                required={true}
               />
             </Form.Item>
             <SubmissionTemplateSelect

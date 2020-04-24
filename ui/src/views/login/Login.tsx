@@ -132,6 +132,7 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
           >
             <Input
               autoFocus
+              required
               placeholder="Account Alias"
               maxLength={64}
               onChange={this.setAccountAlias}
@@ -177,8 +178,8 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
   deleteAccount = (id: string) => LoginService.deleteAccount(id);
 
   renameAccount = () => {
-    this.setState({ renameVisible: false });
     if (this.isRenameValid()) {
+      this.setState({ renameVisible: false });
       LoginService.renameAccount(this.props.accountInfo._id, this.state.renameValue.trim())
         .then(() => {
           message.success('Account name updated.');
@@ -253,10 +254,19 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
                 onOk={this.renameAccount}
                 okButtonProps={{ disabled: !this.isRenameValid() }}
               >
-                <Input
-                  value={this.state.renameValue}
-                  onChange={({ target }) => this.setState({ renameValue: target.value })}
-                />
+                <Form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    this.renameAccount();
+                  }}
+                >
+                  <Input
+                    required
+                    autoFocus
+                    value={this.state.renameValue}
+                    onChange={({ target }) => this.setState({ renameValue: target.value })}
+                  />
+                </Form>
               </Modal>
             </div>
           }
