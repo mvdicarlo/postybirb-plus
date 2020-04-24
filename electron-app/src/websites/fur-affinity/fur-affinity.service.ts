@@ -1,35 +1,33 @@
-import * as cheerio from 'cheerio';
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import {
-  FurAffinityDefaultFileOptions,
-  FurAffinityDefaultNotificationOptions,
-} from './fur-affinity.defaults';
+import * as cheerio from 'cheerio';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import Http from 'src/http/http.util';
-import _ = require('lodash');
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
-import { Folder } from '../interfaces/folder.interface';
 import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
-import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import FormContent from 'src/utils/form-content.util';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import HtmlParserUtil from 'src/utils/html-parser.util';
+import Http from 'src/http/http.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
+import FormContent from 'src/utils/form-content.util';
+import HtmlParserUtil from 'src/utils/html-parser.util';
+import WebsiteValidator from 'src/utils/website-validator.util';
+import { Folder } from '../interfaces/folder.interface';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { FurAffinityDefaultFileOptions, FurAffinityDefaultNotificationOptions } from './fur-affinity.defaults';
+import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
+import _ = require('lodash');
 
 @Injectable()
 export class FurAffinity extends Website {
@@ -127,6 +125,7 @@ export class FurAffinity extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, FurAffinityNotificationOptions>,
   ): Promise<PostResponse> {
     const page = await Http.get<string>(`${this.BASE_URL}/controls/journal`, data.part.accountId);
@@ -147,6 +146,7 @@ export class FurAffinity extends Website {
       form.make_featured = 'on';
     }
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<string>(
       `${this.BASE_URL}/controls/journal/`,
       data.part.accountId,
@@ -205,7 +205,10 @@ export class FurAffinity extends Website {
     }
   }
 
-  async postFileSubmission(data: FilePostData<FurAffinityFileOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<FurAffinityFileOptions>,
+  ): Promise<PostResponse> {
     const part1 = await Http.post<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
       type: 'form',
       data: {
@@ -218,6 +221,7 @@ export class FurAffinity extends Website {
       },
     });
 
+    this.checkCancelled(cancellationToken);
     this.verifyResponse(part1, 'Part 1');
     if (part1.body.includes('Flood protection')) {
       return Promise.reject(
@@ -242,6 +246,7 @@ export class FurAffinity extends Website {
       }
     }
 
+    this.checkCancelled(cancellationToken);
     const part2 = await Http.post<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
       type: 'multipart',
       data: part2Form,
@@ -294,6 +299,7 @@ export class FurAffinity extends Website {
       form['folder_ids[]'] = options.folders;
     }
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
       type: 'multipart',
       data: form,

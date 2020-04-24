@@ -142,8 +142,8 @@ export class PostService {
             waitingForCondition: poster.waitForExternalStart,
             website: poster.part.website,
             accountId: poster.part.accountId,
-            source: poster.response ? poster.response.source : undefined,
-            error: poster.response ? poster.response.error : undefined,
+            source: poster.getSource(),
+            error: poster.getFullResponse().error,
             isPosting: poster.isPosting,
           })),
         });
@@ -271,14 +271,14 @@ export class PostService {
         .addLog(
           submission.asPlain(),
           posters
-            .filter(poster => !poster.cancelled)
+            .filter(poster => poster.status !== 'CANCELLED')
             .map(poster => ({
               part: {
                 ...poster.part.asPlain(),
                 postStatus: poster.status,
-                postedTo: poster.response.source,
+                postedTo: poster.getSource(),
               },
-              response: poster.response,
+              response: poster.getFullResponse(),
             })),
         )
         .finally(() => {
@@ -298,35 +298,27 @@ export class PostService {
             );
             this.submissionService.deleteSubmission(submission._id, true);
           } else {
-            this.notificationService.create(
-              {
-                type: NotificationType.ERROR,
-                body: posters
-                  .filter(p => p.status === 'FAILED')
-                  .map(
-                    p =>
-                      `${p.part.website}: ${p.response.message ||
-                        p.response.error ||
-                        'Unknown error occurred.'}`,
-                  )
-                  .join('\n'),
-                title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
-              },
-              submission instanceof FileSubmissionEntity
-                ? nativeImage.createFromPath(submission.primary.preview)
-                : undefined,
-            );
+            const body = posters
+              .filter(p => p.status === 'FAILED')
+              .map(p => p.getMessage())
+              .join('\n');
+            if (body) {
+              this.notificationService.create(
+                {
+                  type: NotificationType.ERROR,
+                  body,
+                  title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
+                },
+                submission instanceof FileSubmissionEntity
+                  ? nativeImage.createFromPath(submission.primary.preview)
+                  : undefined,
+              );
+            }
+
             this.uiNotificationService.createUINotification(
               NotificationType.ERROR,
               20,
-              posters
-                .map(
-                  p =>
-                    `${p.part.website}: ${p.response.message ||
-                      p.response.error ||
-                      'Unknown error occurred.'}`,
-                )
-                .join('\n'),
+              posters.map(p => p.getMessage()).join('\n'),
               `Post Failure: ${submission.title}`,
             );
           }

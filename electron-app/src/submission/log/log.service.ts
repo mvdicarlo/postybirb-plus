@@ -1,11 +1,11 @@
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { app } from 'electron';
-import { Injectable, Logger, Inject } from '@nestjs/common';
-import { PartWithResponse } from './interfaces/submission-log.interface';
-import { SubmissionLogRepository, SubmissionLogRepositoryToken } from './log.repository';
 import { SubmissionType } from '../enums/submission-type.enum';
-import SubmissionLogEntity from './models/submission-log.entity';
 import SubmissionEntity from '../models/submission.entity';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
+import { PartWithResponse } from './interfaces/submission-log.interface';
+import { SubmissionLogRepository, SubmissionLogRepositoryToken } from './log.repository';
+import SubmissionLogEntity from './models/submission-log.entity';
 
 @Injectable()
 export class LogService {
@@ -27,19 +27,21 @@ export class LogService {
   }
 
   async addLog(submission: SubmissionEntity, parts: PartWithResponse[]): Promise<void> {
-    this.logger.log(submission._id, 'Creating Log');
-    await this.repository.save(
-      new SubmissionLogEntity({
-        submission,
-        parts,
-        version: app.getVersion(),
-        defaultPart: (await this.partService.getPartsForSubmission(submission._id, false)).filter(
-          p => p.isDefault,
-        )[0],
-      }),
-    );
+    if (parts.length) {
+      this.logger.log(submission._id, 'Creating Log');
+      await this.repository.save(
+        new SubmissionLogEntity({
+          submission,
+          parts,
+          version: app.getVersion(),
+          defaultPart: (await this.partService.getPartsForSubmission(submission._id, false)).filter(
+            p => p.isDefault,
+          )[0],
+        }),
+      );
 
-    await this.checkForTruncate();
+      await this.checkForTruncate();
+    }
   }
 
   async checkForTruncate() {

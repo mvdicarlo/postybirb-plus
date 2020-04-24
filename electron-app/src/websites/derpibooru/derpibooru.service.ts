@@ -1,31 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Website } from '../website.base';
-import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
-import { LoginResponse } from '../interfaces/login-response.interface';
+import UserAccountEntity from 'src/account/models/user-account.entity';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import {
-  DefaultFileOptions,
-  DefaultOptions,
-} from 'src/submission/submission-part/interfaces/default-options.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import UserAccountEntity from 'src/account/models/user-account.entity';
+import BrowserWindowUtil from 'src/utils/browser-window.util';
 import FileSize from 'src/utils/filesize.util';
-import Http from 'src/http/http.util';
-import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 import FormContent from 'src/utils/form-content.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
+import { Website } from '../website.base';
 import { DerpibooruDefaultFileOptions } from './derpibooru.defaults';
-import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
-import BrowserWindowUtil from 'src/utils/browser-window.util';
 import { DerpibooruOptions } from './derpibooru.interface';
 
 @Injectable()
@@ -81,13 +77,16 @@ export class Derpibooru extends Website {
     return super.parseDescription(text.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '"$4":$2'));
   }
 
-  async postFileSubmission(data: FilePostData<DerpibooruOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<DerpibooruOptions>,
+  ): Promise<PostResponse> {
     try {
-      return await this.attemptFilePost(data);
+      return await this.attemptFilePost(cancellationToken, data);
     } catch (err) {
       // Users have reported it working on a second post :shrug:
       this.logger.warn(err, 'Derpibooru Post Retry');
-      return await this.attemptFilePost(data);
+      return await this.attemptFilePost(cancellationToken, data);
     }
   }
 
@@ -104,7 +103,10 @@ export class Derpibooru extends Website {
     }
   }
 
-  private async attemptFilePost(data: FilePostData<DerpibooruOptions>): Promise<PostResponse> {
+  private async attemptFilePost(
+    cancellationToken: CancellationToken,
+    data: FilePostData<DerpibooruOptions>,
+  ): Promise<PostResponse> {
     const tags: string[] = this.parseTags(data.tags, {
       spaceReplacer: ' ',
       minLength: 1,
@@ -126,6 +128,7 @@ export class Derpibooru extends Website {
       'image[source_url]': data.options.source || data.sources[0] || '',
     };
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post<string>(`${this.BASE_URL}/images`, data.part.accountId, {
       type: 'multipart',
       data: form,
@@ -140,10 +143,6 @@ export class Derpibooru extends Website {
       .formatTags(tags)
       .join(', ')
       .trim();
-  }
-
-  postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {
-    throw new Error('Method not implemented.');
   }
 
   validateFileSubmission(

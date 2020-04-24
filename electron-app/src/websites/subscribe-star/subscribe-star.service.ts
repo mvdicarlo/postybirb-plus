@@ -1,29 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import {
-  SubscribeStarDefaultFileOptions,
-  SubscribeStarDefaultNotificationOptions,
-} from './subscribe-star.defaults';
-import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import Http from 'src/http/http.util';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
-import { SubscribeStarFileOptions } from './subscribe-star.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import { v1 } from 'uuid';
 import * as cheerio from 'cheerio';
 import { nativeImage } from 'electron';
+import UserAccountEntity from 'src/account/models/user-account.entity';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
+import { v1 } from 'uuid';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { SubscribeStarDefaultFileOptions, SubscribeStarDefaultNotificationOptions } from './subscribe-star.defaults';
+import { SubscribeStarFileOptions } from './subscribe-star.interface';
 
 @Injectable()
 export class SubscribeStar extends Website {
@@ -63,6 +61,7 @@ export class SubscribeStar extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, SubscribeStarFileOptions>,
   ): Promise<PostResponse> {
     const page = await Http.get<string>(this.BASE_URL, data.part.accountId);
@@ -77,6 +76,7 @@ export class SubscribeStar extends Website {
       tier_id: data.options.tier,
     };
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<{ error: any; html: string }>(
       `${this.BASE_URL}/posts.json`,
       data.part.accountId,
@@ -105,7 +105,10 @@ export class SubscribeStar extends Website {
     });
   }
 
-  async postFileSubmission(data: FilePostData<SubscribeStarFileOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<SubscribeStarFileOptions>,
+  ): Promise<PostResponse> {
     const username: string = this.getAccountInfo(data.part.accountId, 'username');
     const page = await Http.get<string>(`${this.BASE_URL}/${username}`, data.part.accountId);
     this.verifyResponse(page, 'Get CSRF');
@@ -115,6 +118,7 @@ export class SubscribeStar extends Website {
     const files = [data.primary, ...data.additional].map(f => f.file);
     const postKey = page.body.match(/data-s3-upload-path=\\"(.*?)\\"/)[1];
     const uploadURL = page.body.match(/data-s3-url="(.*?)"/)[1];
+    this.checkCancelled(cancellationToken);
     for (const file of files) {
       const key = `${postKey}/${v1()}.${file.options.filename.split('.').pop()}`;
       const postFile = await Http.post<string>(uploadURL, data.part.accountId, {

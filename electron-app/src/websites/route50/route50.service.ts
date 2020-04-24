@@ -1,29 +1,24 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
-import { Website } from '../website.base';
-import { GenericDefaultFileOptions } from '../generic/generic.defaults';
+import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import Http from 'src/http/http.util';
-import HtmlParserUtil from 'src/utils/html-parser.util';
-import FileSize from 'src/utils/filesize.util';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import {
-  DefaultFileOptions,
-  DefaultOptions,
-} from 'src/submission/submission-part/interfaces/default-options.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultFileOptions, DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import FileSize from 'src/utils/filesize.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
 
 @Injectable()
 export class Route50 extends Website {
@@ -75,7 +70,10 @@ export class Route50 extends Website {
     }
   }
 
-  async postFileSubmission(data: FilePostData<DefaultFileOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<DefaultFileOptions>,
+  ): Promise<PostResponse> {
     const form: any = {
       title: data.title,
       file: data.primary.file,
@@ -98,6 +96,7 @@ export class Route50 extends Website {
       }
     }
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<string>(`${this.BASE_URL}/galleries/submit`, data.part.accountId, {
       type: 'multipart',
       data: form,
@@ -107,12 +106,6 @@ export class Route50 extends Website {
       return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
     }
     return this.createPostResponse({ source: post.returnUrl });
-  }
-
-  async postNotificationSubmission(
-    data: PostData<Submission, DefaultOptions>,
-  ): Promise<PostResponse> {
-    throw new NotImplementedException('Method not implemented');
   }
 
   formatTags(tags: string[]) {

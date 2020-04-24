@@ -1,28 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
-import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
-import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
+import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import { InkbunnyOptions } from './inkbunny.interface';
 import Http from 'src/http/http.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
 import FormContent from 'src/utils/form-content.util';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
+import { Website } from '../website.base';
+import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
+import { InkbunnyOptions } from './inkbunny.interface';
 
 interface InkbunnyAccountData {
   username: string;
@@ -109,6 +108,7 @@ export class Inkbunny extends Website {
   }
 
   async postFileSubmission(
+    cancellationToken: CancellationToken,
     data: FilePostData<InkbunnyOptions>,
     accountData: InkbunnyAccountData,
   ): Promise<PostResponse> {
@@ -125,6 +125,7 @@ export class Inkbunny extends Website {
       form[`uploadedfile[${index + 1}]`] = file;
     });
 
+    this.checkCancelled(cancellationToken);
     const upload = await Http.post<{ sid: string; submission_id: string; error_code: any }>(
       `${this.BASE_URL}/api_upload.php`,
       undefined,
@@ -168,6 +169,7 @@ export class Inkbunny extends Website {
     if (options.blockGuests) editForm.guest_block = 'yes';
     if (options.friendsOnly) editForm.friends_only = 'yes';
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<any>(`${this.BASE_URL}/api_editsubmission.php`, undefined, {
       type: 'multipart',
       data: editForm,
@@ -191,10 +193,6 @@ export class Inkbunny extends Website {
     }
 
     return this.createPostResponse({ source: `${this.BASE_URL}/s/${json.submission_id}` });
-  }
-
-  postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {
-    throw new Error('Method not implemented.');
   }
 
   parseTags(tags: string[]) {

@@ -1,27 +1,28 @@
-import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { Website } from '../website.base';
-import { FurifficOptions } from './furiffic.interface';
-import { FurifficDefaultFileOptions } from './furiffic.defaults';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { Injectable, Logger } from '@nestjs/common';
 import UserAccountEntity from 'src/account/models/user-account.entity';
+import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
+import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import Http from 'src/http/http.util';
-import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
-import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
-import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { FurifficDefaultFileOptions } from './furiffic.defaults';
+import { FurifficOptions } from './furiffic.interface';
 
 @Injectable()
 export class Furiffic extends Website {
@@ -107,6 +108,7 @@ export class Furiffic extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, FurifficOptions>,
   ): Promise<PostResponse> {
     const username = this.getAccountInfo(data.part.accountId).username;
@@ -145,7 +147,10 @@ export class Furiffic extends Website {
     return this.createPostResponse({});
   }
 
-  async postFileSubmission(data: FilePostData<FurifficOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<FurifficOptions>,
+  ): Promise<PostResponse> {
     let postFile = data.primary.file;
     if (data.primary.type === FileSubmissionType.TEXT) {
       if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
@@ -161,6 +166,7 @@ export class Furiffic extends Website {
     };
 
     const username = this.getAccountInfo(data.part.accountId).username;
+    this.checkCancelled(cancellationToken);
     const preUploadResponse = await Http.post<any>(
       `${this.BASE_URL}/${username}/gallery/preupload`,
       data.part.accountId,
@@ -179,6 +185,7 @@ export class Furiffic extends Website {
       file: postFile,
     };
 
+    this.checkCancelled(cancellationToken);
     const fileResponse = await Http.post<string>(
       `${this.BASE_URL}/${username}/gallery/upload`,
       data.part.accountId,
@@ -189,6 +196,7 @@ export class Furiffic extends Website {
     );
     this.verifyResponse(fileResponse, 'File Response');
 
+    this.checkCancelled(cancellationToken);
     const formResponse = await Http.post(
       `${this.BASE_URL}/${username}/gallery/uploaddata`,
       data.part.accountId,
@@ -224,6 +232,7 @@ export class Furiffic extends Website {
       infoData.thumbnailfile = '';
     }
 
+    this.checkCancelled(cancellationToken);
     const editResponse = await Http.post<string>(
       `${this.BASE_URL}/${username}/edit/${id}`,
       data.part.accountId,
@@ -237,6 +246,7 @@ export class Furiffic extends Website {
     );
     this.verifyResponse(editResponse, 'Edit');
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post(
       `${this.BASE_URL}/${username}/gallery/publish`,
       data.part.accountId,

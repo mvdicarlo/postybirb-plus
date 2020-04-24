@@ -1,25 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Website } from '../website.base';
-import { DiscordOptions } from './discord.interface';
-import { DiscordDefaultFileOptions } from './discord.defaults';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
-import FormContent from 'src/utils/form-content.util';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import Http from 'src/http/http.util';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
+import FormContent from 'src/utils/form-content.util';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { DiscordDefaultFileOptions } from './discord.defaults';
+import { DiscordOptions } from './discord.interface';
 
 interface DiscordLoginData {
   name: string;
@@ -57,6 +58,7 @@ export class Discord extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, DiscordOptions>,
     accountData: DiscordLoginData,
   ): Promise<PostResponse> {
@@ -72,6 +74,7 @@ export class Discord extends Website {
       },
     };
 
+    this.checkCancelled(cancellationToken);
     const res = await Http.post<any>(accountData.webhook.trim(), '', {
       data: json,
       type: 'json',
@@ -92,10 +95,12 @@ export class Discord extends Website {
   }
 
   async postFileSubmission(
+    cancellationToken: CancellationToken,
     data: FilePostData<DiscordOptions>,
     accountData: DiscordLoginData,
   ): Promise<PostResponse> {
     await this.postNotificationSubmission(
+      cancellationToken,
       data as PostData<Submission, DiscordOptions>,
       accountData,
     );
@@ -105,6 +110,7 @@ export class Discord extends Website {
 
     let error = null;
     const files = [data.primary, ...data.additional];
+    this.checkCancelled(cancellationToken);
     for (const file of files) {
       if (data.options.spoiler) {
         file.file.options.filename = `SPOILER_${file.file.options.filename}`;

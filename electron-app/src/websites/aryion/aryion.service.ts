@@ -1,28 +1,27 @@
+import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
-import { Injectable, NotImplementedException } from '@nestjs/common';
-import { Website } from '../website.base';
-import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
-import { AryionDefaultFileOptions } from './aryion.defaults';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import Http from 'src/http/http.util';
-import { Folder } from '../interfaces/folder.interface';
 import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
-import { AryionFileOptions } from './aryion.interface';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import FileSize from 'src/utils/filesize.util';
+import WebsiteValidator from 'src/utils/website-validator.util';
+import { Folder } from '../interfaces/folder.interface';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { AryionDefaultFileOptions } from './aryion.defaults';
+import { AryionFileOptions } from './aryion.interface';
 
 @Injectable()
 export class Aryion extends Website {
@@ -108,7 +107,10 @@ export class Aryion extends Website {
     return UsernameParser.replaceText(text, 'ar', ':icon$1:');
   }
 
-  async postFileSubmission(data: FilePostData<AryionFileOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<AryionFileOptions>,
+  ): Promise<PostResponse> {
     let postFile = data.primary.file;
     if (data.primary.type === FileSubmissionType.TEXT) {
       if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
@@ -135,6 +137,7 @@ export class Aryion extends Website {
       scrap: data.options.scraps ? 'on' : '',
     };
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<string>(
       `${this.BASE_URL}/g4/itemaction.php`,
       data.part.accountId,
@@ -152,12 +155,6 @@ export class Aryion extends Website {
       }
     } catch (err) {}
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
-  }
-
-  async postNotificationSubmission(
-    data: PostData<Submission, DefaultOptions>,
-  ): Promise<PostResponse> {
-    throw new NotImplementedException('Method not implemented');
   }
 
   validateFileSubmission(

@@ -1,26 +1,25 @@
-import * as _ from 'lodash';
-import Http from 'src/http/http.util';
 import { Injectable } from '@nestjs/common';
-import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { Website } from 'src/websites/website.base';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import { Folder } from 'src/websites/interfaces/folder.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import * as _ from 'lodash';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import { PiczelOptions } from './piczel.interface';
-import { PiczelDefaultFileOptions } from './piczel.defaults';
+import Http from 'src/http/http.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
+import { Folder } from 'src/websites/interfaces/folder.interface';
+import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
+import { Website } from 'src/websites/website.base';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { PiczelDefaultFileOptions } from './piczel.defaults';
+import { PiczelOptions } from './piczel.interface';
 
 @Injectable()
 export class Piczel extends Website {
@@ -83,7 +82,10 @@ export class Piczel extends Website {
     return text;
   }
 
-  async postFileSubmission(data: FilePostData<PiczelOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<PiczelOptions>,
+  ): Promise<PostResponse> {
     const form: any = {
       nsfw: data.rating !== SubmissionRating.GENERAL,
       description: data.description,
@@ -118,6 +120,7 @@ export class Piczel extends Website {
       'access-token': userData.auth['access-token'],
     };
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post<any>(`${this.BASE_URL}/api/gallery`, data.part.accountId, {
       type: 'json',
       data: form,
@@ -134,10 +137,6 @@ export class Piczel extends Website {
     }
 
     return Promise.reject(this.createPostResponse({ additionalInfo: postResponse.body }));
-  }
-
-  postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {
-    throw new Error('Method not implemented.');
   }
 
   validateFileSubmission(

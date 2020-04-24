@@ -1,25 +1,24 @@
-import { LoginResponse } from './interfaces/login-response.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { NotImplementedException } from '@nestjs/common';
 import * as _ from 'lodash';
-import { SubmissionType } from 'src/submission/enums/submission-type.enum';
-import {
-  DefaultOptions,
-  DefaultFileOptions,
-} from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { UsernameShortcut } from './interfaces/username-shortcut.interface';
-import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from './interfaces/scaling-options.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import { HttpResponse } from 'src/http/http.util';
+import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
-import { FallbackInformation } from './interfaces/fallback-information.interface';
+import { HttpResponse } from 'src/http/http.util';
+import { SubmissionType } from 'src/submission/enums/submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultFileOptions, DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import { FallbackInformation } from './interfaces/fallback-information.interface';
+import { LoginResponse } from './interfaces/login-response.interface';
+import { ScalingOptions } from './interfaces/scaling-options.interface';
+import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 
 interface TagParseOptions {
   spaceReplacer: string;
@@ -45,6 +44,12 @@ export abstract class Website {
   readonly defaultDescriptionParser = HTMLFormatParser.parse;
 
   abstract async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
+
+  protected checkCancelled(ct: CancellationToken) {
+    if (ct.isCancelled()) {
+      throw new Error('Submission was cancelled while posting.');
+    }
+  }
 
   protected createPostResponse(postResponse: Partial<PostResponse>): PostResponse {
     return {
@@ -73,14 +78,18 @@ export abstract class Website {
   abstract getScalingOptions(file: FileRecord): ScalingOptions | undefined;
 
   abstract async postFileSubmission(
+    cancellationToken: CancellationToken,
     data: FilePostData<DefaultFileOptions>,
     accountData: any,
   ): Promise<PostResponse>;
 
-  abstract async postNotificationSubmission(
+  async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, any>,
     accountData: any,
-  ): Promise<PostResponse>;
+  ): Promise<PostResponse> {
+    throw new NotImplementedException('Method not implemented');
+  }
 
   fallbackFileParser(html: string): FallbackInformation {
     return { text: PlaintextParser.parse(html), type: 'text/plain', extension: 'txt' };

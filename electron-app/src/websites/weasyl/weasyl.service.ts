@@ -1,31 +1,32 @@
-import * as _ from 'lodash';
-import Http from 'src/http/http.util';
 import { Injectable, Logger } from '@nestjs/common';
-import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
-import { Website } from 'src/websites/website.base';
-import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import { WeasylDefaultFileOptions } from './weasyl.defaults';
-import { WeasylOptions } from './weasyl.interface';
-import { Folder } from 'src/websites/interfaces/folder.interface';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
+import * as _ from 'lodash';
 import UserAccountEntity from 'src/account/models/user-account.entity';
+import { MarkdownParser } from 'src/description-parsing/markdown/markdown.parser';
+import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
+import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/utils/filesize.util';
 import FormContent from 'src/utils/form-content.util';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import HtmlParserUtil from 'src/utils/html-parser.util';
-import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
-import { MarkdownParser } from 'src/description-parsing/markdown/markdown.parser';
+import WebsiteValidator from 'src/utils/website-validator.util';
+import { Folder } from 'src/websites/interfaces/folder.interface';
+import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
+import { Website } from 'src/websites/website.base';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { WeasylDefaultFileOptions } from './weasyl.defaults';
+import { WeasylOptions } from './weasyl.interface';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -108,6 +109,7 @@ export class Weasyl extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, WeasylOptions>,
   ): Promise<PostResponse> {
     const page = await Http.get<string>(`${this.BASE_URL}/submit/journal`, data.part.accountId);
@@ -121,6 +123,7 @@ export class Weasyl extends Website {
       tags: this.formatTags(data.tags),
     };
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post<string>(
       `${this.BASE_URL}/submit/journal`,
       data.part.accountId,
@@ -134,7 +137,10 @@ export class Weasyl extends Website {
     return this.createPostResponse({});
   }
 
-  async postFileSubmission(data: FilePostData<WeasylOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<WeasylOptions>,
+  ): Promise<PostResponse> {
     const type = this.getContentType(data.primary.type);
     const url = `${this.BASE_URL}/submit/${type}`;
 
@@ -180,6 +186,7 @@ export class Weasyl extends Website {
     form.folderid = options.folder || '';
     form.subtype = options.category || '';
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post<string>(url, data.part.accountId, {
       type: 'multipart',
       data: form,

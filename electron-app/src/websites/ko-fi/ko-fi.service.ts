@@ -1,26 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import { GenericDefaultFileOptions } from '../generic/generic.defaults';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
 import Http from 'src/http/http.util';
-import HtmlParserUtil from 'src/utils/html-parser.util';
-import {
-  DefaultFileOptions,
-  DefaultOptions,
-} from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultFileOptions, DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import HtmlParserUtil from 'src/utils/html-parser.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
+import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
-import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
+import { Website } from '../website.base';
 
 @Injectable()
 export class KoFi extends Website {
@@ -48,12 +46,16 @@ export class KoFi extends Website {
     return text; // no parsing
   }
 
-  async postFileSubmission(data: FilePostData<DefaultFileOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<DefaultFileOptions>,
+  ): Promise<PostResponse> {
     const form = {
       uniqueFilename: '',
       file: data.primary.file,
     };
 
+    this.checkCancelled(cancellationToken);
     const upload = await Http.post<string>(
       `${this.BASE_URL}/Media/UploadImage`,
       data.part.accountId,
@@ -89,6 +91,7 @@ export class KoFi extends Website {
       FileNames: json.FileNames,
     };
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post(
       `${this.BASE_URL}/Feed/AddImageFeedItem`,
       data.part.accountId,
@@ -112,6 +115,7 @@ export class KoFi extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
     const form = {
@@ -127,6 +131,7 @@ export class KoFi extends Website {
       postAudience: 'public',
     };
 
+    this.checkCancelled(cancellationToken);
     const postResponse = await Http.post<string>(
       `${this.BASE_URL}/Blog/AddBlogPost`,
       data.part.accountId,
@@ -155,6 +160,7 @@ export class KoFi extends Website {
       );
     }
 
+    this.checkCancelled(cancellationToken);
     const publish = await Http.post(`${this.BASE_URL}${postUrl}`, data.part.accountId, {
       requestOptions: { gzip: true },
       headers: {

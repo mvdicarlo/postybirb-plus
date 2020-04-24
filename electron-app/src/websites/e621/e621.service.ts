@@ -1,30 +1,29 @@
-import { app } from 'electron';
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
-import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
+import { app } from 'electron';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
+import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
+import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
+import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
+import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/utils/filesize.util';
 import FormContent from 'src/utils/form-content.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { e621Account } from './e621-account.interface';
 import { e621DefaultFileOptions } from './e621.defaults';
 import { e621Options } from './e621.interface';
-import { e621Account } from './e621-account.interface';
-import Http from 'src/http/http.util';
 
 @Injectable()
 export class e621 extends Website {
@@ -85,6 +84,7 @@ export class e621 extends Website {
   }
 
   async postFileSubmission(
+    cancellationToken: CancellationToken,
     data: FilePostData<e621Options>,
     accountData: e621Account,
   ): Promise<PostResponse> {
@@ -102,6 +102,7 @@ export class e621 extends Website {
         .join('%0A'),
     };
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<{ success: boolean; location: string; reason: string }>(
       `${this.BASE_URL}/uploads.json`,
       undefined,
@@ -146,10 +147,6 @@ export class e621 extends Website {
       .formatTags(tags)
       .join(' ')
       .trim();
-  }
-
-  postNotificationSubmission(data: PostData<Submission, any>): Promise<PostResponse> {
-    throw new Error('Method not implemented.');
   }
 
   validateFileSubmission(

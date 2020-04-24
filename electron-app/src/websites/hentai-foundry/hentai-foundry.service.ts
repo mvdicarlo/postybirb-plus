@@ -1,28 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
+import { BBCodeParser } from 'src/description-parsing/bbcode/bbcode.parser';
+import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/http/http.util';
-import _ = require('lodash');
+import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/utils/filesize.util';
-import { HentaiFoundryDefaultFileOptions } from './hentai-foundry.defaults';
-import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
-import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { HentaiFoundryFileOptions } from './hentai-foundry.interface';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
+import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
+import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
-import WebsiteValidator from 'src/utils/website-validator.util';
-import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
-import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import FileSize from 'src/utils/filesize.util';
 import HtmlParserUtil from 'src/utils/html-parser.util';
+import WebsiteValidator from 'src/utils/website-validator.util';
+import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { HentaiFoundryDefaultFileOptions } from './hentai-foundry.defaults';
+import { HentaiFoundryFileOptions } from './hentai-foundry.interface';
+import _ = require('lodash');
 
 @Injectable()
 export class HentaiFoundry extends Website {
@@ -54,10 +55,12 @@ export class HentaiFoundry extends Website {
   }
 
   async postNotificationSubmission(
+    cancellationToken: CancellationToken,
     data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
     const page = await Http.get<string>(`${this.BASE_URL}/UserBlogs/create`, data.part.accountId);
     this.verifyResponse(page, 'Load page');
+    this.checkCancelled(cancellationToken);
     const post = await Http.post(`${this.BASE_URL}/UserBlogs/create`, data.part.accountId, {
       type: 'multipart',
       data: {
@@ -70,7 +73,10 @@ export class HentaiFoundry extends Website {
     return this.createPostResponse({ source: post.returnUrl });
   }
 
-  async postFileSubmission(data: FilePostData<HentaiFoundryFileOptions>): Promise<PostResponse> {
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<HentaiFoundryFileOptions>,
+  ): Promise<PostResponse> {
     const page = await Http.get<string>(`${this.BASE_URL}/pictures/create`, data.part.accountId);
     this.verifyResponse(page, 'Load form');
     const { options } = data;
@@ -111,6 +117,7 @@ export class HentaiFoundry extends Website {
       'Pictures[license_id]': '0',
     };
 
+    this.checkCancelled(cancellationToken);
     const post = await Http.post<string>(`${this.BASE_URL}/pictures/create`, data.part.accountId, {
       type: 'multipart',
       data: form,
