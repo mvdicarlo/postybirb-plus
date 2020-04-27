@@ -114,6 +114,7 @@ li .ant-light-list-item .error {
   top: 0 !important;
   width: 100% !important;
   height: 100vh;
+  overflow: hidden;
 }
 
 .fullscreen-modal .ant-light-modal-content,
@@ -125,6 +126,7 @@ li .ant-light-list-item .error {
 .fullscreen-modal .ant-dark-modal-body {
   height: calc(100% - 55px);
   padding: 0 !important;
+  overflow: auto;
 }
 
 .fullscreen-modal-with-footer .ant-light-modal,

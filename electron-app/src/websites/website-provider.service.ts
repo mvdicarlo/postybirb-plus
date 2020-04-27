@@ -14,6 +14,7 @@ import { SubscribeStar } from './subscribe-star/subscribe-star.service';
 import { Route50 } from './route50/route50.service';
 import { HentaiFoundry } from './hentai-foundry/hentai-foundry.service';
 import { Aryion } from './aryion/aryion.service';
+import { Custom } from './custom/custom.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -35,6 +36,7 @@ export class WebsiteProvider {
     readonly route50: Route50,
     readonly hentaiFoundry: HentaiFoundry,
     readonly aryion: Aryion,
+    readonly custom: Custom,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

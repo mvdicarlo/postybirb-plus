@@ -13,10 +13,12 @@ import { SubscribeStar } from './subscribe-star/SubscribeStar';
 import { Route50 } from './route-50/Route50';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 import { Aryion } from './aryion/Aryion';
+import { Custom } from './custom/Custom';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
     Aryion: new Aryion(),
+    Custom: new Custom(),
     Derpibooru: new Derpibooru(),
     Discord: new Discord(),
     e621: new e621(),

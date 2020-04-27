@@ -16,6 +16,7 @@ import { SubscribeStarModule } from './subscribe-star/subscribe-star.module';
 import { Route50Module } from './route50/route50.module';
 import { HentaiFoundryModule } from './hentai-foundry/hentai-foundry.module';
 import { AryionModule } from './aryion/aryion.module';
+import { CustomModule } from './custom/custom.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -36,6 +37,7 @@ import { AryionModule } from './aryion/aryion.module';
     Route50Module,
     HentaiFoundryModule,
     AryionModule,
+    CustomModule,
   ],
 })
 export class WebsitesModule {}
