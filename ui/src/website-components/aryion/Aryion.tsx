@@ -90,54 +90,52 @@ export class AryionFileSubmissionForm extends GenericFileSubmissionSection<Aryio
   renderWideForm(data: AryionFileOptions) {
     const elements = super.renderWideForm(data);
     elements.push(
-      ...[
-        <Form.Item label="Required Tag" required>
-          <Radio.Group
-            onChange={this.handleValueChange.bind(this, 'requiredTag')}
-            value={data.requiredTag}
-            buttonStyle="solid"
-          >
-            <Radio.Button value="0">Vore</Radio.Button>
-            <Radio.Button value="1">Non-Vore</Radio.Button>
-          </Radio.Group>
-        </Form.Item>,
-        <Form.Item label="View Permissions">
-          <Radio.Group
-            onChange={this.handleValueChange.bind(this, 'viewPermissions')}
-            value={data.viewPermissions}
-            buttonStyle="solid"
-          >
-            <Radio.Button value="ALL">Everyone</Radio.Button>
-            <Radio.Button value="USER">Registered Users</Radio.Button>
-            <Radio.Button value="SELF">Self Only</Radio.Button>
-          </Radio.Group>
-        </Form.Item>,
-        <Form.Item label="Comment Permissions">
-          <Radio.Group
-            onChange={this.handleValueChange.bind(this, 'commentPermissions')}
-            value={data.commentPermissions}
-            buttonStyle="solid"
-          >
-            <Radio.Button value="USER">Registered Users</Radio.Button>
-            <Radio.Button value="BLACK">All But Blocked</Radio.Button>
-            <Radio.Button value="WHITE">Friends Only</Radio.Button>
-            <Radio.Button value="SELF">Self Only</Radio.Button>
-            <Radio.Button value="NONE">Nobody</Radio.Button>
-          </Radio.Group>
-        </Form.Item>,
-        <Form.Item label="View Permissions">
-          <Radio.Group
-            onChange={this.handleValueChange.bind(this, 'tagPermissions')}
-            value={data.tagPermissions}
-            buttonStyle="solid"
-          >
-            <Radio.Button value="USER">Registered Users</Radio.Button>
-            <Radio.Button value="BLACK">All But Blocked</Radio.Button>
-            <Radio.Button value="WHITE">Friends Only</Radio.Button>
-            <Radio.Button value="SELF">Self Only</Radio.Button>
-          </Radio.Group>
-        </Form.Item>
-      ]
+      <Form.Item label="Required Tag" required>
+        <Radio.Group
+          onChange={this.handleValueChange.bind(this, 'requiredTag')}
+          value={data.requiredTag}
+          buttonStyle="solid"
+        >
+          <Radio.Button value="0">Vore</Radio.Button>
+          <Radio.Button value="1">Non-Vore</Radio.Button>
+        </Radio.Group>
+      </Form.Item>,
+      <Form.Item label="View Permissions">
+        <Radio.Group
+          onChange={this.handleValueChange.bind(this, 'viewPermissions')}
+          value={data.viewPermissions}
+          buttonStyle="solid"
+        >
+          <Radio.Button value="ALL">Everyone</Radio.Button>
+          <Radio.Button value="USER">Registered Users</Radio.Button>
+          <Radio.Button value="SELF">Self Only</Radio.Button>
+        </Radio.Group>
+      </Form.Item>,
+      <Form.Item label="Comment Permissions">
+        <Radio.Group
+          onChange={this.handleValueChange.bind(this, 'commentPermissions')}
+          value={data.commentPermissions}
+          buttonStyle="solid"
+        >
+          <Radio.Button value="USER">Registered Users</Radio.Button>
+          <Radio.Button value="BLACK">All But Blocked</Radio.Button>
+          <Radio.Button value="WHITE">Friends Only</Radio.Button>
+          <Radio.Button value="SELF">Self Only</Radio.Button>
+          <Radio.Button value="NONE">Nobody</Radio.Button>
+        </Radio.Group>
+      </Form.Item>,
+      <Form.Item label="View Permissions">
+        <Radio.Group
+          onChange={this.handleValueChange.bind(this, 'tagPermissions')}
+          value={data.tagPermissions}
+          buttonStyle="solid"
+        >
+          <Radio.Button value="USER">Registered Users</Radio.Button>
+          <Radio.Button value="BLACK">All But Blocked</Radio.Button>
+          <Radio.Button value="WHITE">Friends Only</Radio.Button>
+          <Radio.Button value="SELF">Self Only</Radio.Button>
+        </Radio.Group>
+      </Form.Item>
     );
     return elements;
   }

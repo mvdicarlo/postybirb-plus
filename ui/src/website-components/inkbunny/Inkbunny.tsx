@@ -101,34 +101,32 @@ export class InkbunnyFileSubmissionForm extends GenericFileSubmissionSection<Ink
   renderLeftForm(data: InkbunnyOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
-      ...[
-        <div>
-          <Checkbox
-            checked={data.blockGuests}
-            onChange={this.handleCheckedChange.bind(this, 'blockGuests')}
-          >
-            Block Guests
-          </Checkbox>
-        </div>,
-        <div>
-          <Checkbox
-            checked={data.friendsOnly}
-            onChange={this.handleCheckedChange.bind(this, 'friendsOnly')}
-          >
-            Friends Only
-          </Checkbox>
-        </div>,
-        <div>
-          <Checkbox checked={data.notify} onChange={this.handleCheckedChange.bind(this, 'notify')}>
-            Notify Watchers
-          </Checkbox>
-        </div>,
-        <div>
-          <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
-            Send to scraps
-          </Checkbox>
-        </div>
-      ]
+      <div>
+        <Checkbox
+          checked={data.blockGuests}
+          onChange={this.handleCheckedChange.bind(this, 'blockGuests')}
+        >
+          Block Guests
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.friendsOnly}
+          onChange={this.handleCheckedChange.bind(this, 'friendsOnly')}
+        >
+          Friends Only
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox checked={data.notify} onChange={this.handleCheckedChange.bind(this, 'notify')}>
+          Notify Watchers
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
+          Send to scraps
+        </Checkbox>
+      </div>
     );
     return elements;
   }

@@ -17,6 +17,7 @@ import { Route50Module } from './route50/route50.module';
 import { HentaiFoundryModule } from './hentai-foundry/hentai-foundry.module';
 import { AryionModule } from './aryion/aryion.module';
 import { CustomModule } from './custom/custom.module';
+import { NewgroundsModule } from './newgrounds/newgrounds.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -38,6 +39,7 @@ import { CustomModule } from './custom/custom.module';
     HentaiFoundryModule,
     AryionModule,
     CustomModule,
+    NewgroundsModule,
   ],
 })
 export class WebsitesModule {}

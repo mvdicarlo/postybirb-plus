@@ -80,7 +80,7 @@ export default class Http {
     options = options || {};
     const ses = session.fromPartition(`persist:${partitionId}`);
     const headers = options.headers || {};
-    if (!options.skipCookies) {
+    if (!options.skipCookies && ses) {
       headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
     }
 
@@ -129,7 +129,7 @@ export default class Http {
     }
 
     const headers = options.headers || {};
-    if (!options.skipCookies) {
+    if (!options.skipCookies && ses) {
       headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
     }
 

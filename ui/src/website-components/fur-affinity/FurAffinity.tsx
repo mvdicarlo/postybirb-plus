@@ -158,72 +158,70 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
   renderRightForm(data: FurAffinityFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
-      ...[
-        <Form.Item label="Category">
-          <Select
-            {...GenericSelectProps}
-            className="w-full"
-            value={data.category}
-            onSelect={this.setValue.bind(this, 'category')}
-          >
-            {FurAffinityCategories}
-          </Select>
-        </Form.Item>,
-        <Form.Item label="Theme">
-          <Select
-            {...GenericSelectProps}
-            className="w-full"
-            value={data.theme}
-            onSelect={this.setValue.bind(this, 'theme')}
-          >
-            {FurAffinityThemes}
-          </Select>
-        </Form.Item>,
-        <Form.Item label="Species">
-          <Select
-            {...GenericSelectProps}
-            className="w-full"
-            value={data.species}
-            onSelect={this.setValue.bind(this, 'species')}
-          >
-            {FurAffinitySpecies}
-          </Select>
-        </Form.Item>,
-        <Form.Item label="Gender">
-          <Select
-            {...GenericSelectProps}
-            className="w-full"
-            value={data.gender}
-            onSelect={this.setValue.bind(this, 'gender')}
-          >
-            {FurAffinityGenders}
-          </Select>
-        </Form.Item>,
-        <Form.Item label="Folders">
-          <Select
-            {...GenericSelectProps}
-            mode="multiple"
-            className="w-full"
-            value={data.folders}
-            onChange={this.setValue.bind(this, 'folders')}
-            allowClear={true}
-          >
-            {this.state.folders.map(folder => {
-              if (folder.children && folder.children.length) {
-                return (
-                  <Select.OptGroup label={folder.label}>
-                    {folder.children.map(subfolder => (
-                      <Select.Option value={subfolder.value}>{subfolder.label}</Select.Option>
-                    ))}
-                  </Select.OptGroup>
-                );
-              } else {
-                return <Select.Option value={folder.value}>{folder.label}</Select.Option>;
-              }
-            })}
-          </Select>
-        </Form.Item>
-      ]
+      <Form.Item label="Category">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.category}
+          onSelect={this.setValue.bind(this, 'category')}
+        >
+          {FurAffinityCategories}
+        </Select>
+      </Form.Item>,
+      <Form.Item label="Theme">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.theme}
+          onSelect={this.setValue.bind(this, 'theme')}
+        >
+          {FurAffinityThemes}
+        </Select>
+      </Form.Item>,
+      <Form.Item label="Species">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.species}
+          onSelect={this.setValue.bind(this, 'species')}
+        >
+          {FurAffinitySpecies}
+        </Select>
+      </Form.Item>,
+      <Form.Item label="Gender">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.gender}
+          onSelect={this.setValue.bind(this, 'gender')}
+        >
+          {FurAffinityGenders}
+        </Select>
+      </Form.Item>,
+      <Form.Item label="Folders">
+        <Select
+          {...GenericSelectProps}
+          mode="multiple"
+          className="w-full"
+          value={data.folders}
+          onChange={this.setValue.bind(this, 'folders')}
+          allowClear={true}
+        >
+          {this.state.folders.map(folder => {
+            if (folder.children && folder.children.length) {
+              return (
+                <Select.OptGroup label={folder.label}>
+                  {folder.children.map(subfolder => (
+                    <Select.Option value={subfolder.value}>{subfolder.label}</Select.Option>
+                  ))}
+                </Select.OptGroup>
+              );
+            } else {
+              return <Select.Option value={folder.value}>{folder.label}</Select.Option>;
+            }
+          })}
+        </Select>
+      </Form.Item>
     );
     return elements;
   }
@@ -231,29 +229,27 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
   renderLeftForm(data: FurAffinityFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
-      ...[
-        <div>
-          <Checkbox
-            checked={data.disableComments}
-            onChange={this.handleCheckedChange.bind(this, 'disableComments')}
-          >
-            Disable Comments
-          </Checkbox>
-        </div>,
-        <div>
-          <Checkbox
-            checked={data.reupload}
-            onChange={this.handleCheckedChange.bind(this, 'reupload')}
-          >
-            Reupload better quality image
-          </Checkbox>
-        </div>,
-        <div>
-          <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
-            Send to scraps
-          </Checkbox>
-        </div>
-      ]
+      <div>
+        <Checkbox
+          checked={data.disableComments}
+          onChange={this.handleCheckedChange.bind(this, 'disableComments')}
+        >
+          Disable Comments
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.reupload}
+          onChange={this.handleCheckedChange.bind(this, 'reupload')}
+        >
+          Reupload better quality image
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
+          Send to scraps
+        </Checkbox>
+      </div>
     );
     return elements;
   }

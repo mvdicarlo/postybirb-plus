@@ -14,6 +14,7 @@ import { Route50 } from './route-50/Route50';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 import { Aryion } from './aryion/Aryion';
 import { Custom } from './custom/Custom';
+import { Newgrounds } from './Newgrounds/Newgrounds';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -21,17 +22,18 @@ export class WebsiteRegistry {
     Custom: new Custom(),
     Derpibooru: new Derpibooru(),
     Discord: new Discord(),
-    e621: new e621(),
     FurAffinity: new FurAffinity(),
     Furiffic: new Furiffic(),
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
     KoFi: new KoFi(),
+    Newgrounds: new Newgrounds(),
     Piczel: new Piczel(),
     Route50: new Route50(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
-    Weasyl: new Weasyl()
+    Weasyl: new Weasyl(),
+    e621: new e621()
   };
 
   static getAllAsArray() {

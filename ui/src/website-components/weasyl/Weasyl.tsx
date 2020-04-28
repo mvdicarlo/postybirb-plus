@@ -130,40 +130,38 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
   renderRightForm(data: WeasylOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
-      ...[
-        <Form.Item label="Category">
-          <Select
-            {...GenericSelectProps}
-            className="w-full"
-            value={data.category}
-            onSelect={this.setValue.bind(this, 'category')}
-          >
-            {this.props.submission && WeasylCategories[this.props.submission.primary.type]
-              ? (WeasylCategories[this.props.submission.primary.type] || []).map(item => (
-                  <Select.Option value={item.id}>{item.name}</Select.Option>
-                ))
-              : Object.entries(WeasylCategories).map(([key, values]) => (
-                  <Select.OptGroup label={key}>
-                    {values.map(item => (
-                      <Select.Option value={item.id}>{item.name}</Select.Option>
-                    ))}
-                  </Select.OptGroup>
-                ))}
-          </Select>
-        </Form.Item>,
-        <Form.Item label="Folder">
-          <Select
-            {...GenericSelectProps}
-            className="w-full"
-            value={data.folder}
-            onSelect={this.setValue.bind(this, 'folder')}
-          >
-            {this.state.folders.map(f => (
-              <Select.Option value={f.value}>{f.label}</Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-      ]
+      <Form.Item label="Category">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.category}
+          onSelect={this.setValue.bind(this, 'category')}
+        >
+          {this.props.submission && WeasylCategories[this.props.submission.primary.type]
+            ? (WeasylCategories[this.props.submission.primary.type] || []).map(item => (
+                <Select.Option value={item.id}>{item.name}</Select.Option>
+              ))
+            : Object.entries(WeasylCategories).map(([key, values]) => (
+                <Select.OptGroup label={key}>
+                  {values.map(item => (
+                    <Select.Option value={item.id}>{item.name}</Select.Option>
+                  ))}
+                </Select.OptGroup>
+              ))}
+        </Select>
+      </Form.Item>,
+      <Form.Item label="Folder">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.folder}
+          onSelect={this.setValue.bind(this, 'folder')}
+        >
+          {this.state.folders.map(f => (
+            <Select.Option value={f.value}>{f.label}</Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
     );
     return elements;
   }

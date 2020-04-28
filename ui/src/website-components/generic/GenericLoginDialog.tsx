@@ -19,6 +19,7 @@ export class GenericLoginDialog extends React.Component<LoginDialogProps, State>
       view.addEventListener('did-stop-loading', () => {
         if (this.state.loading) this.setState({ loading: false });
       });
+      view.allowpopups = true;
       view.partition = `persist:${this.props.account._id}`;
       view.src = this.props.url;
     }
@@ -28,11 +29,7 @@ export class GenericLoginDialog extends React.Component<LoginDialogProps, State>
     return (
       <div className="h-full w-full">
         <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
-          <webview
-            className="webview h-full w-full"
-            webpreferences="nativeWindowOpen=1"
-            allowpopups
-          />
+          <webview className="webview h-full w-full" webpreferences="nativeWindowOpen=1" />
         </Spin>
       </div>
     );

@@ -38,12 +38,10 @@ export default abstract class WebsiteFormSection<
       );
     } else {
       ratings.push(
-        ...[
-          <Radio.Button value="general">General</Radio.Button>,
-          <Radio.Button value="mature">Mature</Radio.Button>,
-          <Radio.Button value="adult">Adult</Radio.Button>,
-          <Radio.Button value="extreme">Extreme</Radio.Button>
-        ]
+        <Radio.Button value="general">General</Radio.Button>,
+        <Radio.Button value="mature">Mature</Radio.Button>,
+        <Radio.Button value="adult">Adult</Radio.Button>,
+        <Radio.Button value="extreme">Extreme</Radio.Button>
       );
     }
 

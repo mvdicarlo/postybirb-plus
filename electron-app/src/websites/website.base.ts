@@ -12,7 +12,10 @@ import { CancellationToken } from 'src/submission/post/cancellation/cancellation
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { DefaultFileOptions, DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import {
+  DefaultFileOptions,
+  DefaultOptions,
+} from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import { FallbackInformation } from './interfaces/fallback-information.interface';
@@ -149,7 +152,13 @@ export abstract class Website {
     if (response.error || response.response.statusCode > 303) {
       throw this.createPostResponse({
         error: response.error || response.response.statusCode,
-        additionalInfo: `${info ? `${info}\n\n` : ''}${response.body}`,
+        additionalInfo: `${info ? `${info}\n\n` : ''}${
+          response.body
+            ? typeof response.body === 'object'
+              ? JSON.stringify(response.body, null, 1)
+              : response.body
+            : ''
+        }`,
       });
     }
   }

@@ -15,6 +15,7 @@ import { Route50 } from './route50/route50.service';
 import { HentaiFoundry } from './hentai-foundry/hentai-foundry.service';
 import { Aryion } from './aryion/aryion.service';
 import { Custom } from './custom/custom.service';
+import { Newgrounds } from './newgrounds/newgrounds.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -37,6 +38,7 @@ export class WebsiteProvider {
     readonly hentaiFoundry: HentaiFoundry,
     readonly aryion: Aryion,
     readonly custom: Custom,
+    readonly newgrounds: Newgrounds,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(
