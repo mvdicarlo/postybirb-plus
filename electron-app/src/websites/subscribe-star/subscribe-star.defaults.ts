@@ -2,31 +2,17 @@ import {
   SubscribeStarFileOptions,
   SubscribeStarNotificationOptions,
 } from './subscribe-star.interface';
+import {
+  GenericDefaultFileOptions,
+  GenericDefaultNotificationOptions,
+} from '../generic/generic.defaults';
 
 export const SubscribeStarDefaultFileOptions: SubscribeStarFileOptions = {
+  ...GenericDefaultFileOptions,
   tier: 'free',
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };
 
 export const SubscribeStarDefaultNotificationOptions: SubscribeStarNotificationOptions = {
+  ...GenericDefaultNotificationOptions,
   tier: 'free',
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
 };

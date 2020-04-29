@@ -21,11 +21,11 @@ import { FurAffinityThemes } from './FurAffinityThemes';
 import { FurAffinitySpecies } from './FurAffinitySpecies';
 import { FurAffinityGenders } from './FurAffinityGenders';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
 const defaultFileOptions: FurAffinityFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
+  ...GenericDefaultFileOptions,
   category: '1',
   disableComments: false,
   folders: [],
@@ -33,30 +33,12 @@ const defaultFileOptions: FurAffinityFileOptions = {
   reupload: true,
   scraps: false,
   species: '1',
-  theme: '1',
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  theme: '1'
 };
 
 const defaultNotificationOptions: FurAffinityNotificationOptions = {
-  title: undefined,
-  rating: null,
-  feature: true,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  ...GenericDefaultNotificationOptions,
+  feature: true
 };
 
 export class FurAffinity implements Website {

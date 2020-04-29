@@ -1,16 +1,7 @@
 import { DerpibooruOptions } from './derpibooru.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const DerpibooruDefaultFileOptions: DerpibooruOptions = {
+  ...GenericDefaultFileOptions,
   source: null,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };

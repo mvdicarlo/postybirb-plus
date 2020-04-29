@@ -25,7 +25,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { SoFurryDefaultFileOptions } from './so-furry.defaults';
-import { SoFurryOptions } from './so-furry.interface';
+import { SoFurryFileOptions } from './so-furry.interface';
 import _ = require('lodash');
 
 @Injectable()
@@ -33,7 +33,7 @@ export class SoFurry extends Website {
   readonly BASE_URL: string = 'https://www.sofurry.com';
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3'];
 
-  readonly fileSubmissionOptions: SoFurryOptions = SoFurryDefaultFileOptions;
+  readonly fileSubmissionOptions: SoFurryFileOptions = SoFurryDefaultFileOptions;
 
   readonly usernameShortcuts = [
     {
@@ -111,7 +111,7 @@ export class SoFurry extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<SoFurryOptions>,
+    data: FilePostData<SoFurryFileOptions>,
   ): Promise<PostResponse> {
     const url = `${this.BASE_URL}/upload/details?contentType=${this.getSubmissionType(
       data.primary.type,
@@ -161,7 +161,7 @@ export class SoFurry extends Website {
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
-    data: PostData<Submission, SoFurryOptions>,
+    data: PostData<Submission, SoFurryFileOptions>,
   ): Promise<PostResponse> {
     const url = `${this.BASE_URL}/upload/details?contentType=3`;
     const page = await Http.get<string>(url, data.part.accountId);
@@ -205,7 +205,7 @@ export class SoFurry extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<SoFurryOptions>,
+    submissionPart: SubmissionPart<SoFurryFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

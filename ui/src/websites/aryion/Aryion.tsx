@@ -10,26 +10,16 @@ import WebsiteService from '../../services/website.service';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
 const defaultOptions: AryionFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  rating: null,
+  ...GenericDefaultFileOptions,
   folder: [],
   viewPermissions: 'ALL',
   commentPermissions: 'USER',
   tagPermissions: 'USER',
   requiredTag: undefined,
-  scraps: false,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  scraps: false
 };
 
 export class Aryion implements Website {

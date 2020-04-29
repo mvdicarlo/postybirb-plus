@@ -8,22 +8,12 @@ import { Form, Input } from 'antd';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import E621Login from './e621Login';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
 const defaultOptions: e621Options = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  rating: null,
+  ...GenericDefaultFileOptions,
   sources: [],
-  parentId: undefined,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  parentId: undefined
 };
 
 export class e621 implements Website {

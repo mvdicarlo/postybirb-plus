@@ -1,18 +1,9 @@
-import { SoFurryOptions } from './so-furry.interface';
+import { SoFurryFileOptions } from './so-furry.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
-export const SoFurryDefaultFileOptions: SoFurryOptions = {
+export const SoFurryDefaultFileOptions: SoFurryFileOptions = {
+  ...GenericDefaultFileOptions,
   folder: '0',
   viewOptions: '0',
   thumbnailAsCoverArt: false,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };

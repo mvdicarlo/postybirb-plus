@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { SoFurryOptions } from '../../../../electron-app/src/websites/so-furry/so-furry.interface';
+import { SoFurryFileOptions } from '../../../../electron-app/src/websites/so-furry/so-furry.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Form, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
@@ -14,7 +14,8 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 
-const defaultOptions: SoFurryOptions = {
+// TODO make a separate notification options
+const defaultOptions: SoFurryFileOptions = {
   title: undefined,
   useThumbnail: true,
   autoScale: true,
@@ -41,7 +42,7 @@ export class SoFurry implements Website {
     <GenericLoginDialog url="https://www.sofurry.com/user/login" {...props} />
   );
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, SoFurryOptions>) => (
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, SoFurryFileOptions>) => (
     <SoFurryFileSubmissionForm
       key={props.part.accountId}
       ratingOptions={{
@@ -62,7 +63,7 @@ export class SoFurry implements Website {
     />
   );
 
-  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, SoFurryOptions>) => (
+  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, SoFurryFileOptions>) => (
     <SoFurryNotificationSubmissionForm
       key={props.part.accountId}
       ratingOptions={{
@@ -90,12 +91,12 @@ interface SoFurrySubmissionState {
   folders: Folder[];
 }
 
-export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<SoFurryOptions> {
+export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<SoFurryFileOptions> {
   state: SoFurrySubmissionState = {
     folders: []
   };
 
-  constructor(props: SubmissionSectionProps<FileSubmission, SoFurryOptions>) {
+  constructor(props: SubmissionSectionProps<FileSubmission, SoFurryFileOptions>) {
     super(props);
     this.state = {
       folders: []
@@ -113,7 +114,7 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
     );
   }
 
-  renderRightForm(data: SoFurryOptions) {
+  renderRightForm(data: SoFurryFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Folder">
@@ -133,12 +134,12 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
   }
 }
 
-export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFurryOptions> {
+export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFurryFileOptions> {
   state: SoFurrySubmissionState = {
     folders: []
   };
 
-  constructor(props: SubmissionSectionProps<FileSubmission, SoFurryOptions>) {
+  constructor(props: SubmissionSectionProps<FileSubmission, SoFurryFileOptions>) {
     super(props);
     this.state = {
       folders: []
@@ -156,7 +157,7 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
     );
   }
 
-  renderRightForm(data: SoFurryOptions) {
+  renderRightForm(data: SoFurryFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Folder">
@@ -175,7 +176,7 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
     return elements;
   }
 
-  renderLeftForm(data: SoFurryOptions) {
+  renderLeftForm(data: SoFurryFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
       <div>

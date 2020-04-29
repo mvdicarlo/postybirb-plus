@@ -1,8 +1,9 @@
-import { Checkbox, Form, Radio, Select } from 'antd';
+import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { PixivFileOptions } from '../../../../electron-app/src/websites/pixiv/pixiv.interface';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
@@ -10,23 +11,12 @@ import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
 
 const defaultOptions: PixivFileOptions = {
+  ...GenericDefaultFileOptions,
   communityTags: true,
   matureContent: [],
   original: false,
   sexual: undefined,
-  containsContent: [],
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  containsContent: []
 };
 
 export class Pixiv implements Website {

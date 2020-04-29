@@ -13,11 +13,11 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { HentaiFoundryCategories } from './hentai-foundry-categories';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
 const defaultFileOptions: HentaiFoundryFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
+  ...GenericDefaultFileOptions,
   scraps: false,
   disableComments: false,
   category: undefined,
@@ -43,30 +43,10 @@ const defaultFileOptions: HentaiFoundryFileOptions = {
   media: '0',
   timeTaken: undefined,
   license: '0',
-  reference: undefined,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  reference: undefined
 };
 
-const defaultNotificationOptions: DefaultOptions = {
-  title: undefined,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
-};
+const defaultNotificationOptions: DefaultOptions = GenericDefaultNotificationOptions;
 
 export class HentaiFoundry implements Website {
   internalName: string = 'HentaiFoundry';

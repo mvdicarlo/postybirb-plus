@@ -11,8 +11,11 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { NewgroundsFileOptions } from '../../../../electron-app/src/websites/newgrounds/newgrounds.interface';
 import { Checkbox, Form, Radio } from 'antd';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
 const defaultFileOptions: NewgroundsFileOptions = {
+  ...GenericDefaultFileOptions,
   creativeCommons: true,
   modification: true,
   commercial: false,
@@ -21,32 +24,10 @@ const defaultFileOptions: NewgroundsFileOptions = {
   nudity: undefined,
   violence: undefined,
   explicitText: undefined,
-  adultThemes: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  adultThemes: undefined
 };
 
-const defaultNotificationOptions: DefaultOptions = {
-  title: undefined,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
-};
+const defaultNotificationOptions: DefaultOptions = GenericDefaultNotificationOptions;
 
 export class Newgrounds implements Website {
   internalName: string = 'Newgrounds';

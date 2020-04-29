@@ -18,7 +18,6 @@ import { PlaintextParser } from 'src/description-parsing/plaintext/plaintext.par
 import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
-import { DiscordOptions } from '../discord/discord.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import Http from 'src/http/http.util';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
@@ -78,7 +77,7 @@ export class Custom extends Website {
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
-    data: PostData<Submission, DiscordOptions>,
+    data: PostData<Submission, DefaultOptions>,
     accountData: CustomAccountData,
   ): Promise<PostResponse> {
     if (!accountData.notificationUrl) {

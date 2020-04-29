@@ -7,21 +7,12 @@ import { Form, Input } from 'antd';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
 const defaultOptions: DerpibooruOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
+  ...GenericDefaultFileOptions,
   rating: null,
-  source: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  source: null
 };
 
 export class Derpibooru implements Website {

@@ -1,7 +1,10 @@
 import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { DiscordOptions } from '../../../../electron-app/src/websites/discord/discord.interface';
+import {
+  DiscordFileOptions,
+  DiscordNotificationOptions
+} from '../../../../electron-app/src/websites/discord/discord.interface';
 import { Checkbox } from 'antd';
 import DiscordLogin from './DiscordLogin';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
@@ -9,21 +12,19 @@ import { Submission } from '../../../../electron-app/src/submission/interfaces/s
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
 
-const defaultOptions: DiscordOptions = {
+const defaultOptions: DiscordFileOptions = {
+  ...GenericDefaultFileOptions,
   spoiler: false,
-  useTitle: true,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true
+  useTitle: true
+};
+
+const defaultNotificationOptions: DiscordNotificationOptions = {
+  ...GenericDefaultNotificationOptions,
+  useTitle: true
 };
 
 export class Discord implements Website {
@@ -33,7 +34,7 @@ export class Discord implements Website {
   supportsTags: boolean = false;
   LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DiscordOptions>) => (
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DiscordFileOptions>) => (
     <DiscordFileSubmissionForm
       hideThumbnailOptions={true}
       tagOptions={{ show: false }}
@@ -43,7 +44,7 @@ export class Discord implements Website {
     />
   );
 
-  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DiscordOptions>) => (
+  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DiscordFileOptions>) => (
     <DiscordNotificationSubmissionForm
       tagOptions={{ show: false }}
       ratingOptions={{ show: false }}
@@ -52,13 +53,15 @@ export class Discord implements Website {
     />
   );
 
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
+  getDefaults(type: SubmissionType) {
+    return _.cloneDeep(type === SubmissionType.FILE ? defaultOptions : defaultNotificationOptions);
   }
 }
 
-export class DiscordNotificationSubmissionForm extends GenericSubmissionSection<DiscordOptions> {
-  renderLeftForm(data: DiscordOptions) {
+export class DiscordNotificationSubmissionForm extends GenericSubmissionSection<
+  DiscordFileOptions
+> {
+  renderLeftForm(data: DiscordFileOptions) {
     const elements = super.renderLeftForm(data);
     return [
       ...elements,
@@ -69,18 +72,13 @@ export class DiscordNotificationSubmissionForm extends GenericSubmissionSection<
         >
           Use Title
         </Checkbox>
-      </div>,
-      <div>
-        <Checkbox checked={data.spoiler} onChange={this.handleCheckedChange.bind(this, 'spoiler')}>
-          Spoiler
-        </Checkbox>
       </div>
     ];
   }
 }
 
-export class DiscordFileSubmissionForm extends GenericFileSubmissionSection<DiscordOptions> {
-  renderLeftForm(data: DiscordOptions) {
+export class DiscordFileSubmissionForm extends GenericFileSubmissionSection<DiscordFileOptions> {
+  renderLeftForm(data: DiscordFileOptions) {
     const elements = super.renderLeftForm(data);
     return [
       ...elements,

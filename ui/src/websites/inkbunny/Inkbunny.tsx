@@ -8,24 +8,15 @@ import InkbunnyLogin from './InkbunnyLogin';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
 const defaultOptions: InkbunnyOptions = {
+  ...GenericDefaultFileOptions,
   blockGuests: false,
   friendsOnly: false,
   notify: true,
   scraps: false,
-  submissionType: undefined,
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  submissionType: undefined
 };
 
 export class Inkbunny implements Website {

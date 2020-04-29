@@ -14,35 +14,17 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
 const defaultFileOptions: SubscribeStarFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  tier: 'free',
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  ...GenericDefaultFileOptions,
+  tier: 'free'
 };
 
 const defaultNotificationOptions: SubscribeStarNotificationOptions = {
-  title: undefined,
-  tier: 'free',
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  ...GenericDefaultNotificationOptions,
+  tier: 'free'
 };
 
 export class SubscribeStar implements Website {

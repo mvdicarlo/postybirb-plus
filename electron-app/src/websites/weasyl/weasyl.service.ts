@@ -26,7 +26,7 @@ import { LoginResponse } from 'src/websites/interfaces/login-response.interface'
 import { Website } from 'src/websites/website.base';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { WeasylDefaultFileOptions } from './weasyl.defaults';
-import { WeasylOptions } from './weasyl.interface';
+import { WeasylFileOptions } from './weasyl.interface';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -35,7 +35,7 @@ export class Weasyl extends Website {
   readonly BASE_URL: string = 'https://www.weasyl.com';
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
 
-  readonly fileSubmissionOptions: WeasylOptions = WeasylDefaultFileOptions;
+  readonly fileSubmissionOptions: WeasylFileOptions = WeasylDefaultFileOptions;
 
   readonly usernameShortcuts = [
     {
@@ -110,7 +110,7 @@ export class Weasyl extends Website {
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
-    data: PostData<Submission, WeasylOptions>,
+    data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
     const page = await Http.get<string>(`${this.BASE_URL}/submit/journal`, data.part.accountId);
     this.verifyResponse(page);
@@ -139,7 +139,7 @@ export class Weasyl extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<WeasylOptions>,
+    data: FilePostData<WeasylFileOptions>,
   ): Promise<PostResponse> {
     const type = this.getContentType(data.primary.type);
     const url = `${this.BASE_URL}/submit/${type}`;
@@ -282,7 +282,7 @@ export class Weasyl extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<WeasylOptions>,
+    submissionPart: SubmissionPart<WeasylFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

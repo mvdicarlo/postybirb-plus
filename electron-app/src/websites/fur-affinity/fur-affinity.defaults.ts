@@ -1,6 +1,11 @@
 import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
+import {
+  GenericDefaultFileOptions,
+  GenericDefaultNotificationOptions,
+} from '../generic/generic.defaults';
 
 export const FurAffinityDefaultFileOptions: FurAffinityFileOptions = {
+  ...GenericDefaultFileOptions,
   category: '1',
   disableComments: false,
   folders: [],
@@ -9,28 +14,9 @@ export const FurAffinityDefaultFileOptions: FurAffinityFileOptions = {
   scraps: false,
   species: '1',
   theme: '1',
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };
 
 export const FurAffinityDefaultNotificationOptions: FurAffinityNotificationOptions = {
+  ...GenericDefaultNotificationOptions,
   feature: true,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
 };

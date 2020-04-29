@@ -19,8 +19,8 @@ import FormContent from 'src/utils/form-content.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { DiscordDefaultFileOptions } from './discord.defaults';
-import { DiscordOptions } from './discord.interface';
+import { DiscordDefaultFileOptions, DiscordDefaultNotificationOptions } from './discord.defaults';
+import { DiscordFileOptions, DiscordNotificationOptions } from './discord.interface';
 
 interface DiscordLoginData {
   name: string;
@@ -36,7 +36,8 @@ export class Discord extends Website {
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
 
-  readonly fileSubmissionOptions: DiscordOptions = DiscordDefaultFileOptions;
+  readonly fileSubmissionOptions: DiscordFileOptions = DiscordDefaultFileOptions;
+  readonly notificationSubmissionOptions: DiscordNotificationOptions = DiscordDefaultNotificationOptions;
   readonly defaultDescriptionParser = PlaintextParser.parse;
 
   readonly usernameShortcuts = [];
@@ -59,7 +60,7 @@ export class Discord extends Website {
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
-    data: PostData<Submission, DiscordOptions>,
+    data: PostData<Submission, DiscordNotificationOptions>,
     accountData: DiscordLoginData,
   ): Promise<PostResponse> {
     let description = `${data.options.useTitle ? `**${data.title}**\n\n` : ''}${data.description}`
@@ -96,12 +97,12 @@ export class Discord extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<DiscordOptions>,
+    data: FilePostData<DiscordFileOptions>,
     accountData: DiscordLoginData,
   ): Promise<PostResponse> {
     await this.postNotificationSubmission(
       cancellationToken,
-      data as PostData<Submission, DiscordOptions>,
+      data as PostData<Submission, DiscordFileOptions>,
       accountData,
     );
     const formData = {
@@ -165,7 +166,7 @@ export class Discord extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DiscordOptions>,
+    submissionPart: SubmissionPart<DiscordFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

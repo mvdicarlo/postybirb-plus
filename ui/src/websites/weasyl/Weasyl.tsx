@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { WeasylOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
+import { WeasylFileOptions } from '../../../../electron-app/src/websites/weasyl/weasyl.interface';
 import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { Form, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
@@ -14,24 +14,14 @@ import { WeasylCategories } from './WeasylCategories';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
-const defaultOptions: WeasylOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
+const defaultOptions: WeasylFileOptions = {
+  ...GenericDefaultFileOptions,
   notify: true,
   critique: false,
   folder: null,
-  category: null,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
+  category: null
 };
 
 export class Weasyl implements Website {
@@ -43,7 +33,7 @@ export class Weasyl implements Website {
     <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
   );
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, WeasylOptions>) => (
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, WeasylFileOptions>) => (
     <WeasylFileSubmissionForm
       key={props.part.accountId}
       ratingOptions={{
@@ -104,12 +94,12 @@ interface WeasylFileSubmissionState {
   folders: Folder[];
 }
 
-export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<WeasylOptions> {
+export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<WeasylFileOptions> {
   state: WeasylFileSubmissionState = {
     folders: []
   };
 
-  constructor(props: WebsiteSectionProps<FileSubmission, WeasylOptions>) {
+  constructor(props: WebsiteSectionProps<FileSubmission, WeasylFileOptions>) {
     super(props);
     this.state = {
       folders: []
@@ -127,7 +117,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
     );
   }
 
-  renderRightForm(data: WeasylOptions) {
+  renderRightForm(data: WeasylFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Category">
@@ -166,7 +156,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
     return elements;
   }
 
-  renderLeftForm(data: WeasylOptions) {
+  renderLeftForm(data: WeasylFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
       <div>

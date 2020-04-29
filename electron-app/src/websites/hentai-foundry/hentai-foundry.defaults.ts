@@ -1,6 +1,8 @@
 import { HentaiFoundryFileOptions } from './hentai-foundry.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const HentaiFoundryDefaultFileOptions: HentaiFoundryFileOptions = {
+  ...GenericDefaultFileOptions,
   scraps: false,
   disableComments: false,
   category: undefined,
@@ -27,15 +29,4 @@ export const HentaiFoundryDefaultFileOptions: HentaiFoundryFileOptions = {
   timeTaken: undefined,
   license: '0',
   reference: undefined,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };

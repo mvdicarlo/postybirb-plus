@@ -1,16 +1,7 @@
-import { PiczelOptions } from './piczel.interface';
+import { PiczelFileOptions } from './piczel.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
-export const PiczelDefaultFileOptions: PiczelOptions = {
+export const PiczelDefaultFileOptions: PiczelFileOptions = {
+  ...GenericDefaultFileOptions,
   folder: null,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };

@@ -19,7 +19,7 @@ import { LoginResponse } from 'src/websites/interfaces/login-response.interface'
 import { Website } from 'src/websites/website.base';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { PiczelDefaultFileOptions } from './piczel.defaults';
-import { PiczelOptions } from './piczel.interface';
+import { PiczelFileOptions } from './piczel.interface';
 
 @Injectable()
 export class Piczel extends Website {
@@ -27,7 +27,7 @@ export class Piczel extends Website {
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = true;
 
-  readonly fileSubmissionOptions: PiczelOptions = PiczelDefaultFileOptions;
+  readonly fileSubmissionOptions: PiczelFileOptions = PiczelDefaultFileOptions;
 
   readonly usernameShortcuts = [
     {
@@ -84,7 +84,7 @@ export class Piczel extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<PiczelOptions>,
+    data: FilePostData<PiczelFileOptions>,
   ): Promise<PostResponse> {
     const form: any = {
       nsfw: data.rating !== SubmissionRating.GENERAL,
@@ -141,7 +141,7 @@ export class Piczel extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<PiczelOptions>,
+    submissionPart: SubmissionPart<PiczelFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

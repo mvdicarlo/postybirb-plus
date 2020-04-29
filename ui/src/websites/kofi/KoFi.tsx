@@ -11,21 +11,9 @@ import {
 } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-
-const defaultOptions: DefaultFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
-};
+import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
 export class KoFi implements Website {
   internalName: string = 'KoFi';
@@ -55,7 +43,9 @@ export class KoFi implements Website {
     />
   );
 
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
+  getDefaults(type: SubmissionType) {
+    return _.cloneDeep(
+      type === SubmissionType.FILE ? GenericDefaultFileOptions : GenericDefaultNotificationOptions
+    );
   }
 }

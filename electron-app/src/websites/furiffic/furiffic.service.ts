@@ -21,8 +21,11 @@ import WebsiteValidator from 'src/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { FurifficDefaultFileOptions } from './furiffic.defaults';
 import { FurifficOptions } from './furiffic.interface';
+import {
+  GenericDefaultFileOptions,
+  GenericDefaultNotificationOptions,
+} from '../generic/generic.defaults';
 
 @Injectable()
 export class Furiffic extends Website {
@@ -49,7 +52,8 @@ export class Furiffic extends Website {
   ];
 
   readonly acceptsAdditionalFiles: boolean = false;
-  readonly fileSubmissionOptions: FurifficOptions = FurifficDefaultFileOptions;
+  readonly fileSubmissionOptions = GenericDefaultFileOptions;
+  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
 
   readonly usernameShortcuts = [

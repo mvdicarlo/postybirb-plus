@@ -6,21 +6,7 @@ import { FileSubmission } from '../../../../electron-app/src/submission/file-sub
 import { DefaultFileOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-
-const defaultOptions: DefaultFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
-};
+import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
 export class Route50 implements Website {
   internalName: string = 'Route50';
@@ -42,6 +28,6 @@ export class Route50 implements Website {
   }
 
   getDefaults() {
-    return _.cloneDeep(defaultOptions);
+    return _.cloneDeep(GenericDefaultFileOptions);
   }
 }

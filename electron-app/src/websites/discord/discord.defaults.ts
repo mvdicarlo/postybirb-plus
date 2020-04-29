@@ -1,17 +1,16 @@
-import { DiscordOptions } from './discord.interface';
+import { DiscordFileOptions, DiscordNotificationOptions } from './discord.interface';
+import {
+  GenericDefaultFileOptions,
+  GenericDefaultNotificationOptions,
+} from '../generic/generic.defaults';
 
-export const DiscordDefaultFileOptions: DiscordOptions = {
+export const DiscordDefaultFileOptions: DiscordFileOptions = {
+  ...GenericDefaultFileOptions,
   spoiler: false,
   useTitle: true,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
+};
+
+export const DiscordDefaultNotificationOptions: DiscordNotificationOptions = {
+  ...GenericDefaultNotificationOptions,
+  useTitle: true,
 };
