@@ -271,6 +271,11 @@ export class Furiffic extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
+    const title = submissionPart.data.title || defaultPart.data.title || submission.title;
+    if (title.length > 75) {
+      warnings.push(`Title will be truncated to 75 characters: ${title.substring(0, 75)}`);
+    }
+
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(

@@ -14,7 +14,8 @@ import { Route50 } from './route-50/Route50';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 import { Aryion } from './aryion/Aryion';
 import { Custom } from './custom/Custom';
-import { Newgrounds } from './Newgrounds/Newgrounds';
+import { Newgrounds } from './newgrounds/Newgrounds';
+import { Pixiv } from './pixiv/Pixiv';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -29,6 +30,7 @@ export class WebsiteRegistry {
     KoFi: new KoFi(),
     Newgrounds: new Newgrounds(),
     Piczel: new Piczel(),
+    Pixiv: new Pixiv(),
     Route50: new Route50(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),

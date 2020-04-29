@@ -16,7 +16,7 @@ import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { UIStore } from '../../stores/ui.store';
-import { WebsiteRegistry } from '../../website-components/website-registry';
+import { WebsiteRegistry } from '../../websites/website-registry';
 import { inject, observer } from 'mobx-react';
 import { KofiIcon, DiscordIcon } from './SvgIcons';
 import NotificationsView from '../notifications/NotificationsView';

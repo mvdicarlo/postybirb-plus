@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import DefaultFormSection from '../form-sections/DefaultFormSection';
 import SubmissionService from '../../../../services/submission.service';
 import SubmissionUtil from '../../../../utils/submission.util';

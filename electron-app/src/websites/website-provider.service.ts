@@ -16,6 +16,7 @@ import { HentaiFoundry } from './hentai-foundry/hentai-foundry.service';
 import { Aryion } from './aryion/aryion.service';
 import { Custom } from './custom/custom.service';
 import { Newgrounds } from './newgrounds/newgrounds.service';
+import { Pixiv } from './pixiv/pixiv.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -39,6 +40,7 @@ export class WebsiteProvider {
     readonly aryion: Aryion,
     readonly custom: Custom,
     readonly newgrounds: Newgrounds,
+    readonly pixiv: Pixiv,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

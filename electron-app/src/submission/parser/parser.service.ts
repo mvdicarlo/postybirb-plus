@@ -171,7 +171,7 @@ export class ParserService {
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
   ): string {
-    return websitePart.data.title || defaultPart.data.title || submission.title;
+    return (websitePart.data.title || defaultPart.data.title || submission.title).substring(0, 160);
   }
 
   private isFileSubmission(submission: Submission): submission is FileSubmission {

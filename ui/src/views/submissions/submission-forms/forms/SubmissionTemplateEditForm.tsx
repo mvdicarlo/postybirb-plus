@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import DefaultFormSection from '../form-sections/DefaultFormSection';
 import { LoginStatusStore } from '../../../../stores/login-status.store';
 import { Match, withRouter, history } from 'react-router-dom';

@@ -8,7 +8,7 @@ import { Problems } from '../../../../../electron-app/src/submission/validator/i
 import moment from 'moment';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import PostService from '../../../services/post.service';
-import { WebsiteRegistry } from '../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../websites/website-registry';
 import { IssueState } from './IssueState';
 import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';

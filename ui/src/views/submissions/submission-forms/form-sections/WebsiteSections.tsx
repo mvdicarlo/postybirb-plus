@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { loginStatusStore, LoginStatusStore } from '../../../../stores/login-status.store';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { Form, Typography, Tabs, Badge, Empty } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { SubmissionType } from '../../../../shared/enums/submission-type.enum';

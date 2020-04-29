@@ -10,7 +10,7 @@ import { PostInfoStatus } from '../../../../electron-app/src/submission/post/int
 import PostService from '../../services/post.service';
 import { Link } from 'react-router-dom';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { WebsiteRegistry } from '../../website-components/website-registry';
+import { WebsiteRegistry } from '../../websites/website-registry';
 import { loginStatusStore } from '../../stores/login-status.store';
 import RemoteService from '../../services/remote.service';
 

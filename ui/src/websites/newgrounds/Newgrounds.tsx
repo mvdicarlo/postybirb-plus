@@ -98,38 +98,9 @@ export class Newgrounds implements Website {
 export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<
   NewgroundsFileOptions
 > {
-  renderLeftForm(data: NewgroundsFileOptions) {
-    const elements = super.renderLeftForm(data);
+  renderRightForm(data: NewgroundsFileOptions) {
+    const elements = super.renderRightForm(data);
     elements.push(
-      <div>
-        <Checkbox checked={data.sketch} onChange={this.handleCheckedChange.bind(this, 'sketch')}>
-          Is a sketch
-        </Checkbox>
-      </div>,
-      <div>
-        <Checkbox
-          checked={data.creativeCommons}
-          onChange={this.handleCheckedChange.bind(this, 'creativeCommons')}
-        >
-          Use a Creative Commons license
-        </Checkbox>
-      </div>,
-      <div>
-        <Checkbox
-          checked={data.commercial}
-          onChange={this.handleCheckedChange.bind(this, 'commercial')}
-        >
-          Allow commercial uses
-        </Checkbox>
-      </div>,
-      <div>
-        <Checkbox
-          checked={data.modification}
-          onChange={this.handleCheckedChange.bind(this, 'modification')}
-        >
-          Allow modification
-        </Checkbox>
-      </div>,
       <Form.Item label="Nudity">
         <Radio.Group
           onChange={this.handleValueChange.bind(this, 'nudity')}
@@ -174,6 +145,41 @@ export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<
           <Radio.Button value="a">Lots</Radio.Button>
         </Radio.Group>
       </Form.Item>
+    );
+    return elements;
+  }
+  renderLeftForm(data: NewgroundsFileOptions) {
+    const elements = super.renderLeftForm(data);
+    elements.push(
+      <div>
+        <Checkbox checked={data.sketch} onChange={this.handleCheckedChange.bind(this, 'sketch')}>
+          Is a sketch
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.creativeCommons}
+          onChange={this.handleCheckedChange.bind(this, 'creativeCommons')}
+        >
+          Use a Creative Commons license
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.commercial}
+          onChange={this.handleCheckedChange.bind(this, 'commercial')}
+        >
+          Allow commercial uses
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.modification}
+          onChange={this.handleCheckedChange.bind(this, 'modification')}
+        >
+          Allow modification
+        </Checkbox>
+      </div>
     );
     return elements;
   }

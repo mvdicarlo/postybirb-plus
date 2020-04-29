@@ -6,7 +6,7 @@ import { Form, Switch, Button, Popover, Typography } from 'antd';
 import { DescriptionTemplateStore } from '../../../../stores/description-template.store';
 import { DescriptionData } from '../../../../../../electron-app/src/submission/submission-part/interfaces/description-data.interface';
 import WebsiteService from '../../../../services/website.service';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { uiStore } from '../../../../stores/ui.store';
 import { CustomShortcutStore } from '../../../../stores/custom-shortcut.store';
 

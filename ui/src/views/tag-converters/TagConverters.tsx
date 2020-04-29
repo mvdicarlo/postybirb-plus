@@ -17,7 +17,7 @@ import {
   Popconfirm,
   Alert
 } from 'antd';
-import { WebsiteRegistry } from '../../website-components/website-registry';
+import { WebsiteRegistry } from '../../websites/website-registry';
 
 interface Props {
   tagConverterStore?: TagConverterStore;

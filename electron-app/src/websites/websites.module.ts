@@ -18,6 +18,7 @@ import { HentaiFoundryModule } from './hentai-foundry/hentai-foundry.module';
 import { AryionModule } from './aryion/aryion.module';
 import { CustomModule } from './custom/custom.module';
 import { NewgroundsModule } from './newgrounds/newgrounds.module';
+import { PixivModule } from './pixiv/pixiv.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -40,6 +41,7 @@ import { NewgroundsModule } from './newgrounds/newgrounds.module';
     AryionModule,
     CustomModule,
     NewgroundsModule,
+    PixivModule,
   ],
 })
 export class WebsitesModule {}
