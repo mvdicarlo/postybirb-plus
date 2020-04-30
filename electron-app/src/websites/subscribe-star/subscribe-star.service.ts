@@ -20,7 +20,10 @@ import { v1 } from 'uuid';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { SubscribeStarDefaultFileOptions, SubscribeStarDefaultNotificationOptions } from './subscribe-star.defaults';
+import {
+  SubscribeStarDefaultFileOptions,
+  SubscribeStarDefaultNotificationOptions,
+} from './subscribe-star.defaults';
 import { SubscribeStarFileOptions } from './subscribe-star.interface';
 
 @Injectable()
@@ -44,7 +47,11 @@ export class SubscribeStar extends Website {
     if (res.body.includes('top_bar-user_name')) {
       status.loggedIn = true;
       status.username = res.body.match(/<div class="top_bar-user_name">(.*?)<\/div>/)[1];
-      this.storeAccountInformation(data._id, 'username', status.username);
+      this.storeAccountInformation(
+        data._id,
+        'username',
+        res.body.match(/class="top_bar-branding">(.*?)href="(.*?)"/ims)[2],
+      );
     }
     return status;
   }
@@ -109,8 +116,8 @@ export class SubscribeStar extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<SubscribeStarFileOptions>,
   ): Promise<PostResponse> {
-    const username: string = this.getAccountInfo(data.part.accountId, 'username');
-    const page = await Http.get<string>(`${this.BASE_URL}/${username}`, data.part.accountId);
+    const usernameLink: string = this.getAccountInfo(data.part.accountId, 'username');
+    const page = await Http.get<string>(`${this.BASE_URL}${usernameLink}`, data.part.accountId);
     this.verifyResponse(page, 'Get CSRF');
     page.body = page.body.replace(/\&quot;/g, '"');
     const csrf = page.body.match(/<meta name="csrf-token" content="(.*?)"/)[1];
@@ -161,7 +168,7 @@ export class SubscribeStar extends Website {
           type: 'json',
           data: record,
           headers: {
-            Referer: `https://www.subscribestar.com/${username}`,
+            Referer: `https://www.subscribestar.com/${usernameLink}`,
             Origin: 'https://www.subscribestar.com',
           },
         },
