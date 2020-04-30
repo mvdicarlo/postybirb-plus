@@ -166,11 +166,6 @@ export class Aryion extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const title = defaultPart.data.title || submissionPart.data.title;
-    if (title && title.length > 50) {
-      warnings.push(`Title will be truncated to 50 characters (${title.substring(0, 50)})`);
-    }
-
     if (!submissionPart.data.folder || !submissionPart.data.folder.length) {
       problems.push('No folder selected.');
     } else {

@@ -108,7 +108,7 @@ export class PixivFileSubmissionForm extends GenericFileSubmissionSection<PixivF
   renderWideForm(data: PixivFileOptions) {
     const elements = super.renderWideForm(data);
     const rating = data.rating || this.props.defaultData!.rating;
-    if (data.rating === 'general') {
+    if (rating === 'general') {
       elements.push(
         <div>
           <Checkbox checked={data.sexual} onChange={this.handleCheckedChange.bind(this, 'sexual')}>

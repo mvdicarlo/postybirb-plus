@@ -51,7 +51,6 @@ export class Furiffic extends Website {
     'mp4',
   ];
 
-  readonly acceptsAdditionalFiles: boolean = false;
   readonly fileSubmissionOptions = GenericDefaultFileOptions;
   readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;

@@ -20,6 +20,7 @@ import { Website } from 'src/websites/website.base';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { PiczelDefaultFileOptions } from './piczel.defaults';
 import { PiczelFileOptions } from './piczel.interface';
+import WebsiteValidator from 'src/utils/website-validator.util';
 
 @Injectable()
 export class Piczel extends Website {
@@ -179,6 +180,10 @@ export class Piczel extends Website {
         } else {
           problems.push(`Piczel limits ${mimetype} to ${maxMB}MB`);
         }
+      }
+
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
     });
 

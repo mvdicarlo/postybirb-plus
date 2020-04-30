@@ -34,8 +34,14 @@ export default class Http {
     return cookies.map(c => `${c.name}=${c.value}`).join('; ');
   }
 
-  static async retrieveCookies(
-    uri: string,
+  static async getWebsiteCookies(partitionId: string, url: string): Promise<Electron.Cookie[]> {
+    return await session.fromPartition(`persist:${partitionId}`).cookies.get({
+      url: new URL(url).origin,
+    });
+  }
+
+  static async retrieveCookieString(
+    url: string,
     ses: Electron.Session,
     cookies?: string,
   ): Promise<string> {
@@ -44,7 +50,7 @@ export default class Http {
     }
 
     const sessionCookies = await ses.cookies.get({
-      url: new URL(uri).origin,
+      url: new URL(url).origin,
     });
 
     return Http.parseCookies(sessionCookies);
@@ -78,10 +84,14 @@ export default class Http {
     options: GetOptions = {},
   ): Promise<HttpResponse<T>> {
     options = options || {};
-    const ses = session.fromPartition(`persist:${partitionId}`);
+    let ses: Electron.Session;
+    options = options || {};
+    if (partitionId) {
+      ses = session.fromPartition(`persist:${partitionId}`);
+    }
     const headers = options.headers || {};
     if (!options.skipCookies && ses) {
-      headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+      headers.cookie = await Http.retrieveCookieString(uri, ses, headers.cookie);
     }
 
     const opts: request.CoreOptions = Object.assign(
@@ -130,7 +140,7 @@ export default class Http {
 
     const headers = options.headers || {};
     if (!options.skipCookies && ses) {
-      headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+      headers.cookie = await Http.retrieveCookieString(uri, ses, headers.cookie);
     }
 
     const opts: request.CoreOptions = Object.assign(

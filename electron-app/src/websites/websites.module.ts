@@ -19,6 +19,7 @@ import { AryionModule } from './aryion/aryion.module';
 import { CustomModule } from './custom/custom.module';
 import { NewgroundsModule } from './newgrounds/newgrounds.module';
 import { PixivModule } from './pixiv/pixiv.module';
+import { NewTumblModule } from './new-tumbl/new-tumbl.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -42,6 +43,7 @@ import { PixivModule } from './pixiv/pixiv.module';
     CustomModule,
     NewgroundsModule,
     PixivModule,
+    NewTumblModule,
   ],
 })
 export class WebsitesModule {}

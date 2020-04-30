@@ -23,6 +23,7 @@ import { FileSubmissionType } from 'src/submission/file-submission/enums/file-su
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import HtmlParserUtil from 'src/utils/html-parser.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
+import WebsiteValidator from 'src/utils/website-validator.util';
 
 @Injectable()
 export class Pixiv extends Website {
@@ -181,7 +182,11 @@ export class Pixiv extends Website {
         ) {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
-          problems.push(`Inkbunny limits ${mimetype} to ${maxMB}MB`);
+          problems.push(`Pixiv limits ${mimetype} to ${maxMB}MB`);
+        }
+
+        if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+          problems.push(`Does not support file format: (${name}) ${mimetype}.`);
         }
       }
     });

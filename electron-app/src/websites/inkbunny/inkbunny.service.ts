@@ -22,6 +22,7 @@ import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
 import { Website } from '../website.base';
 import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
 import { InkbunnyOptions } from './inkbunny.interface';
+import WebsiteValidator from 'src/utils/website-validator.util';
 
 interface InkbunnyAccountData {
   username: string;
@@ -205,7 +206,8 @@ export class Inkbunny extends Website {
   }
 
   formatTags(tags: string[]) {
-    return super.formatTags(tags)
+    return super
+      .formatTags(tags)
       .join(',')
       .trim();
   }
@@ -243,6 +245,10 @@ export class Inkbunny extends Website {
         } else {
           problems.push(`Inkbunny limits ${mimetype} to ${maxMB}MB`);
         }
+      }
+
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
     });
 

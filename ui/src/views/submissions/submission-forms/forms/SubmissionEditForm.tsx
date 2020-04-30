@@ -249,14 +249,15 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     }
 
     filtered.forEach(status => {
+      const name = WebsiteRegistry.find(status.website)?.name;
       websiteData[status.website] = websiteData[status.website] || { children: [] };
-      websiteData[status.website].title = status.website;
+      websiteData[status.website].title = name;
       websiteData[status.website].key = status.website;
       websiteData[status.website].value = status.website;
       (websiteData[status.website].children as any[]).push({
         key: status._id,
         value: status._id,
-        title: `${status.website}: ${status.alias}`,
+        title: `${name}: ${status.alias}`,
         isLeaf: true
       });
     });
