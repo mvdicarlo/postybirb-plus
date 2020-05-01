@@ -23,6 +23,7 @@ export default class WebsiteValidator {
   }
 
   static folderIdExists(id: string, folders: Folder[]): boolean {
+    if (!folders) return false;
     for (const folder of folders) {
       if (folder.value === id) {
         return true;

@@ -81,6 +81,7 @@ export class Weasyl implements Website {
     />
   );
 
+  // TODO make a real notification file option
   getDefaults() {
     return _.cloneDeep(defaultOptions);
   }

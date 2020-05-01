@@ -20,6 +20,7 @@ import { CustomModule } from './custom/custom.module';
 import { NewgroundsModule } from './newgrounds/newgrounds.module';
 import { PixivModule } from './pixiv/pixiv.module';
 import { NewTumblModule } from './new-tumbl/new-tumbl.module';
+import { FurryLifeModule } from './furry-life/furry-life.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -44,6 +45,7 @@ import { NewTumblModule } from './new-tumbl/new-tumbl.module';
     NewgroundsModule,
     PixivModule,
     NewTumblModule,
+    FurryLifeModule,
   ],
 })
 export class WebsitesModule {}

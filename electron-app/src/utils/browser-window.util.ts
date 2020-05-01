@@ -23,11 +23,17 @@ export default class BrowserWindowUtil {
     }
   }
 
-  public static async getFormData(partition: string, url: string, selector: string): Promise<any> {
+  public static async getFormData(
+    partition: string,
+    url: string,
+    selector: { id?: string; custom?: string },
+  ): Promise<any> {
     const bw = await BrowserWindowUtil.createWindow(partition, url);
     try {
       return await bw.webContents.executeJavaScript(
-        `Array.from(new FormData(${selector})).reduce((obj, [k, v]) => ({...obj, [k]: v}), {})`,
+        `Array.from(new FormData(${
+          selector.id ? `document.getElementById('${selector.id}')` : selector.custom
+        })).reduce((obj, [k, v]) => ({...obj, [k]: v}), {})`,
       );
     } catch (err) {
       bw.destroy();

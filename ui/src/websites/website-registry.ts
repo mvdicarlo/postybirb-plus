@@ -17,6 +17,7 @@ import { Custom } from './custom/Custom';
 import { Newgrounds } from './newgrounds/Newgrounds';
 import { Pixiv } from './pixiv/Pixiv';
 import { NewTumbl } from './new-tumbl/NewTumbl';
+import { FurryLife } from './furry-life/FurryLife';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -26,6 +27,7 @@ export class WebsiteRegistry {
     Discord: new Discord(),
     FurAffinity: new FurAffinity(),
     Furiffic: new Furiffic(),
+    FurryLife: new FurryLife(),
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
     KoFi: new KoFi(),

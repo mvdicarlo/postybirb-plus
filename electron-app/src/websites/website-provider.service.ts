@@ -18,6 +18,7 @@ import { Custom } from './custom/custom.service';
 import { Newgrounds } from './newgrounds/newgrounds.service';
 import { Pixiv } from './pixiv/pixiv.service';
 import { NewTumbl } from './new-tumbl/new-tumbl.service';
+import { FurryLife } from './furry-life/furry-life.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -43,6 +44,7 @@ export class WebsiteProvider {
     readonly newgrounds: Newgrounds,
     readonly pixiv: Pixiv,
     readonly newTumbl: NewTumbl,
+    readonly furryLife: FurryLife,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

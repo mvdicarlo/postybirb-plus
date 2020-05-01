@@ -116,11 +116,9 @@ export class Derpibooru extends Website {
     if (!tags.includes(ratingTag)) tags.push(ratingTag);
 
     const form: any = {
-      ...(await BrowserWindowUtil.getFormData(
-        data.part.accountId,
-        `${this.BASE_URL}/images/new`,
-        'document.body.querySelectorAll("form")[3]',
-      )),
+      ...(await BrowserWindowUtil.getFormData(data.part.accountId, `${this.BASE_URL}/images/new`, {
+        custom: 'document.body.querySelectorAll("form")[3]',
+      })),
       _method: 'post',
       'image[tag_input]': this.formatTags(tags),
       'image[image]': data.primary.file,
