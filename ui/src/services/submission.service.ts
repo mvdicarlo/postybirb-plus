@@ -1,12 +1,12 @@
-import axios from '../utils/http';
-import { SubmissionUpdate } from '../../../electron-app/src/submission/interfaces/submission-update.interface';
-import { SubmissionOverwrite } from '../../../electron-app/src/submission/interfaces/submission-overwrite.interface';
-import { FormSubmissionPart } from '../views/submissions/submission-forms/interfaces/form-submission-part.interface';
-import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
 import { FileRecord } from '../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
-import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
-import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { SubmissionCreate } from '../../../electron-app/src/submission/interfaces/submission-create.interface';
+import { SubmissionOverwrite } from '../../../electron-app/src/submission/interfaces/submission-overwrite.interface';
+import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionUpdate } from '../../../electron-app/src/submission/interfaces/submission-update.interface';
+import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
+import { Problems } from '../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import axios from '../utils/http';
+import { FormSubmissionPart } from '../views/submissions/submission-forms/interfaces/form-submission-part.interface';
 
 export default class SubmissionService {
   static checkProblems(id: string, parts: Array<FormSubmissionPart<any>>) {
@@ -23,18 +23,18 @@ export default class SubmissionService {
     return axios.post('/submission/create', data);
   }
 
+  static createFromClipboard() {
+    const formData: FormData = new FormData();
+    formData.set('file', window.electron.clipboard.read());
+    return axios.post('/submission/create/', formData);
+  }
+
   static changeFallback(id: string, file: File) {
     const formData = new FormData();
     formData.set('file', file);
     return axios
       .post<SubmissionPackage<any>>(`/submission/change/fallback/${id}`, formData)
       .then(({ data }) => data);
-  }
-
-  static createFromClipboard() {
-    const formData: FormData = new FormData();
-    formData.set('file', window.electron.clipboard.read());
-    return axios.post('/submission/create/', formData);
   }
 
   static deleteSubmission(id: string) {

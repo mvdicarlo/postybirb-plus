@@ -27,6 +27,7 @@ import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { RcFile } from 'antd/lib/upload';
 import SubmissionTemplateSelect from '../submission-template-select/SubmissionTemplateSelect';
 import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import Axios from 'axios';
 const { Dragger } = Upload;
 
 interface Props {
@@ -293,11 +294,13 @@ export class EditableSubmissions extends React.Component<Props, State> {
 
 interface FileSubmissionCreateState {
   canCopyClipboard: boolean;
+  importUrl: string;
 }
 
 class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateState> {
   state: FileSubmissionCreateState = {
-    canCopyClipboard: window.electron.clipboard.availableFormats().includes('image/png')
+    canCopyClipboard: window.electron.clipboard.availableFormats().includes('image/png'),
+    importUrl: ''
   };
 
   private clipboardCheckInterval: any;
@@ -344,6 +347,33 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
       .catch(() => message.error('Failed to create submission.'));
   }
 
+  async createFromImportURL() {
+    const importUrl = this.state.importUrl.trim();
+    if (importUrl.length) {
+      try {
+        const filename = importUrl.split('/').pop() || 'import';
+        const res = await Axios.get(importUrl, { responseType: 'arraybuffer' });
+        const blob: Blob = new Blob([res.data], { type: res.headers['content-type'] });
+        const file: File = new File([blob], filename, {
+          type: res.headers['content-type']
+        });
+        SubmissionService.create({
+          type: SubmissionType.FILE,
+          title: filename,
+          file
+        })
+          .then(() => {
+            message.success('Image imported.');
+          })
+          .catch(() => {
+            message.error('Unable to load file for import.');
+          });
+      } catch (err) {
+        message.error('Unable to load file for import.');
+      }
+    }
+  }
+
   render() {
     return (
       <div>
@@ -363,6 +393,22 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
           >
             <Icon type="copy" />
             Copy from clipboard
+          </Button>
+        </div>
+        <div className="mt-1 flex">
+          <Input
+            className="mr-1"
+            placeholder="Import From URL"
+            style={{ flex: 10 }}
+            defaultValue={this.state.importUrl}
+            onChange={e => this.setState({ importUrl: e.target.value })}
+          />
+          <Button
+            className="block"
+            disabled={!this.state.importUrl}
+            onClick={this.createFromImportURL.bind(this)}
+          >
+            Import
           </Button>
         </div>
       </div>
