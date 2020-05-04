@@ -1,22 +1,22 @@
 import {
-  Injectable,
-  Logger,
   BadRequestException,
-  NotFoundException,
   forwardRef,
   Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
-import { AccountRepository, AccountRepositoryToken } from './account.repository';
+import { session } from 'electron';
 import { EventsGateway } from 'src/events/events.gateway';
+import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
+import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
+import { SubmissionService } from 'src/submission/submission.service';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
-import { session } from 'electron';
-import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
+import { AccountRepository, AccountRepositoryToken } from './account.repository';
 import { AccountEvent } from './enums/account.events.enum';
-import { SubmissionService } from 'src/submission/submission.service';
-import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
-import UserAccountEntity from './models/user-account.entity';
 import { UserAccountDto } from './interfaces/user-account.dto.interface';
+import UserAccountEntity from './models/user-account.entity';
 
 @Injectable()
 export class AccountService {
@@ -68,6 +68,23 @@ export class AccountService {
       this.loginCheckMap[refreshInterval] = this.loginCheckMap[refreshInterval] || [];
       this.loginCheckMap[refreshInterval].push(website.constructor.name);
     });
+  }
+
+  async clearCookiesAndData(id: string) {
+    this.logger.log(id, 'Clearing Account Data');
+
+    const ses = session.fromPartition(`persist:${id}`);
+    const cookies = await ses.cookies.get({});
+    if (cookies.length) {
+      await ses.clearStorageData();
+    }
+
+    const data = await this.get(id);
+    if (data && data.data && Object.keys(data.data)) {
+      await this.setData(id, {});
+    }
+
+    this.checkLogin(id);
   }
 
   async createAccount(createAccount: UserAccountEntity) {

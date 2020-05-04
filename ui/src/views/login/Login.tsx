@@ -175,6 +175,16 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
     }
   };
 
+  clearAccountData = (id: string) => {
+    LoginService.clearAccountData(id)
+      .then(() => {
+        message.success('Cookies and data cleared.');
+      })
+      .catch(() => {
+        message.error('Failed to clear data.');
+      });
+  };
+
   deleteAccount = (id: string) => LoginService.deleteAccount(id);
 
   renameAccount = () => {
@@ -217,6 +227,16 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
             Login
           </span>,
           <Popconfirm
+            title={<div>Are you sure you want to clear cookies and data for this account?</div>}
+            onConfirm={() => this.clearAccountData(this.props.accountInfo._id)}
+          >
+            <span className="text-link" key="action-clear" title="Clear cookies and login data">
+              <Typography.Text type="danger">
+                <Icon type="disconnect" />
+              </Typography.Text>
+            </span>
+          </Popconfirm>,
+          <Popconfirm
             title={
               <div>
                 Are you sure you want to delete this account?
@@ -226,7 +246,7 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
             }
             onConfirm={() => this.deleteAccount(this.props.accountInfo._id)}
           >
-            <span className="text-link" key="action-delete">
+            <span className="text-link" key="action-delete" title="Delete account profile">
               <Typography.Text type="danger">
                 <Icon type="delete" />
               </Typography.Text>

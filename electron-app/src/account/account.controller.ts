@@ -17,6 +17,11 @@ export class AccountController {
     return this.service.createAccount(createAccountDto);
   }
 
+  @Post('clear/:id')
+  async clearData(@Param('id') id: string) {
+    return this.service.clearCookiesAndData(id);
+  }
+
   @Patch('data/:id')
   async setData(@Body() body: { data: any }, @Param('id') id: string) {
     return this.service.setData(id, body.data);
