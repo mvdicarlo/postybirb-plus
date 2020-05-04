@@ -23,11 +23,7 @@ import { Website } from '../website.base';
 import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
 import { InkbunnyOptions } from './inkbunny.interface';
 import WebsiteValidator from 'src/utils/website-validator.util';
-
-interface InkbunnyAccountData {
-  username: string;
-  sid: string;
-}
+import { InkbunnyAccountData } from './inkbunny-account.interface';
 
 @Injectable()
 export class Inkbunny extends Website {
@@ -210,6 +206,10 @@ export class Inkbunny extends Website {
       .formatTags(tags)
       .join(',')
       .trim();
+  }
+
+  transformAccountData(data: InkbunnyAccountData) {
+    return { username: data.username };
   }
 
   validateFileSubmission(

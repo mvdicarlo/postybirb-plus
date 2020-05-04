@@ -3,9 +3,9 @@ import { LoginDialogProps } from '../interfaces/website.interface';
 import { Form, Input, Button, message } from 'antd';
 import LoginService from '../../services/login.service';
 import BrowserLink from '../../components/BrowserLink';
-import { e621Account } from '../../../../electron-app/src/websites/e621/e621-account.interface';
+import { e621AccountData } from '../../../../electron-app/src/websites/e621/e621-account.interface';
 
-interface State extends e621Account {
+interface State extends e621AccountData {
   username: string;
   key: string;
   sending: boolean;
@@ -29,7 +29,7 @@ export default class E621Login extends React.Component<LoginDialogProps, State> 
   submit() {
     if (this.state.key && this.state.username) {
       this.setState({ sending: true });
-      const data: e621Account = {
+      const data: e621AccountData = {
         username: this.state.username,
         key: this.state.key
       };

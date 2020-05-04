@@ -134,6 +134,10 @@ export abstract class Website {
     });
   }
 
+  transformAccountData(data: object): object {
+    return {};
+  }
+
   abstract validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,

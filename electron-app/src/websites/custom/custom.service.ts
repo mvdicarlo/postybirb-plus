@@ -147,6 +147,10 @@ export class Custom extends Website {
     return this.createPostResponse({});
   }
 
+  transformAccountData(data: CustomAccountData) {
+    return data;
+  }
+
   validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<DefaultFileOptions>,

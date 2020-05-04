@@ -51,10 +51,22 @@ export default class InkbunnyLogin extends React.Component<LoginDialogProps, Sta
     }
   }
 
+  isValid(): boolean {
+    return !!this.state.username && !!this.state.password;
+  }
+
   render() {
     return (
       <div className="container mt-6">
-        <Form layout="vertical">
+        <Form
+          layout="vertical"
+          onSubmit={e => {
+            e.preventDefault();
+            if (this.isValid()) {
+              this.submit();
+            }
+          }}
+        >
           <Form.Item label="Username" required>
             <Input
               className="w-full"
@@ -83,7 +95,7 @@ export default class InkbunnyLogin extends React.Component<LoginDialogProps, Sta
           </Form.Item>
           <Form.Item>
             <Button
-              disabled={!(this.state.username && this.state.password)}
+              disabled={!this.isValid()}
               onClick={this.submit.bind(this)}
               loading={this.state.sending}
               block

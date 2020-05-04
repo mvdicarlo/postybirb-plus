@@ -21,7 +21,7 @@ import WebsiteValidator from 'src/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { e621Account } from './e621-account.interface';
+import { e621AccountData } from './e621-account.interface';
 import { e621DefaultFileOptions } from './e621.defaults';
 import { e621Options } from './e621.interface';
 
@@ -43,7 +43,7 @@ export class e621 extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const accountData: e621Account = data.data;
+    const accountData: e621AccountData = data.data;
     if (accountData && accountData.username && accountData.username) {
       status.username = accountData.username;
       status.loggedIn = true;
@@ -86,7 +86,7 @@ export class e621 extends Website {
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<e621Options>,
-    accountData: e621Account,
+    accountData: e621AccountData,
   ): Promise<PostResponse> {
     const form: any = {
       login: accountData.username,
@@ -147,6 +147,12 @@ export class e621 extends Website {
       .formatTags(tags)
       .join(' ')
       .trim();
+  }
+
+  transformAccountData(data: e621AccountData) {
+    return {
+      username: data.username,
+    };
   }
 
   validateFileSubmission(

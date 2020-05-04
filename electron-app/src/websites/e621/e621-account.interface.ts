@@ -1,4 +1,4 @@
-export interface e621Account {
+export interface e621AccountData {
   username: string;
   key: string;
 }

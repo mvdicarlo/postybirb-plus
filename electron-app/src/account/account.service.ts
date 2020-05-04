@@ -46,7 +46,7 @@ export class AccountService {
             website: result.website,
             loggedIn: false,
             username: null,
-            data: result.data,
+            data: {},
           });
         });
       })
@@ -86,12 +86,11 @@ export class AccountService {
       website: account.website,
       loggedIn: false,
       username: null,
-      data: account.data,
+      data: {},
     });
 
     this.eventEmitter.emit(AccountEvent.CREATED, createAccount._id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
   }
 
   async get(id: string): Promise<UserAccountEntity> {
@@ -121,7 +120,6 @@ export class AccountService {
 
     this.eventEmitter.emit(AccountEvent.DELETED, id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(AccountEvent.UPDATED, await this.repository.find());
 
     session
       .fromPartition(`persist:${id}`)
@@ -145,7 +143,6 @@ export class AccountService {
     account.alias = alias;
     await this.repository.update(account);
     this.loginStatuses.find(status => status._id === id).alias = alias;
-    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
   }
 
@@ -172,7 +169,7 @@ export class AccountService {
       alias: account.alias,
       loggedIn: response.loggedIn,
       username: response.username,
-      data: account.data,
+      data: website.transformAccountData(account.data),
     };
 
     this.insertOrUpdateLoginStatus(login);

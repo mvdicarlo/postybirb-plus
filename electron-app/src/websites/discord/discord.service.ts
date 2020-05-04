@@ -21,11 +21,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { DiscordDefaultFileOptions, DiscordDefaultNotificationOptions } from './discord.defaults';
 import { DiscordFileOptions, DiscordNotificationOptions } from './discord.interface';
-
-interface DiscordLoginData {
-  name: string;
-  webhook: string;
-}
+import { DiscordAccountData } from './discord.account.interface';
 
 @Injectable()
 export class Discord extends Website {
@@ -46,7 +42,7 @@ export class Discord extends Website {
     const status: LoginResponse = { loggedIn: false, username: null };
 
     if (data.data) {
-      const webhookData: DiscordLoginData = data.data;
+      const webhookData: DiscordAccountData = data.data;
       status.loggedIn = !!webhookData.webhook;
       status.username = webhookData.name;
     }
@@ -61,7 +57,7 @@ export class Discord extends Website {
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, DiscordNotificationOptions>,
-    accountData: DiscordLoginData,
+    accountData: DiscordAccountData,
   ): Promise<PostResponse> {
     let description = `${data.options.useTitle ? `**${data.title}**\n\n` : ''}${data.description}`
       .substring(0, 2000)
@@ -98,7 +94,7 @@ export class Discord extends Website {
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<DiscordFileOptions>,
-    accountData: DiscordLoginData,
+    accountData: DiscordAccountData,
   ): Promise<PostResponse> {
     await this.postNotificationSubmission(
       cancellationToken,
@@ -162,6 +158,10 @@ export class Discord extends Website {
       text = text.replace(new RegExp(link, 'gi'), `<${link}>`);
     });
     return text;
+  }
+
+  transformAccountData(data: DiscordAccountData) {
+    return data;
   }
 
   validateFileSubmission(
