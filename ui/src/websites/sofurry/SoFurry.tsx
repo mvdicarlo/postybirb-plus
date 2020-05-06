@@ -91,7 +91,9 @@ interface SoFurrySubmissionState {
   folders: Folder[];
 }
 
-export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<SoFurryFileOptions> {
+export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
+  SoFurryFileOptions
+> {
   state: SoFurrySubmissionState = {
     folders: []
   };
@@ -102,12 +104,11 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
       folders: []
     };
 
-    // Not sure if I should move this call elsewhere
-    WebsiteService.getAccountInformation(this.props.part.website, this.props.part.accountId).then(
+    WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
       ({ data }) => {
-        if (data.folders) {
-          if (!_.isEqual(this.state.folders, data.folders)) {
-            this.setState({ folders: data.folders });
+        if (data) {
+          if (!_.isEqual(this.state.folders, data)) {
+            this.setState({ folders: data });
           }
         }
       }
@@ -145,12 +146,11 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
       folders: []
     };
 
-    // Not sure if I should move this call elsewhere
-    WebsiteService.getAccountInformation(this.props.part.website, this.props.part.accountId).then(
+    WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
       ({ data }) => {
-        if (data.folders) {
-          if (!_.isEqual(this.state.folders, data.folders)) {
-            this.setState({ folders: data.folders });
+        if (data) {
+          if (!_.isEqual(this.state.folders, data)) {
+            this.setState({ folders: data });
           }
         }
       }

@@ -65,12 +65,11 @@ export class AryionFileSubmissionForm extends GenericFileSubmissionSection<Aryio
       folders: []
     };
 
-    // Not sure if I should move this call elsewhere
-    WebsiteService.getAccountInformation(this.props.part.website, this.props.part.accountId).then(
+    WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
       ({ data }) => {
-        if (data.folders) {
-          if (!_.isEqual(this.state.folders, data.folders)) {
-            this.setState({ folders: data.folders });
+        if (data) {
+          if (!_.isEqual(this.state.folders, data)) {
+            this.setState({ folders: data });
           }
         }
       }

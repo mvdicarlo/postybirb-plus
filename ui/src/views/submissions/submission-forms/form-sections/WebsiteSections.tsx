@@ -68,7 +68,7 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
         <Form.Item className="form-section">
           <Typography.Title style={{ marginBottom: '0' }} level={3}>
             <span className="form-section-header nav-section-anchor" id={`#${website}`}>
-              {website}
+              {WebsiteRegistry.find(website)?.name}
             </span>
           </Typography.Title>
           <Tabs>

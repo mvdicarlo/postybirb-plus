@@ -125,7 +125,6 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
       folders: []
     };
 
-    // Not sure if I should move this call elsewhere
     WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
       ({ data }) => {
         if (data) {

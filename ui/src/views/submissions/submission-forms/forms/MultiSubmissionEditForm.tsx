@@ -148,8 +148,8 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
       .forEach(status => {
         const name = WebsiteRegistry.find(status.website)?.name;
         websiteData[status.website] = websiteData[status.website] || { children: [] };
-        websiteData[status.website].title = name;
-        websiteData[status.website].key = status.website;
+        websiteData[status.website].title = <strong>{name}</strong>;
+        websiteData[status.website].key = name;
         websiteData[status.website].value = status.website;
         (websiteData[status.website].children as any[]).push({
           key: status._id,
@@ -159,7 +159,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
         });
       });
     return Object.values(websiteData).sort((a, b) =>
-      (a.title as string).localeCompare(b.title as string)
+      (a.key as string).localeCompare(b.key as string)
     );
   }
 

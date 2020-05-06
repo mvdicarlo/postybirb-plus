@@ -1,4 +1,4 @@
-import { Get, Param, Query } from '@nestjs/common';
+import { Get, Param, Query, BadRequestException } from '@nestjs/common';
 import { Website } from '../website.base';
 
 export class GenericWebsiteController {
@@ -6,6 +6,9 @@ export class GenericWebsiteController {
 
   @Get('/info/:id')
   getInfo(@Param('id') id: string, @Query('prop') prop: string) {
+    if (!prop) {
+      throw new BadRequestException('No prop provided');
+    }
     return this.service.getAccountInfo(id, prop);
   }
 

@@ -160,7 +160,7 @@ export class AccountService {
     account.alias = alias;
     await this.repository.update(account);
     this.loginStatuses.find(status => status._id === id).alias = alias;
-    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.getLoginStatuses());
   }
 
   async checkLogin(userAccount: string | UserAccountEntity): Promise<UserAccountDto> {
@@ -189,6 +189,10 @@ export class AccountService {
       data: website.transformAccountData(account.data),
     };
 
+    if (response.data) {
+      await this.setData(account._id, response.data);
+    }
+
     this.insertOrUpdateLoginStatus(login);
     return login;
   }
@@ -203,6 +207,6 @@ export class AccountService {
   private async insertOrUpdateLoginStatus(login: UserAccountDto): Promise<void> {
     const index: number = this.loginStatuses.findIndex(s => s._id === login._id);
     this.loginStatuses[index] = login;
-    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.getLoginStatuses());
   }
 }

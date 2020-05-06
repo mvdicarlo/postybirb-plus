@@ -5,8 +5,8 @@ import { Folder } from '../../../electron-app/src/websites/interfaces/folder.int
 export default class WebsiteService {
   static usernameShortcuts: { [key: string]: UsernameShortcut[] } = {};
 
-  static getAccountInformation(website: string, id: string, key?: string) {
-    return axios.get(`${website.toLowerCase()}/info/${id}${key ? '?prop=' + key : ''}`);
+  static getAccountInformation(website: string, id: string, key: string) {
+    return axios.get(`${website.toLowerCase()}/info/${id}?prop=${key}`);
   }
 
   static getAccountFolders(website: string, id: string) {

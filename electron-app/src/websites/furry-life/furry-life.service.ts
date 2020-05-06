@@ -15,6 +15,7 @@ import { PostResponse } from 'src/submission/post/interfaces/post-response.inter
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import BrowserWindowUtil from 'src/utils/browser-window.util';
 import FileSize from 'src/utils/filesize.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
 import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
@@ -24,8 +25,6 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { FurryLifeDefaultFileOptions } from './furry-life.defaults';
 import { FurryLifeFileOptions } from './furry-life.interface';
-import BrowserWindowUtil from 'src/utils/browser-window.util';
-import { json } from 'express';
 
 @Injectable()
 export class FurryLife extends Website {

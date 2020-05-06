@@ -4,7 +4,10 @@ import React from 'react';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import { NewTumblBlog } from '../../../../electron-app/src/websites/new-tumbl/new-tumbl-blog.interface';
-import { NewTumblFileOptions, NewTumblNotificationOptions } from '../../../../electron-app/src/websites/new-tumbl/new-tumbl.interface';
+import {
+  NewTumblFileOptions,
+  NewTumblNotificationOptions
+} from '../../../../electron-app/src/websites/new-tumbl/new-tumbl.interface';
 import WebsiteService from '../../services/website.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
@@ -125,7 +128,6 @@ export class NewTumblNotificationSubmissionForm extends GenericSubmissionSection
       blogs: []
     };
 
-    // Not sure if I should move this call elsewhere
     WebsiteService.getAccountInformation(
       this.props.part.website,
       this.props.part.accountId,
@@ -168,7 +170,6 @@ export class NewTumblFileSubmissionForm extends GenericFileSubmissionSection<New
       blogs: []
     };
 
-    // Not sure if I should move this call elsewhere
     WebsiteService.getAccountInformation(
       this.props.part.website,
       this.props.part.accountId,
