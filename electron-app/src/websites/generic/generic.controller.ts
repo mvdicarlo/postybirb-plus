@@ -1,5 +1,6 @@
 import { Get, Param, Query, BadRequestException } from '@nestjs/common';
 import { Website } from '../website.base';
+import { GenericAccountProp } from './generic-account-props.enum';
 
 export class GenericWebsiteController {
   constructor(protected readonly service: Website) {}
@@ -14,6 +15,6 @@ export class GenericWebsiteController {
 
   @Get('/folders/:id')
   getFolders(@Param('id') id: string) {
-    return this.service.getAccountInfo(id, 'folders') || [];
+    return this.service.getAccountInfo(id, GenericAccountProp.FOLDERS) || [];
   }
 }

@@ -22,6 +22,7 @@ import { PixivModule } from './pixiv/pixiv.module';
 import { NewTumblModule } from './new-tumbl/new-tumbl.module';
 import { FurryLifeModule } from './furry-life/furry-life.module';
 import { FurryNetworkModule } from './furry-network/furry-network.module';
+import { PatreonModule } from './patreon/patreon.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -48,6 +49,7 @@ import { FurryNetworkModule } from './furry-network/furry-network.module';
     NewTumblModule,
     FurryLifeModule,
     FurryNetworkModule,
+    PatreonModule,
   ],
 })
 export class WebsitesModule {}

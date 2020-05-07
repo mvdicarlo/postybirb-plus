@@ -51,7 +51,9 @@ export class AccountService {
         });
       })
       .finally(() => {
-        this.loginStatuses.forEach(s => this.checkLogin(s._id));
+        Promise.all(this.loginStatuses.map(s => this.checkLogin(s._id))).finally(() =>
+          this.submissionService.postingStateChanged(), // Force updates to validation in case any website was slow
+        );
       });
 
     this.websiteProvider.getAllWebsiteModules().forEach(website => {

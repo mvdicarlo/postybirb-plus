@@ -44,4 +44,52 @@ export default class BrowserWindowUtil {
       throw err;
     }
   }
+
+  public static async getPage(partition: string, url: string): Promise<string> {
+    return BrowserWindowUtil.runScripOnPage<string>(partition, url, 'document.body.innerText');
+  }
+
+  public static async runScripOnPage<T>(
+    partition: string,
+    url: string,
+    script: string,
+  ): Promise<T> {
+    const bw = await BrowserWindowUtil.createWindow(partition, url);
+    try {
+      const page = await bw.webContents.executeJavaScript(script);
+      bw.destroy();
+      return page;
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+  }
+
+  public static async post<T>(
+    partition: string,
+    url: string,
+    headers: object,
+    data: object,
+  ): Promise<T> {
+    const bw = await BrowserWindowUtil.createWindow(partition, url);
+    try {
+      await bw.loadURL(url, {
+        extraHeaders: Object.entries(headers)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('\n'),
+        postData: [
+          {
+            type: 'rawData',
+            bytes: Buffer.from(JSON.stringify(data)),
+          },
+        ],
+      });
+      const page = await bw.webContents.executeJavaScript('document.body.innerText');
+      bw.destroy();
+      return page;
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+  }
 }

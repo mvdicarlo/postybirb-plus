@@ -19,6 +19,7 @@ import { Pixiv } from './pixiv/Pixiv';
 import { NewTumbl } from './new-tumbl/NewTumbl';
 import { FurryLife } from './furry-life/FurryLife';
 import { FurryNetwork } from './furry-network/FurryNetwork';
+import { Patreon } from './patreon/Patreon';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -35,6 +36,7 @@ export class WebsiteRegistry {
     KoFi: new KoFi(),
     Newgrounds: new Newgrounds(),
     NewTumbl: new NewTumbl(),
+    Patreon: new Patreon(),
     Piczel: new Piczel(),
     Pixiv: new Pixiv(),
     Route50: new Route50(),
