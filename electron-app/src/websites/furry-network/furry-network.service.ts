@@ -2,21 +2,26 @@ import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import { MarkdownParser } from 'src/description-parsing/markdown/markdown.parser';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/http/http.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from 'src/submission/interfaces/submission.interface';
 import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { FilePostData, PostFile } from 'src/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
+import BrowserWindowUtil from 'src/utils/browser-window.util';
 import FileSize from 'src/utils/filesize.util';
 import WebsiteValidator from 'src/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { FurryNetworkAccountData } from './furry-network-account.interface';
 import {
   FurryNetworkDefaultFileOptions,
   FurryNetworkDefaultNotificationOptions,
@@ -25,11 +30,7 @@ import {
   FurryNetworkFileOptions,
   FurryNetworkNotificationOptions,
 } from './furry-network.interface';
-import BrowserWindowUtil from 'src/utils/browser-window.util';
-import Http from 'src/http/http.util';
-import { Submission } from 'src/submission/interfaces/submission.interface';
-import { FurryNetworkAccountData } from './furry-network-account.interface';
-import { PostData } from 'src/submission/post/interfaces/post-data.interface';
+import _ = require('lodash');
 
 @Injectable()
 export class FurryNetwork extends Website {
@@ -129,7 +130,6 @@ export class FurryNetwork extends Website {
 
   private generateUploadUrl(character: string, file: PostFile, type: string): string {
     let uploadURL = '';
-
     if (type === 'story') {
       uploadURL = `${this.BASE_URL}/api/story`;
     } else {
@@ -176,6 +176,55 @@ export class FurryNetwork extends Website {
     }
   }
 
+  private async postFileChunks(
+    profileId: string,
+    character: string,
+    file: PostFile,
+    type: string,
+    headers: object,
+  ) {
+    const chunkSize: number = 524288;
+    const chunks = _.chunk(file.value, chunkSize);
+    const fileType = encodeURIComponent(file.options.contentType);
+    const responses = await Promise.all(
+      chunks.map((chunk, i) => {
+        const upload = {
+          value: Buffer.from(chunk),
+          options: file.options,
+        };
+        return Http.post<any>(
+          `${this.BASE_URL}/api/submission/${character}/${type}/upload?` +
+            `resumableChunkNumber=${i + 1}` +
+            `&resumableChunkSize=${chunkSize}` +
+            `&resumableCurrentChunkSize=${chunk.length}&resumableTotalSize=${
+              file.value.length
+            }&resumableType=${fileType}&resumableIdentifier=${
+              file.value.length
+            }-${encodeURIComponent(
+              file.options.filename.replace('.', ''),
+            )}&resumableFilename=${encodeURIComponent(
+              file.options.filename,
+            )}&resumableRelativePath=${encodeURIComponent(
+              file.options.filename,
+            )}&resumableTotalChunks=${chunks.length}`,
+          profileId,
+          {
+            type: 'multipart',
+            headers,
+            requestOptions: { json: true },
+            data: { file: upload },
+          },
+        );
+      }),
+    );
+
+    const res = responses.shift();
+    if (!res.body.id) {
+      throw this.createPostResponse({ additionalInfo: res.body });
+    }
+    return res.body;
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<FurryNetworkFileOptions>,
@@ -184,7 +233,7 @@ export class FurryNetwork extends Website {
     const { options } = data;
     const type = this.getContentType(
       data.primary.type,
-      data.primary.file.options.filename === 'image/gif',
+      data.primary.file.options.contentType === 'image/gif',
     );
 
     let file = data.primary.file;
@@ -218,9 +267,55 @@ export class FurryNetwork extends Website {
       }
       return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
     } else {
-      // ANYTHING ELSE
-      // TODO
-      return Promise.reject(this.createPostResponse({}));
+      this.checkCancelled(cancellationToken);
+      const upload = await this.postFileChunks(data.part.accountId, character, file, type, headers);
+
+      this.checkCancelled(cancellationToken);
+      const post = await Http.patch<{ id: number }>(
+        `${this.BASE_URL}/api/${type}/${upload.id}`,
+        data.part.accountId,
+        {
+          type: 'json',
+          data: form,
+          requestOptions: { json: true },
+          headers,
+        },
+      );
+
+      this.verifyResponse(post);
+      if (post.body.id) {
+        if (type === 'multimedia' && data.thumbnail) {
+          try {
+            await Http.post(
+              `${this.BASE_URL}/api/submission/${character}/${type}/${upload.id}/thumbnail?` +
+                'resumableChunkNumber=1' +
+                `&resumableChunkSize=${data.thumbnail.value.length}` +
+                `&resumableCurrentChunkSize=${data.thumbnail.value.length}
+            &resumableTotalSize=${data.thumbnail.value.length}
+            &resumableType=${encodeURIComponent(data.thumbnail.options.contentType)}
+            &resumableIdentifier=${data.thumbnail.value.length}-${encodeURIComponent(
+                  data.thumbnail.options.filename,
+                ).replace('.', '')}
+            &resumableFilename=${encodeURIComponent(
+              data.thumbnail.options.filename,
+            )}&resumableRelativePath=${encodeURIComponent(data.thumbnail.options.filename)}
+            &resumableTotalChunks=1`,
+              data.part.accountId,
+              {
+                type: 'multipart',
+                headers,
+                data: {
+                  file: data.thumbnail,
+                },
+              },
+            );
+          } catch {}
+        }
+
+        return this.createPostResponse({ source: `${this.BASE_URL}/${type}/${post.body.id}` });
+      }
+
+      return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
     }
   }
 

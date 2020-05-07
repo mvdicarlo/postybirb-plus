@@ -127,7 +127,24 @@ export default class Http {
     });
   }
 
+  static async patch<T>(
+    uri: string,
+    partitionId: string | undefined,
+    options: PostOptions,
+  ): Promise<HttpResponse<T>> {
+    return Http.postLike('patch', uri, partitionId, options);
+  }
+
   static async post<T>(
+    uri: string,
+    partitionId: string | undefined,
+    options: PostOptions,
+  ): Promise<HttpResponse<T>> {
+    return Http.postLike('post', uri, partitionId, options);
+  }
+
+  private static async postLike<T>(
+    type: 'post' | 'patch',
     uri: string,
     partitionId: string | undefined,
     options: PostOptions,
@@ -163,7 +180,7 @@ export default class Http {
     }
 
     return new Promise(resolve => {
-      Http.Request.post(uri, opts, (error, response, body) => {
+      Http.Request[type](uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           error,
           response,
