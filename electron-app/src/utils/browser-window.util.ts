@@ -7,6 +7,7 @@ export default class BrowserWindowUtil {
       show: false,
       webPreferences: {
         partition: `persist:${partition}`,
+        enableRemoteModule: false,
       },
     });
 
@@ -46,10 +47,10 @@ export default class BrowserWindowUtil {
   }
 
   public static async getPage(partition: string, url: string): Promise<string> {
-    return BrowserWindowUtil.runScripOnPage<string>(partition, url, 'document.body.innerText');
+    return BrowserWindowUtil.runScriptOnPage<string>(partition, url, 'document.body.innerText');
   }
 
-  public static async runScripOnPage<T>(
+  public static async runScriptOnPage<T>(
     partition: string,
     url: string,
     script: string,

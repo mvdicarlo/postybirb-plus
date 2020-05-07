@@ -7,7 +7,7 @@ import { FileRecord } from 'src/submission/file-submission/interfaces/file-recor
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from 'src/submission/interfaces/submission.interface';
 import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { FilePostData, PostFile } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import { DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
@@ -24,6 +24,7 @@ import { PatreonFileOptions, PatreonNotificationOptions } from './patreon.interf
 import _ = require('lodash');
 import WebsiteValidator from 'src/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
+import { v1 } from 'uuid';
 
 /*
  * Developer note:
@@ -231,7 +232,7 @@ export class Patreon extends Website {
     xhr.send(JSON.stringify(data));
     var body = xhr.response;
     Object.assign({}, { body: body, status: xhr.status })`;
-    return BrowserWindowUtil.runScripOnPage<{ body: string; status: number }>(
+    return BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
       profileId,
       `${this.BASE_URL}/posts/${id}/edit`,
       cmd,
@@ -271,7 +272,7 @@ export class Patreon extends Website {
 
     const attributes: any = {
       content: data.description,
-      post_type: 'text_only',
+      post_type: createData.data.type,
       is_paid: options.charge ? 'true' : 'false',
       title: data.title,
       teaser_text: '',
@@ -321,7 +322,254 @@ export class Patreon extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<PatreonFileOptions>,
   ): Promise<PostResponse> {
-    return null;
+    const csrf = await this.getCSRF(data.part.accountId);
+    const createData = {
+      data: {
+        type: 'post',
+        attributes: {
+          post_type: this.getPostType(data.primary.type),
+        },
+      },
+    };
+
+    const create = await this.createPost(data.part.accountId, csrf, createData);
+    const link = create.data.id;
+
+    // Files
+    [data.primary.file, data.thumbnail, ...data.additional.map(f => f.file)]
+      .filter(f => f)
+      .forEach(f => (f.options.filename = f.options.filename.replace(/'/g, '')));
+
+    let uploadType = 'main';
+    let shouldUploadThumbnail: boolean = false;
+    if (data.primary.type === FileSubmissionType.AUDIO) {
+      uploadType = 'audio';
+      shouldUploadThumbnail = data.thumbnail ? true : false;
+    }
+
+    let primaryFileUpload;
+    let thumbnailFileUpload;
+    let additionalUploads = [];
+    let additionalImageUploads = [];
+    try {
+      if (data.primary.type === FileSubmissionType.TEXT) {
+        const upload = await this.uploadAttachment(
+          link,
+          data.primary.file,
+          csrf,
+          data.part.accountId,
+        );
+        additionalUploads.push(upload);
+      } else {
+        primaryFileUpload = await this.uploadFile(
+          link,
+          data.primary.file,
+          csrf,
+          data.part.accountId,
+          uploadType,
+        );
+        if (shouldUploadThumbnail) {
+          thumbnailFileUpload = await this.uploadFile(
+            link,
+            data.thumbnail,
+            csrf,
+            data.part.accountId,
+            'main',
+          );
+        }
+      }
+
+      for (const file of data.additional) {
+        if (
+          data.primary.type === FileSubmissionType.IMAGE &&
+          file.type === FileSubmissionType.IMAGE
+        ) {
+          const upload = await this.uploadFile(
+            link,
+            file.file,
+            csrf,
+            data.part.accountId,
+            uploadType,
+          );
+          additionalImageUploads.push(upload);
+        } else {
+          const upload = await this.uploadAttachment(link, file.file, csrf, data.part.accountId);
+          additionalUploads.push(upload);
+        }
+      }
+    } catch (err) {
+      return Promise.reject(this.createPostResponse({ additionalInfo: err }));
+    }
+
+    // Tags
+    const formattedTags = this.formatTags(data.tags);
+    const relationshipTags = formattedTags.map(tag => {
+      return {
+        id: tag.id,
+        type: tag.type,
+      };
+    });
+
+    const { options } = data;
+    const accessRules: any[] = options.tiers.map(tier => {
+      return { type: 'access-rule', id: tier };
+    });
+
+    const attributes: any = {
+      content: data.description,
+      post_type: createData.data.type,
+      is_paid: options.charge ? 'true' : 'false',
+      title: data.title,
+      teaser_text: '',
+      post_metadata: {},
+      tags: { publish: true },
+    };
+
+    const relationships = {
+      post_tag: {
+        data: relationshipTags.length > 0 ? relationshipTags[0] : {},
+      },
+      user_defined_tags: {
+        data: relationshipTags,
+      },
+      access_rule: {
+        data: accessRules[accessRules.length - 1],
+      },
+      access_rules: {
+        data: accessRules,
+      },
+    };
+
+    let image_order = [];
+    if (
+      data.primary.type === FileSubmissionType.AUDIO ||
+      data.primary.type === FileSubmissionType.IMAGE
+    ) {
+      image_order = [
+        thumbnailFileUpload ? thumbnailFileUpload.body.data.id : primaryFileUpload.body.data.id,
+        ...additionalImageUploads.map(img => img.body.data.id),
+      ];
+    }
+
+    const form = {
+      data: {
+        attributes,
+        relationships,
+        type: 'post',
+      },
+      included: formattedTags,
+      meta: {
+        image_order,
+      },
+    };
+
+    accessRules.forEach(rule => form.included.push(rule));
+
+    this.checkCancelled(cancellationToken);
+    const post = await this.finalizePost(data.part.accountId, link, csrf, form);
+    try {
+      const json = JSON.parse(post.body);
+      if (!json.errors) {
+        return this.createPostResponse({ source: `${this.BASE_URL}/posts/${link}` });
+      }
+    } catch {}
+
+    return Promise.reject(this.createPostResponse({ additionalInfo: post }));
+  }
+
+  private async uploadFile(
+    link: string,
+    file: PostFile,
+    csrf: string,
+    profileId: string,
+    relationship: string,
+  ) {
+    const data: any = {
+      data: {
+        attributes: {
+          state: 'pending_upload',
+          owner_id: link,
+          owner_type: 'post',
+          owner_relationship: relationship || 'main',
+          file_name: file.options.filename,
+        },
+        type: 'media',
+      },
+    };
+
+    const buf = file.value.toString('base64');
+    const cmd = `
+    const data = '${JSON.stringify(data)}';
+    var h = new XMLHttpRequest();
+    h.open('POST', '/api/media?json-api-version=1.0', false);
+    h.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    h.setRequestHeader("X-CSRF-Signature", "${csrf}");
+    h.send(data);
+    var body = JSON.parse(h.response);
+    var x = body.data.attributes.upload_parameters;
+    var dest = body.data.attributes.upload_url;
+    var fd = new FormData();
+    var buf = atob('${buf}');
+    var file = new File([Uint8Array.from(buf, x => x.charCodeAt(0))], '${
+      file.options.filename
+    }', { type: '${file.options.contentType}' });
+    Object.entries(x).forEach(([key, value]) => fd.append(key, value));
+    fd.append('file', file);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', dest, false);
+    xhr.send(fd);
+    Object.assign({}, { body: body, status: xhr.status, response: xhr.response })`;
+    const upload = await BrowserWindowUtil.runScriptOnPage<{ body: any; status: number, response: object }>(
+      profileId,
+      `${this.BASE_URL}/posts/${link}/edit`,
+      cmd,
+    );
+
+    if (upload && upload.body && upload.status && upload.status < 320) {
+      return upload;
+    } else {
+      throw this.createPostResponse({
+        message: `Failed to upload file: ${file.options.filename}`,
+        additionalInfo: upload,
+      });
+    }
+  }
+  private async uploadAttachment(link: any, file: PostFile, csrf: string, profileId: string) {
+    const uuid = v1();
+    const data: any = {
+      qquuid: uuid,
+      qqfilename: file.options.filename,
+      qqtotalfilesize: file.value.length,
+    };
+
+    const buf = file.value.toString('base64');
+    const cmd = `
+    const data = '${JSON.stringify(data)}';
+    var fd = new FormData();
+    var buf = atob('${buf}');
+    var file = new File([Uint8Array.from(buf, x => x.charCodeAt(0))], '${
+      file.options.filename
+    }', { type: '${file.options.contentType}' });
+    Object.entries(data).forEach(([key, value]) => fd.append(key, value));
+    fd.append('file', file);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/posts/${link}/attachments?json-api-version=1.0', false);
+    xhr.setRequestHeader("X-CSRF-Signature", "${csrf}");
+    xhr.send(fd);
+    xhr.status`;
+
+    const upload = await BrowserWindowUtil.runScriptOnPage<number>(
+      profileId,
+      `${this.BASE_URL}/posts/${link}/edit`,
+      cmd,
+    );
+
+    if (!(upload && upload < 320)) {
+      throw this.createPostResponse({
+        message: `Failed to upload file: ${file.options.filename}`,
+        additionalInfo: 'Attachment',
+      });
+    }
   }
 
   formatTags(tags: string[]): any {
