@@ -1,0 +1,79 @@
+.ant-form-item {
+  margin-bottom: 0px;
+}
+
+.ant-form-item + .ant-form-item {
+  margin-top: 10px;
+}
+
+.ant-drawer-header {
+  @apply z-10 sticky top-0;
+}
+
+.ant-card-cover {
+  margin: auto;
+}
+
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+}
+
+.ant-back-top {
+  right: 75px !important;
+}
+
+.fullscreen-modal .ant-modal {
+  padding: 0;
+  margin: 0;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.fullscreen-modal .ant-modal-content {
+  height: 100%;
+}
+
+.fullscreen-modal .ant-modal-body {
+  height: calc(100% - 55px);
+  padding: 0 !important;
+  overflow: auto;
+}
+
+.fullscreen-modal-with-footer .ant-modal {
+  padding: 0;
+  margin: 0;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100vh;
+}
+
+.fullscreen-modal-with-footer .ant-modal-content {
+  height: 100%;
+}
+
+.fullscreen-modal-with-footer .ant-modal-body {
+  height: calc(100% - 55px - 53px);
+  padding: 0 !important;
+}
+
+.ant-menu .ant-badge-count {
+  min-width: 10px;
+  height: 10px;
+  padding: 0 3px;
+  font-size: 9px;
+  line-height: 10px;
+  top: 7px;
+  right: -12px;
+}
+
+.ant-menu-inline-collapsed .ant-badge-count {
+  right: 0;
+}

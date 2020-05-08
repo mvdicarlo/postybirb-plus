@@ -15,36 +15,23 @@
   background-color: inherit;
 }
 
-.update .ant-light-progress-text,
-.update .ant-dark-progress-text {
+.update .ant-progress-text {
   color: hsla(0, 0%, 100%, 0.65) !important;
 }
 
-.ant-light-modal-body .release-notes * {
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.ant-dark-modal-body .release-notes * {
-  color: hsla(0, 0%, 100%, 0.85);
-}
-
-.ant-light-layout-sider-collapsed .logo,
-.ant-dark-layout-sider-collapsed .logo {
+.ant-layout-sider-collapsed .logo {
   color: transparent;
   background-position: center;
   font-size: 0 !important;
 }
 
-.ant-light-layout-sider .ant-light-menu,
-.ant-dark-layout-sider .ant-dark-menu {
+.ant-layout-sider .ant-menu {
   height: calc(100% - 64px);
   overflow: auto;
 }
 
-.ant-light-page-header,
-.ant-light-page-header-content,
-.ant-dark-page-header,
-.ant-dark-page-header-content {
+.ant-page-header,
+.ant-page-header-content {
   padding: 0 !important;
 }
 
@@ -54,20 +41,10 @@
   z-index: 20;
 }
 
-.ant-light-layout .header > * {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.ant-dark-layout .header > * {
-  border-bottom: 1px solid #030303;
-}
-
-.ant-light-layout-sider,
-.ant-dark-layout-sider {
+.ant-layout-sider {
   overflow: auto;
 }
 
-.ant-light-layout-sider-children,
-.ant-dark-layout-sider-children {
+.ant-layout-sider-children {
   background-color: inherit;
 }

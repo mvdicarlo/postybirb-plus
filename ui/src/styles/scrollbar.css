@@ -20,16 +20,3 @@
 ::-webkit-scrollbar-thumb:active {
   background: gray;
 }
-
-*[class^='ant-dark'] ::-webkit-scrollbar-track {
-  background: #606060;
-}
-
-*[class^='ant-dark'] ::-webkit-scrollbar-thumb {
-  background: #3e3e3e;
-}
-
-*[class^='ant-dark'] ::-webkit-scrollbar-thumb:hover,
-*[class^='ant-dark'] ::-webkit-scrollbar-thumb:active {
-  background: #363636;
-}

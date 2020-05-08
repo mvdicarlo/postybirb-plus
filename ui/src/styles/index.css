@@ -30,22 +30,6 @@ ul {
   @apply shadow py-2 px-3 text-right z-10 sticky bottom-0;
 }
 
-.ant-light-layout .form-action-bar {
-  @apply bg-white;
-}
-
-.ant-dark-layout .form-action-bar {
-  background-color: #141414;
-}
-
-.ant-light-layout .primary-layout-container {
-  background-color: white;
-}
-
-.ant-dark-layout .primary-layout-container {
-  background-color: #141414;
-}
-
 .full-size-spinner {
   @apply h-full w-full;
 }
@@ -54,126 +38,8 @@ ul {
   @apply h-full w-full;
 }
 
-.ant-light-form-item,
-.ant-dark-form-item {
-  margin-bottom: 0px;
-}
-
-.ant-light-form-item + .ant-light-form-item,
-.ant-dark-form-item + .ant-dark-form-item {
-  margin-top: 10px;
-}
-
-.ant-dark-select-dropdown-menu-item-active:not(.ant-dark-select-dropdown-menu-item-disabled) {
-  background-color: hsla(0, 0%, 100%, 0.04);
-}
-
-li .ant-dark-list-item .error {
-  @apply bg-red-900;
-}
-
-li .ant-light-list-item .error {
-  @apply bg-red-200;
-}
-
-.ant-light-drawer-header,
-.ant-dark-drawer-header {
-  @apply z-10 sticky top-0;
-}
-
-.ant-light-card-cover,
-.ant-dark-card-cover {
-  margin: auto;
-}
-
-.ant-light-upload-select-picture-card i,
-.ant-dark-upload-select-picture-card i {
-  font-size: 32px;
-  color: #999;
-}
-
-.ant-light-upload-select-picture-card .ant-light-upload-text,
-.ant-dark-upload-select-picture-card .ant-dark-upload-text {
-  margin-top: 8px;
-  color: #666;
-}
-
-.ant-light-back-top,
-.ant-dark-back-top {
-  right: 75px !important;
-}
-
 .h-full-important {
   height: 100% !important;
-}
-
-.fullscreen-modal .ant-light-modal,
-.fullscreen-modal .ant-dark-modal {
-  padding: 0;
-  margin: 0;
-  top: 0 !important;
-  width: 100% !important;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.fullscreen-modal .ant-light-modal-content,
-.fullscreen-modal .ant-dark-modal-content {
-  height: 100%;
-}
-
-.fullscreen-modal .ant-light-modal-body,
-.fullscreen-modal .ant-dark-modal-body {
-  height: calc(100% - 55px);
-  padding: 0 !important;
-  overflow: auto;
-}
-
-.fullscreen-modal-with-footer .ant-light-modal,
-.fullscreen-modal-with-footer .ant-dark-modal {
-  padding: 0;
-  margin: 0;
-  top: 0 !important;
-  width: 100% !important;
-  height: 100vh;
-}
-
-.fullscreen-modal-with-footer .ant-light-modal-content,
-.fullscreen-modal-with-footer .ant-dark-modal-content {
-  height: 100%;
-}
-
-.fullscreen-modal-with-footer .ant-light-modal-body,
-.fullscreen-modal-with-footer .ant-dark-modal-body {
-  height: calc(100% - 55px - 53px);
-  padding: 0 !important;
-}
-
-.ant-dark-menu .ant-dark-badge-count,
-.ant-light-menu .ant-light-badge-count {
-  min-width: 10px;
-  height: 10px;
-  padding: 0 3px;
-  font-size: 9px;
-  line-height: 10px;
-  top: 7px;
-  right: -12px;
-}
-
-.ant-dark-menu-inline-collapsed .ant-dark-badge-count,
-.ant-dark-menu-inline-collapsed .ant-light-badge-count {
-  right: 0;
-}
-
-.ant-dark-page-header-back-button {
-  color: hsla(0, 0%, 100%, 0.85);
-}
-
-.ant-dark-fullcalendar-fullscreen
-  .ant-dark-fullcalendar-month-panel-selected-cell
-  .ant-dark-fullcalendar-month,
-.ant-dark-fullcalendar-fullscreen .ant-dark-fullcalendar-selected-day .ant-dark-fullcalendar-date {
-  background: rgba(255, 255, 255, 0.08);
 }
 
 @tailwind utilities;

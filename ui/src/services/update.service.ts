@@ -23,7 +23,6 @@ export default class UpdateService {
             message: 'Notice',
             description: value,
             duration: 15,
-            prefixCls: `ant-${uiStore.state.theme}-notification`
           });
         }
       })

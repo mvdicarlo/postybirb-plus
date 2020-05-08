@@ -62,7 +62,6 @@ socket.on(UpdateEvent.ERROR, (err: any) => {
         <div>{err.code}</div>
       </div>
     ),
-    prefixCls: `ant-${uiStore.state.theme}-notification`
   });
 });
 

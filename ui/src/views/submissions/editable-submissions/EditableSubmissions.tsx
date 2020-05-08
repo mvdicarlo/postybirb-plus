@@ -378,10 +378,10 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
     return (
       <div>
         <Dragger {...this.uploadProps} headers={{ Authorization: window.AUTH_ID }}>
-          <p className="ant-light-upload-drag-icon ant-dark-upload-drag-icon">
+          <p className="ant-upload-drag-icon">
             <Icon type="inbox" />
           </p>
-          <p className="ant-light-upload-text ant-dark-upload-text">
+          <p className="ant-upload-text">
             Click or drag file to this area to create a submission
           </p>
         </Dragger>

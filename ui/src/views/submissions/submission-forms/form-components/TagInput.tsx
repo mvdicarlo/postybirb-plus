@@ -219,7 +219,7 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps> {
     return (
       <div className="mr-2">
         <Dropdown overlay={menu}>
-          <span className="ant-light-dropdown-link ant-dark-dropdown-link text-link">
+          <span className="ant-dropdown-link text-link">
             Apply Tag Group <Icon type="down" />
           </span>
         </Dropdown>

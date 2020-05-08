@@ -1,9 +1,8 @@
 .login-card + .login-card {
-  margin-top: .5rem;
+  margin-top: 0.5rem;
 }
 
-.login-card .ant-light-list-empty-text,
-.login-card .ant-dark-list-empty-text {
+.login-card .ant-list-empty-text {
   padding: 0 !important;
   display: none;
 }

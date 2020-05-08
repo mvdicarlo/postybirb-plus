@@ -15,7 +15,6 @@ export default class UINotificationService {
       message: msg.title ? msg.title : 'System Notification',
       description: msg.message,
       duration: msg.duration,
-      prefixCls: `ant-${uiStore.state.theme}-notification`
     });
   }
 }

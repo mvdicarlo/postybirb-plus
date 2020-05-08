@@ -181,7 +181,7 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
       >
         {(provided: DraggableProvided) => (
           <div
-            className={`ant-${uiStore.state.theme}-list-item ant-${uiStore.state.theme}-list-split`}
+            className="ant-list-item ant-list-split"
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             ref={provided.innerRef}
