@@ -1,108 +1,46 @@
-import { Form, Select } from 'antd';
+import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { NewTumblBlog } from '../../../../electron-app/src/websites/new-tumbl/new-tumbl-blog.interface';
-import {
-  NewTumblFileOptions,
-  NewTumblNotificationOptions
-} from '../../../../electron-app/src/websites/new-tumbl/new-tumbl.interface';
+import { TumblrBlog } from '../../../../electron-app/src/websites/tumblr/tumblr-account.interface';
+import { TumblrFileOptions, TumblrNotificationOptions } from '../../../../electron-app/src/websites/tumblr/tumblr.interface';
 import WebsiteService from '../../services/website.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { TumblrLogin } from './TumblrLogin';
 
-const defaultFileOptions: NewTumblFileOptions = {
+const defaultFileOptions: TumblrFileOptions = {
   ...GenericDefaultFileOptions,
-  blog: ''
+  useTitle: true,
+  blog: undefined
 };
-
-const defaultNotificationOptions: NewTumblNotificationOptions = {
+const defaultNotificationOptions: TumblrNotificationOptions = {
   ...GenericDefaultNotificationOptions,
-  blog: ''
+  useTitle: true,
+  blog: undefined
 };
 
-export class NewTumbl implements Website {
-  internalName: string = 'NewTumbl';
-  name: string = 'newTumbl';
+export class Tumblr implements Website {
+  internalName: string = 'Tumblr';
+  name: string = 'Tumblr';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://newtumbl.com/" {...props} />
-  );
+  LoginDialog = (props: LoginDialogProps) => <TumblrLogin {...props} />;
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, NewTumblFileOptions>) => (
-    <NewTumblFileSubmissionForm
-      key={props.part.accountId}
-      ratingOptions={{
-        show: true,
-        ratings: [
-          {
-            value: 'general',
-            name: 'F'
-          },
-          {
-            value: '2',
-            name: 'O'
-          },
-          {
-            value: 'mature',
-            name: 'M'
-          },
-          {
-            value: 'adult',
-            name: 'X'
-          },
-          {
-            value: 'extreme',
-            name: 'W'
-          }
-        ]
-      }}
-      {...props}
-    />
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, TumblrFileOptions>) => (
+    <TumblrFileSubmissionForm key={props.part.accountId} {...props} hideThumbnailOptions={true} />
   );
 
   NotificationSubmissionForm = (
-    props: WebsiteSectionProps<Submission, NewTumblNotificationOptions>
-  ) => (
-    <NewTumblNotificationSubmissionForm
-      key={props.part.accountId}
-      {...props}
-      ratingOptions={{
-        show: true,
-        ratings: [
-          {
-            value: 'general',
-            name: 'F'
-          },
-          {
-            value: '2',
-            name: 'O'
-          },
-          {
-            value: 'mature',
-            name: 'M'
-          },
-          {
-            value: 'adult',
-            name: 'X'
-          },
-          {
-            value: 'extreme',
-            name: 'W'
-          }
-        ]
-      }}
-    />
-  );
+    props: WebsiteSectionProps<Submission, TumblrNotificationOptions>
+  ) => <TumblrNotificationSubmissionForm key={props.part.accountId} {...props} />;
 
   getDefaults(type: SubmissionType) {
     return _.cloneDeep(
@@ -111,18 +49,18 @@ export class NewTumbl implements Website {
   }
 }
 
-interface NewTumblSubmissionState {
-  blogs: NewTumblBlog[];
+interface TumblrSubmissionState {
+  blogs: TumblrBlog[];
 }
 
-export class NewTumblNotificationSubmissionForm extends GenericSubmissionSection<
-  NewTumblNotificationOptions
+export class TumblrNotificationSubmissionForm extends GenericSubmissionSection<
+  TumblrNotificationOptions
 > {
-  state: NewTumblSubmissionState = {
+  state: TumblrSubmissionState = {
     blogs: []
   };
 
-  constructor(props: WebsiteSectionProps<FileSubmission, NewTumblNotificationOptions>) {
+  constructor(props: WebsiteSectionProps<FileSubmission, TumblrNotificationOptions>) {
     super(props);
     this.state = {
       blogs: []
@@ -135,11 +73,29 @@ export class NewTumblNotificationSubmissionForm extends GenericSubmissionSection
     ).then(({ data }) => {
       if (data) {
         this.setState({ blogs: data });
+        if (!this.props.part.data.blog) {
+          this.setValue('blog', data.find(b => b.primary).name);
+        }
       }
     });
   }
 
-  renderRightForm(data: NewTumblNotificationOptions) {
+  renderLeftForm(data: TumblrNotificationOptions) {
+    const elements = super.renderLeftForm(data);
+    elements.push(
+      <div>
+        <Checkbox
+          checked={data.useTitle}
+          onChange={this.handleCheckedChange.bind(this, 'useTitle')}
+        >
+          Use Title
+        </Checkbox>
+      </div>
+    );
+    return elements;
+  }
+
+  renderRightForm(data: TumblrNotificationOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Blog">
@@ -150,7 +106,7 @@ export class NewTumblNotificationSubmissionForm extends GenericSubmissionSection
           onSelect={this.setValue.bind(this, 'blog')}
         >
           {this.state.blogs.map(b => (
-            <Select.Option value={b.id}>{b.name}</Select.Option>
+            <Select.Option value={b.name}>{b.name}</Select.Option>
           ))}
         </Select>
       </Form.Item>
@@ -159,12 +115,12 @@ export class NewTumblNotificationSubmissionForm extends GenericSubmissionSection
   }
 }
 
-export class NewTumblFileSubmissionForm extends GenericFileSubmissionSection<NewTumblFileOptions> {
-  state: NewTumblSubmissionState = {
+export class TumblrFileSubmissionForm extends GenericFileSubmissionSection<TumblrFileOptions> {
+  state: TumblrSubmissionState = {
     blogs: []
   };
 
-  constructor(props: WebsiteSectionProps<FileSubmission, NewTumblFileOptions>) {
+  constructor(props: WebsiteSectionProps<FileSubmission, TumblrFileOptions>) {
     super(props);
     this.state = {
       blogs: []
@@ -177,11 +133,29 @@ export class NewTumblFileSubmissionForm extends GenericFileSubmissionSection<New
     ).then(({ data }) => {
       if (data) {
         this.setState({ blogs: data });
+        if (!this.props.part.data.blog) {
+          this.setValue('blog', data.find(b => b.primary).name);
+        }
       }
     });
   }
 
-  renderRightForm(data: NewTumblFileOptions) {
+  renderLeftForm(data: TumblrFileOptions) {
+    const elements = super.renderLeftForm(data);
+    elements.push(
+      <div>
+        <Checkbox
+          checked={data.useTitle}
+          onChange={this.handleCheckedChange.bind(this, 'useTitle')}
+        >
+          Use Title
+        </Checkbox>
+      </div>
+    );
+    return elements;
+  }
+
+  renderRightForm(data: TumblrFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Blog">
@@ -192,7 +166,7 @@ export class NewTumblFileSubmissionForm extends GenericFileSubmissionSection<New
           onSelect={this.setValue.bind(this, 'blog')}
         >
           {this.state.blogs.map(b => (
-            <Select.Option value={b.id}>{b.name}</Select.Option>
+            <Select.Option value={b.name}>{b.name}</Select.Option>
           ))}
         </Select>
       </Form.Item>

@@ -16,14 +16,14 @@ import { SubmissionPart } from 'src/submission/submission-part/interfaces/submis
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/utils/filesize.util';
 import FormContent from 'src/utils/form-content.util';
+import WebsiteValidator from 'src/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
 import { Website } from '../website.base';
+import { InkbunnyAccountData } from './inkbunny-account.interface';
 import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
 import { InkbunnyOptions } from './inkbunny.interface';
-import WebsiteValidator from 'src/utils/website-validator.util';
-import { InkbunnyAccountData } from './inkbunny-account.interface';
 
 @Injectable()
 export class Inkbunny extends Website {
@@ -214,7 +214,7 @@ export class Inkbunny extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<any>,
+    submissionPart: SubmissionPart<InkbunnyOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

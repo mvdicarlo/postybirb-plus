@@ -165,6 +165,7 @@ class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
 
   showModal = () => this.setState({ modalVisible: true });
   hideModal = () => {
+    Object.values(window.electron.auth).forEach(auth => auth.stop());
     this.setState({ modalVisible: false });
     if (RemoteService.isRemote()) {
       RemoteService.updateCookies(this.props.accountInfo._id).finally(() => {

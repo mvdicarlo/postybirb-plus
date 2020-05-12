@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
 import { HashRouter as Router } from 'react-router-dom';
+import App from './App';
 import * as serviceWorker from './serviceWorker';
-
-import './styles/submission.css';
 import './styles/scrollbar.css';
+import './styles/submission.css';
+import { Authorizer } from './websites/interfaces/authorizer.interface';
+
 
 declare global {
   interface Window {
@@ -22,6 +23,9 @@ declare global {
         openInBrowser(url: string): Promise<void>;
       };
       kill: () => void;
+      auth: {
+        tumblr: Authorizer;
+      };
     };
     AUTH_ID: string;
     PORT: number;

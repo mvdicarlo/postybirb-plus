@@ -190,8 +190,8 @@ export class Poster extends EventEmitter {
     while (totalTries) {
       try {
         totalTries--;
-        // const res = await this.fakePost();
         const accountData: any = (await this.accountService.get(this.part.accountId)).data;
+        // const res = await this.fakePost();
         const res = await (this.isFilePost(data)
           ? this.website.postFileSubmission(this.cancellationToken, data as any, accountData)
           : this.website.postNotificationSubmission(

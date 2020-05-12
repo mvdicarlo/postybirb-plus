@@ -1,10 +1,9 @@
-import socket from '../utils/websocket';
-import { observable, action } from 'mobx';
-import UpdateService from '../services/update.service';
 import { notification } from 'antd';
+import { action, observable } from 'mobx';
 import React from 'react';
+import UpdateService from '../services/update.service';
 import { UpdateEvent } from '../shared/enums/update.events.enum';
-import { uiStore } from './ui.store';
+import socket from '../utils/websocket';
 
 interface UpdateState {
   available: boolean;

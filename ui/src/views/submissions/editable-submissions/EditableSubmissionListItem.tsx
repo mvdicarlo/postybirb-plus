@@ -1,29 +1,18 @@
-import React from 'react';
-import { uiStore } from '../../../stores/ui.store';
-import SubmissionService from '../../../services/submission.service';
-import SubmissionUtil from '../../../utils/submission.util';
-import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Link } from 'react-router-dom';
-import { Problems } from '../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { Alert, Avatar, DatePicker, Icon, List, message, Modal, Popconfirm, Typography } from 'antd';
 import moment from 'moment';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
-import PostService from '../../../services/post.service';
-import { WebsiteRegistry } from '../../../websites/website-registry';
-import { IssueState } from './IssueState';
+import React from 'react';
+import { Draggable, DraggableProvided } from 'react-beautiful-dnd';
+import { Link } from 'react-router-dom';
+import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
 import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
-import { Draggable, DraggableProvided } from 'react-beautiful-dnd';
-import {
-  Avatar,
-  DatePicker,
-  Icon,
-  List,
-  Modal,
-  Popconfirm,
-  Typography,
-  message,
-  Alert
-} from 'antd';
+import { Problems } from '../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import PostService from '../../../services/post.service';
+import SubmissionService from '../../../services/submission.service';
+import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import SubmissionUtil from '../../../utils/submission.util';
+import { WebsiteRegistry } from '../../../websites/website-registry';
+import { IssueState } from './IssueState';
 
 interface ListItemProps {
   item: SubmissionPackage<Submission>;

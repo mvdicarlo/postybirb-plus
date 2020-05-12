@@ -1,5 +1,15 @@
 const { remote, clipboard, shell } = require('electron');
 const { app, session } = remote;
+const tumblr = require('./authorizers/tumblr.auth');
+
+const _setImmediate = setImmediate;
+const _clearImmediate = clearImmediate;
+const _Buffer = Buffer;
+process.once('loaded', () => {
+  global.setImmediate = _setImmediate;
+  global.clearImmediate = _clearImmediate;
+  global.Buffer = _Buffer;
+});
 
 window.PORT = remote.getCurrentWindow().PORT;
 window.AUTH_ID = remote.getCurrentWindow().AUTH_ID;
@@ -29,4 +39,7 @@ window.electron = {
     },
   },
   kill: () => app.quit(),
+  auth: {
+    tumblr,
+  },
 };

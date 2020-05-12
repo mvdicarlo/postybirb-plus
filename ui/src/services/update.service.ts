@@ -1,6 +1,5 @@
-import axios from '../utils/http';
 import { notification } from 'antd';
-import { uiStore } from '../stores/ui.store';
+import axios from '../utils/http';
 
 export default class UpdateService {
   static getUpdateData() {

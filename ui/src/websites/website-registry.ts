@@ -20,6 +20,7 @@ import { NewTumbl } from './new-tumbl/NewTumbl';
 import { FurryLife } from './furry-life/FurryLife';
 import { FurryNetwork } from './furry-network/FurryNetwork';
 import { Patreon } from './patreon/Patreon';
+import { Tumblr } from './tumblr/Tumblr';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -42,6 +43,7 @@ export class WebsiteRegistry {
     Route50: new Route50(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
+    Tumblr: new Tumblr(),
     Weasyl: new Weasyl(),
     e621: new e621()
   };

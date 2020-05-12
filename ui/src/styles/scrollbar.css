@@ -7,16 +7,3 @@
 ::-webkit-scrollbar-track {
   border-radius: 8px;
 }
-
-::-webkit-scrollbar-track {
-  background: lightgray;
-}
-
-::-webkit-scrollbar-thumb {
-  background: darkgray;
-}
-
-::-webkit-scrollbar-thumb:hover,
-::-webkit-scrollbar-thumb:active {
-  background: gray;
-}

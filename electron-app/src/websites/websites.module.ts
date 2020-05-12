@@ -23,6 +23,7 @@ import { NewTumblModule } from './new-tumbl/new-tumbl.module';
 import { FurryLifeModule } from './furry-life/furry-life.module';
 import { FurryNetworkModule } from './furry-network/furry-network.module';
 import { PatreonModule } from './patreon/patreon.module';
+import { TumblrModule } from './tumblr/tumblr.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -50,6 +51,7 @@ import { PatreonModule } from './patreon/patreon.module';
     FurryLifeModule,
     FurryNetworkModule,
     PatreonModule,
+    TumblrModule,
   ],
 })
 export class WebsitesModule {}
