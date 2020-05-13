@@ -21,12 +21,14 @@ import { FurryLife } from './furry-life/FurryLife';
 import { FurryNetwork } from './furry-network/FurryNetwork';
 import { Patreon } from './patreon/Patreon';
 import { Tumblr } from './tumblr/Tumblr';
+import { DeviantArt } from './deviant-art/DeviantArt';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
     Aryion: new Aryion(),
     Custom: new Custom(),
     Derpibooru: new Derpibooru(),
+    DeviantArt: new DeviantArt(),
     Discord: new Discord(),
     FurAffinity: new FurAffinity(),
     Furiffic: new Furiffic(),

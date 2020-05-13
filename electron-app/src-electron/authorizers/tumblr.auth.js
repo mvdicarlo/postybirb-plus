@@ -22,6 +22,7 @@ exports.stop = function() {
   if (server) {
     server.close();
   }
+  cb = null;
   server = null;
 };
 

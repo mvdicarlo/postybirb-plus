@@ -1,12 +1,6 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { session } from 'electron';
+import * as _ from 'lodash';
 import { EventsGateway } from 'src/events/events.gateway';
 import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
 import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
@@ -51,8 +45,8 @@ export class AccountService {
         });
       })
       .finally(() => {
-        Promise.all(this.loginStatuses.map(s => this.checkLogin(s._id))).finally(() =>
-          this.submissionService.postingStateChanged(), // Force updates to validation in case any website was slow
+        Promise.all(this.loginStatuses.map(s => this.checkLogin(s._id))).finally(
+          () => this.submissionService.postingStateChanged(), // Force updates to validation in case any website was slow
         );
       });
 
@@ -191,7 +185,7 @@ export class AccountService {
       data: website.transformAccountData(account.data),
     };
 
-    if (response.data) {
+    if (response.data && !_.isEqual(response.data, account.data)) {
       await this.setData(account._id, response.data);
     }
 

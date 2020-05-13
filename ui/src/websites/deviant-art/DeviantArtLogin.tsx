@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { Spin, message } from 'antd';
 import { Authorizer } from '../interfaces/authorizer.interface';
-import { TumblrAccountData } from '../../../../electron-app/src/websites/tumblr/tumblr-account.interface';
+import { DeviantArtAccountData } from '../../../../electron-app/src/websites/deviant-art/deviant-art-account.interface';
 import LoginService from '../../services/login.service';
 
 interface State {
   loading: boolean;
 }
 
-export class TumblrLogin extends React.Component<LoginDialogProps, State> {
+export class DeviantArtLogin extends React.Component<LoginDialogProps, State> {
   private authorizer: Authorizer;
   state: State = {
     loading: true
@@ -18,7 +18,7 @@ export class TumblrLogin extends React.Component<LoginDialogProps, State> {
 
   constructor(props: LoginDialogProps) {
     super(props);
-    this.authorizer = window.electron.auth.Tumblr;
+    this.authorizer = window.electron.auth.DeviantArt;
     this.authorizer.start(this.updateAuthData.bind(this));
   }
 
@@ -29,16 +29,23 @@ export class TumblrLogin extends React.Component<LoginDialogProps, State> {
       view.addEventListener('did-stop-loading', () => {
         if (this.state.loading) this.setState({ loading: false });
       });
+      view.addEventListener('did-navigate', () => {
+        if (this.state.loading) this.setState({ loading: false });
+      });
       view.allowpopups = true;
       view.partition = `persist:${this.props.account._id}`;
-      view.src = window.electron.auth.Tumblr.getAuthURL();
+      view.src = window.electron.auth.DeviantArt.getAuthURL();
     }
   }
 
-  updateAuthData(data: TumblrAccountData) {
-    LoginService.setAccountData(this.props.account._id, data).then(() => {
-      message.success('Tumblr Authenticated.');
-    });
+  updateAuthData(data: DeviantArtAccountData) {
+    if (data && data.access_token) {
+      LoginService.setAccountData(this.props.account._id, data).then(() => {
+        message.success('Deviant Art Authenticated.');
+      });
+    } else {
+      message.error('Failed to authententicate Deviant Art.');
+    }
   }
 
   render() {

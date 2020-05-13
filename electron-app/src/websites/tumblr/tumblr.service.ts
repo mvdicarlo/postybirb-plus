@@ -27,7 +27,7 @@ import { OAuthUtil } from 'src/utils/oauth.util';
 
 @Injectable()
 export class Tumblr extends Website {
-  readonly BASE_URL = ''; //TODO
+  readonly BASE_URL = '';
   readonly fileSubmissionOptions = TumblrDefaultFileOptions;
   readonly notificationSubmissionOptions = TumblrDefaultNotificationOptions;
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp3', 'mp4'];

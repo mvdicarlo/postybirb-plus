@@ -1,6 +1,9 @@
 const { remote, clipboard, shell } = require('electron');
 const { app, session } = remote;
-const tumblr = require('./authorizers/tumblr.auth');
+
+// Authorizers
+const Tumblr = require('./authorizers/tumblr.auth');
+const DeviantArt = require('./authorizers/deviant-art.auth');
 
 const _setImmediate = setImmediate;
 const _clearImmediate = clearImmediate;
@@ -14,6 +17,7 @@ process.once('loaded', () => {
 window.PORT = remote.getCurrentWindow().PORT;
 window.AUTH_ID = remote.getCurrentWindow().AUTH_ID;
 window.IS_DARK_THEME = remote.getCurrentWindow().IS_DARK_THEME;
+window.AUTH_SERVER_URL = remote.getCurrentWindow().AUTH_SERVER_URL;
 window.appVersion = app.getVersion();
 window.electron = {
   clipboard: {
@@ -40,6 +44,7 @@ window.electron = {
   },
   kill: () => app.quit(),
   auth: {
-    tumblr,
+    Tumblr,
+    DeviantArt,
   },
 };

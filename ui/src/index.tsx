@@ -7,7 +7,6 @@ import './styles/scrollbar.css';
 import './styles/submission.css';
 import { Authorizer } from './websites/interfaces/authorizer.interface';
 
-
 declare global {
   interface Window {
     electron: {
@@ -24,10 +23,12 @@ declare global {
       };
       kill: () => void;
       auth: {
-        tumblr: Authorizer;
+        Tumblr: Authorizer;
+        DeviantArt: Authorizer;
       };
     };
     AUTH_ID: string;
+    AUTH_SERVER_URL: string;
     PORT: number;
     IS_DARK_THEME: boolean;
     appVersion: string;

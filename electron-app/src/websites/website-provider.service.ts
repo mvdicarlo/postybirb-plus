@@ -22,6 +22,7 @@ import { FurryLife } from './furry-life/furry-life.service';
 import { FurryNetwork } from './furry-network/furry-network.service';
 import { Patreon } from './patreon/patreon.service';
 import { Tumblr } from './tumblr/tumblr.service';
+import { DeviantArt } from './deviant-art/deviant-art.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -51,6 +52,7 @@ export class WebsiteProvider {
     readonly furryNetwork: FurryNetwork,
     readonly patreon: Patreon,
     readonly tumblr: Tumblr,
+    readonly deviantArt: DeviantArt,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

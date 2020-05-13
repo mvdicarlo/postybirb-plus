@@ -13,6 +13,7 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 
 process.env.PORT = process.env.PORT || 9247;
+global.AUTH_SERVER_URL = 'http://localhost:3000';
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
@@ -121,6 +122,7 @@ function createWindow() {
 
   window.PORT = process.env.PORT;
   window.AUTH_ID = global.AUTH_ID;
+  window.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
   window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
   if (!global.DEBUG_MODE) {
     mainWindowState.manage(window);
