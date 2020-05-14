@@ -147,12 +147,103 @@ export class DeviantArt extends Website {
       .replace(/\n/g, '');
   }
 
+  private getDefaultCategoryType(type: FileSubmissionType): string {
+    switch (type) {
+      case FileSubmissionType.VIDEO:
+        return 'flash/animations';
+      case FileSubmissionType.TEXT:
+        return 'literature/prose/fiction/general/shortstory';
+      case FileSubmissionType.IMAGE:
+      default:
+        return 'digitalart/paintings/other';
+    }
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<DeviantArtFileOptions>,
     accountData: DeviantArtAccountData,
   ): Promise<PostResponse> {
-    return null;
+    const uploadForm: any = {
+      title: data.title,
+      access_token: accountData.access_token,
+      file: data.primary.file,
+      artist_comments: data.description,
+    };
+
+    this.parseTags(data.tags).forEach((t, i) => {
+      uploadForm[`tags[${i}]`] = t;
+    });
+
+    this.checkCancelled(cancellationToken);
+    const upload = await Http.post<{ itemid: string; error_description: string }>(
+      `${this.BASE_URL}/api/v1/oauth2/stash/submit`,
+      undefined,
+      {
+        type: 'multipart',
+        data: uploadForm,
+        requestOptions: { json: true },
+      },
+    );
+
+    if (!upload.body.itemid) {
+      return Promise.reject(
+        this.createPostResponse({
+          additionalInfo: upload.body,
+          message: upload.body.error_description,
+        }),
+      );
+    }
+
+    const { options } = data;
+    const form: any = {
+      access_token: accountData.access_token,
+      itemid: upload.body.itemid,
+      agree_tos: '1',
+      agree_submission: '1',
+      is_mature: data.rating !== SubmissionRating.GENERAL ? 'true' : 'false',
+      catpath: this.getDefaultCategoryType(data.primary.type),
+      display_resolution: options.displayResolution || '0',
+    };
+
+    if (data.rating !== SubmissionRating.GENERAL) {
+      form.mature_level = 'moderate';
+    }
+
+    options.matureClassification.forEach((classification, i) => {
+      form[`mature_classification[${i}]`] = classification;
+    });
+
+    if (options.matureLevel) form.mature_level = options.matureLevel;
+    if (options.disableComments) form.allow_comments = 'no';
+    if (options.critique) form.request_critique = 'yes';
+    if (options.freeDownload) form.allow_free_download = 'no';
+    if (options.feature) form.feature = 'yes';
+    if (options.displayResolution) form.display_resolution = options.displayResolution;
+
+    options.folders.forEach((folder, i) => {
+      form[`galleryids[${i}]`] = folder;
+    });
+
+    this.checkCancelled(cancellationToken);
+    const post = await Http.post<any>(`${this.BASE_URL}/api/v1/oauth2/stash/publish`, undefined, {
+      type: 'multipart',
+      data: form,
+      requestOptions: { json: true },
+    });
+
+    console.log(post.body);
+    this.verifyResponse(post, 'Verify post');
+    if (post.body.error_description || post.body.status !== 'success') {
+      return Promise.reject(
+        this.createPostResponse({
+          additionalInfo: post.body,
+          message: post.body.error_description,
+        }),
+      );
+    }
+
+    return this.createPostResponse({ source: post.body.url });
   }
 
   async postNotificationSubmission(
@@ -160,7 +251,31 @@ export class DeviantArt extends Website {
     data: PostData<Submission, DefaultOptions>,
     accountData: DeviantArtAccountData,
   ): Promise<PostResponse> {
-    return null;
+    this.checkCancelled(cancellationToken);
+    const post = await Http.post<any>(
+      `${this.BASE_URL}/api/v1/oauth2/user/statuses/post`,
+      undefined,
+      {
+        requestOptions: { json: true },
+        type: 'multipart',
+        data: {
+          body: data.description,
+          access_token: accountData.access_token,
+        },
+      },
+    );
+
+    this.verifyResponse(post, 'Verify Post');
+    if (post.body.error_description) {
+      return Promise.reject(
+        this.createPostResponse({
+          additionalInfo: post.body,
+          message: post.body.error_description,
+        }),
+      );
+    }
+
+    return this.createPostResponse({});
   }
 
   validateFileSubmission(

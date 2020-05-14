@@ -7,6 +7,6 @@ export interface DeviantArtFileOptions extends DefaultFileOptions {
   freeDownload: boolean;
   folders: string[];
   matureClassification: string[];
-  matureLevel?: string;
+  matureLevel: string;
   displayResolution: string;
 }

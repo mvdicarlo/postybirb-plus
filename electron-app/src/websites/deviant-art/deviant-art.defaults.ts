@@ -9,6 +9,6 @@ export const DeviantArtDefaultFileOptions: DeviantArtFileOptions = {
   freeDownload: false,
   folders: [],
   matureClassification: [],
-  matureLevel: undefined,
+  matureLevel: '',
   displayResolution: '0',
 };
