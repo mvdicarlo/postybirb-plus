@@ -25,6 +25,7 @@ import { FurryNetworkModule } from './furry-network/furry-network.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { TumblrModule } from './tumblr/tumblr.module';
 import { DeviantArtModule } from './deviant-art/deviant-art.module';
+import { MastodonModule } from './mastodon/mastodon.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -54,6 +55,7 @@ import { DeviantArtModule } from './deviant-art/deviant-art.module';
     PatreonModule,
     TumblrModule,
     DeviantArtModule,
+    MastodonModule,
   ],
 })
 export class WebsitesModule {}

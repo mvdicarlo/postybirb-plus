@@ -2,7 +2,9 @@ import * as _ from 'lodash';
 
 export class PlaintextParser {
   public static parse(html: string): string {
-    if (!html) { return ''; }
+    if (!html) {
+      return '';
+    }
 
     html = html.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '$4 ( $2 )');
     html = html.replace(/<h[1-7](.*?)>(.*?)<\/h[1-7]>/, '$2\n');
@@ -31,6 +33,7 @@ export class PlaintextParser {
     html = html.replace(/\r\r/gi, '');
     // html = html.replace(/(\S)\n/gi, '$1 ');
     html = _.unescape(html);
+    html = html.replace(/&nbsp;/g, ' ');
 
     const duplicateCheck = html.match(/(\S*?) \(\s(.*?)\s\)/g) || [];
     duplicateCheck.forEach(potentialDuplicate => {

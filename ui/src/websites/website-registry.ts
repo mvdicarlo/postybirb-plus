@@ -22,6 +22,7 @@ import { FurryNetwork } from './furry-network/FurryNetwork';
 import { Patreon } from './patreon/Patreon';
 import { Tumblr } from './tumblr/Tumblr';
 import { DeviantArt } from './deviant-art/DeviantArt';
+import { Mastodon } from './mastodon/Mastodon';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -37,6 +38,7 @@ export class WebsiteRegistry {
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
     KoFi: new KoFi(),
+    Mastodon: new Mastodon(),
     Newgrounds: new Newgrounds(),
     NewTumbl: new NewTumbl(),
     Patreon: new Patreon(),
