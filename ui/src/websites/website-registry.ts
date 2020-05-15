@@ -23,6 +23,7 @@ import { Patreon } from './patreon/Patreon';
 import { Tumblr } from './tumblr/Tumblr';
 import { DeviantArt } from './deviant-art/DeviantArt';
 import { Mastodon } from './mastodon/Mastodon';
+import { Twitter } from './twitter/Twitter';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -39,8 +40,8 @@ export class WebsiteRegistry {
     Inkbunny: new Inkbunny(),
     KoFi: new KoFi(),
     Mastodon: new Mastodon(),
-    Newgrounds: new Newgrounds(),
     NewTumbl: new NewTumbl(),
+    Newgrounds: new Newgrounds(),
     Patreon: new Patreon(),
     Piczel: new Piczel(),
     Pixiv: new Pixiv(),
@@ -48,6 +49,7 @@ export class WebsiteRegistry {
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
     Tumblr: new Tumblr(),
+    Twitter: new Twitter(),
     Weasyl: new Weasyl(),
     e621: new e621()
   };

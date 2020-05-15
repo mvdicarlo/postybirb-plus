@@ -75,11 +75,11 @@ export class ParserService {
   public async parseDescription(
     website: Website,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<any>,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
   ): Promise<string> {
     let description = FormContent.getDescription(
       defaultPart.data.description,
-      websitePart.data.decription,
+      websitePart.data.description,
     ).trim();
 
     if (description.length) {
@@ -107,7 +107,6 @@ export class ParserService {
     }
 
     description = website.postParseDescription(description);
-
     return description.trim();
   }
 
@@ -142,7 +141,7 @@ export class ParserService {
   public async parseTags(
     website: Website,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<any>,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
   ): Promise<string[]> {
     let tags = _.uniq<string>(FormContent.getTags(defaultPart.data.tags, websitePart.data.tags));
     if (tags.length) {

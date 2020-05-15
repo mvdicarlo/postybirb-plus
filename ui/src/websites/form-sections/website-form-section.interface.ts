@@ -7,7 +7,13 @@ export interface WebsiteSectionProps<T extends Submission, K extends DefaultOpti
   extends SubmissionSectionProps<T, K> {
   hideTitle?: boolean;
   hideThumbnailOptions?: boolean;
-  hideDescription?: boolean;
+  descriptionOptions?: {
+    show: boolean;
+    options?: {
+      lengthParser?: (text: string) => number;
+      anchorLength?: number;
+    };
+  };
   tagOptions?: {
     show: boolean;
     options?: TagOptions;

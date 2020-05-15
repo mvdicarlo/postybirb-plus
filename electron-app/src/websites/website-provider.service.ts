@@ -24,6 +24,7 @@ import { Patreon } from './patreon/patreon.service';
 import { Tumblr } from './tumblr/tumblr.service';
 import { DeviantArt } from './deviant-art/deviant-art.service';
 import { Mastodon } from './mastodon/mastodon.service';
+import { Twitter } from './twitter/twitter.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -55,6 +56,7 @@ export class WebsiteProvider {
     readonly tumblr: Tumblr,
     readonly deviantArt: DeviantArt,
     readonly mastodon: Mastodon,
+    readonly twitter: Twitter,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

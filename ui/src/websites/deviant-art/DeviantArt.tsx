@@ -1,25 +1,22 @@
-import React from 'react';
+import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
+import React from 'react';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import {
-  DefaultFileOptions,
-  DefaultOptions
-} from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
-import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
+import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import { DeviantArtFileOptions } from '../../../../electron-app/src/websites/deviant-art/deviant-art.interface';
+import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
+import WebsiteService from '../../services/website.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-import { DeviantArtLogin } from './DeviantArtLogin';
-import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import WebsiteService from '../../services/website.service';
-import { Form, Select, Checkbox } from 'antd';
+import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
+import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { DeviantArtFileOptions } from '../../../../electron-app/src/websites/deviant-art/deviant-art.interface';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { DeviantArtLogin } from './DeviantArtLogin';
 
 const defaultFileOptions: DeviantArtFileOptions = {
   ...GenericDefaultFileOptions,

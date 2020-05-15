@@ -26,6 +26,7 @@ import { PatreonModule } from './patreon/patreon.module';
 import { TumblrModule } from './tumblr/tumblr.module';
 import { DeviantArtModule } from './deviant-art/deviant-art.module';
 import { MastodonModule } from './mastodon/mastodon.module';
+import { TwitterModule } from './twitter/twitter.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -56,6 +57,7 @@ import { MastodonModule } from './mastodon/mastodon.module';
     TumblrModule,
     DeviantArtModule,
     MastodonModule,
+    TwitterModule,
   ],
 })
 export class WebsitesModule {}

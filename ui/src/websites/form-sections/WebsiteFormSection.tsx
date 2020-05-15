@@ -58,8 +58,8 @@ export default abstract class WebsiteFormSection<
     const { data } = this.props.part;
     const showRating = _.get(this.props.ratingOptions, 'show', false);
     const showTags = _.get(this.props.tagOptions, 'show', true);
+    const showDescription = _.get(this.props.descriptionOptions, 'show', true);
     const hideTitle = !!this.props.hideTitle;
-    const hideDescription = !!this.props.hideDescription;
     const wideForm = this.renderWideForm(data);
     const rightForm = this.renderRightForm(data);
     const leftForm = this.renderLeftForm(data);
@@ -85,14 +85,16 @@ export default abstract class WebsiteFormSection<
               tagOptions={_.get(this.props.tagOptions, 'options')}
             />
           ) : null}
-          {hideDescription ? null : (
+          {showDescription ? (
             <DescriptionInput
               defaultValue={data.description}
               onChange={this.setValue.bind(this, 'description')}
               label="Description"
               overwriteDescriptionValue={_.get(this.props.defaultData, 'description.value')}
+              anchorLength={_.get(this.props.descriptionOptions, 'options.anchorLength')}
+              lengthParser={_.get(this.props.descriptionOptions, 'options.lengthParser')}
             />
-          )}
+          ) : null}
           {showRating ? (
             <Form.Item label="Rating">
               <Radio.Group
