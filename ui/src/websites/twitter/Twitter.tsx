@@ -19,6 +19,7 @@ export class Twitter implements Website {
   internalName: string = 'Twitter';
   name: string = 'Twitter';
   supportsAdditionalFiles: boolean = true;
+  supportsTags = false
   LoginDialog = (props: LoginDialogProps) => <TwitterLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (

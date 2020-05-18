@@ -34,7 +34,7 @@ const defaultNotificationOptions: PatreonNotificationOptions = {
 export class Patreon implements Website {
   internalName: string = 'Patreon';
   name: string = 'Patreon';
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="https://www.patreon.com/login" {...props} />

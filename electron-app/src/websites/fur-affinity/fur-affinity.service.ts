@@ -32,7 +32,7 @@ import _ = require('lodash');
 @Injectable()
 export class FurAffinity extends Website {
   readonly BASE_URL = 'https://www.furaffinity.net';
-  readonly waitBetweenPostsInterval = 45000;
+  readonly waitBetweenPostsInterval = 50000;
   readonly fileSubmissionOptions = FurAffinityDefaultFileOptions;
   readonly notificationSubmissionOptions = FurAffinityDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
@@ -312,7 +312,7 @@ export class FurAffinity extends Website {
 
     if (body.includes('CAPTCHA verification error')) {
       return Promise.reject(
-        this.createPostResponse({ message: 'You must have 5+ posts on your account first' }),
+        this.createPostResponse({ message: 'You must have 10+ posts on your account first' }),
       );
     }
 

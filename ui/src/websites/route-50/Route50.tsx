@@ -11,6 +11,7 @@ import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-
 export class Route50 implements Website {
   internalName: string = 'Route50';
   name: string = 'Route 50';
+  supportsTags = true;
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="http://route50.net/login" {...props} />
   );

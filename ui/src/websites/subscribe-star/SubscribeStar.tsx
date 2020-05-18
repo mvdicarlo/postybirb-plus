@@ -30,8 +30,8 @@ const defaultNotificationOptions: SubscribeStarNotificationOptions = {
 export class SubscribeStar implements Website {
   internalName: string = 'SubscribeStar';
   name: string = 'SubscribeStar';
-  supportsAdditionalFiles: boolean = false;
-  supportsTags: boolean = true;
+  supportsAdditionalFiles: boolean = true;
+  supportsTags: boolean = false;
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="https://www.subscribestar.com" {...props} />
   );
