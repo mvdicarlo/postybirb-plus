@@ -269,7 +269,7 @@ export class FurryLife extends Website {
         this.getAccountInfo(submissionPart.accountId, 'folders'),
       )
     ) {
-      warnings.push('Album not found.');
+      warnings.push(`Album (${folder}) not found.`);
     }
 
     const files = [
@@ -282,6 +282,9 @@ export class FurryLife extends Website {
     const maxMB: number = 1023;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (
           isAutoscaling &&
@@ -291,10 +294,6 @@ export class FurryLife extends Website {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
           problems.push(`FurryLife limits ${mimetype} to ${maxMB}MB`);
-        }
-
-        if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-          problems.push(`Does not support file format: (${name}) ${mimetype}.`);
         }
       }
     });

@@ -180,6 +180,10 @@ export class Tumblr extends Website {
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
+
       let maxMB: number = 10;
       if (type === FileSubmissionType.IMAGE && mimetype === 'image/gif') {
         maxMB = 1;
@@ -196,10 +200,6 @@ export class Tumblr extends Website {
         } else {
           problems.push(`Tumblr limits ${mimetype} to ${maxMB}MB`);
         }
-      }
-
-      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
     });
 

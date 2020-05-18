@@ -206,4 +206,23 @@ export class Discord extends Website {
 
     return { problems, warnings };
   }
+
+  validateNotificationSubmission(
+    submission: FileSubmission,
+    submissionPart: SubmissionPart<DiscordNotificationOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): ValidationParts {
+    const problems: string[] = [];
+    const warnings: string[] = [];
+
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    );
+
+    if (description.length > 2000) {
+      warnings.push('Max description length allowed is 2,000 characters.');
+    }
+
+    return { problems, warnings };
+  }
 }

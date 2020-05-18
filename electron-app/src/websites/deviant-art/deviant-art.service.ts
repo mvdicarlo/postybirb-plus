@@ -295,7 +295,7 @@ export class DeviantArt extends Website {
       );
       submissionPart.data.folders.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(`Folder not found: ${f}`);
+          problems.push(`Folder (${f}) not found.`);
         }
       });
     }

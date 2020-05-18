@@ -181,12 +181,6 @@ export class Mastodon extends Website {
       warnings.push('Max description length allowed is 500 characters.');
     }
 
-    if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
-      );
-    }
-
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
@@ -197,6 +191,10 @@ export class Mastodon extends Website {
     const maxMB: number = 300;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
+
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (
           isAutoscaling &&

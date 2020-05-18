@@ -289,10 +289,6 @@ export class Weasyl extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
-      problems.push('Requires at least 2 tags.');
-    }
-
     if (submissionPart.data.folder) {
       const folders: Folder[] = _.get(
         this.accountInformation.get(submissionPart.accountId),
@@ -300,8 +296,12 @@ export class Weasyl extends Website {
         [],
       );
       if (!folders.find(f => f.value === submissionPart.data.folder)) {
-        warnings.push('Folder not found.');
+        warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
+    }
+
+    if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
+      problems.push('Requires at least 2 tags.');
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {

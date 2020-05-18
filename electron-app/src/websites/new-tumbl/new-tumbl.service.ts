@@ -471,7 +471,7 @@ export class NewTumbl extends Website {
     if (submissionPart.data.blog) {
       const blogs: NewTumblBlog[] = this.getAccountInfo(submissionPart.accountId, 'blogs') || [];
       if (!blogs.find(b => b.id === submissionPart.data.blog)) {
-        problems.push(`Blog not found: ${submissionPart.data.blog}`);
+        problems.push(`Blog (${submissionPart.data.blog}) not found.`);
       }
     } else {
       warnings.push('Default blog will be used');
@@ -505,7 +505,7 @@ export class NewTumbl extends Website {
     if (submissionPart.data.blog) {
       const blogs: NewTumblBlog[] = this.getAccountInfo(submissionPart.accountId, 'blogs') || [];
       if (!blogs.find(b => b.id === submissionPart.data.blog)) {
-        problems.push(`Blog not found: ${submissionPart.data.blog}`);
+        problems.push(`Blog (${submissionPart.data.blog}) not found.`);
       }
     } else {
       warnings.push('Default blog will be used');

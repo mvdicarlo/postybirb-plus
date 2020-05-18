@@ -418,7 +418,7 @@ export class FurryNetwork extends Website {
         submissionPart.data.folders.forEach(f => {
           const found = collections[type].find(c => c.id === f);
           if (!found) {
-            problems.push(`Folder not found: ${f}`);
+            problems.push(`Folder (${f}) not found.`);
           }
         });
       }
@@ -482,7 +482,7 @@ export class FurryNetwork extends Website {
         submissionPart.data.folders.forEach(f => {
           const found = collections[type].find(c => c.id === f);
           if (!found) {
-            problems.push(`Folder not found: ${f}`);
+            problems.push(`Folder (${f}) not found.`);
           }
         });
       }

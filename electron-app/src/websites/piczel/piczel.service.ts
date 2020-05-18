@@ -156,7 +156,7 @@ export class Piczel extends Website {
         [],
       );
       if (!folders.find(f => f.value === submissionPart.data.folder)) {
-        warnings.push('Folder not found.');
+        warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
     }
 
@@ -171,6 +171,9 @@ export class Piczel extends Website {
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (FileSize.MBtoBytes(maxMB) < size) {
+        if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+          problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+        }
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
@@ -180,10 +183,6 @@ export class Piczel extends Website {
         } else {
           problems.push(`Piczel limits ${mimetype} to ${maxMB}MB`);
         }
-      }
-
-      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
     });
 

@@ -221,6 +221,10 @@ export class SubscribeStar extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
+    if (!submissionPart.data.tier) {
+      problems.push('No access tier selected.');
+    }
+
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
@@ -247,10 +251,6 @@ export class SubscribeStar extends Website {
         }
       }
     });
-
-    if (!submissionPart.data.tier) {
-      problems.push('No access tier selected.');
-    }
 
     return { problems, warnings };
   }

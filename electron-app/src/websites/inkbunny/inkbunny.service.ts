@@ -235,6 +235,10 @@ export class Inkbunny extends Website {
     const maxMB: number = 200;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
+
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (
           isAutoscaling &&
@@ -245,10 +249,6 @@ export class Inkbunny extends Website {
         } else {
           problems.push(`Inkbunny limits ${mimetype} to ${maxMB}MB`);
         }
-      }
-
-      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
     });
 

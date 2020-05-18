@@ -327,13 +327,6 @@ export class Furiffic extends Website {
     return { problems, warnings };
   }
 
-  validateNotificationSubmission(
-    submission: Submission,
-    submissionPart: SubmissionPart<any>,
-  ): ValidationParts {
-    return { problems: [], warnings: [] };
-  }
-
   parseTags(tags: string[]): string[] {
     return super
       .parseTags(tags)

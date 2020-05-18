@@ -41,6 +41,7 @@ const defaultNotificationOptions: FurAffinityNotificationOptions = {
   feature: true
 };
 
+// TODO supports fallback for all real mimetypes
 export class FurAffinity implements Website {
   internalName: string = 'FurAffinity';
   name: string = 'Fur Affinity';

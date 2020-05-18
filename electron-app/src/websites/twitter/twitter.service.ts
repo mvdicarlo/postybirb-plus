@@ -167,6 +167,10 @@ export class Twitter extends Website {
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
+
       let maxMB: number = mimetype === 'image/gif' ? 15 : 5;
       if (type === FileSubmissionType.VIDEO) {
         maxMB = 15;
@@ -181,10 +185,6 @@ export class Twitter extends Website {
         } else {
           problems.push(`Twitter limits ${mimetype} to ${maxMB}MB`);
         }
-      }
-
-      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
     });
 

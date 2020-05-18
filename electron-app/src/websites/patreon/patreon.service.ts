@@ -519,11 +519,11 @@ export class Patreon extends Website {
     xhr.open('POST', dest, false);
     xhr.send(fd);
     Object.assign({}, { body: body, status: xhr.status, response: xhr.response })`;
-    const upload = await BrowserWindowUtil.runScriptOnPage<{ body: any; status: number, response: object }>(
-      profileId,
-      `${this.BASE_URL}/posts/${link}/edit`,
-      cmd,
-    );
+    const upload = await BrowserWindowUtil.runScriptOnPage<{
+      body: any;
+      status: number;
+      response: object;
+    }>(profileId, `${this.BASE_URL}/posts/${link}/edit`, cmd);
 
     if (upload && upload.body && upload.status && upload.status < 320) {
       return upload;
@@ -602,7 +602,7 @@ export class Patreon extends Website {
       const folders = this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS);
       options.tiers.forEach(tier => {
         if (!WebsiteValidator.folderIdExists(tier, folders)) {
-          problems.push(`Access Tier could not be found: ${tier}`);
+          problems.push(`Access Tier (${tier}) could not be found.`);
         }
       });
     } else {
@@ -648,7 +648,7 @@ export class Patreon extends Website {
       const folders = this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS);
       options.tiers.forEach(tier => {
         if (!WebsiteValidator.folderIdExists(tier, folders)) {
-          problems.push(`Access Tier could not be found: ${tier}`);
+          problems.push(`Access Tier (${tier}) could not be found.`);
         }
       });
     } else {

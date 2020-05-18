@@ -223,7 +223,7 @@ export class SoFurry extends Website {
         [],
       );
       if (!folders.find(f => f.value === submissionPart.data.folder)) {
-        warnings.push('Folder not found.');
+        warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
     }
 
