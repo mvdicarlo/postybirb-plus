@@ -171,9 +171,11 @@ export class DeviantArt extends Website {
       artist_comments: data.description,
     };
 
-    this.parseTags(data.tags).forEach((t, i) => {
-      uploadForm[`tags[${i}]`] = t;
-    });
+    this.parseTags(data.tags)
+      .map(t => t.replace(/\//g, '_'))
+      .forEach((t, i) => {
+        uploadForm[`tags[${i}]`] = t;
+      });
 
     this.checkCancelled(cancellationToken);
     const upload = await Http.post<{ itemid: string; error_description: string }>(
@@ -214,7 +216,10 @@ export class DeviantArt extends Website {
       form[`mature_classification[${i}]`] = classification;
     });
 
-    if (options.matureLevel) form.mature_level = options.matureLevel;
+    if (options.matureLevel || options.matureClassification.length) {
+      form.mature_level = options.matureLevel || 'moderate';
+      form.is_mature = 'true';
+    }
     if (options.disableComments) form.allow_comments = 'no';
     if (options.critique) form.request_critique = 'yes';
     if (options.freeDownload) form.allow_free_download = 'no';
@@ -232,7 +237,6 @@ export class DeviantArt extends Website {
       requestOptions: { json: true },
     });
 
-    console.log(post.body);
     this.verifyResponse(post, 'Verify post');
     if (post.body.error_description || post.body.status !== 'success') {
       return Promise.reject(

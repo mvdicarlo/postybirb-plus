@@ -57,7 +57,7 @@ export class Aryion extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<string>(`${this.BASE_URL}/g4/treeview.php`, data._id);
-    if (res.body.includes('user-link')) {
+    if (res.body.includes('user-link') && !res.body.includes('Login to read messages')) {
       status.loggedIn = true;
       const $ = cheerio.load(res.body);
       status.username = $('.user-link').text();
@@ -133,7 +133,7 @@ export class Aryion extends Website {
       'reqtag[]': data.options.requiredTag === '1' ? 'Non-Vore' : '',
       view_perm: data.options.viewPermissions,
       comment_perm: data.options.commentPermissions,
-      tag_perm: data.options.tagPermissions,
+      tag_perm: data.options.tagPermissions, // NOTE: broken
       scrap: data.options.scraps ? 'on' : '',
     };
 

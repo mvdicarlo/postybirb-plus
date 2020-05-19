@@ -22,6 +22,7 @@ import { Website } from '../website.base';
 import { DiscordDefaultFileOptions, DiscordDefaultNotificationOptions } from './discord.defaults';
 import { DiscordFileOptions, DiscordNotificationOptions } from './discord.interface';
 import { DiscordAccountData } from './discord.account.interface';
+import { MarkdownParser } from 'src/description-parsing/markdown/markdown.parser';
 
 @Injectable()
 export class Discord extends Website {
@@ -34,17 +35,23 @@ export class Discord extends Website {
 
   readonly fileSubmissionOptions: DiscordFileOptions = DiscordDefaultFileOptions;
   readonly notificationSubmissionOptions: DiscordNotificationOptions = DiscordDefaultNotificationOptions;
-  readonly defaultDescriptionParser = PlaintextParser.parse;
+  readonly defaultDescriptionParser = MarkdownParser.parse;
 
   readonly usernameShortcuts = [];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
 
-    if (data.data) {
-      const webhookData: DiscordAccountData = data.data;
-      status.loggedIn = !!webhookData.webhook;
-      status.username = webhookData.name;
+    const webhookData: DiscordAccountData = data.data;
+    if (webhookData && webhookData.webhook) {
+      const channel = await Http.get<any>(webhookData.webhook, undefined, {
+        requestOptions: { json: true },
+      });
+
+      if (!channel.error && channel.body.id) {
+        status.loggedIn = true;
+        status.username = webhookData.name;
+      }
     }
 
     return status;
@@ -59,16 +66,26 @@ export class Discord extends Website {
     data: PostData<Submission, DiscordNotificationOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    let description = `${data.options.useTitle ? `**${data.title}**\n\n` : ''}${data.description}`
-      .substring(0, 2000)
-      .trim();
+    let description = data.description.substring(0, 2000).trim();
+
+    const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
     const json = {
-      content: description,
+      content: mentions.length ? mentions.join(' ') : undefined,
       username: 'PostyBirb',
+      avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
       allowed_mentions: {
         parse: ['everyone', 'users', 'roles'],
       },
+      embeds: [
+        {
+          title: data.options.useTitle ? data.title : undefined,
+          description,
+          footer: {
+            text: 'Posted using PostyBirb',
+          },
+        },
+      ],
     };
 
     this.checkCancelled(cancellationToken);
@@ -96,13 +113,17 @@ export class Discord extends Website {
     data: FilePostData<DiscordFileOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    await this.postNotificationSubmission(
-      cancellationToken,
-      data as PostData<Submission, DiscordFileOptions>,
-      accountData,
-    );
+    if (data.description && data.description.length) {
+      await this.postNotificationSubmission(
+        cancellationToken,
+        data as PostData<Submission, DiscordFileOptions>,
+        accountData,
+      );
+    }
+
     const formData = {
       username: 'PostyBirb',
+      avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
     };
 
     let error = null;
@@ -133,31 +154,6 @@ export class Discord extends Website {
     }
 
     return this.createPostResponse({});
-  }
-
-  preparseDescription(text: string): string {
-    return text
-      .replace(/(<b>|<strong>)/gm, '**')
-      .replace(/(<\/b>|<\/strong>)/gm, '**')
-      .replace(/(<i>|<em>)/gm, '*')
-      .replace(/(<\/i>|<\/em>)/gm, '*');
-  }
-
-  parseDescription(text: string): string {
-    text = super.parseDescription(text);
-    const links =
-      text.match(
-        /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gm,
-      ) || [];
-    const seenLinks = [];
-    links.forEach(link => {
-      if (seenLinks.includes(link)) {
-        return;
-      }
-      seenLinks.push(link);
-      text = text.replace(new RegExp(link, 'gi'), `<${link}>`);
-    });
-    return text;
   }
 
   transformAccountData(data: DiscordAccountData) {

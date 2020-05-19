@@ -57,6 +57,7 @@ export class Derpibooru extends Website {
   }
 
   preparseDescription(text: string) {
+    // NOTE: Has a weird format issue when inlines are nested e.g. italic within a bold
     return text
       .replace(/<b>/gi, '*')
       .replace(/<i>/gi, '_')

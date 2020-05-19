@@ -107,7 +107,7 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
           {...GenericSelectProps}
           className="w-full"
           value={data.matureClassification}
-          onSelect={this.setValue.bind(this, 'matureClassification')}
+          onChange={this.setValue.bind(this, 'matureClassification')}
           mode="multiple"
         >
           <Select.Option value="nudity">Nudity</Select.Option>

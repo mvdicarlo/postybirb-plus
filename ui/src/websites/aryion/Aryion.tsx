@@ -113,7 +113,7 @@ export class AryionFileSubmissionForm extends GenericFileSubmissionSection<Aryio
           <Radio.Button value="NONE">Nobody</Radio.Button>
         </Radio.Group>
       </Form.Item>,
-      <Form.Item label="View Permissions">
+      <Form.Item label="Tag Permissions">
         <Radio.Group
           onChange={this.handleValueChange.bind(this, 'tagPermissions')}
           value={data.tagPermissions}
