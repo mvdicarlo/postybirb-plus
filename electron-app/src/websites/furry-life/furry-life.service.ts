@@ -25,6 +25,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { FurryLifeDefaultFileOptions } from './furry-life.defaults';
 import { FurryLifeFileOptions } from './furry-life.interface';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class FurryLife extends Website {
@@ -87,9 +88,9 @@ export class FurryLife extends Website {
         });
       });
 
-    const folders = this.getAccountInfo(profileId, 'folders') || [];
+    const folders = this.getAccountInfo(profileId, GenericAccountProp.FOLDERS) || [];
     folders[albumId - 1] = folder;
-    this.storeAccountInformation(profileId, 'folders', folders);
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
@@ -266,7 +267,7 @@ export class FurryLife extends Website {
     if (
       !WebsiteValidator.folderIdExists(
         folder,
-        this.getAccountInfo(submissionPart.accountId, 'folders'),
+        this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS),
       )
     ) {
       warnings.push(`Album (${folder}) not found.`);

@@ -28,6 +28,7 @@ import { Website } from '../website.base';
 import { FurAffinityDefaultFileOptions, FurAffinityDefaultNotificationOptions } from './fur-affinity.defaults';
 import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
 import _ = require('lodash');
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class FurAffinity extends Website {
@@ -106,7 +107,7 @@ export class FurAffinity extends Website {
         }
       });
 
-    this.storeAccountInformation(profileId, 'folders', folders);
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
     this.storeAccountInformation(profileId, 'flat_folders', flatFolders);
   }
 

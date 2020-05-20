@@ -22,6 +22,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { AryionDefaultFileOptions } from './aryion.defaults';
 import { AryionFileOptions } from './aryion.interface';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class Aryion extends Website {
@@ -76,7 +77,7 @@ export class Aryion extends Website {
         folders.push(...myTree);
       });
 
-    this.storeAccountInformation(profileId, 'folders', folders);
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
 
   private searchFolderTree($: CheerioStatic, el: CheerioElement, parent: Folder[]) {
@@ -172,7 +173,7 @@ export class Aryion extends Website {
       if (
         !WebsiteValidator.folderIdExists(
           submissionPart.data.folder.pop(),
-          this.getAccountInfo(submissionPart.accountId, 'folders'),
+          this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS),
         )
       ) {
         problems.push(`Folder (${submissionPart.data.folder}) not found.`);

@@ -21,6 +21,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { PiczelDefaultFileOptions } from './piczel.defaults';
 import { PiczelFileOptions } from './piczel.interface';
 import WebsiteValidator from 'src/utils/website-validator.util';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class Piczel extends Website {
@@ -72,7 +73,7 @@ export class Piczel extends Website {
       })),
     );
 
-    this.storeAccountInformation(profileId, 'folders', folders);
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
@@ -152,7 +153,7 @@ export class Piczel extends Website {
     if (submissionPart.data.folder) {
       const folders: Folder[] = _.get(
         this.accountInformation.get(submissionPart.accountId),
-        'folders',
+        GenericAccountProp.FOLDERS,
         [],
       );
       if (!folders.find(f => f.value === submissionPart.data.folder)) {

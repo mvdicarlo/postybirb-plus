@@ -27,6 +27,7 @@ import { Website } from '../website.base';
 import { SoFurryDefaultFileOptions } from './so-furry.defaults';
 import { SoFurryFileOptions } from './so-furry.interface';
 import _ = require('lodash');
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class SoFurry extends Website {
@@ -69,7 +70,7 @@ export class SoFurry extends Website {
         folders.push({ value: $(o).attr('value'), label: $(o).text() });
       });
 
-    this.storeAccountInformation(profileId, 'folders', folders);
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
@@ -219,7 +220,7 @@ export class SoFurry extends Website {
     if (submissionPart.data.folder) {
       const folders: Folder[] = _.get(
         this.accountInformation.get(submissionPart.accountId),
-        'folders',
+        GenericAccountProp.FOLDERS,
         [],
       );
       if (!folders.find(f => f.value === submissionPart.data.folder)) {

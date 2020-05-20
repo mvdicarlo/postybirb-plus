@@ -27,6 +27,7 @@ import { Website } from 'src/websites/website.base';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { WeasylDefaultFileOptions } from './weasyl.defaults';
 import { WeasylFileOptions } from './weasyl.interface';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class Weasyl extends Website {
@@ -292,7 +293,7 @@ export class Weasyl extends Website {
     if (submissionPart.data.folder) {
       const folders: Folder[] = _.get(
         this.accountInformation.get(submissionPart.accountId),
-        'folders',
+        GenericAccountProp.FOLDERS,
         [],
       );
       if (!folders.find(f => f.value === submissionPart.data.folder)) {
