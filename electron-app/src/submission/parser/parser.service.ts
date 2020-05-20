@@ -83,9 +83,11 @@ export class ParserService {
     ).trim();
 
     if (description.length) {
-      description = HTMLFormatParser.parse(description);
       // Replace custom shortcuts
       description = await this.parseCustomDescriptionShortcuts(description);
+
+      // Standardize HTML
+      description = HTMLFormatParser.parse(description);
 
       // Run preparser (allows formatting of shortcuts before anything else runs)
       description = website.preparseDescription(description);

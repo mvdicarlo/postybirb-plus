@@ -86,7 +86,7 @@ export class Furiffic extends Website {
     return super
       .parseDescription(text)
       .replace(/\[hr\]/gm, '\n----------\n')
-      .replace(/\n/gm, '[lb]\n')
+      .replace(/\n/gm, '[lb]')
       .replace(/(\[size=\d+\]|\[\/size\])/g, '') // does not support our size tag
       .replace(/\[right\]/g, '[align=right]')
       .replace(/\[center\]/g, '[align=center]')

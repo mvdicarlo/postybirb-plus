@@ -77,7 +77,8 @@ export default class SubmissionView extends React.Component<Props> {
 
     return (
       <Tabs
-        className="overflow-visible bg-inherit"
+        className="overflow-y-auto h-full bg-inherit"
+        style={{ overflowY: 'auto' }}
         tabBarStyle={{ zIndex: 10, backgroundColor: 'inherit', position: 'sticky', top: 0 }}
         defaultActiveKey={this.defaultKey}
         onTabClick={(key: string) => {

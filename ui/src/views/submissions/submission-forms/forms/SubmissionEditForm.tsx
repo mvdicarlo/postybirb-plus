@@ -840,7 +840,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                             <Icon type="exclamation" />
                           </Typography.Text>
                         ) : null}
-                        {website}
+                        {WebsiteRegistry.websites[website].name}
                       </span>
                     }
                     href={`#${website}`}

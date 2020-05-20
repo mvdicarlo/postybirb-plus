@@ -386,7 +386,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
                 <Anchor.Link title="Defaults" href="#Defaults" />
                 <Anchor.Link title="Websites" href="#Websites" />
                 {this.getSelectedWebsites().map(website => (
-                  <Anchor.Link title={<span>{website}</span>} href={`#${website}`} />
+                  <Anchor.Link title={<span>{WebsiteRegistry.websites[website].name}</span>} href={`#${website}`} />
                 ))}
               </Anchor>
             </div>
