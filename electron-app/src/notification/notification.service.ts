@@ -34,7 +34,7 @@ export class NotificationService {
   }
 
   emitSystemNotification(
-    notification: PostyBirbNotificationEntity,
+    notification: PostyBirbNotification,
     icon?: string | Electron.NativeImage,
   ) {
     if (Notification.isSupported() && !global.SERVER_ONLY_MODE && !process.env.TEST) {

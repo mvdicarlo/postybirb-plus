@@ -138,7 +138,18 @@ function createWindow() {
     }
   });
   window.webContents.on('new-window', event => event.preventDefault());
-  window.on('closed', () => (window = null));
+  window.on('closed', () => {
+    window = null;
+    if (global.tray && util.isWindows()) {
+      global.tray.displayBalloon({
+        icon,
+        title: 'PostyBirb',
+        content: 'PostyBirb will continue in the background.',
+        noSound: true,
+        silent: true,
+      });
+    }
+  });
 }
 
 function buildAppImage() {
