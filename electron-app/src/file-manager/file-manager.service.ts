@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as shortid from 'shortid';
 import * as _ from 'lodash';
+import * as path from 'path';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/submission/file-submission/interfaces/file-submission.interface';
 import { Injectable, Logger } from '@nestjs/common';
@@ -22,22 +23,26 @@ export class FileManagerService {
   async insertFile(
     id: string,
     file: UploadedFile,
-    path: string,
+    filePath: string,
   ): Promise<{ thumbnailLocation: string; submissionLocation: string }> {
     this.logger.debug(
       `${file.originalname} (${file.mimetype})`,
-      `Uploading file ${path ? 'From File' : 'From Clipboard'}`,
+      `Uploading file ${filePath ? 'From File' : 'From Clipboard'}`,
     );
 
     file = this.parseFileUpload(file);
     const fileId = `${id}-${shortid.generate()}`;
-    const originalExtension = file.originalname.split('.').pop();
-    let submissionFilePath: string = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${originalExtension}`;
+    const ext = path.extname(file.originalname);
+    let submissionFilePath: string = path.format({
+      dir: SUBMISSION_FILE_DIRECTORY,
+      name: fileId,
+      ext,
+    });
 
-    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${originalExtension}`;
+    let thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}${ext}`;
     let thumbnail: Buffer = null;
     if (file.mimetype.includes('image')) {
-      if (file.mimetype.includes('gif')) {
+      if (file.mimetype === 'image/gif') {
         await fs.outputFile(submissionFilePath, file.buffer);
         const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
         const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
@@ -64,9 +69,11 @@ export class FileManagerService {
           file.mimetype = data.type;
           file.buffer = data.buffer;
 
-          submissionFilePath = `${SUBMISSION_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
-            data.type,
-          )}`;
+          submissionFilePath = path.format({
+            dir: SUBMISSION_FILE_DIRECTORY,
+            name: fileId,
+            ext: `.${ImageManipulator.getExtension(data.type)}`,
+          });
 
           const thumbnailData = await im
             .resize(300)
@@ -88,9 +95,9 @@ export class FileManagerService {
       }
     } else {
       // Non-image saving
-      thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.jpg`;
+      thumbnailFilePath = path.format({ dir: THUMBNAIL_FILE_DIRECTORY, name: fileId, ext: '.jpg' });
       try {
-        thumbnail = (await app.getFileIcon(path)).toJPEG(100);
+        thumbnail = (await app.getFileIcon(filePath)).toJPEG(100);
       } catch (err) {
         // Ignore? Should only fail on remote.
       }
@@ -108,7 +115,7 @@ export class FileManagerService {
   }
 
   async insertFileDirectly(file: UploadedFile, filename: string): Promise<string> {
-    const filepath = `${SUBMISSION_FILE_DIRECTORY}/${filename}`;
+    const filepath = path.format({ dir: SUBMISSION_FILE_DIRECTORY, name: filename });
     file = this.parseFileUpload(file);
     await fs.outputFile(filepath, file.buffer);
     return filepath;
@@ -163,20 +170,15 @@ export class FileManagerService {
 
   async copyFileWithNewId(id: string, file: FileRecord): Promise<FileRecord> {
     this.logger.debug(`Copying file ${file.location} with name ${id}`, 'Copy File');
-    const pathParts = file.location.split('/');
-    pathParts.pop();
-    const extension = file.location.split('.').pop();
+    const parts = path.parse(file.location);
     const newId = `${id}-${shortid.generate()}`;
-    const filePath = [...pathParts, `${newId}.${extension}`].join('/');
-
+    const filePath = path.format({ dir: parts.dir, name: newId, ext: parts.ext });
     await fs.copy(file.location, filePath);
     file.location = filePath;
 
     if (file.preview) {
-      const thumbPathParts = file.preview.split('/');
-      thumbPathParts.pop();
-      const thumbPath = [...thumbPathParts, `${newId}.jpg`].join('/');
-
+      const thumbPathParts = path.parse(file.preview);
+      const thumbPath = path.format({ dir: thumbPathParts.dir, name: newId, ext: '.jpg' });
       await fs.copy(file.preview, thumbPath);
       file.preview = thumbPath;
     }

@@ -1,9 +1,11 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 
-export const BASE_DIRECTORY = process.env.TEST ? `${__dirname}/test-dir` : global.BASE_DIRECTORY;
-export const SUBMISSION_FILE_DIRECTORY = path.join(BASE_DIRECTORY, 'submission files');
-export const THUMBNAIL_FILE_DIRECTORY = path.join(BASE_DIRECTORY, 'thumbnail files');
+export const BASE_DIRECTORY = process.env.TEST
+  ? path.join(__dirname, 'test-dir')
+  : global.BASE_DIRECTORY;
+export const SUBMISSION_FILE_DIRECTORY = path.join(BASE_DIRECTORY, 'submission', 'files');
+export const THUMBNAIL_FILE_DIRECTORY = path.join(BASE_DIRECTORY, 'submission', 'thumbnails');
 export const TEMP_FILE_DIRECTORY = path.join(BASE_DIRECTORY, 'temp');
 export const DATABASE_DIRECTORY = path.join(BASE_DIRECTORY, 'data');
 

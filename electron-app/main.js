@@ -34,6 +34,7 @@ let nest;
 let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
+const icon = path.join(__dirname, '/build/assets/icons/minnowicon.png');
 
 // Enable windows 10 notifications
 if (util.isWindows()) {
@@ -105,7 +106,7 @@ function createWindow() {
     minWidth: 500,
     minHeight: 500,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, '/build/assets/icons/minnowicon.png'),
+    icon,
     title: 'PostyBirb',
     darkTheme: nativeTheme.shouldUseDarkColors,
     webPreferences: {
@@ -141,9 +142,7 @@ function createWindow() {
 }
 
 function buildAppImage() {
-  let image = nativeImage.createFromPath(
-    path.join(__dirname, '/build/assets/icons/minnowicon.png'),
-  );
+  let image = nativeImage.createFromPath(icon);
   if (util.isOSX()) {
     image = image.resize({
       width: 16,
@@ -151,7 +150,6 @@ function buildAppImage() {
     });
   }
 
-  // image.setTemplateImage(true);
   return image;
 }
 
