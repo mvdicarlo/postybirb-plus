@@ -5,6 +5,7 @@ import PostyBirbNotificationEntity from './models/postybirb-notification.entity'
 import { NotificationEvent } from './enums/notification.events.enum';
 import { PostyBirbNotification } from './interfaces/postybirb-notification.interface';
 import { Notification } from 'electron';
+import { SettingsService } from 'src/settings/settings.service';
 
 @Injectable()
 export class NotificationService {
@@ -12,6 +13,7 @@ export class NotificationService {
     @Inject(NotificationRepositoryToken)
     private readonly repository: NotificationRepository,
     private readonly eventEmitter: EventsGateway,
+    private readonly settings: SettingsService,
   ) {}
 
   async get(id: string): Promise<PostyBirbNotificationEntity> {
@@ -43,6 +45,7 @@ export class NotificationService {
         title,
         body,
         icon,
+        silent: this.settings.getValue<boolean>('silentNotification'),
       });
 
       systemNotification.on('click', () => global.showApp());

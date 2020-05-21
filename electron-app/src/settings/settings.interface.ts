@@ -9,4 +9,5 @@ export interface Settings {
   maxPNGSizeCompressionWithAlpha: number;
   maxJPEGQualityCompression: number;
   maxJPEGSizeCompression: number;
+  silentNotification: boolean;
 }

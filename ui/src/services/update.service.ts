@@ -21,7 +21,7 @@ export default class UpdateService {
           notification.info({
             message: 'Notice',
             description: value,
-            duration: 15,
+            duration: 10,
           });
         }
       })

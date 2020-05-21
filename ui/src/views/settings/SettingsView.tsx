@@ -35,7 +35,7 @@ export default class SettingsView extends React.Component<Props> {
     return (
       <Form layout="vertical">
         <Collapse bordered={false}>
-          <Collapse.Panel header="Posting" key="1">
+          <Collapse.Panel header="Posting" key="posting">
             <Form.Item label="Help Advertise Postybirb">
               <Tooltip
                 title={
@@ -156,7 +156,7 @@ export default class SettingsView extends React.Component<Props> {
               </Form.Item>
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Theme" key="2">
+          <Collapse.Panel header="Theme" key="theme">
             <Form.Item label="Theme">
               <Radio.Group
                 value={this.props.uiStore!.state.theme}
@@ -167,7 +167,15 @@ export default class SettingsView extends React.Component<Props> {
               </Radio.Group>
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Performance" key="3">
+          <Collapse.Panel header="Notifications" key="notifications">
+            <Form.Item label="Make system notifications silent">
+              <Switch
+                checked={settings.silentNotification}
+                onChange={value => this.updateSetting('silentNotification', value)}
+              />
+            </Form.Item>
+          </Collapse.Panel>
+          <Collapse.Panel header="Performance" key="performance">
             <Form.Item label="Use hardware acceleration (requires restart)">
               <Switch
                 disabled={/Linux/.test(navigator.platform)}
@@ -176,7 +184,7 @@ export default class SettingsView extends React.Component<Props> {
               />
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Startup" key="4">
+          <Collapse.Panel header="Startup" key="startup">
             <Form.Item label="Start PostyBirb on startup">
               <Switch
                 disabled={/Linux/.test(navigator.platform)}
@@ -191,7 +199,7 @@ export default class SettingsView extends React.Component<Props> {
               />
             </Form.Item>
           </Collapse.Panel>
-          <Collapse.Panel header="Remote" key="6">
+          <Collapse.Panel header="Remote" key="remote">
             <p>
               Connect to a PostyBirb client over the internet.
               <br />
