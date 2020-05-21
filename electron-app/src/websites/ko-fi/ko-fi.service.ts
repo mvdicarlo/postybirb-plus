@@ -10,7 +10,10 @@ import { CancellationToken } from 'src/submission/post/cancellation/cancellation
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { DefaultFileOptions, DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import {
+  DefaultFileOptions,
+  DefaultOptions,
+} from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import HtmlParserUtil from 'src/utils/html-parser.util';
@@ -19,6 +22,7 @@ import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { SubmissionType } from 'src/submission/enums/submission-type.enum';
 
 @Injectable()
 export class KoFi extends Website {
@@ -42,8 +46,19 @@ export class KoFi extends Website {
     return undefined;
   }
 
-  parseDescription(text: string): string {
-    return text; // no parsing
+  parseDescription(text: string) {
+    return text;
+  }
+
+  postParseDescription(text: string, type: SubmissionType) {
+    return type === SubmissionType.FILE
+      ? PlaintextParser.parse(
+          text.replace(
+            '<p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>',
+            'Posted using PostyBirb',
+          ),
+        )
+      : text;
   }
 
   async postFileSubmission(
@@ -57,17 +72,13 @@ export class KoFi extends Website {
 
     this.checkCancelled(cancellationToken);
     const upload = await Http.post<string>(
-      `${this.BASE_URL}/Media/UploadImage`,
+      `${this.BASE_URL}/api/media/gallery-item/upload`,
       data.part.accountId,
       {
         type: 'multipart',
         data: form,
         headers: {
-          Accept: 'application/json',
-          Pragma: 'no-cache',
-          'Cache-Control': 'no-cache',
           Referer: 'https://ko-fi.com/',
-          Connection: 'keep-alive',
         },
       },
     );
@@ -85,10 +96,10 @@ export class KoFi extends Website {
     const formUpdate: any = {
       Album: '',
       Title: data.title,
-      Description: PlaintextParser.parse(data.description),
+      Description: data.description,
       PostToTwitter: 'false',
       EnableHiRes: 'false',
-      FileNames: json.FileNames,
+      ImageUploadIds: [json[0].ExternalId],
     };
 
     this.checkCancelled(cancellationToken);

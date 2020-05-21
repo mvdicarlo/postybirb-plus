@@ -24,6 +24,7 @@ import FileSubmissionEntity from '../file-submission/models/file-submission.enti
 import { FilePostData, PostFileRecord } from '../post/interfaces/file-post-data.interface';
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
+import { SubmissionType } from '../enums/submission-type.enum';
 
 @Injectable()
 export class ParserService {
@@ -45,7 +46,12 @@ export class ParserService {
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
   ): Promise<PostData<Submission, DefaultOptions>> {
-    const description = await this.parseDescription(website, defaultPart, websitePart);
+    const description = await this.parseDescription(
+      website,
+      defaultPart,
+      websitePart,
+      submission.type,
+    );
     const tags = await this.parseTags(website, defaultPart, websitePart);
 
     const data: PostData<Submission, any> = {
@@ -76,6 +82,7 @@ export class ParserService {
     website: Website,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<DefaultOptions>,
+    type: SubmissionType,
   ): Promise<string> {
     let description = FormContent.getDescription(
       defaultPart.data.description,
@@ -90,7 +97,7 @@ export class ParserService {
       description = HTMLFormatParser.parse(description);
 
       // Run preparser (allows formatting of shortcuts before anything else runs)
-      description = website.preparseDescription(description);
+      description = website.preparseDescription(description, type);
 
       // Parse website shortcuts
       Object.values(this.websiteDescriptionShortcuts).forEach(websiteShortcuts =>
@@ -100,7 +107,7 @@ export class ParserService {
       );
 
       // Default parser (typically conversion to HTML, BBCode, Markdown, Plaintext)
-      description = website.parseDescription(description);
+      description = website.parseDescription(description, type);
     }
 
     // Advertisement
@@ -108,7 +115,7 @@ export class ParserService {
       description = AdInsertParser.parse(description, website.defaultDescriptionParser);
     }
 
-    description = website.postParseDescription(description);
+    description = website.postParseDescription(description, type);
     return description.trim();
   }
 

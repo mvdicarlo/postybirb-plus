@@ -51,8 +51,8 @@ export default class E621Login extends React.Component<LoginDialogProps, State> 
           <Form.Item label="Username" required>
             <Input
               className="w-full"
-              defaultValue={this.state.username}
-              onBlur={({ target }) => this.setState({ username: target.value })}
+              value={this.state.username}
+              onChange={({ target }) => this.setState({ username: target.value })}
             />
           </Form.Item>
           <Form.Item
@@ -69,8 +69,8 @@ export default class E621Login extends React.Component<LoginDialogProps, State> 
             <Input
               type="password"
               className="w-full"
-              defaultValue={this.state.key}
-              onBlur={({ target }) => this.setState({ key: target.value })}
+              value={this.state.key}
+              onChange={({ target }) => this.setState({ key: target.value })}
             />
           </Form.Item>
           <Form.Item>

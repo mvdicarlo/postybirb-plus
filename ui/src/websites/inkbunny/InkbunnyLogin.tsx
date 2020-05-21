@@ -70,8 +70,8 @@ export default class InkbunnyLogin extends React.Component<LoginDialogProps, Sta
           <Form.Item label="Username" required>
             <Input
               className="w-full"
-              defaultValue={this.state.username}
-              onBlur={({ target }) => this.setState({ username: target.value })}
+              value={this.state.username}
+              onChange={({ target }) => this.setState({ username: target.value })}
             />
           </Form.Item>
           <Form.Item
@@ -89,8 +89,8 @@ export default class InkbunnyLogin extends React.Component<LoginDialogProps, Sta
             <Input
               type="password"
               className="w-full"
-              defaultValue={this.state.password}
-              onBlur={({ target }) => this.setState({ password: target.value })}
+              value={this.state.password}
+              onChange={({ target }) => this.setState({ password: target.value })}
             />
           </Form.Item>
           <Form.Item>

@@ -171,7 +171,7 @@ export default class AppLayout extends React.Component<Props, State> {
               theme="dark"
               selectedKeys={[this.props.uiStore!.state.activeNav]}
               onSelect={this.handleNavSelectChange}
-              defaultOpenKeys={['submissions', 'templates']}
+              defaultOpenKeys={state.navCollapsed ? [] : ['submissions', 'templates']}
             >
               <Menu.Item key="home">
                 <Link to="/">

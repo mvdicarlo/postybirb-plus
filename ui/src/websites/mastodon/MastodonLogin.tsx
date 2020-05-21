@@ -103,8 +103,8 @@ export default class MastodonLogin extends React.Component<LoginDialogProps, Sta
             </Form.Item>
             <Form.Item label="Code" help="Obtained from authenticating the website" required>
               <Input
-                defaultValue={this.state.code}
-                onBlur={({ target }) => this.setState({ code: target.value })}
+                value={this.state.code}
+                onChange={({ target }) => this.setState({ code: target.value })}
                 addonAfter={
                   <Button onClick={this.submit.bind(this)} disabled={!this.isValid()}>
                     Authorize

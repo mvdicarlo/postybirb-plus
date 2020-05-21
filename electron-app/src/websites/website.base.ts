@@ -115,15 +115,15 @@ export abstract class Website {
     return this.parseTags(tags, options);
   }
 
-  parseDescription(text: string): string {
+  parseDescription(text: string, type?: SubmissionType): string {
     return this.defaultDescriptionParser(text);
   }
 
-  postParseDescription(text: string): string {
+  postParseDescription(text: string, type?: SubmissionType): string {
     return text;
   }
 
-  preparseDescription(text: string): string {
+  preparseDescription(text: string, type?: SubmissionType): string {
     return text || '';
   }
 

@@ -7,6 +7,7 @@ export class PlaintextParser {
       return '';
     }
 
+    html = html.replace(/<br(\/|\s\/){0,1}>/g, '<br>');
     html = html.replace(/<br>\n/gi, '<br>');
     html = html.replace(/<br>/gi, '\n');
     html = html.replace(/<hr(.*?)>/gi, '\n------------\n');
