@@ -250,8 +250,8 @@ export class FurryNetworkFileSubmissionForm extends GenericFileSubmissionSection
 
   renderRightForm(data: FurryNetworkFileOptions) {
     const elements = super.renderRightForm(data);
-    let type = this.props.submission.primary.type;
-    if (this.props.submission.primary.mimetype === 'image/gif') {
+    let type = this.props.submission && this.props.submission.primary ? this.props.submission.primary.type : FileSubmissionType.IMAGE;
+    if (this.props.submission && this.props.submission.primary.mimetype === 'image/gif') {
       type = FileSubmissionType.VIDEO;
     }
     elements.push(
