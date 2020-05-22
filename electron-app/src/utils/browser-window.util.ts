@@ -1,0 +1,96 @@
+import { BrowserWindow } from 'electron';
+import WaitUtil from './wait.util';
+
+export default class BrowserWindowUtil {
+  private static async createWindow(partition: string, url: string) {
+    const bw: Electron.BrowserWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        partition: `persist:${partition}`,
+        enableRemoteModule: false,
+      },
+    });
+
+    await bw.loadURL(url);
+    return bw;
+  }
+
+  public static async getLocalStorage(partition: string, url: string, wait?: number): Promise<any> {
+    const bw = await BrowserWindowUtil.createWindow(partition, url);
+    try {
+      if (wait) {
+        await WaitUtil.wait(wait);
+      }
+      return await bw.webContents.executeJavaScript('localStorage');
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+  }
+
+  public static async getFormData(
+    partition: string,
+    url: string,
+    selector: { id?: string; custom?: string },
+  ): Promise<any> {
+    const bw = await BrowserWindowUtil.createWindow(partition, url);
+    try {
+      return await bw.webContents.executeJavaScript(
+        `Array.from(new FormData(${
+          selector.id ? `document.getElementById('${selector.id}')` : selector.custom
+        })).reduce((obj, [k, v]) => ({...obj, [k]: v}), {})`,
+      );
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+  }
+
+  public static async getPage(partition: string, url: string): Promise<string> {
+    return BrowserWindowUtil.runScriptOnPage<string>(partition, url, 'document.body.innerText');
+  }
+
+  public static async runScriptOnPage<T>(
+    partition: string,
+    url: string,
+    script: string,
+  ): Promise<T> {
+    const bw = await BrowserWindowUtil.createWindow(partition, url);
+    try {
+      const page = await bw.webContents.executeJavaScript(script);
+      bw.destroy();
+      return page;
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+  }
+
+  public static async post<T>(
+    partition: string,
+    url: string,
+    headers: object,
+    data: object,
+  ): Promise<T> {
+    const bw = await BrowserWindowUtil.createWindow(partition, url);
+    try {
+      await bw.loadURL(url, {
+        extraHeaders: Object.entries(headers)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('\n'),
+        postData: [
+          {
+            type: 'rawData',
+            bytes: Buffer.from(JSON.stringify(data)),
+          },
+        ],
+      });
+      const page = await bw.webContents.executeJavaScript('document.body.innerText');
+      bw.destroy();
+      return page;
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+  }
+}

@@ -114,7 +114,7 @@ export class FileManipulationService {
     const maxQualityReduction = this.settings.getValue<number>('maxJPEGQualityCompression');
     const maxSizeReduction = this.settings.getValue<number>('maxJPEGSizeCompression');
 
-    im.toJPEG().setQuality(99); // reduce to 99% quality
+    im.toJPEG().setQuality(100);
 
     const scaleSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
     const scaleSteps = this.getSteps(maxSizeReduction, scaleSize).map(step => 1 - step / 100);
@@ -134,7 +134,7 @@ export class FileManipulationService {
       return lastScaled.buffer;
     }
 
-    const qualitySteps = this.getSteps(maxQualityReduction, 2).map(step => (1 - step / 100) * 100);
+    const qualitySteps = [99, ...this.getSteps(maxQualityReduction, 2).map(step => (1 - step / 100) * 100)];
     // Attempt combo of quality + size (which is probably pretty slow)
     for (const scale of scaleSteps) {
       for (const quality of qualitySteps) {

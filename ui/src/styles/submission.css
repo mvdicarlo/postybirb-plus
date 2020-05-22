@@ -2,14 +2,12 @@
   margin-bottom: 1em;
 }
 
-.submission-list .ant-light-list-items,
-.submission-list .ant-dark-list-items {
+.submission-list .ant-list-items {
   max-height: 50vh;
   overflow: auto;
 }
 
-.submission-form .ant-light-form label,
-.submission-form .ant-dark-form label {
+.submission-form .ant-form label {
   font-size: 16px;
 }
 
@@ -22,29 +20,29 @@
   text-transform: uppercase;
 }
 
-.file-card .ant-light-card-cover > span,
-.file-card .ant-dark-card-cover > span {
+.file-card .ant-card-cover > span {
   height: 100%;
 }
 
-.file-card .ant-light-upload.ant-light-upload-drag .ant-light-upload-btn,
-.file-card .ant-dark-upload.ant-dark-upload-drag .ant-dark-upload-btn {
+.file-card .ant-upload.ant-upload-drag .ant-upload-btn {
   padding: 0 !important;
   height: 250px !important;
 }
 
-.file-card .ant-light-upload-drag-container > *,
-.file-card .ant-dark-upload-drag-container > * {
+.file-card .ant-upload-drag-container > * {
   max-height: 250px;
   width: auto;
 }
 
-.additional-file-card .ant-light-card-cover img,
-.additional-file-card .ant-dark-card-cover img {
+.additional-file-card .ant-card-cover img {
   height: 100px;
   width: auto;
   margin: auto;
   max-width: 100%;
+}
+
+.additional-file-card > .ant-card-body {
+  padding: 0;
 }
 
 .calendar-events {

@@ -2,7 +2,10 @@ import * as _ from 'lodash';
 import { EventEmitter } from 'events';
 import { AccountService } from '../../account/account.service';
 import { PostData } from './interfaces/post-data.interface';
-import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+import {
+  DefaultOptions,
+  DefaultFileOptions,
+} from '../submission-part/interfaces/default-options.interface';
 import { Website } from 'src/websites/website.base';
 import { SettingsService } from 'src/settings/settings.service';
 import { PostResponse } from './interfaces/post-response.interface';
@@ -11,6 +14,9 @@ import { Submission } from '../interfaces/submission.interface';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
 import { ParserService } from '../parser/parser.service';
+import { FilePostData } from './interfaces/file-post-data.interface';
+import { CancellationToken } from './cancellation/cancellation-token';
+import { CancellationException } from './cancellation/cancellation.exception';
 
 export interface Poster {
   on(
@@ -83,16 +89,16 @@ export interface Poster {
 }
 
 export class Poster extends EventEmitter {
-  cancelled: boolean = false;
   isPosting: boolean = false;
   isReady: boolean = false;
   isDone: boolean = false;
   status: PostStatus = 'UNPOSTED';
-  response: PostResponse;
+  private response: PostResponse;
   postAtTimeout: NodeJS.Timeout;
   sources: string[] = [];
   postAt: number;
   retries: number = 0;
+  private cancellationToken: CancellationToken;
 
   constructor(
     private readonly accountService: AccountService,
@@ -109,6 +115,8 @@ export class Poster extends EventEmitter {
     this.postAtTimeout = setTimeout(this.post.bind(this), timeUntilPost);
     this.postAt = Date.now() + timeUntilPost;
     this.retries = settingsService.getValue<number>('postRetries') || 0;
+    this.cancellationToken = new CancellationToken(this.handleCancel.bind(this));
+    this.response = { website: part.website };
   }
 
   private post() {
@@ -123,23 +131,13 @@ export class Poster extends EventEmitter {
   }
 
   private async performPost() {
-    if (this.cancelled) {
-      this.isDone = true;
-      this.emit('cancelled', {
-        submission: this.submission,
-        part: this.part,
-      });
+    if (this.isCancelled()) {
       return;
     }
 
     try {
       const loginStatus = await this.accountService.checkLogin(this.part.accountId);
-      if (this.cancelled) {
-        this.isDone = true;
-        this.emit('cancelled', {
-          submission: this.submission,
-          part: this.part,
-        });
+      if (this.isCancelled()) {
         return;
       }
 
@@ -147,19 +145,14 @@ export class Poster extends EventEmitter {
         throw new Error('Not logged in');
       }
 
-      const data: PostData<Submission> = await this.parser.parse(
+      const data: PostData<Submission, DefaultOptions> = await this.parser.parse(
         this.website,
         this.submission,
         this.defaultPart,
         this.part,
       );
 
-      if (this.cancelled) {
-        this.isDone = true;
-        this.emit('cancelled', {
-          submission: this.submission,
-          part: this.part,
-        });
+      if (this.isCancelled()) {
         return;
       }
 
@@ -178,27 +171,42 @@ export class Poster extends EventEmitter {
       };
       if (error instanceof Error) {
         errorMsg.stack = error.stack;
-        errorMsg.error = error.toString();
+        errorMsg.error = error.message;
       } else {
         Object.assign(errorMsg, error);
       }
-      this.status = 'FAILED';
+      if (error instanceof CancellationException) {
+        this.status = 'CANCELLED';
+      } else {
+        this.status = 'FAILED';
+      }
       this.done(errorMsg);
     }
   }
 
-  private async attemptPost(data: PostData<Submission>): Promise<PostResponse> {
-    // TODO post
+  private async attemptPost(data: PostData<Submission, any>): Promise<PostResponse> {
     let totalTries = this.retries + 1;
     let error = null;
     while (totalTries) {
       try {
         totalTries--;
-        await this.fakePost();
-        this.done({ website: this.part.website });
+        const accountData: any = (await this.accountService.get(this.part.accountId)).data;
+        // const res = await this.fakePost();
+        const res = await (this.isFilePost(data)
+          ? this.website.postFileSubmission(this.cancellationToken, data as any, accountData)
+          : this.website.postNotificationSubmission(
+              this.cancellationToken,
+              data as any,
+              accountData,
+            ));
+        this.status = 'SUCCESS';
+        this.done(res);
         return;
       } catch (err) {
         error = err;
+        if (this.isCancelled()) {
+          totalTries = 0; // kill when cancelled
+        }
       }
     }
     throw error;
@@ -210,8 +218,7 @@ export class Poster extends EventEmitter {
       if (random > 90) {
         setTimeout(
           function() {
-            this.status = 'SUCCESS';
-            resolve();
+            resolve({ website: this.part.website });
           }.bind(this),
           _.random(8000),
         );
@@ -233,6 +240,25 @@ export class Poster extends EventEmitter {
     });
   }
 
+  private isFilePost(
+    data: PostData<Submission, DefaultOptions>,
+  ): data is FilePostData<DefaultFileOptions> {
+    return !!data['primary'];
+  }
+
+  private handleCancel() {
+    if (this.isPosting) {
+      return;
+    }
+    this.status = 'CANCELLED';
+    this.isDone = true;
+    clearTimeout(this.postAtTimeout);
+    this.emit('cancelled', {
+      submission: this.submission,
+      part: this.part,
+    });
+  }
+
   addSource(source: string) {
     if (!this.sources.includes(source)) {
       this.sources.push(source);
@@ -240,19 +266,14 @@ export class Poster extends EventEmitter {
   }
 
   cancel() {
-    if (this.isPosting || this.isDone) {
+    if (this.cancellationToken.isCancelled() || this.isDone) {
       return;
     }
-    this.status = 'CANCELLED';
-    this.cancelled = true;
-    this.isDone = true;
-    if (!this.isReady) {
-      clearTimeout(this.postAtTimeout);
-      this.emit('cancelled', {
-        submission: this.submission,
-        part: this.part,
-      });
-    }
+    this.cancellationToken.cancel();
+  }
+
+  isCancelled(): boolean {
+    return this.cancellationToken.isCancelled();
   }
 
   doPost() {
@@ -260,5 +281,25 @@ export class Poster extends EventEmitter {
     if (this.isReady) {
       this.performPost();
     }
+  }
+
+  getMessage(): string {
+    let reason = '';
+    if (this.status === 'CANCELLED') {
+      reason = 'was cancelled.';
+    } else if (this.status === 'SUCCESS') {
+      reason = 'was successful.';
+    } else if (this.status === 'FAILED') {
+      reason = this.response.message || this.response.error || 'Unknown error occurred.';
+    }
+    return `${this.part.website}: ${reason}`;
+  }
+
+  getSource(): string | undefined {
+    return this.response.source;
+  }
+
+  getFullResponse() {
+    return this.response;
   }
 }

@@ -16,7 +16,7 @@ import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { UIStore } from '../../stores/ui.store';
-import { WebsiteRegistry } from '../../website-components/website-registry';
+import { WebsiteRegistry } from '../../websites/website-registry';
 import { inject, observer } from 'mobx-react';
 import { KofiIcon, DiscordIcon } from './SvgIcons';
 import NotificationsView from '../notifications/NotificationsView';
@@ -59,7 +59,7 @@ export default class AppLayout extends React.Component<Props, State> {
     descriptionTemplateVisible: false,
     settingsVisible: false,
     tagGroupVisible: false,
-    tagConverterVisible: false,
+    tagConverterVisible: false
   };
 
   private readonly websites = Object.keys(WebsiteRegistry.websites);
@@ -106,12 +106,11 @@ export default class AppLayout extends React.Component<Props, State> {
     const state = uiStore!.state;
     message.config({
       duration: 2,
-      prefixCls: `ant-${this.props.uiStore!.state.theme}-message`,
       maxCount: 2
     });
     this.props.uiStore!.setActiveNav(this.getCurrentNavId());
     return (
-      <ConfigProvider prefixCls={`ant-${this.props.uiStore!.state.theme}`}>
+      <ConfigProvider>
         <Modal
           title="User Agreement"
           visible={!this.props.uiStore!.state.agreementAccepted}
@@ -172,7 +171,7 @@ export default class AppLayout extends React.Component<Props, State> {
               theme="dark"
               selectedKeys={[this.props.uiStore!.state.activeNav]}
               onSelect={this.handleNavSelectChange}
-              defaultOpenKeys={['submissions', 'templates']}
+              defaultOpenKeys={state.navCollapsed ? [] : ['submissions', 'templates']}
             >
               <Menu.Item key="home">
                 <Link to="/">
@@ -351,7 +350,7 @@ export default class AppLayout extends React.Component<Props, State> {
                       mode="multiple"
                       size="small"
                       placeholder="Hide websites"
-                      style={{ width: '100%' }}
+                      className="w-full"
                       defaultValue={this.props.uiStore!.websiteFilter}
                       onChange={this.updateWebsiteFilter}
                       allowClear={true}

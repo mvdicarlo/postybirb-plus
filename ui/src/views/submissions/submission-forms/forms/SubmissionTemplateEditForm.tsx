@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import DefaultFormSection from '../form-sections/DefaultFormSection';
 import { LoginStatusStore } from '../../../../stores/login-status.store';
 import { Match, withRouter, history } from 'react-router-dom';
@@ -146,19 +146,20 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
         }
       })
       .forEach(status => {
+        const name = WebsiteRegistry.find(status.website)?.name;
         websiteData[status.website] = websiteData[status.website] || { children: [] };
-        websiteData[status.website].title = status.website;
-        websiteData[status.website].key = status.website;
+        websiteData[status.website].title = <strong>{name}</strong>;
+        websiteData[status.website].key = name;
         websiteData[status.website].value = status.website;
         (websiteData[status.website].children as any[]).push({
           key: status._id,
           value: status._id,
-          title: `${status.website}: ${status.alias}`,
+          title: `${name}: ${status.alias}`,
           isLeaf: true
         });
       });
     return Object.values(websiteData).sort((a, b) =>
-      (a.title as string).localeCompare(b.title as string)
+      (a.key as string).localeCompare(b.key as string)
     );
   }
 
@@ -208,9 +209,9 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
-          ].getDefaults(),
+          ].getDefaults(this.original.type),
           isNew: true,
-          created: Date.now(),
+          created: Date.now()
         };
       });
 
@@ -336,12 +337,12 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
             <Form layout="vertical" style={{ flex: 10 }}>
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Defaults">Defaults</span>
+                  <span className="form-section-header nav-section-anchor" id="#Defaults">
+                    Defaults
+                  </span>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
-                  problems={[]}
-                  warnings={[]}
                   onUpdate={this.onUpdate}
                   submission={{} as any}
                 />
@@ -349,7 +350,9 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
 
               <Form.Item className="form-section">
                 <Typography.Title level={3}>
-                  <span className="form-section-header nav-section-anchor" id="#Websites">Websites</span>
+                  <span className="form-section-header nav-section-anchor" id="#Websites">
+                    Websites
+                  </span>
                 </Typography.Title>
                 <TreeSelect
                   multiple
@@ -382,7 +385,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
                 <Anchor.Link title="Defaults" href="#Defaults" />
                 <Anchor.Link title="Websites" href="#Websites" />
                 {this.getSelectedWebsites().map(website => (
-                  <Anchor.Link title={<span>{website}</span>} href={`#${website}`} />
+                  <Anchor.Link title={<span>{WebsiteRegistry.websites[website].name}</span>} href={`#${website}`} />
                 ))}
               </Anchor>
             </div>

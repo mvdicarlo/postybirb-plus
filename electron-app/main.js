@@ -1,6 +1,7 @@
 const path = require('path');
 const { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray } = require('electron');
 const windowStateKeeper = require('electron-window-state');
+const util = require('./src-electron/utils');
 
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
@@ -12,6 +13,7 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 
 process.env.PORT = process.env.PORT || 9247;
+global.AUTH_SERVER_URL = 'http://postybirb.cleverapps.io';
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
@@ -32,9 +34,10 @@ let nest;
 let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
+const icon = path.join(__dirname, '/build/assets/icons/minnowicon.png');
 
 // Enable windows 10 notifications
-if (process.platform === 'win32') {
+if (util.isWindows()) {
   app.setAppUserModelId('com.lemonynade.postybirb.plus');
 }
 
@@ -78,12 +81,13 @@ async function initialize() {
     shouldDisplayWindow = settingsDB.getState().openOnStartup;
   }
 
+  if (global.SERVER_ONLY_MODE) return;
+
   if (!shouldDisplayWindow) {
     // observe user setting
     loader.hide();
     return;
   }
-  if (global.SERVER_ONLY_MODE) return;
   createWindow();
 }
 
@@ -102,7 +106,7 @@ function createWindow() {
     minWidth: 500,
     minHeight: 500,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, '/build/assets/icons/minnowicon.png'),
+    icon,
     title: 'PostyBirb',
     darkTheme: nativeTheme.shouldUseDarkColors,
     webPreferences: {
@@ -119,6 +123,7 @@ function createWindow() {
 
   window.PORT = process.env.PORT;
   window.AUTH_ID = global.AUTH_ID;
+  window.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
   window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
   if (!global.DEBUG_MODE) {
     mainWindowState.manage(window);
@@ -133,21 +138,29 @@ function createWindow() {
     }
   });
   window.webContents.on('new-window', event => event.preventDefault());
-  window.on('closed', () => (window = null));
+  window.on('closed', () => {
+    window = null;
+    if (global.tray && util.isWindows()) {
+      global.tray.displayBalloon({
+        icon,
+        title: 'PostyBirb',
+        content: 'PostyBirb will continue in the background.',
+        noSound: true,
+        silent: true,
+      });
+    }
+  });
 }
 
 function buildAppImage() {
-  let image = nativeImage.createFromPath(
-    path.join(__dirname, '/build/assets/icons/minnowicon.png'),
-  );
-  if (process.platform === 'darwin') {
+  let image = nativeImage.createFromPath(icon);
+  if (util.isOSX()) {
     image = image.resize({
       width: 16,
       height: 16,
     });
   }
 
-  // image.setTemplateImage(true);
   return image;
 }
 
@@ -167,7 +180,7 @@ function buildTray(image) {
     },
   ];
 
-  if (process.platform === 'win32' || process.platform === 'darwin') {
+  if (!util.isLinux()) {
     trayItems.splice(0, 0, {
       label: 'Open on startup',
       type: 'checkbox',

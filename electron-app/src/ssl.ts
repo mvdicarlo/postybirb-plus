@@ -22,7 +22,7 @@ export class SSL {
     cert.serialNumber = '01';
     cert.validity.notBefore = new Date();
     cert.validity.notAfter = new Date();
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
+    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 99);
 
     const attrs = [
       { name: 'commonName', value: 'postybirb.com' },

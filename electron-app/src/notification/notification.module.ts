@@ -5,9 +5,11 @@ import { NotificationRepositoryToken } from './notification.repository';
 import { UiNotificationService } from './ui-notification/ui-notification.service';
 import { DatabaseFactory } from 'src/database/database.factory';
 import PostyBirbNotificationEntity from './models/postybirb-notification.entity';
+import { SettingsModule } from 'src/settings/settings.module';
 
 @Global()
 @Module({
+  imports: [SettingsModule],
   controllers: [NotificationController],
   providers: [
     NotificationService,

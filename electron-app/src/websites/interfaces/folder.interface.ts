@@ -1,6 +1,6 @@
 export interface Folder {
-  id?: string;
-  title: string;
-  subfolders?: Folder[];
+  value?: string;
+  label: string;
+  children?: Folder[];
   nsfw?: boolean;
 }

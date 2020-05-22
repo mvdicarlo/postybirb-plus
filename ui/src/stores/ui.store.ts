@@ -2,13 +2,15 @@ import { observable, action, autorun, computed } from 'mobx';
 
 const STORE_KEY: string = 'UIState';
 
+type Theme = 'light' | 'dark';
+
 interface UIState {
   activeNav: string;
   agreementAccepted: boolean;
   hasPendingChanges: boolean;
   navCollapsed: boolean;
   navId: number;
-  theme: 'light' | 'dark';
+  theme: Theme;
   websiteFilter: string[];
 }
 
@@ -28,6 +30,14 @@ export class UIStore {
     if (storedState) Object.assign(this.state, JSON.parse(storedState));
     this.state.hasPendingChanges = false;
     autorun(() => localStorage.setItem(STORE_KEY, JSON.stringify(this.state)));
+    this.enableThemeStyles(this.state.theme);
+  }
+
+  private enableThemeStyles(theme: Theme) {
+    document.getElementsByName(`${theme}-theme`).forEach(e => (e['disabled'] = false));
+    document
+      .getElementsByName(`${theme === 'dark' ? 'light' : 'dark'}-theme`)
+      .forEach(e => (e['disabled'] = true));
   }
 
   @computed
@@ -41,8 +51,9 @@ export class UIStore {
   }
 
   @action
-  changeTheme(theme: 'light' | 'dark') {
+  changeTheme(theme: Theme) {
     this.state.theme = theme;
+    this.enableThemeStyles(theme);
   }
 
   @action

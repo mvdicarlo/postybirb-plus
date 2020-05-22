@@ -23,6 +23,8 @@ import { FileSubmission } from '../file-submission/interfaces/file-submission.in
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 import { FilePostData, PostFileRecord } from '../post/interfaces/file-post-data.interface';
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
+import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
+import { SubmissionType } from '../enums/submission-type.enum';
 
 @Injectable()
 export class ParserService {
@@ -43,11 +45,16 @@ export class ParserService {
     submission: SubmissionEntity,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
-  ): Promise<PostData<Submission>> {
-    const description = await this.parseDescription(website, defaultPart, websitePart);
+  ): Promise<PostData<Submission, DefaultOptions>> {
+    const description = await this.parseDescription(
+      website,
+      defaultPart,
+      websitePart,
+      submission.type,
+    );
     const tags = await this.parseTags(website, defaultPart, websitePart);
 
-    const data: PostData<Submission> = {
+    const data: PostData<Submission, any> = {
       description,
       options: websitePart.data || {},
       part: websitePart,
@@ -60,7 +67,7 @@ export class ParserService {
 
     if (this.isFileSubmission(submission)) {
       await this.parseFileSubmission(
-        data as FilePostData,
+        data as FilePostData<DefaultFileOptions>,
         website,
         submission,
         defaultPart,
@@ -74,19 +81,23 @@ export class ParserService {
   public async parseDescription(
     website: Website,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<any>,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
+    type: SubmissionType,
   ): Promise<string> {
     let description = FormContent.getDescription(
       defaultPart.data.description,
-      websitePart.data.decription,
+      websitePart.data.description,
     ).trim();
 
     if (description.length) {
       // Replace custom shortcuts
       description = await this.parseCustomDescriptionShortcuts(description);
 
+      // Standardize HTML
+      description = HTMLFormatParser.parse(description);
+
       // Run preparser (allows formatting of shortcuts before anything else runs)
-      description = website.preparseDescription(description);
+      description = website.preparseDescription(description, type);
 
       // Parse website shortcuts
       Object.values(this.websiteDescriptionShortcuts).forEach(websiteShortcuts =>
@@ -96,7 +107,7 @@ export class ParserService {
       );
 
       // Default parser (typically conversion to HTML, BBCode, Markdown, Plaintext)
-      description = website.parseDescription(description);
+      description = website.parseDescription(description, type);
     }
 
     // Advertisement
@@ -104,12 +115,14 @@ export class ParserService {
       description = AdInsertParser.parse(description, website.defaultDescriptionParser);
     }
 
+    description = website.postParseDescription(description, type);
     return description.trim();
   }
 
   private async parseCustomDescriptionShortcuts(description: string): Promise<string> {
     const customShortcuts = await this.customShortcuts.getAll();
     customShortcuts.forEach(scEntity => {
+      scEntity.content = scEntity.content.replace(/(^<p.*?>|<\/p>$)/g, ''); // Remove surrounding blocks
       if (scEntity.isDynamic) {
         const dynamicMatches =
           description.match(new RegExp(`{${scEntity.shortcut}:(.+?)}`, 'gms')) || [];
@@ -138,7 +151,7 @@ export class ParserService {
   public async parseTags(
     website: Website,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<any>,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
   ): Promise<string[]> {
     let tags = _.uniq<string>(FormContent.getTags(defaultPart.data.tags, websitePart.data.tags));
     if (tags.length) {
@@ -159,7 +172,7 @@ export class ParserService {
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
   ): SubmissionRating {
-    return websitePart.data.rating || defaultPart.data.rating;
+    return (websitePart.data.rating || defaultPart.data.rating).toLowerCase();
   }
 
   public getTitle(
@@ -167,7 +180,7 @@ export class ParserService {
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     websitePart: SubmissionPartEntity<any>,
   ): string {
-    return websitePart.data.title || defaultPart.data.title || submission.title;
+    return (websitePart.data.title || defaultPart.data.title || submission.title).substring(0, 160);
   }
 
   private isFileSubmission(submission: Submission): submission is FileSubmission {
@@ -175,7 +188,7 @@ export class ParserService {
   }
 
   private async parseFileSubmission(
-    data: FilePostData,
+    data: FilePostData<DefaultFileOptions>,
     website: Website,
     submission: FileSubmission,
     defaultPart: SubmissionPartEntity<DefaultOptions>,
@@ -187,6 +200,16 @@ export class ParserService {
 
     if (submission.thumbnail && options.useThumbnail) {
       data.thumbnail = this.fileRecordAsPostFileRecord(submission.thumbnail).file;
+    }
+
+    if (submission.fallback) {
+      data.fallback = this.fileRecordAsPostFileRecord(submission.fallback).file;
+      const { text, type, extension } = website.fallbackFileParser(
+        data.fallback.value.toString('utf8'),
+      );
+      data.fallback.options.contentType = type;
+      data.fallback.options.filename = data.fallback.options.filename.replace('html', extension);
+      data.fallback.value = Buffer.from(text, 'utf8');
     }
 
     if (website.acceptsAdditionalFiles) {
@@ -206,7 +229,7 @@ export class ParserService {
     return {
       type: file.type,
       file: {
-        buffer: file.buffer,
+        value: file.buffer,
         options: {
           contentType: file.mimetype,
           filename: this.parseFileName(file.name),
@@ -223,17 +246,19 @@ export class ParserService {
     const record = this.fileRecordAsPostFileRecord(file);
     if (canScale && this.fileManipulator.canScale(file.mimetype)) {
       const scaleOptions = website.getScalingOptions(file);
-      const { buffer, mimetype } = await this.fileManipulator.scale(
-        file.buffer,
-        file.mimetype,
-        scaleOptions.maxSize,
-        { convertToJPEG: scaleOptions.converToJPEG },
-      );
-      if (mimetype !== file.mimetype) {
-        record.file.options.filename = this.fixFileExtension(mimetype, file.name);
+      if (scaleOptions) {
+        const { buffer, mimetype } = await this.fileManipulator.scale(
+          file.buffer,
+          file.mimetype,
+          scaleOptions.maxSize,
+          { convertToJPEG: scaleOptions.converToJPEG },
+        );
+        if (mimetype !== file.mimetype) {
+          record.file.options.filename = this.fixFileExtension(mimetype, file.name);
+        }
+        record.file.options.contentType = mimetype;
+        record.file.value = buffer;
       }
-      record.file.options.contentType = mimetype;
-      record.file.buffer = buffer;
     }
 
     return record;

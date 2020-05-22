@@ -17,7 +17,12 @@ export class UiNotificationService {
     this.eventEmitter.emit(UINotificationEvent.MESSAGE, event);
   }
 
-  createUINotification(type: NotificationType, duration: number, message: string, title?: string) {
+  createUINotification(
+    type: NotificationType,
+    duration: number, // In Seconds
+    message: string,
+    title?: string,
+  ) {
     const event: UINotification = {
       type,
       duration,

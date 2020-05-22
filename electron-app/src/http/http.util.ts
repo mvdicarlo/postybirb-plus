@@ -1,19 +1,22 @@
 import * as request from 'request';
 import { session } from 'electron';
 import 'url';
-
+import * as _ from 'lodash';
+import CookieConverter from 'src/utils/cookie-converter.util';
+import * as setCookie from 'set-cookie-parser';
 interface GetOptions {
   headers?: any;
   updateCookies?: boolean;
   requestOptions?: request.CoreOptions;
+  skipCookies?: boolean;
 }
 
 interface PostOptions extends GetOptions {
-  data: any;
+  data?: any;
   type?: 'form' | 'multipart' | 'json';
 }
 
-interface HttpResponse<T> {
+export interface HttpResponse<T> {
   body: T;
   error: any;
   response: request.Response;
@@ -31,8 +34,14 @@ export default class Http {
     return cookies.map(c => `${c.name}=${c.value}`).join('; ');
   }
 
-  static async retrieveCookies(
-    uri: string,
+  static async getWebsiteCookies(partitionId: string, url: string): Promise<Electron.Cookie[]> {
+    return await session.fromPartition(`persist:${partitionId}`).cookies.get({
+      url: new URL(url).origin,
+    });
+  }
+
+  static async retrieveCookieString(
+    url: string,
     ses: Electron.Session,
     cookies?: string,
   ): Promise<string> {
@@ -41,10 +50,32 @@ export default class Http {
     }
 
     const sessionCookies = await ses.cookies.get({
-      url: new URL(uri).origin,
+      url: new URL(url).origin,
     });
 
     return Http.parseCookies(sessionCookies);
+  }
+
+  static async saveSessionCookies(uri: string, partitionId: string) {
+    const ses = session.fromPartition(`persist:${partitionId}`);
+    const url = new URL(uri).origin;
+    const cookies = await ses.cookies.get({
+      url,
+    });
+    let expirationDate = new Date();
+    expirationDate = new Date(expirationDate.setMonth(expirationDate.getMonth() + 2));
+    await Promise.all(
+      cookies
+        .filter(c => c.session)
+        .map(c => {
+          const cookie: Electron.CookiesSetDetails = {
+            ...CookieConverter.convertCookie(c),
+            expirationDate: expirationDate.valueOf() / 1000,
+          };
+          return ses.cookies.set(cookie);
+        }),
+    );
+    ses.flushStorageData();
   }
 
   static async get<T>(
@@ -52,43 +83,87 @@ export default class Http {
     partitionId: string,
     options: GetOptions = {},
   ): Promise<HttpResponse<T>> {
-    const ses = session.fromPartition(`persist:${partitionId}`);
-
+    options = options || {};
+    let ses: Electron.Session;
+    options = options || {};
+    if (partitionId) {
+      ses = session.fromPartition(`persist:${partitionId}`);
+    }
     const headers = options.headers || {};
-    headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+    if (!options.skipCookies && ses) {
+      headers.cookie = await Http.retrieveCookieString(uri, ses, headers.cookie);
+    }
 
     const opts: request.CoreOptions = Object.assign(
       {
         headers,
+        followAllRedirects: true,
       },
       options.requestOptions,
     );
     return new Promise(resolve => {
-      Http.Request.get(uri, opts, (error, response, body) => {
+      Http.Request.get(uri, opts, async (error, response, body) => {
         const res: HttpResponse<T> = {
           response,
           error,
           body,
-          returnUrl: response.request.uri.href,
+          returnUrl: _.get(response, 'request.uri.href'),
         };
+
+        if (options.updateCookies && response.headers['set-cookie']) {
+          const cookies = setCookie.parse(response);
+          const ses = session.fromPartition(`persist:${partitionId}`);
+          let future = new Date();
+          future = new Date(future.setMonth(future.getMonth() + 2));
+          for (const c of cookies) {
+            c.domain = c.domain || response.request.host;
+            const cc = CookieConverter.convertCookie(c);
+            cc.expirationDate = future.valueOf() / 1000;
+            await ses.cookies.set(cc);
+          }
+        }
         resolve(res);
       });
     });
   }
 
-  static async post<T>(
+  static async patch<T>(
     uri: string,
-    partitionId: string,
+    partitionId: string | undefined,
     options: PostOptions,
   ): Promise<HttpResponse<T>> {
-    const ses = session.fromPartition(`persist:${partitionId}`);
+    return Http.postLike('patch', uri, partitionId, options);
+  }
+
+  static async post<T>(
+    uri: string,
+    partitionId: string | undefined,
+    options: PostOptions,
+  ): Promise<HttpResponse<T>> {
+    return Http.postLike('post', uri, partitionId, options);
+  }
+
+  private static async postLike<T>(
+    type: 'post' | 'patch',
+    uri: string,
+    partitionId: string | undefined,
+    options: PostOptions,
+  ): Promise<HttpResponse<T>> {
+    let ses: Electron.Session;
+    options = options || {};
+    if (partitionId) {
+      ses = session.fromPartition(`persist:${partitionId}`);
+    }
 
     const headers = options.headers || {};
-    headers.cookie = await Http.retrieveCookies(uri, ses, headers.cookie);
+    if (!options.skipCookies && ses) {
+      headers.cookie = await Http.retrieveCookieString(uri, ses, headers.cookie);
+    }
 
     const opts: request.CoreOptions = Object.assign(
       {
         headers,
+        followAllRedirects: true,
       },
       options.requestOptions,
     );
@@ -105,12 +180,12 @@ export default class Http {
     }
 
     return new Promise(resolve => {
-      Http.Request.get(uri, opts, (error, response, body) => {
+      Http.Request[type](uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           error,
           response,
           body,
-          returnUrl: response.request.uri.href,
+          returnUrl: _.get(response, 'request.uri.href'),
         };
         resolve(res);
       });

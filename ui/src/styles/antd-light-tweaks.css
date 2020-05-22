@@ -1,0 +1,32 @@
+::-webkit-scrollbar-track {
+  background: lightgray;
+}
+
+::-webkit-scrollbar-thumb {
+  background: darkgray;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: gray;
+}
+
+.ant-layout .form-action-bar {
+  background-color: white;
+}
+
+.ant-layout .primary-layout-container {
+  background-color: white;
+}
+
+li .ant-list-item .error {
+  @apply bg-red-200;
+}
+
+.ant-modal-body .release-notes * {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.ant-layout .header > * {
+  border-bottom: 1px solid #e0e0e0;
+}

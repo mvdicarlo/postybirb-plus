@@ -1,0 +1,45 @@
+* ::-webkit-scrollbar-track {
+  background: #606060;
+}
+
+* ::-webkit-scrollbar-thumb {
+  background: #3e3e3e;
+}
+
+* ::-webkit-scrollbar-thumb:hover,
+* ::-webkit-scrollbar-thumb:active {
+  background: #363636;
+}
+
+.ant-layout .form-action-bar {
+  background-color: #141414;
+}
+
+.ant-layout .primary-layout-container {
+  background-color: #141414;
+}
+
+.ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
+  background-color: hsla(0, 0%, 100%, 0.04);
+}
+
+li .ant-list-item .error {
+  @apply bg-red-900;
+}
+
+.ant-page-header-back-button {
+  color: hsla(0, 0%, 100%, 0.85);
+}
+
+.ant-modal-body .release-notes * {
+  color: hsla(0, 0%, 100%, 0.85);
+}
+
+.ant-layout .header > * {
+  border-bottom: 1px solid #030303;
+}
+
+.ant-fullcalendar-fullscreen .ant-fullcalendar-month-panel-selected-cell .ant-fullcalendar-month,
+.ant-fullcalendar-fullscreen .ant-fullcalendar-selected-day .ant-fullcalendar-date {
+  background: rgba(255, 255, 255, 0.08);
+}

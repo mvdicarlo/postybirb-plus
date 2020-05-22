@@ -1,19 +1,10 @@
-import { DefaultWeasylOptions } from './weasyl.interface';
+import { WeasylFileOptions } from './weasyl.interface';
+import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
-export const WEASYL_DEFAULT_FILE_SUBMISSION_OPTIONS: DefaultWeasylOptions = {
+export const WeasylDefaultFileOptions: WeasylFileOptions = {
+  ...GenericDefaultFileOptions,
   notify: true,
   critique: false,
   folder: null,
   category: null,
-  tags: {
-    extendDefault: true,
-    value: [],
-  },
-  description: {
-    overwriteDefault: false,
-    value: '',
-  },
-  rating: null,
-  useThumbnail: true,
-  autoScale: true,
 };

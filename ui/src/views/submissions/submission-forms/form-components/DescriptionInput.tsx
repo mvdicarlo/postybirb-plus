@@ -6,7 +6,7 @@ import { Form, Switch, Button, Popover, Typography } from 'antd';
 import { DescriptionTemplateStore } from '../../../../stores/description-template.store';
 import { DescriptionData } from '../../../../../../electron-app/src/submission/submission-part/interfaces/description-data.interface';
 import WebsiteService from '../../../../services/website.service';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { uiStore } from '../../../../stores/ui.store';
 import { CustomShortcutStore } from '../../../../stores/custom-shortcut.store';
 
@@ -19,6 +19,8 @@ interface Props {
   label?: string;
   onChange: (change: DescriptionData) => void;
   overwriteDescriptionValue?: string;
+  lengthParser?: (text: string) => number;
+  anchorLength?: number;
 }
 
 interface State {}
@@ -106,6 +108,24 @@ export default class DescriptionInput extends React.Component<Props, State> {
     });
   }
 
+  getLength(text: string): number {
+    if (this.props.lengthParser) {
+      return this.props.lengthParser(text);
+    }
+
+    const doc = document.createElement('div');
+    const anchorMatch = text.matchAll(/<a(.*?)href="(.*?)">(.*?)<\/a>/g);
+    let next: IteratorResult<RegExpMatchArray, any>;
+    while (!(next = anchorMatch.next()).done) {
+      const url = this.props.anchorLength
+        ? next.value[2].substring(0, this.props.anchorLength)
+        : next.value[2];
+      text = text.replace(next.value[0], url);
+    }
+    doc.innerHTML = text;
+    return doc.innerText.trim().length;
+  }
+
   render() {
     this.data = this.props.defaultValue;
     const overwriteSwitch = this.props.hideOverwrite ? null : (
@@ -184,7 +204,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
                   </div>
                 }
               >
-                <Button size="small">Username Shortcuts</Button>
+                <Button size="small">Custom Shortcuts</Button>
               </Popover>
             </div>
           )
@@ -202,63 +222,11 @@ export default class DescriptionInput extends React.Component<Props, State> {
               onEditorChange={this.handleDescriptionChange}
             />
             <div className="absolute bottom-0 text-gray-600 mr-1 right-0 pointer-events-none">
-              {PlaintextParser.parse(this.props.defaultValue.value).length}
+              {this.getLength(this.props.defaultValue.value)}
             </div>
           </div>
         ) : null}
       </Form.Item>
     );
-  }
-}
-
-class PlaintextParser {
-  public static parse(html: string): string {
-    if (!html) return '';
-
-    html = html.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '$4 ( $2 )');
-    html = html.replace(/<h[1-7](.*?)>(.*?)<\/h[1-7]>/, '$2\n');
-
-    html = html.replace(/<br>\n/gi, '<br>');
-    html = html.replace(/<br>/gi, '\n');
-    html = html.replace(/<hr(.*?)>/gi, '\n------------\n');
-
-    html = html.replace(/<div>/gi, '');
-    html = html.replace(/<\/div>/gi, '');
-    html = html.replace(/<p>/gi, '');
-    html = html.replace(/<\/p>/gi, '');
-    html = html.replace(/<pre>/gi, '');
-    html = html.replace(/<\/pre>/gi, '');
-    html = html.replace(/<td(.*?)>/gi, ' ');
-    html = html.replace(/<tr(.*?)>/gi, '\n');
-
-    html = html.replace(/<head>(.*?)<\/head>/gim, '');
-    html = html.replace(/<object>(.*?)<\/object>/gim, '');
-    html = html.replace(/<script(.*?)>(.*?)<\/script>/gim, '');
-    html = html.replace(/<style(.*?)>(.*?)<\/style>/gim, '');
-    html = html.replace(/<title>(.*?)<\/title>/gim, '');
-    html = html.replace(/<!--(.*?)-->/gim, '\n');
-
-    html = html.replace(/<(?:[^>'"]*|(['"]).*?\1)*>/gim, '');
-    html = html.replace(/\r\r/gi, '');
-    // html = html.replace(/(\S)\n/gi, '$1 ');
-    const entityDecode = document.createElement('textarea');
-    entityDecode.innerHTML = html;
-    html = entityDecode.value;
-    html = html.replace(/&nbsp;/gi, '');
-    html = html.replace(/&gt;/gi, '>');
-    html = html.replace(/&lt;/gi, '<');
-    html = html.replace(/&amp;/gi, '&');
-
-    const duplicateCheck = html.match(/(\S*?) \(\s(.*?)\s\)/g) || [];
-    duplicateCheck.forEach(potentialDuplicate => {
-      const parts = potentialDuplicate.split(' ');
-      const part1 = parts[0];
-      const part2 = parts[2].replace(/(\(|\))/g, '');
-      if (part1 === part2) {
-        html = html.replace(potentialDuplicate, part1);
-      }
-    });
-
-    return html.trim();
   }
 }

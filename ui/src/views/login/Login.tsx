@@ -1,25 +1,14 @@
-import React from 'react';
+import { Button, Card, Form, Input, List, message, Modal } from 'antd';
 import { inject, observer } from 'mobx-react';
-import { LoginStatusStore } from '../../stores/login-status.store';
-import { UIStore } from '../../stores/ui.store';
-import { WebsiteRegistry } from '../../website-components/website-registry';
-import { Website } from '../../website-components/interfaces/website.interface';
+import React from 'react';
 import { UserAccountDto } from '../../../../electron-app/src/account/interfaces/user-account.dto.interface';
 import LoginService from '../../services/login.service';
+import { LoginStatusStore } from '../../stores/login-status.store';
+import { UIStore } from '../../stores/ui.store';
+import { Website } from '../../websites/interfaces/website.interface';
+import { WebsiteRegistry } from '../../websites/website-registry';
+import AccountInfo from './AccountInfo';
 import './Login.css';
-import {
-  List,
-  Card,
-  Button,
-  Modal,
-  Input,
-  message,
-  Popconfirm,
-  Icon,
-  Typography,
-  Badge
-} from 'antd';
-import RemoteService from '../../services/remote.service';
 
 interface Props {
   loginStatusStore?: LoginStatusStore;
@@ -53,7 +42,7 @@ export class Login extends React.Component<Props> {
             key={key}
             website={website}
             accounts={this.props.loginStatusStore!.statuses.filter(
-              status => status.website === website.name
+              status => status.website === website.internalName
             )}
           />
         ))}
@@ -85,8 +74,8 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
   createAccount = () => {
     if (this.state.newAccountAlias && this.state.newAccountAlias.trim()) {
       LoginService.createAccount(
-        `${this.props.website.name}-${Date.now()}`,
-        this.props.website.name,
+        `${this.props.website.internalName}-${Date.now()}`,
+        this.props.website.internalName,
         this.state.newAccountAlias
       )
         .then(() => message.success('Account created'))
@@ -100,9 +89,17 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
       <Card
         size="small"
         className="login-card"
-        title={this.props.website.name}
+        title={
+          <span
+            className={`font-bold text-${
+              this.props.accounts.find(a => a.loggedIn) ? 'success' : 'danger'
+            }`}
+          >
+            {this.props.website.name}
+          </span>
+        }
         extra={
-          <Button type="primary" onClick={this.showAddAccount}>
+          <Button type="link" onClick={this.showAddAccount}>
             Add Account
           </Button>
         }
@@ -119,153 +116,26 @@ class LoginPanel extends React.Component<LoginPanelProps, LoginPanelState> {
           destroyOnClose={true}
           onCancel={this.hideAddAccount}
           onOk={this.createAccount}
-          okText="Create"
+          okText="Add"
           closeIcon={false}
-          title="Create Account"
+          title="Add Account"
         >
-          <Input placeholder="Account Alias" maxLength={64} onChange={this.setAccountAlias} />
+          <Form
+            onSubmit={e => {
+              e.preventDefault();
+              this.createAccount();
+            }}
+          >
+            <Input
+              autoFocus
+              required
+              placeholder="Account Alias"
+              maxLength={64}
+              onChange={this.setAccountAlias}
+            />
+          </Form>
         </Modal>
       </Card>
-    );
-  }
-}
-
-interface AccountInfoProps {
-  accountInfo: UserAccountDto;
-  data: any;
-  website: Website;
-}
-
-interface AccountInfoState {
-  modalVisible: boolean;
-  renameVisible: boolean;
-  renameValue?: string;
-}
-
-class AccountInfo extends React.Component<AccountInfoProps, AccountInfoState> {
-  state: any = {
-    modalVisible: false,
-    renameVisible: false,
-    renameValue: undefined
-  };
-
-  showModal = () => this.setState({ modalVisible: true });
-  hideModal = () => {
-    this.setState({ modalVisible: false });
-    if (RemoteService.isRemote()) {
-      RemoteService.updateCookies(this.props.accountInfo._id).finally(() => {
-        LoginService.checkLogin(this.props.accountInfo._id);
-      });
-    } else {
-      LoginService.checkLogin(this.props.accountInfo._id);
-    }
-  };
-
-  deleteAccount = (id: string) => LoginService.deleteAccount(id);
-
-  renameAccount = () => {
-    this.setState({ renameVisible: false });
-    if (this.isRenameValid()) {
-      LoginService.renameAccount(this.props.accountInfo._id, this.state.renameValue.trim())
-        .then(() => {
-          message.success('Account name updated.');
-        })
-        .catch(() => {
-          message.error('Failed to update account name.');
-        });
-    } else {
-      message.error('Account cannot be given an empty name.');
-    }
-  };
-
-  isRenameValid(): boolean {
-    if (!this.state.renameValue) {
-      return false;
-    }
-
-    if (!this.state.renameValue.trim()) {
-      return false;
-    }
-
-    return true;
-  }
-
-  render() {
-    const { accountInfo } = this.props;
-    const LoginDialog = this.props.website.LoginDialog({
-      account: this.props.accountInfo,
-      data: this.props.accountInfo.data
-    });
-    return (
-      <List.Item
-        actions={[
-          <span className="text-link" key="action-login" onClick={this.showModal}>
-            Login
-          </span>,
-          <Popconfirm
-            title={
-              <div>
-                Are you sure you want to delete this account?
-                <br />
-                This action cannot be undone and the account will be removed from all submissions.
-              </div>
-            }
-            onConfirm={() => this.deleteAccount(this.props.accountInfo._id)}
-          >
-            <span className="text-link" key="action-delete">
-              <Typography.Text type="danger">
-                <Icon type="delete" />
-              </Typography.Text>
-            </span>
-          </Popconfirm>
-        ]}
-      >
-        <List.Item.Meta
-          title={
-            <div>
-              {accountInfo.alias}
-              <span className="text-link ml-1">
-                <Icon
-                  type="edit"
-                  onClick={() =>
-                    this.setState({ renameVisible: true, renameValue: accountInfo.alias })
-                  }
-                />
-              </span>
-              <Modal
-                title="Rename"
-                visible={this.state.renameVisible}
-                destroyOnClose={true}
-                onCancel={() => this.setState({ renameVisible: false })}
-                onOk={this.renameAccount}
-                okButtonProps={{ disabled: !this.isRenameValid() }}
-              >
-                <Input
-                  value={this.state.renameValue}
-                  onChange={({ target }) => this.setState({ renameValue: target.value })}
-                />
-              </Modal>
-            </div>
-          }
-        />
-        <span>
-          <Badge
-            status={accountInfo.loggedIn ? 'success' : 'error'}
-            text={accountInfo.username || 'Not logged in'}
-          />
-        </span>
-        <Modal
-          title={`${this.props.website.name} - ${this.props.accountInfo.alias}`}
-          visible={this.state.modalVisible}
-          destroyOnClose={true}
-          footer={null}
-          onCancel={this.hideModal}
-          wrapClassName="fullscreen-modal"
-          mask={false}
-        >
-          {LoginDialog}
-        </Modal>
-      </List.Item>
     );
   }
 }

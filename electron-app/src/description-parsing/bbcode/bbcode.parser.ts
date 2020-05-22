@@ -3,7 +3,9 @@ import * as _ from 'lodash';
 export class BBCodeParser {
   private static BLOCKS: string[] = ['p', 'div', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
   public static parse(html: string): string {
-    if (!html) { return ''; }
+    if (!html) {
+      return '';
+    }
 
     // html = html.replace(/<h[1-7](.*?)>(.*?)<\/h[1-7]>/, '\n[h]$2[/h]\n');
 
@@ -70,12 +72,15 @@ export class BBCodeParser {
     html = html.replace(/\r\r/gi, '');
     // html = html.replace(/(\S)\n/gi, '$1 ');
     html = _.unescape(html);
+    html = html.replace(/&nbsp;/g, ' ');
 
     return html.trim();
   }
 
   private static postParse(html: string): string {
-    if (!html) { return ''; }
+    if (!html) {
+      return '';
+    }
 
     html = html.replace(/(\n|\r)/g, '');
 

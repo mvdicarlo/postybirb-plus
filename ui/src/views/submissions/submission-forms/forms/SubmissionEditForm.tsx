@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import DefaultFormSection from '../form-sections/DefaultFormSection';
 import SubmissionService from '../../../../services/submission.service';
 import SubmissionUtil from '../../../../utils/submission.util';
@@ -44,6 +44,7 @@ import {
   Alert,
   Tooltip
 } from 'antd';
+import { Problem } from '../../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
 
 interface Props {
   match: Match;
@@ -55,7 +56,7 @@ export interface SubmissionEditFormState {
   loading: boolean;
   parts: { [key: string]: FormSubmissionPart<any> };
   postAt: number | undefined;
-  problems: { [key: string]: any };
+  problems: { [key: string]: Problem };
   removedParts: string[];
   submission?: Submission;
   submissionType: SubmissionType;
@@ -248,19 +249,20 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     }
 
     filtered.forEach(status => {
+      const name = WebsiteRegistry.find(status.website)?.name;
       websiteData[status.website] = websiteData[status.website] || { children: [] };
-      websiteData[status.website].title = status.website;
-      websiteData[status.website].key = status.website;
+      websiteData[status.website].title = <strong>{name}</strong>;
+      websiteData[status.website].key = name;
       websiteData[status.website].value = status.website;
       (websiteData[status.website].children as any[]).push({
         key: status._id,
         value: status._id,
-        title: `${status.website}: ${status.alias}`,
+        title: `${name}: ${status.alias}`,
         isLeaf: true
       });
     });
     return Object.values(websiteData).sort((a, b) =>
-      (a.title as string).localeCompare(b.title as string)
+      (a.key as string).localeCompare(b.key as string)
     );
   }
 
@@ -310,7 +312,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           website: this.props.loginStatusStore!.getWebsiteForAccountId(accountId),
           data: WebsiteRegistry.websites[
             this.props.loginStatusStore!.getWebsiteForAccountId(accountId)
-          ].getDefaults(),
+          ].getDefaults(this.original.submission.type),
           isNew: true,
           created: Date.now()
         };
@@ -382,9 +384,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     if (status === 'done') {
       message.success(`${info.file.name} file uploaded successfully.`);
       this.setState({
-        submission: info.file.response.submission,
-        problems: info.file.response.problems
+        submission: info.file.response.submission
+        // problems: info.file.response.problems
       });
+      this.checkProblems();
     } else if (status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
@@ -392,9 +395,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   fallbackUploadChange(info: SubmissionPackage<any>) {
     this.setState({
-      submission: info.submission,
-      problems: info.problems
+      submission: info.submission
+      // problems: info.problems
     });
+    this.checkProblems();
   }
 
   cropThumbnail(file: File): Promise<any> {
@@ -523,8 +527,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     });
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     console.error(error);
+    alert(`${error.message}\n\n${error.stack}`);
     return { hasError: true };
   }
 
@@ -711,7 +716,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                                 defaultValue={f.ignoredAccounts}
                                 treeData={this.getWebsiteTreeData(
                                   status =>
-                                    WebsiteRegistry.websites[status.website].supportsAdditionalFiles
+                                    !!WebsiteRegistry.websites[status.website]
+                                      .supportsAdditionalFiles
                                 )}
                                 onChange={value => this.handleAdditionalIgnoredAccounts(f, value)}
                                 placeholder="Ignored accounts"
@@ -759,8 +765,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 </Typography.Title>
                 <DefaultFormSection
                   part={this.state.parts.default}
-                  problems={this.state.problems.default.problems}
-                  warnings={this.state.problems.default.warnings}
+                  problems={this.state.problems.default}
                   onUpdate={this.onUpdate}
                   submission={this.state.submission!}
                 />
@@ -837,7 +842,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                             <Icon type="exclamation" />
                           </Typography.Text>
                         ) : null}
-                        {website}
+                        {WebsiteRegistry.websites[website].name}
                       </span>
                     }
                     href={`#${website}`}

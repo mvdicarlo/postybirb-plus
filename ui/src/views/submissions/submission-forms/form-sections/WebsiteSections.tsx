@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { loginStatusStore, LoginStatusStore } from '../../../../stores/login-status.store';
-import { WebsiteRegistry } from '../../../../website-components/website-registry';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { Form, Typography, Tabs, Badge, Empty } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
@@ -52,16 +52,14 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
                   defaultData: defaultPart.data,
                   part: child,
                   onUpdate: props.onUpdate,
-                  problems: _.get(props.problems[child.accountId], 'problems', []),
-                  warnings: _.get(props.problems[child.accountId], 'warnings', []),
+                  problems: props.problems[child.accountId],
                   submission: props.submission! as FileSubmission
                 })
               : WebsiteRegistry.websites[child.website].NotificationSubmissionForm!({
                   defaultData: defaultPart.data,
                   part: child,
                   onUpdate: props.onUpdate,
-                  problems: _.get(props.problems[child.accountId], 'problems', []),
-                  warnings: _.get(props.problems[child.accountId], 'warnings', []),
+                  problems: props.problems[child.accountId],
                   submission: props.submission!
                 })
         };
@@ -69,7 +67,9 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
       sections.push(
         <Form.Item className="form-section">
           <Typography.Title style={{ marginBottom: '0' }} level={3}>
-            <span className="form-section-header nav-section-anchor" id={`#${website}`}>{website}</span>
+            <span className="form-section-header nav-section-anchor" id={`#${website}`}>
+              {WebsiteRegistry.find(website)?.name}
+            </span>
           </Typography.Title>
           <Tabs>
             {childrenSections.map(section => (
@@ -96,6 +96,6 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
       );
     });
 
-    return <div className="mt-2">{sections}</div>;
+    return sections;
   }
 }

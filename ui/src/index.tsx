@@ -1,14 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
 import { HashRouter as Router } from 'react-router-dom';
+import App from './App';
 import * as serviceWorker from './serviceWorker';
-
-import './styles/light.css';
-import './styles/dark.css';
-import './styles/submission.css';
 import './styles/scrollbar.css';
-import './styles/tailwind.css';
+import './styles/submission.css';
+import { Authorizer } from './websites/interfaces/authorizer.interface';
 
 declare global {
   interface Window {
@@ -25,8 +22,13 @@ declare global {
         openInBrowser(url: string): Promise<void>;
       };
       kill: () => void;
+      auth: {
+        Tumblr: Authorizer;
+        DeviantArt: Authorizer;
+      };
     };
     AUTH_ID: string;
+    AUTH_SERVER_URL: string;
     PORT: number;
     IS_DARK_THEME: boolean;
     appVersion: string;

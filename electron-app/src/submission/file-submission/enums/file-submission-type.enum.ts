@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 export enum FileSubmissionType {
   IMAGE = 'IMAGE',
   TEXT = 'TEXT',
@@ -36,29 +38,16 @@ const TEXT_TYPES: string[] = [
 
 const AUDIO_TYPES: string[] = ['wav', 'wave', 'x-wav', 'x-pn-wav', 'audio', 'odt', 'mp3'];
 
-const VIDEO_TYPES: string[] = [
-  'video',
-  'avi',
-  'flv',
-  'm3u8',
-  'mov',
-  'wmv',
-  'mpeg',
-  'swf',
-  'webm',
-];
+const VIDEO_TYPES: string[] = ['video', 'avi', 'flv', 'm3u8', 'mov', 'wmv', 'mpeg', 'swf', 'webm'];
 
-export function getSubmissionType(
-  mime: string,
-  filename: string,
-): FileSubmissionType {
-  const extension: string = filename
-    .split('.')
-    .pop()
+export function getSubmissionType(mime: string, filename: string): FileSubmissionType {
+  const ext: string = path
+    .parse(filename)
+    .ext.replace('.', '')
     .toLowerCase();
   const mimeParts: string[] = mime.split('/');
   if (
-    IMAGE_TYPES.includes(extension) ||
+    IMAGE_TYPES.includes(ext) ||
     IMAGE_TYPES.includes(mimeParts[0]) ||
     IMAGE_TYPES.includes(mimeParts[1])
   ) {
@@ -66,7 +55,7 @@ export function getSubmissionType(
   }
 
   if (
-    VIDEO_TYPES.includes(extension) ||
+    VIDEO_TYPES.includes(ext) ||
     VIDEO_TYPES.includes(mimeParts[0]) ||
     VIDEO_TYPES.includes(mimeParts[1])
   ) {
@@ -74,7 +63,7 @@ export function getSubmissionType(
   }
 
   if (
-    AUDIO_TYPES.includes(extension) ||
+    AUDIO_TYPES.includes(ext) ||
     AUDIO_TYPES.includes(mimeParts[0]) ||
     AUDIO_TYPES.includes(mimeParts[1])
   ) {
@@ -82,7 +71,7 @@ export function getSubmissionType(
   }
 
   if (
-    TEXT_TYPES.includes(extension) ||
+    TEXT_TYPES.includes(ext) ||
     TEXT_TYPES.includes(mimeParts[0]) ||
     TEXT_TYPES.includes(mimeParts[1])
   ) {

@@ -1,30 +1,24 @@
-import {
-  Injectable,
-  Logger,
-  BadRequestException,
-  NotFoundException,
-  forwardRef,
-  Inject,
-} from '@nestjs/common';
-import { AccountRepository, AccountRepositoryToken } from './account.repository';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { session } from 'electron';
+import * as _ from 'lodash';
 import { EventsGateway } from 'src/events/events.gateway';
+import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
+import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
+import { SubmissionService } from 'src/submission/submission.service';
 import { LoginResponse } from 'src/websites/interfaces/login-response.interface';
 import { WebsiteProvider } from 'src/websites/website-provider.service';
-import { session } from 'electron';
-import { SubmissionPartService } from 'src/submission/submission-part/submission-part.service';
+import { AccountRepository, AccountRepositoryToken } from './account.repository';
 import { AccountEvent } from './enums/account.events.enum';
-import { SubmissionService } from 'src/submission/submission.service';
-import { SubmissionTemplateService } from 'src/submission/submission-template/submission-template.service';
-import UserAccountEntity from './models/user-account.entity';
 import { UserAccountDto } from './interfaces/user-account.dto.interface';
+import UserAccountEntity from './models/user-account.entity';
 
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
 
   private readonly loginStatuses: UserAccountDto[] = [];
-  private readonly loginCheckTimers: { [key: number]: any } = [];
-  private readonly loginCheckMap: { [key: number]: string[] } = [];
+  private readonly loginCheckTimers: Record<number, any> = [];
+  private readonly loginCheckMap: Record<number, string[]> = [];
 
   constructor(
     @Inject(AccountRepositoryToken)
@@ -46,12 +40,14 @@ export class AccountService {
             website: result.website,
             loggedIn: false,
             username: null,
-            data: result.data,
+            data: {},
           });
         });
       })
       .finally(() => {
-        this.loginStatuses.forEach(s => this.checkLogin(s._id));
+        Promise.all(this.loginStatuses.map(s => this.checkLogin(s._id))).finally(
+          () => this.submissionService.postingStateChanged(), // Force updates to validation in case any website was slow
+        );
       });
 
     this.websiteProvider.getAllWebsiteModules().forEach(website => {
@@ -70,6 +66,23 @@ export class AccountService {
     });
   }
 
+  async clearCookiesAndData(id: string) {
+    this.logger.log(id, 'Clearing Account Data');
+
+    const ses = session.fromPartition(`persist:${id}`);
+    const cookies = await ses.cookies.get({});
+    if (cookies.length) {
+      await ses.clearStorageData();
+    }
+
+    const data = await this.get(id);
+    if (data && data.data && Object.keys(data.data)) {
+      await this.setData(id, {});
+    }
+
+    this.checkLogin(id);
+  }
+
   async createAccount(createAccount: UserAccountEntity) {
     this.logger.log(createAccount, 'Create Account');
 
@@ -86,12 +99,11 @@ export class AccountService {
       website: account.website,
       loggedIn: false,
       username: null,
-      data: account.data,
+      data: {},
     });
 
     this.eventEmitter.emit(AccountEvent.CREATED, createAccount._id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
   }
 
   async get(id: string): Promise<UserAccountEntity> {
@@ -121,7 +133,6 @@ export class AccountService {
 
     this.eventEmitter.emit(AccountEvent.DELETED, id);
     this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
-    this.eventEmitter.emit(AccountEvent.UPDATED, await this.repository.find());
 
     session
       .fromPartition(`persist:${id}`)
@@ -145,8 +156,7 @@ export class AccountService {
     account.alias = alias;
     await this.repository.update(account);
     this.loginStatuses.find(status => status._id === id).alias = alias;
-    this.eventEmitter.emitOnComplete(AccountEvent.UPDATED, this.repository.find());
-    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.getLoginStatuses());
   }
 
   async checkLogin(userAccount: string | UserAccountEntity): Promise<UserAccountDto> {
@@ -158,7 +168,13 @@ export class AccountService {
 
     this.logger.debug(account._id, 'Login Check');
     const website = this.websiteProvider.getWebsiteModule(account.website);
-    const response: LoginResponse = await website.checkLoginStatus(account);
+    let response: LoginResponse = { loggedIn: false, username: null };
+
+    try {
+      response = await website.checkLoginStatus(account);
+    } catch (err) {
+      this.logger.error(err, err.stack, `${account.website} Login Check Failure`);
+    }
 
     const login: UserAccountDto = {
       _id: account._id,
@@ -166,8 +182,12 @@ export class AccountService {
       alias: account.alias,
       loggedIn: response.loggedIn,
       username: response.username,
-      data: account.data,
+      data: website.transformAccountData(account.data),
     };
+
+    if (response.data && !_.isEqual(response.data, account.data)) {
+      await this.setData(account._id, response.data);
+    }
 
     this.insertOrUpdateLoginStatus(login);
     return login;
@@ -183,6 +203,6 @@ export class AccountService {
   private async insertOrUpdateLoginStatus(login: UserAccountDto): Promise<void> {
     const index: number = this.loginStatuses.findIndex(s => s._id === login._id);
     this.loginStatuses[index] = login;
-    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.loginStatuses);
+    this.eventEmitter.emit(AccountEvent.STATUS_UPDATED, this.getLoginStatuses());
   }
 }

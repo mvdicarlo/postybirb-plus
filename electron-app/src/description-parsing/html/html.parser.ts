@@ -2,6 +2,8 @@ import * as sanitize from 'sanitize-html';
 import * as parse5 from 'parse5';
 
 export class HTMLFormatParser {
+  static readonly BLOCKS: string[] = ['div', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+
   public static parse(html: string): string {
     if (!html) {
       return '';
@@ -33,7 +35,7 @@ export class HTMLFormatParser {
     });
     html = HTMLFormatParser.bundle(html);
     html = html.replace(/<br \/>/g, '<br>').replace(/<br\/>/g, '<br>');
-    html = html.replace(/(\s)*&nbsp;/g, '');
+    // html = html.replace(/(\s)*&nbsp;/g, ''); Causes issues currently
     return html.trim();
   }
 
@@ -42,10 +44,10 @@ export class HTMLFormatParser {
       return '';
     }
 
-    html = html.replace(/<p/g, '<div').replace(/<\/p/g, '</div');
-    html = html.replace(/<div>(\s|\n|\r)*?<\/div>/g, '<br>');
-
-    return html;
+    return html
+      .replace(/<p/g, '<div')
+      .replace(/<\/p/g, '</div')
+      .replace(/<div>(\s|\n|\r)*?<\/div>/g, '<br>');
   }
 
   private static trim(html: string): string {
@@ -53,13 +55,13 @@ export class HTMLFormatParser {
       return '';
     }
 
-    const startRegex = /^(<br>|<br \/>)(\n|\r)*/gi;
+    const startRegex = /^(<br(\/|\s\/){0,1}>)(\n|\r)*/gi;
     let matches;
     while ((matches = html.match(startRegex))) {
       html = html.replace(startRegex, '');
     }
 
-    const endRegex = /(<br>|<br \/>)(\n|\r)*$/gi;
+    const endRegex = /(<br(\/|\s\/){0,1}>)(\n|\r)*$/gi;
     while ((matches = html.match(endRegex))) {
       html = html.replace(endRegex, '');
     }

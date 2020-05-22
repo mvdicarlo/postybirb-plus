@@ -27,6 +27,7 @@ import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { RcFile } from 'antd/lib/upload';
 import SubmissionTemplateSelect from '../submission-template-select/SubmissionTemplateSelect';
 import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import Axios from 'axios';
 const { Dragger } = Upload;
 
 interface Props {
@@ -293,11 +294,13 @@ export class EditableSubmissions extends React.Component<Props, State> {
 
 interface FileSubmissionCreateState {
   canCopyClipboard: boolean;
+  importUrl: string;
 }
 
 class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateState> {
   state: FileSubmissionCreateState = {
-    canCopyClipboard: window.electron.clipboard.availableFormats().includes('image/png')
+    canCopyClipboard: window.electron.clipboard.availableFormats().includes('image/png'),
+    importUrl: ''
   };
 
   private clipboardCheckInterval: any;
@@ -344,14 +347,41 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
       .catch(() => message.error('Failed to create submission.'));
   }
 
+  async createFromImportURL() {
+    const importUrl = this.state.importUrl.trim();
+    if (importUrl.length) {
+      try {
+        const filename = importUrl.split('/').pop() || 'import';
+        const res = await Axios.get(importUrl, { responseType: 'arraybuffer' });
+        const blob: Blob = new Blob([res.data], { type: res.headers['content-type'] });
+        const file: File = new File([blob], filename, {
+          type: res.headers['content-type']
+        });
+        SubmissionService.create({
+          type: SubmissionType.FILE,
+          title: filename,
+          file
+        })
+          .then(() => {
+            message.success('Image imported.');
+          })
+          .catch(() => {
+            message.error('Unable to load file for import.');
+          });
+      } catch (err) {
+        message.error('Unable to load file for import.');
+      }
+    }
+  }
+
   render() {
     return (
       <div>
         <Dragger {...this.uploadProps} headers={{ Authorization: window.AUTH_ID }}>
-          <p className="ant-light-upload-drag-icon ant-dark-upload-drag-icon">
+          <p className="ant-upload-drag-icon">
             <Icon type="inbox" />
           </p>
-          <p className="ant-light-upload-text ant-dark-upload-text">
+          <p className="ant-upload-text">
             Click or drag file to this area to create a submission
           </p>
         </Dragger>
@@ -363,6 +393,22 @@ class FileSubmissionCreator extends React.Component<any, FileSubmissionCreateSta
           >
             <Icon type="copy" />
             Copy from clipboard
+          </Button>
+        </div>
+        <div className="mt-1 flex">
+          <Input
+            className="mr-1"
+            placeholder="Import From URL"
+            style={{ flex: 10 }}
+            defaultValue={this.state.importUrl}
+            onChange={e => this.setState({ importUrl: e.target.value })}
+          />
+          <Button
+            className="block"
+            disabled={!this.state.importUrl}
+            onClick={this.createFromImportURL.bind(this)}
+          >
+            Import
           </Button>
         </div>
       </div>
@@ -387,7 +433,7 @@ class NotificationSubmissionCreator extends React.Component<
   };
 
   createSubmission() {
-    if (this.state.value) {
+    if (this.isValid()) {
       SubmissionService.create({
         type: SubmissionType.NOTIFICATION,
         title: this.state.value,
@@ -411,6 +457,10 @@ class NotificationSubmissionCreator extends React.Component<
     this.setState({ value: target.value });
   }
 
+  isValid(): boolean {
+    return !!this.state.value && !!this.state.value.trim().length;
+  }
+
   render() {
     return (
       <div>
@@ -419,19 +469,26 @@ class NotificationSubmissionCreator extends React.Component<
         </Button>
         <Modal
           destroyOnClose={true}
-          okButtonProps={{ disabled: !this.state.value.length }}
+          okButtonProps={{ disabled: !this.isValid() }}
           onCancel={this.hideModal.bind(this)}
           onOk={this.createSubmission.bind(this)}
           title="New Notification"
           visible={this.state.modalVisible}
         >
-          <Form layout="vertical">
-            <Form.Item label="Name" required={true}>
+          <Form
+            layout="vertical"
+            onSubmit={e => {
+              e.preventDefault();
+              this.createSubmission();
+            }}
+          >
+            <Form.Item label="Name" required>
               <Input
+                autoFocus
+                required
                 className="w-full"
                 value={this.state.value}
                 onChange={this.onNameChange.bind(this)}
-                required={true}
               />
             </Form.Item>
             <SubmissionTemplateSelect

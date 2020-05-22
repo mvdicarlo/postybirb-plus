@@ -1,4 +1,6 @@
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
+import { Folder } from 'src/websites/interfaces/folder.interface';
+import * as path from 'path';
 
 export default class WebsiteValidator {
   private constructor() {}
@@ -7,7 +9,10 @@ export default class WebsiteValidator {
     const split = fileInfo.mimetype.split('/')[1];
     let extension = null;
     if (fileInfo.name) {
-      extension = fileInfo.name.split('.').pop();
+      extension = path
+        .extname(fileInfo.name)
+        .replace('.', '')
+        .toLowerCase();
     }
 
     for (const type of supportedFileTypes) {
@@ -18,6 +23,21 @@ export default class WebsiteValidator {
       }
     }
 
+    return false;
+  }
+
+  static folderIdExists(id: string, folders: Folder[]): boolean {
+    if (!folders) return false;
+    for (const folder of folders) {
+      if (folder.value === id) {
+        return true;
+      }
+      if (folder.children) {
+        if (WebsiteValidator.folderIdExists(id, folder.children)) {
+          return true;
+        }
+      }
+    }
     return false;
   }
 }

@@ -25,3 +25,6 @@ yarn-error.log*
 dark.css
 light.css
 tailwind.css
+dark-tweaks.css
+antd-tweaks.css
+light-tweaks.css

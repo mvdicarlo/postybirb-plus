@@ -1,6 +1,5 @@
-import axios from '../utils/http';
 import { notification } from 'antd';
-import { uiStore } from '../stores/ui.store';
+import axios from '../utils/http';
 
 export default class UpdateService {
   static getUpdateData() {
@@ -22,8 +21,7 @@ export default class UpdateService {
           notification.info({
             message: 'Notice',
             description: value,
-            duration: 15,
-            prefixCls: `ant-${uiStore.state.theme}-notification`
+            duration: 10,
           });
         }
       })

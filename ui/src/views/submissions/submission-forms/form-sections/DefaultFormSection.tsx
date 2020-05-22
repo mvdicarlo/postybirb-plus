@@ -4,9 +4,10 @@ import { SubmissionPart } from '../../../../../../electron-app/src/submission/su
 import { SubmissionSectionProps } from '../interfaces/submission-section.interface';
 import TagInput from '../form-components/TagInput';
 import DescriptionInput from '../form-components/DescriptionInput';
-import { Form, Input, Radio, Alert } from 'antd';
+import { Form, Input, Radio } from 'antd';
 import { Submission } from '../../../../../../electron-app/src/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import SectionProblems from './SectionProblems';
 
 export default class DefaultFormSection extends React.Component<
   SubmissionSectionProps<Submission, DefaultOptions>
@@ -33,30 +34,7 @@ export default class DefaultFormSection extends React.Component<
     const { data } = this.props.part;
     return (
       <div>
-        {this.props.problems.length ? (
-          <Alert
-            type="error"
-            message={
-              <ul>
-                {this.props.problems.map(problem => (
-                  <li>{problem}</li>
-                ))}
-              </ul>
-            }
-          />
-        ) : null}
-        {this.props.warnings.length ? (
-          <Alert
-            type="warning"
-            message={
-              <ul>
-                {this.props.warnings.map(warning => (
-                  <li>{warning}</li>
-                ))}
-              </ul>
-            }
-          />
-        ) : null}
+        <SectionProblems problems={this.props.problems} />
         <Form.Item label="Title">
           <Input value={data.title} onChange={this.handleChange.bind(this, 'title')} />
         </Form.Item>
