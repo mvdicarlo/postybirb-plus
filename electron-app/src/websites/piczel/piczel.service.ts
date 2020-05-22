@@ -22,6 +22,7 @@ import { PiczelDefaultFileOptions } from './piczel.defaults';
 import { PiczelFileOptions } from './piczel.interface';
 import WebsiteValidator from 'src/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
+import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 
 @Injectable()
 export class Piczel extends Website {
@@ -64,14 +65,10 @@ export class Piczel extends Website {
       },
     );
 
-    const folders: Folder[] = [{ value: undefined, label: 'None' }];
-
-    folders.push(
-      ...res.body.map(f => ({
-        value: f.id.toString(),
-        label: f.name,
-      })),
-    );
+    const folders: Folder[] = res.body.map(f => ({
+      value: f.id.toString(),
+      label: f.name,
+    }));
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
@@ -81,7 +78,13 @@ export class Piczel extends Website {
   }
 
   parseDescription(text: string): string {
-    return text;
+    text = text.replace(/<br(\/|\s\/){0,1}>/g, '\n');
+    HTMLFormatParser.BLOCKS.forEach(block => {
+      text = text
+        .replace(new RegExp(`</${block}>`, 'g'), '')
+        .replace(new RegExp(`<${block}.*?>`, 'g'), '');
+    });
+    return text.replace(/<hr\s{0,1}\/{0,1}>/g, '------------');
   }
 
   async postFileSubmission(

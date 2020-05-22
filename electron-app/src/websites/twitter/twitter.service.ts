@@ -80,6 +80,7 @@ export class Twitter extends Website {
         data: f.file.value.toString('base64'),
         ...f.file.options,
       })),
+      rating: data.rating,
       options: {},
     };
 
@@ -114,6 +115,7 @@ export class Twitter extends Website {
       title: '',
       description: data.description,
       tags: data.tags,
+      rating: data.rating,
       options: {},
     };
 

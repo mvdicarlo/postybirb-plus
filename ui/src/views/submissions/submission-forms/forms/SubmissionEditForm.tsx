@@ -384,9 +384,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     if (status === 'done') {
       message.success(`${info.file.name} file uploaded successfully.`);
       this.setState({
-        submission: info.file.response.submission,
-        problems: info.file.response.problems
+        submission: info.file.response.submission
+        // problems: info.file.response.problems
       });
+      this.checkProblems();
     } else if (status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
@@ -394,9 +395,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
   fallbackUploadChange(info: SubmissionPackage<any>) {
     this.setState({
-      submission: info.submission,
-      problems: info.problems
+      submission: info.submission
+      // problems: info.problems
     });
+    this.checkProblems();
   }
 
   cropThumbnail(file: File): Promise<any> {

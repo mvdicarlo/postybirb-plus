@@ -175,7 +175,7 @@ export class Patreon extends Website {
       .replace(/<p/gm, '<div')
       .replace(/<\/p>/gm, '</div>')
       .replace(/(<s>|<\/s>)/g, '')
-      .replace(/<hr\s{0,1}\/{0,1}>/g, '<br>');
+      .replace(/<hr\s{0,1}\/{0,1}>/g, '------------<br>');
   }
 
   private getPostType(type: FileSubmissionType, alt: boolean = false): any {

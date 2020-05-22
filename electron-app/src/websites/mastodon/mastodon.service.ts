@@ -127,13 +127,13 @@ export class Mastodon extends Website {
       status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`.substring(0, 500),
       sensitive:
         options.isSensitive || options.spoilerText
-          ? 'yes'
-          : data.rating !== SubmissionRating.GENERAL
-          ? 'yes'
-          : 'no',
+          ? true
+          : data.rating !== SubmissionRating.GENERAL,
       spoiler_text: options.spoilerText,
       media_ids: uploadIds,
     };
+
+    console.log(form);
 
     this.checkCancelled(cancellationToken);
     const post = await M.post('statuses', form);

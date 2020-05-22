@@ -28,6 +28,7 @@ export default class Home extends React.Component<Props> {
         <Card className="w-full" title="Submissions" bordered={false}>
           <Card
             className="mb-4"
+            style={{ marginBottom: '1rem' }}
             type="inner"
             title="File"
             extra={<Link to={`/${SubmissionType.FILE}`}>View</Link>}

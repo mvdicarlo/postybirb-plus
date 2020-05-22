@@ -128,7 +128,10 @@ export class NewTumbl extends Website {
   }
 
   parseDescription(text: string) {
-    return text.replace(/<div/gm, '<p').replace(/<\/div>/gm, '</p>');
+    return text
+      .replace(/<div/gm, '<p')
+      .replace(/<\/div>/gm, '</p>')
+      .replace(/<hr>/, '------------');
   }
 
   async postNotificationSubmission(

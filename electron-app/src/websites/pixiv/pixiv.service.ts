@@ -73,7 +73,9 @@ export class Pixiv extends Website {
       x_restrict_sexual: this.getContentRating(data.rating),
       sexual: '',
       title: data.title.substring(0, 32),
-      tag: this.formatTags(data.tags).slice(0, 10),
+      tag: this.formatTags(data.tags)
+        .slice(0, 10)
+        .join(' '),
       comment: data.description,
       rating: '1',
       mode: 'upload',

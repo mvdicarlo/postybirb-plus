@@ -122,6 +122,7 @@ export class ParserService {
   private async parseCustomDescriptionShortcuts(description: string): Promise<string> {
     const customShortcuts = await this.customShortcuts.getAll();
     customShortcuts.forEach(scEntity => {
+      scEntity.content = scEntity.content.replace(/(^<p.*?>|<\/p>$)/g, ''); // Remove surrounding blocks
       if (scEntity.isDynamic) {
         const dynamicMatches =
           description.match(new RegExp(`{${scEntity.shortcut}:(.+?)}`, 'gms')) || [];

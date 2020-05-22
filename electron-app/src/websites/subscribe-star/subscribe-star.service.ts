@@ -64,6 +64,7 @@ export class SubscribeStar extends Website {
     return text
       .replace(/<p/gm, '<div')
       .replace(/<\/p>/gm, '</div>')
+      .replace(/<hr\s{0,1}\/{0,1}>/g, '------------<br>')
       .replace(/\n/g, '');
   }
 

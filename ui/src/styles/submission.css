@@ -41,6 +41,10 @@
   max-width: 100%;
 }
 
+.additional-file-card > .ant-card-body {
+  padding: 0;
+}
+
 .calendar-events {
   list-style: none;
   margin: 0;

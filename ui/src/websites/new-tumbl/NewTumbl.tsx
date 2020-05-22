@@ -177,6 +177,9 @@ export class NewTumblFileSubmissionForm extends GenericFileSubmissionSection<New
     ).then(({ data }) => {
       if (data) {
         this.setState({ blogs: data });
+        if (!this.props.part.data.blog) {
+          this.setValue('blog', data.find(b => b.primary).id);
+        }
       }
     });
   }
