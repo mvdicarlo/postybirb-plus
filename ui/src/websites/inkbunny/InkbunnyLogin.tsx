@@ -28,7 +28,7 @@ export default class InkbunnyLogin extends React.Component<LoginDialogProps, Sta
 
   async submit() {
     this.setState({ sending: true });
-    const auth = await Axios.get<{ sid: string }>(
+    const auth = await Axios.get<{ sid: string; error_message: string }>(
       `https://inkbunny.net/api_login.php?username=${encodeURIComponent(
         this.state.username
       )}&password=${encodeURIComponent(this.state.password)}`,
@@ -48,6 +48,11 @@ export default class InkbunnyLogin extends React.Component<LoginDialogProps, Sta
         .finally(() => this.setState({ sending: false }));
     } else {
       this.setState({ sending: false });
+      if (auth.data.error_message) {
+        message.error(auth.data.error_message, 5);
+      } else {
+        message.error('Unable to log you in.');
+      }
     }
   }
 
