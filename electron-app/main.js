@@ -34,6 +34,7 @@ let nest;
 let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
+let backgroundBalloonAlert = null;
 const icon = path.join(__dirname, '/build/assets/icons/minnowicon.png');
 
 // Enable windows 10 notifications
@@ -46,6 +47,7 @@ app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
+  console.log('READY');
   if (!global.SERVER_ONLY_MODE) {
     loader.show();
   }
@@ -64,10 +66,12 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
   }
 });
 app.on('quit', () => {
+  clearTimeout(backgroundBalloonAlert);
   global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });
 
 async function initialize() {
+  console.log('INIT', hasLock);
   if (!hasLock) return;
 
   let shouldDisplayWindow = true;
@@ -80,6 +84,7 @@ async function initialize() {
     initializedOnce = true;
     shouldDisplayWindow = settingsDB.getState().openOnStartup;
   }
+  console.log('INITIALIZED', shouldDisplayWindow);
 
   if (global.SERVER_ONLY_MODE) return;
 
@@ -92,6 +97,7 @@ async function initialize() {
 }
 
 function createWindow() {
+  console.log('CREATE');
   if (!mainWindowState) {
     mainWindowState = windowStateKeeper({
       defaultWidth: 992,
@@ -129,25 +135,30 @@ function createWindow() {
     mainWindowState.manage(window);
   }
 
-  window.loadFile(`./build/index.html`);
-  window.once('ready-to-show', () => {
-    loader.hide();
-    window.show();
-    if (global.DEBUG_MODE) {
-      window.webContents.openDevTools();
-    }
-  });
   window.webContents.on('new-window', event => event.preventDefault());
   window.on('closed', () => {
     window = null;
     if (global.tray && util.isWindows()) {
-      global.tray.displayBalloon({
-        icon,
-        title: 'PostyBirb',
-        content: 'PostyBirb will continue in the background.',
-        noSound: true,
-        silent: true,
-      });
+      clearTimeout(backgroundBalloonAlert);
+      backgroundBalloonAlert = setTimeout(() => {
+        global.tray.displayBalloon({
+          icon,
+          title: 'PostyBirb',
+          content: 'PostyBirb will continue in the background.',
+          noSound: true,
+          silent: true,
+        });
+      }, 1000);
+    }
+  });
+
+  console.log('LOAD');
+  window.loadFile(`./build/index.html`).then(() => {
+    console.log('LOADED');
+    loader.hide();
+    window.show();
+    if (global.DEBUG_MODE) {
+      window.webContents.openDevTools();
     }
   });
 }
