@@ -23,11 +23,12 @@ const defaultFileOptions: DeviantArtFileOptions = {
   feature: false,
   disableComments: false,
   critique: false,
-  freeDownload: false,
+  freeDownload: true,
   folders: [],
   matureClassification: [],
   matureLevel: '',
-  displayResolution: '0'
+  displayResolution: '0',
+  scraps: false
 };
 
 export class DeviantArt implements Website {
@@ -38,7 +39,11 @@ export class DeviantArt implements Website {
   LoginDialog = (props: LoginDialogProps) => <DeviantArtLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DeviantArtFileOptions>) => (
-    <DeviantArtFileSubmissionForm key={props.part.accountId} {...props} />
+    <DeviantArtFileSubmissionForm
+      key={props.part.accountId}
+      hideThumbnailOptions={true}
+      {...props}
+    />
   );
 
   NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
@@ -179,7 +184,12 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
           checked={data.freeDownload}
           onChange={this.handleCheckedChange.bind(this, 'freeDownload')}
         >
-          Free download
+          Allow free download
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
+          Send to scraps
         </Checkbox>
       </div>
     );
