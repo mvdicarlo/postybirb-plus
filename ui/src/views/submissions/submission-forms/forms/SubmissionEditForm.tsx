@@ -182,8 +182,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
     uiStore.setPendingChanges(false);
 
-    if (this.state.submission!.schedule.postAt) {
-      SubmissionService.schedule(this.id, true)
+    if (this.state.postAt) {
+      SubmissionService.schedule(this.id, true, this.state.postAt)
         .then(() => {
           message.success('Submission scheduled.');
         })
@@ -904,7 +904,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                       type="primary"
                       disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
                     >
-                      {this.state.submission!.schedule.postAt ? 'Schedule' : 'Post'}
+                      {this.state.postAt ? 'Schedule' : 'Post'}
                     </Button>
                   </Popconfirm>
                 ) : (
@@ -913,7 +913,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                     onClick={() => this.onPost(false)}
                     disabled={SubmissionUtil.getProblemCount(this.state.problems) > 0}
                   >
-                    {this.state.submission!.schedule.postAt ? 'Schedule' : 'Post'}
+                    {this.state.postAt ? 'Schedule' : 'Post'}
                   </Button>
                 )}
               </span>

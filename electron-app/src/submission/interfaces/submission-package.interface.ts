@@ -5,4 +5,5 @@ export interface SubmissionPackage<T> {
   submission: T;
   parts: Parts;
   problems: Problems;
+  hasProblems: boolean;
 }

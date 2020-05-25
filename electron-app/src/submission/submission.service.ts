@@ -431,16 +431,25 @@ export class SubmissionService {
 
   async validate(submission: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
     submission = await this.get(submission);
+    let hasProblems: boolean = false;
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
     const problems: Problems = parts.length
       ? this.validatorService.validateParts(submission, parts)
       : {};
+    for (const p of Object.values(problems)) {
+      if (p.problems.length) {
+        hasProblems = true;
+        break;
+      }
+    }
+
     const mappedParts: Parts = {};
     parts.forEach(part => (mappedParts[part.accountId] = part.asPlain())); // asPlain to expose the _id (a model might work better)
     return {
       submission,
       parts: mappedParts,
       problems,
+      hasProblems,
     };
   }
 
@@ -528,25 +537,30 @@ export class SubmissionService {
     isScheduled: boolean,
     postAt?: number,
   ): Promise<void> {
-    const submissionToSchedule = await this.get(id);
-    this.logger.debug(`${submissionToSchedule._id}: ${isScheduled}`, 'Schedule Submission');
+    this.logger.debug(`${id}: ${isScheduled}`, 'Schedule Submission');
+    const submissionToSchedule = await this.getAndValidate(id);
+    const submission: SubmissionEntity = submissionToSchedule.submission;
 
-    if (postAt) {
-      submissionToSchedule.schedule.postAt = postAt;
+    if (isScheduled && submissionToSchedule.hasProblems) {
+      throw new BadRequestException('Cannot schedule an incomplete submission');
     }
 
-    if (!submissionToSchedule.schedule.postAt) {
+    if (postAt) {
+      submission.schedule.postAt = postAt;
+    }
+
+    if (isScheduled && !submission.schedule.postAt) {
       throw new BadRequestException(
         'Submission cannot be scheduled because it does not have a postAt value',
       );
     }
 
-    submissionToSchedule.schedule.isScheduled = isScheduled;
-    await this.repository.update(submissionToSchedule);
+    submission.schedule.isScheduled = isScheduled;
+    await this.repository.update(submission);
 
     this.eventEmitter.emitOnComplete(
       SubmissionEvent.UPDATED,
-      Promise.all([this.validate(submissionToSchedule)]),
+      Promise.all([this.validate(submission)]),
     );
   }
 
