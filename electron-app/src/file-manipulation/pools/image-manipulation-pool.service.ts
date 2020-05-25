@@ -18,7 +18,7 @@ export class ImageManipulationPoolService {
 
   private queue: QueuedWaiter[] = [];
   private inUse: ImageManipulator[] = [];
-  private readonly MAX_COUNT: number = os.cpus().length;
+  private readonly MAX_COUNT: number = Math.min(os.cpus().length, 4);
   private hasAlerted: boolean = false;
 
   constructor(private readonly uiNotificationService: UiNotificationService) {}
