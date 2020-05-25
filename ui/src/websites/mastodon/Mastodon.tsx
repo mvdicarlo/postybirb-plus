@@ -3,7 +3,10 @@ import _ from 'lodash';
 import React from 'react';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { MastodonFileOptions, MastodonNotificationOptions } from '../../../../electron-app/src/websites/mastodon/mastodon.interface';
+import {
+  MastodonFileOptions,
+  MastodonNotificationOptions
+} from '../../../../electron-app/src/websites/mastodon/mastodon.interface';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
@@ -16,14 +19,12 @@ import MastodonLogin from './MastodonLogin';
 const defaultFileOptions: MastodonFileOptions = {
   ...GenericDefaultFileOptions,
   useTitle: false,
-  spoilerText: '',
-  isSensitive: false
+  spoilerText: ''
 };
 const defaultNotificationOptions: MastodonNotificationOptions = {
   ...GenericDefaultNotificationOptions,
   useTitle: false,
-  spoilerText: '',
-  isSensitive: false
+  spoilerText: ''
 };
 
 export class Mastodon implements Website {
@@ -37,7 +38,13 @@ export class Mastodon implements Website {
     <MastodonFileSubmissionForm
       key={props.part.accountId}
       {...props}
-      ratingOptions={{ show: false }}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          { name: 'Safe', value: 'general' },
+          { name: 'Sensitive', value: 'adult' }
+        ]
+      }}
       tagOptions={{ show: false }}
       hideThumbnailOptions={true}
     />
@@ -50,7 +57,11 @@ export class Mastodon implements Website {
       key={props.part.accountId}
       {...props}
       ratingOptions={{
-        show: false
+        show: true,
+        ratings: [
+          { name: 'Safe', value: 'general' },
+          { name: 'Sensitive', value: 'adult' }
+        ]
       }}
       tagOptions={{ show: false }}
     />
@@ -77,14 +88,6 @@ class MastodonNotificationSubmissionForm extends GenericSubmissionSection<
           Use title
         </Checkbox>
       </div>,
-      <div>
-        <Checkbox
-          checked={data.isSensitive}
-          onChange={this.handleCheckedChange.bind(this, 'isSensitive')}
-        >
-          Contains sensitive content
-        </Checkbox>
-      </div>,
       <Form.Item label="Spoiler Text">
         <Input
           value={data.spoilerText}
@@ -106,14 +109,6 @@ export class MastodonFileSubmissionForm extends GenericFileSubmissionSection<Mas
           onChange={this.handleCheckedChange.bind(this, 'useTitle')}
         >
           Use title
-        </Checkbox>
-      </div>,
-      <div>
-        <Checkbox
-          checked={data.isSensitive}
-          onChange={this.handleCheckedChange.bind(this, 'isSensitive')}
-        >
-          Contains sensitive content
         </Checkbox>
       </div>,
       <Form.Item label="Spoiler Text">

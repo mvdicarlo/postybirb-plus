@@ -520,7 +520,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           breadcrumbName: SubmissionUtil.getSubmissionTitle({
             submission: this.state.submission!,
             parts: this.state.parts,
-            problems: {}
+            problems: {},
+            hasProblems: false
           })
         }
       ]
