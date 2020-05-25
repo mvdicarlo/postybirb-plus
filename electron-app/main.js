@@ -47,7 +47,6 @@ app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
-  console.log('READY');
   if (!global.SERVER_ONLY_MODE) {
     loader.show();
   }
@@ -71,7 +70,6 @@ app.on('quit', () => {
 });
 
 async function initialize() {
-  console.log('INIT', hasLock);
   if (!hasLock) return;
 
   let shouldDisplayWindow = true;
@@ -82,9 +80,8 @@ async function initialize() {
     const image = buildAppImage();
     global.tray = buildTray(image); // force to stay in memory
     initializedOnce = true;
-    shouldDisplayWindow = settingsDB.getState().openOnStartup;
+    shouldDisplayWindow = settingsDB.getState().openWindowOnStartup;
   }
-  console.log('INITIALIZED', shouldDisplayWindow);
 
   if (global.SERVER_ONLY_MODE) return;
 
@@ -97,7 +94,6 @@ async function initialize() {
 }
 
 function createWindow() {
-  console.log('CREATE');
   if (!mainWindowState) {
     mainWindowState = windowStateKeeper({
       defaultWidth: 992,
@@ -152,9 +148,7 @@ function createWindow() {
     }
   });
 
-  console.log('LOAD');
   window.loadFile(`./build/index.html`).then(() => {
-    console.log('LOADED');
     loader.hide();
     window.show();
     if (global.DEBUG_MODE) {
