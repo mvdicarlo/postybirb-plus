@@ -9,4 +9,5 @@ export interface DeviantArtFileOptions extends DefaultFileOptions {
   matureClassification: string[];
   matureLevel: string;
   displayResolution: string;
+  scraps: boolean;
 }

@@ -123,7 +123,7 @@ export class NewTumbl extends Website {
       case SubmissionRating.EXTREME:
         return '5';
       default:
-        rating; // has a chance of being another value outside of normal SubmissionRating
+        return rating; // has a chance of being another value outside of normal SubmissionRating
     }
   }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
-import { Modal } from 'antd';
+import { Modal, Radio } from 'antd';
 
 interface Props {
   visible: boolean;
@@ -10,7 +10,12 @@ interface Props {
   onClose: () => void;
 }
 
-export default class SubmissionImageCropper extends React.Component<Props> {
+interface State {
+  aspectRatio?: number;
+}
+
+export default class SubmissionImageCropper extends React.Component<Props, State> {
+  state: State = { aspectRatio: undefined };
   private cropper: any;
 
   resolveCroppedImg() {
@@ -29,7 +34,23 @@ export default class SubmissionImageCropper extends React.Component<Props> {
   render() {
     return (
       <Modal
-        title="Modify Image"
+        title={
+          <div className="flex">
+            <div className="flex-1">Modify Thumbnail</div>
+            <div className="flex-1">
+              <span className="mr-1">Aspect Ratio</span>
+              <Radio.Group
+                defaultValue={this.state.aspectRatio}
+                onChange={e => this.setState({ aspectRatio: e.target.value })}
+              >
+                <Radio value={undefined}>None</Radio>
+                <Radio value={1}>1:1</Radio>
+                <Radio value={4 / 3}>4:3</Radio>
+                <Radio value={16 / 9}>16:9</Radio>
+              </Radio.Group>
+            </div>
+          </div>
+        }
         visible={this.props.visible}
         destroyOnClose={true}
         onCancel={() => {
@@ -45,6 +66,7 @@ export default class SubmissionImageCropper extends React.Component<Props> {
             <Cropper
               style={{ height: '100%', width: '100%' }}
               autoCropArea={1}
+              aspectRatio={this.state.aspectRatio || NaN}
               guides={false}
               zoomable={false}
               movable={false}

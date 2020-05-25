@@ -11,4 +11,5 @@ export const DeviantArtDefaultFileOptions: DeviantArtFileOptions = {
   matureClassification: [],
   matureLevel: '',
   displayResolution: '0',
+  scraps: false,
 };

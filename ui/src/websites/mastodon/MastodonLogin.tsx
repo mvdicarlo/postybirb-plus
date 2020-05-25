@@ -46,7 +46,7 @@ export default class MastodonLogin extends React.Component<LoginDialogProps, Sta
 
   private getAuthURL(website?: string): string {
     return `${window.AUTH_SERVER_URL}/mastodon/v1/authorize/${encodeURIComponent(
-      this.getWebsiteURL()
+      this.getWebsiteURL(website)
     )}`;
   }
 
@@ -96,8 +96,8 @@ export default class MastodonLogin extends React.Component<LoginDialogProps, Sta
                 addonBefore="https://"
                 onBlur={({ target }) => {
                   const website = target.value.replace(/(https:\/\/|http:\/\/)/, '');
+                  this.view.loadURL(this.getAuthURL(website));
                   this.setState({ website });
-                  this.view.src = this.getAuthURL(website);
                 }}
               />
             </Form.Item>

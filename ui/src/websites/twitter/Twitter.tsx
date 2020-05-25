@@ -19,14 +19,20 @@ export class Twitter implements Website {
   internalName: string = 'Twitter';
   name: string = 'Twitter';
   supportsAdditionalFiles: boolean = true;
-  supportsTags = false
+  supportsTags = false;
   LoginDialog = (props: LoginDialogProps) => <TwitterLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (
     <GenericFileSubmissionSection
       key={props.part.accountId}
       {...props}
-      ratingOptions={{ show: true, ratings: [{ name: 'Sensitive', value: 'adult' }] }}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          { name: 'Safe', value: 'general' },
+          { name: 'Sensitive', value: 'adult' }
+        ]
+      }}
       tagOptions={{ show: false }}
       descriptionOptions={{ show: true, options: { anchorLength: 23 } }}
       hideThumbnailOptions={true}
@@ -41,7 +47,13 @@ export class Twitter implements Website {
       hideTitle={true}
       tagOptions={{ show: false }}
       descriptionOptions={{ show: true, options: { anchorLength: 23 } }}
-      ratingOptions={{ show: true, ratings: [{ name: 'Sensitive', value: 'adult' }] }}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          { name: 'Safe', value: 'general' },
+          { name: 'Sensitive', value: 'adult' }
+        ]
+      }}
     />
   );
 

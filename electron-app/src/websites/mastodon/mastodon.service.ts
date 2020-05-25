@@ -122,18 +122,16 @@ export class Mastodon extends Website {
       files.map(file => this.uploadMedia(accountData, file.file)),
     );
 
+    const isSensitive = data.rating !== SubmissionRating.GENERAL;
+
     const { options } = data;
     const form: any = {
       status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`.substring(0, 500),
       sensitive:
-        options.isSensitive || options.spoilerText
-          ? true
-          : data.rating !== SubmissionRating.GENERAL,
+        isSensitive || options.spoilerText ? true : data.rating !== SubmissionRating.GENERAL,
       spoiler_text: options.spoilerText,
       media_ids: uploadIds,
     };
-
-    console.log(form);
 
     this.checkCancelled(cancellationToken);
     const post = await M.post('statuses', form);
@@ -147,11 +145,13 @@ export class Mastodon extends Website {
   ): Promise<PostResponse> {
     const M = this.getMastodonInstance(accountData);
 
+    const isSensitive = data.rating !== SubmissionRating.GENERAL;
+
     const { options } = data;
     const form: any = {
       status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`.substring(0, 500),
       sensitive:
-        options.isSensitive || options.spoilerText
+        isSensitive || options.spoilerText
           ? 'yes'
           : data.rating !== SubmissionRating.GENERAL
           ? 'yes'

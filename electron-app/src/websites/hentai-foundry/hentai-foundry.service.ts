@@ -124,11 +124,7 @@ export class HentaiFoundry extends Website {
     });
 
     this.verifyResponse(post, 'Verify post');
-    if (
-      !post.body.includes('Submit new picture') &&
-      post.body.includes('pending approval') &&
-      !post.returnUrl.includes('/create')
-    ) {
+    if (post.body.includes('This submission is still pending approval')) {
       return this.createPostResponse({ source: post.returnUrl });
     }
 

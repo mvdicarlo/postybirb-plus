@@ -6,11 +6,9 @@ import {
 export interface MastodonFileOptions extends DefaultFileOptions {
   useTitle: boolean;
   spoilerText: string;
-  isSensitive: boolean;
 }
 
 export interface MastodonNotificationOptions extends DefaultOptions {
   useTitle: boolean;
   spoilerText: string;
-  isSensitive: boolean;
 }

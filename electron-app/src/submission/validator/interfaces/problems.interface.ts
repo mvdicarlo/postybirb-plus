@@ -1,7 +1,4 @@
-export interface Problems {
-  // accountid
-  [key: string]: Problem;
-}
+export interface Problems extends Record<string, Problem> {}
 
 export interface Problem {
   problems: string[];
