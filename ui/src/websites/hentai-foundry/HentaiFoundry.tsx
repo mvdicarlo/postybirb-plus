@@ -62,6 +62,13 @@ export class HentaiFoundry implements Website {
       ratingOptions={{
         show: false
       }}
+      tagOptions={{
+        show: true,
+        options: {
+          maxLength: 75,
+          mode: 'length'
+        }
+      }}
       {...props}
     />
   );

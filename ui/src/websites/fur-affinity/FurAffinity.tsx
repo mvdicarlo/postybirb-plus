@@ -54,6 +54,13 @@ export class FurAffinity implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, FurAffinityFileOptions>) => (
     <FurAffinityFileSubmissionForm
       key={props.part.accountId}
+      tagOptions={{
+        show: true,
+        options: {
+          maxLength: 250,
+          mode: 'length'
+        }
+      }}
       ratingOptions={{
         show: true,
         ratings: [
