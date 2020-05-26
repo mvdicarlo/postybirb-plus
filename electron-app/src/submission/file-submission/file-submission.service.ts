@@ -32,7 +32,7 @@ export class FileSubmissionService {
       primary: {
         location: locations.submissionLocation,
         mimetype: file.mimetype,
-        name: title,
+        name: file.originalname,
         originalPath: data.path,
         preview: locations.thumbnailLocation,
         size: file.buffer.length,

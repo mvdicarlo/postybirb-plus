@@ -193,11 +193,18 @@ export class PostService {
       }
 
       // Create posters
-      const existingSources = parts.filter(p => p.postedTo).map(p => p.postedTo);
+      const existingSources = parts.filter(p => p.postedTo);
       this.postingParts[postingSubmission.type] = parts
         .filter(p => !p.isDefault)
         .filter(p => p.postStatus !== 'SUCCESS')
-        .map(p => this.createPoster(postingSubmission, p, defaultPart, existingSources));
+        .map(p =>
+          this.createPoster(
+            postingSubmission,
+            p,
+            defaultPart,
+            existingSources.filter(op => p.website !== op.website).map(op => op.postedTo), // do not have duplicate postTos
+          ),
+        );
 
       // Listen to events
       this.getPosters(postingSubmission.type).forEach(poster => {
@@ -361,17 +368,20 @@ export class PostService {
     defaultPart: SubmissionPartEntity<DefaultOptions>,
     sources: string[],
   ): Poster {
-    const knownSources = [...sources, ...(part.data.sources || [])];
+    const website = this.websites.getWebsiteModule(part.website);
+    const waitForExternalStart = website.acceptsSourceUrls && sources.length === 0;
+
     return new Poster(
       this.accountService,
       this.parserService,
       this.settings,
-      this.websites.getWebsiteModule(part.website),
+      website,
       submission,
       part,
       defaultPart,
-      this.websites.getWebsiteModule(part.website).acceptsSourceUrls && knownSources.length === 0,
-      this.getWaitTime(part.accountId, this.websites.getWebsiteModule(part.website)),
+      waitForExternalStart,
+      sources,
+      this.getWaitTime(part.accountId, website),
     );
   }
 

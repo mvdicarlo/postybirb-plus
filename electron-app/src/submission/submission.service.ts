@@ -579,6 +579,8 @@ export class SubmissionService {
       part = new SubmissionPartEntity({
         ...existingPart,
         data: submissionPart.data,
+        postedTo: undefined,
+        postStatus: 'UNPOSTED',
       });
     } else {
       part = new SubmissionPartEntity({
