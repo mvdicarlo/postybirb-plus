@@ -29,7 +29,13 @@ export class Piczel implements Website {
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PiczelFileOptions>) => (
     <PiczelFileSubmissionForm
-      ratingOptions={{ show: true, ratings: [{ value: 'adult', name: 'NSFW' }] }}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          { value: 'general', name: 'SFW' },
+          { value: 'adult', name: 'NSFW' }
+        ]
+      }}
       key={props.part.accountId}
       {...props}
     />
