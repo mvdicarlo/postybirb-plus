@@ -1,5 +1,13 @@
 const path = require('path');
-const { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  nativeImage,
+  nativeTheme,
+  Tray,
+  Notification,
+} = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const util = require('./src-electron/utils');
 
@@ -34,7 +42,7 @@ let nest;
 let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
-let backgroundBalloonAlert = null;
+let backgroundAlertTimeout = null;
 const icon = path.join(__dirname, '/build/assets/icons/minnowicon.png');
 
 // Enable windows 10 notifications
@@ -65,7 +73,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
   }
 });
 app.on('quit', () => {
-  clearTimeout(backgroundBalloonAlert);
+  clearTimeout(backgroundAlertTimeout);
   global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });
 
@@ -135,16 +143,15 @@ function createWindow() {
   window.on('closed', () => {
     window = null;
     if (global.tray && util.isWindows()) {
-      clearTimeout(backgroundBalloonAlert);
-      backgroundBalloonAlert = setTimeout(() => {
-        global.tray.displayBalloon({
+      clearTimeout(backgroundAlertTimeout);
+      backgroundAlertTimeout = setTimeout(() => {
+        const notification = new Notification({
           icon,
-          title: 'PostyBirb',
-          content: 'PostyBirb will continue in the background.',
-          noSound: true,
+          body: 'PostyBirb will continue in the background.',
           silent: true,
         });
-      }, 1000);
+        notification.show();
+      }, 750);
     }
   });
 
