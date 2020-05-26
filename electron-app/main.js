@@ -1,5 +1,13 @@
 const path = require('path');
-const { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  nativeImage,
+  nativeTheme,
+  Tray,
+  Notification,
+} = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const util = require('./src-electron/utils');
 
@@ -34,7 +42,7 @@ let nest;
 let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
-let backgroundBalloonAlert = null;
+let backgroundAlertTimeout = null;
 const icon = path.join(__dirname, '/build/assets/icons/minnowicon.png');
 
 // Enable windows 10 notifications
@@ -47,7 +55,7 @@ app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
-  console.log('READY');
+  app.userAgentFallback = app.userAgentFallback.replace(/Electron.*?\s/, ''); // EXPERIMENTAL: Attempt to get Google Sign-In working
   if (!global.SERVER_ONLY_MODE) {
     loader.show();
   }
@@ -66,12 +74,11 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
   }
 });
 app.on('quit', () => {
-  clearTimeout(backgroundBalloonAlert);
+  clearTimeout(backgroundAlertTimeout);
   global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });
 
 async function initialize() {
-  console.log('INIT', hasLock);
   if (!hasLock) return;
 
   let shouldDisplayWindow = true;
@@ -82,9 +89,8 @@ async function initialize() {
     const image = buildAppImage();
     global.tray = buildTray(image); // force to stay in memory
     initializedOnce = true;
-    shouldDisplayWindow = settingsDB.getState().openOnStartup;
+    shouldDisplayWindow = settingsDB.getState().openWindowOnStartup;
   }
-  console.log('INITIALIZED', shouldDisplayWindow);
 
   if (global.SERVER_ONLY_MODE) return;
 
@@ -97,7 +103,6 @@ async function initialize() {
 }
 
 function createWindow() {
-  console.log('CREATE');
   if (!mainWindowState) {
     mainWindowState = windowStateKeeper({
       defaultWidth: 992,
@@ -139,22 +144,19 @@ function createWindow() {
   window.on('closed', () => {
     window = null;
     if (global.tray && util.isWindows()) {
-      clearTimeout(backgroundBalloonAlert);
-      backgroundBalloonAlert = setTimeout(() => {
-        global.tray.displayBalloon({
+      clearTimeout(backgroundAlertTimeout);
+      backgroundAlertTimeout = setTimeout(() => {
+        const notification = new Notification({
           icon,
-          title: 'PostyBirb',
-          content: 'PostyBirb will continue in the background.',
-          noSound: true,
+          body: 'PostyBirb will continue in the background.',
           silent: true,
         });
-      }, 1000);
+        notification.show();
+      }, 750);
     }
   });
 
-  console.log('LOAD');
   window.loadFile(`./build/index.html`).then(() => {
-    console.log('LOADED');
     loader.hide();
     window.show();
     if (global.DEBUG_MODE) {

@@ -6,6 +6,7 @@ import { getSubmissionType, FileSubmissionType } from './enums/file-submission-t
 import FileSubmissionEntity from './models/file-submission.entity';
 import SubmissionEntity from '../models/submission.entity';
 import SubmissionCreateModel from '../models/submission-create.model';
+import * as path from 'path';
 
 @Injectable()
 export class FileSubmissionService {
@@ -17,13 +18,13 @@ export class FileSubmissionService {
     submission: SubmissionEntity,
     data: SubmissionCreateModel,
   ): Promise<FileSubmission> {
-    const { file, path } = data;
+    const { file } = data;
     if (!file) {
       throw new BadRequestException('FileSubmission requires a file');
     }
 
-    const title = file.originalname;
-    const locations = await this.fileRepository.insertFile(submission._id, file, path);
+    const title = path.parse(file.originalname).name;
+    const locations = await this.fileRepository.insertFile(submission._id, file, data.path);
     // file mimetype may be manipulated by insertFile
     const completedSubmission: FileSubmissionEntity = new FileSubmissionEntity({
       ...submission,
@@ -31,8 +32,8 @@ export class FileSubmissionService {
       primary: {
         location: locations.submissionLocation,
         mimetype: file.mimetype,
-        name: title,
-        originalPath: path,
+        name: file.originalname,
+        originalPath: data.path,
         preview: locations.thumbnailLocation,
         size: file.buffer.length,
         type: getSubmissionType(file.mimetype, file.originalname),

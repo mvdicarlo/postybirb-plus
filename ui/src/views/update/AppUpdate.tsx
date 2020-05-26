@@ -35,7 +35,7 @@ export default class AppUpdate extends React.Component<Props, State> {
       );
     } else {
       return this.props.updateStore!.state.available ? (
-        <div className="w-full">
+        <div className="w-full app-update">
           <Tooltip title="Update available">
             <span className="mr-2 text-link" onClick={() => UpdateService.doUpdate()}>
               <Icon type="download" className="mr-1" />
@@ -43,11 +43,9 @@ export default class AppUpdate extends React.Component<Props, State> {
             </span>
           </Tooltip>
           <Tooltip title="Release Notes">
-            <Icon
-              className="text-link"
-              type="info-circle"
-              onClick={() => this.setState({ modalVisible: true })}
-            />
+            <span className="text-link">
+              <Icon type="info-circle" onClick={() => this.setState({ modalVisible: true })} />
+            </span>
           </Tooltip>
           <Modal
             title="Release Notes"

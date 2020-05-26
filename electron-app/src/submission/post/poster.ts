@@ -95,7 +95,6 @@ export class Poster extends EventEmitter {
   status: PostStatus = 'UNPOSTED';
   private response: PostResponse;
   postAtTimeout: NodeJS.Timeout;
-  sources: string[] = [];
   postAt: number;
   retries: number = 0;
   private cancellationToken: CancellationToken;
@@ -109,6 +108,7 @@ export class Poster extends EventEmitter {
     public readonly part: SubmissionPartEntity<any>,
     private readonly defaultPart: SubmissionPartEntity<DefaultOptions>,
     public waitForExternalStart: boolean,
+    public sources: string[],
     timeUntilPost: number,
   ) {
     super();
@@ -151,6 +151,8 @@ export class Poster extends EventEmitter {
         this.defaultPart,
         this.part,
       );
+
+      data.sources = this.sources;
 
       if (this.isCancelled()) {
         return;
