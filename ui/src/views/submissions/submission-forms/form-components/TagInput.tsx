@@ -1,10 +1,9 @@
-import React from 'react';
-import { inject, observer } from 'mobx-react';
-import { TagGroupStore } from '../../../../stores/tag-group.store';
+import { Dropdown, Form, Icon, Input, Menu, Select, Switch, Tag, Tooltip, Typography } from 'antd';
 import _ from 'lodash';
+import { inject, observer } from 'mobx-react';
+import React from 'react';
 import { TagData } from '../../../../../../electron-app/src/submission/submission-part/interfaces/tag-data.interface';
-
-import { Switch, Select, Form, Typography, Menu, Dropdown, Tooltip, Icon, Tag } from 'antd';
+import { TagGroupStore } from '../../../../stores/tag-group.store';
 
 const { Text } = Typography;
 
@@ -189,31 +188,64 @@ interface TagGroupSelectProps {
   tagGroupStore?: TagGroupStore;
 }
 
+interface TagGroupSelectState {
+  filter: string;
+}
+
 @inject('tagGroupStore')
 @observer
-class TagGroupSelect extends React.Component<TagGroupSelectProps> {
+class TagGroupSelect extends React.Component<TagGroupSelectProps, TagGroupSelectState> {
+  state: TagGroupSelectState = {
+    filter: ''
+  };
   render() {
     const menu = (
-      <Menu>
-        {this.props.tagGroupStore!.groups.map(g => (
-          <Menu.Item key={g._id}>
-            <Tooltip
-              placement="right"
-              title={
-                <div>
-                  {g.tags.map(tag => (
-                    <Tag>{tag}</Tag>
-                  ))}
-                </div>
-              }
-            >
-              {
-                // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                <a onClick={() => this.props.onSelect(g.tags)}>{g.alias}</a>
-              }
-            </Tooltip>
-          </Menu.Item>
-        ))}
+      <Menu style={{ maxHeight: '33vh', overflow: 'auto', padding: '0' }}>
+        <div
+          className="sticky top-0 z-10"
+          style={{ background: 'inherit' }}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <Input.Search
+            autoFocus
+            allowClear
+            placeholder="Search"
+            value={this.state.filter}
+            onChange={e => this.setState({ filter: e.target.value.trim().toLowerCase() })}
+          />
+        </div>
+        {this.props
+          .tagGroupStore!.groups.filter(g => g.alias.toLowerCase().includes(this.state.filter))
+          .map(g => (
+            <Menu.Item key={g._id}>
+              <Tooltip
+                placement="right"
+                title={
+                  <div>
+                    {g.tags.map(tag => (
+                      <Tag>{tag}</Tag>
+                    ))}
+                  </div>
+                }
+              >
+                {
+                  // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                  <a
+                    onClick={e => {
+                      this.props.onSelect(g.tags);
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    {g.alias}
+                  </a>
+                }
+              </Tooltip>
+            </Menu.Item>
+          ))}
       </Menu>
     );
     return (
