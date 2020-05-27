@@ -58,3 +58,8 @@
   text-overflow: ellipsis;
   font-size: 12px;
 }
+
+.editable-submissions .ant-list-item-extra {
+  flex: 0.5;
+  margin: 0;
+}

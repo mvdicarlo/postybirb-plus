@@ -462,7 +462,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               <div>
                 <div>
                   The following website(s) do not support additional files:{' '}
-                  {unsupportedWebsites.join()}
+                  {unsupportedWebsites.join(', ')}
                 </div>
               </div>
             }
