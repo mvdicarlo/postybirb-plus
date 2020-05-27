@@ -4,6 +4,7 @@ import { Form, Input, Button, message } from 'antd';
 import LoginService from '../../services/login.service';
 import BrowserLink from '../../components/BrowserLink';
 import { e621AccountData } from '../../../../electron-app/src/websites/e621/e621-account.interface';
+import Axios from 'axios';
 
 interface State extends e621AccountData {
   username: string;
@@ -30,17 +31,37 @@ export default class E621Login extends React.Component<LoginDialogProps, State> 
     if (this.state.key && this.state.username) {
       this.setState({ sending: true });
       const data: e621AccountData = {
-        username: this.state.username,
-        key: this.state.key
+        username: this.state.username.trim(),
+        key: this.state.key.trim()
       };
-      LoginService.setAccountData(this.props.account._id, data)
-        .then(() => {
-          message.success('Login success.');
+      Axios.get<any>(
+        `https://e621.net/posts.json?login=${encodeURIComponent(data.username)}&api_key=${
+          data.key
+        }&limit=1`,
+        {
+          responseType: 'json'
+        }
+      )
+        .then(res => {
+          if (res.data.posts) {
+            LoginService.setAccountData(this.props.account._id, data)
+              .then(() => {
+                message.success('Login success.');
+              })
+              .catch(() => {
+                message.error('Failed to store login.');
+              })
+              .finally(() => this.setState({ sending: false }));
+          } else {
+            message.error('Authentication failed.');
+          }
         })
         .catch(() => {
-          message.error('Failed to login to e621 account.');
+          message.error('Authentication failed.');
         })
-        .finally(() => this.setState({ sending: false }));
+        .finally(() => {
+          this.setState({ sending: false });
+        });
     }
   }
 

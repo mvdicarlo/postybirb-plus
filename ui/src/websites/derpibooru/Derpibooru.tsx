@@ -25,7 +25,11 @@ export class Derpibooru implements Website {
   );
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DerpibooruOptions>) => (
-    <DerpibooruFileSubmissionForm key={props.part.accountId} {...props} />
+    <DerpibooruFileSubmissionForm
+      hideThumbnailOptions={true}
+      key={props.part.accountId}
+      {...props}
+    />
   );
 
   getDefaults() {
