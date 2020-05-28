@@ -125,7 +125,7 @@ export class EditableSubmissions extends React.Component<Props, State> {
         .includes(this.state.search)
     );
     return (
-      <div>
+      <div className="editable-submissions">
         <div className="uploader mb-2">
           {this.props.type === SubmissionType.FILE ? (
             <FileSubmissionCreator />

@@ -1,4 +1,14 @@
-import { Alert, Avatar, DatePicker, Icon, List, message, Modal, Popconfirm, Typography } from 'antd';
+import {
+  Alert,
+  Avatar,
+  DatePicker,
+  Icon,
+  List,
+  message,
+  Modal,
+  Popconfirm,
+  Typography
+} from 'antd';
 import moment from 'moment';
 import React from 'react';
 import { Draggable, DraggableProvided } from 'react-beautiful-dnd';
@@ -134,13 +144,13 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
       if (unsupportedWebsites.length) {
         return (
           <Alert
-            type="warning"
-            message="Incompatible Websites"
+            type="error"
+            message=""
             description={
               <div>
                 <div>
                   The following website(s) do not support additional files:{' '}
-                  {unsupportedWebsites.join()}
+                  {unsupportedWebsites.join(', ')}
                 </div>
 
                 <span

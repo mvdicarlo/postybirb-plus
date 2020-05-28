@@ -24,7 +24,7 @@ export class e621 implements Website {
   LoginDialog = (props: LoginDialogProps) => <E621Login {...props} />;
 
   FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, e621Options>) => (
-    <E621FileSubmissionForm key={props.part.accountId} {...props} />
+    <E621FileSubmissionForm hideThumbnailOptions={true} key={props.part.accountId} {...props} />
   );
 
   getDefaults() {

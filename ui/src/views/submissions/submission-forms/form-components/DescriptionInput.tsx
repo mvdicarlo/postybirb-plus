@@ -154,7 +154,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
                 title="Username Shortcuts"
                 onVisibleChange={visible => this.setState({ shortcutsHovered: visible })}
                 content={
-                  <div>
+                  <div className="overflow-auto" style={{ maxHeight: '50vh' }}>
                     <em>
                       Example: {'{tw:minnownade}'} -> https://twitter.com/minnownade (would appear
                       as @minnownade on Twitter)
@@ -187,7 +187,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
                 className="ml-1"
                 title="Custom Shortcuts"
                 content={
-                  <div>
+                  <div className="overflow-auto" style={{ maxHeight: '50vh' }}>
                     <ul>
                       {customShortcuts
                         .sort((a, b) => a.shortcut.localeCompare(b.shortcut))

@@ -13,7 +13,7 @@ export class HTMLFormatParser {
     html = sanitize(html, {
       allowedTags: false,
       allowedAttributes: {
-        a: ['href', 'target'],
+        a: ['href'],
         div: ['align', 'style'],
         pre: ['align', 'style'],
         p: ['align', 'style'],

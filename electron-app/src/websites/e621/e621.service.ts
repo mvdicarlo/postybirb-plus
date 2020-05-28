@@ -103,19 +103,20 @@ export class e621 extends Website {
     };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ success: boolean; location: string; reason: string }>(
-      `${this.BASE_URL}/uploads.json`,
-      undefined,
-      {
-        type: 'multipart',
-        data: form,
-        skipCookies: true,
-        requestOptions: { json: true },
-        headers: {
-          'User-Agent': `PostyBirb/${app.getVersion()}`,
-        },
+    const post = await Http.post<{
+      success: boolean;
+      location: string;
+      reason: string;
+      message: string;
+    }>(`${this.BASE_URL}/uploads.json`, undefined, {
+      type: 'multipart',
+      data: form,
+      skipCookies: true,
+      requestOptions: { json: true },
+      headers: {
+        'User-Agent': `PostyBirb/${app.getVersion()}`,
       },
-    );
+    });
 
     if (post.body.success && post.body.location) {
       return this.createPostResponse({ source: `https://e621.net${post.body.location}` });
@@ -124,7 +125,7 @@ export class e621 extends Website {
     return Promise.reject(
       this.createPostResponse({
         additionalInfo: JSON.stringify(post.body),
-        message: post.body.reason,
+        message: `${post.body.reason || ''} || ${post.body.message || ''}`,
       }),
     );
   }
@@ -132,13 +133,13 @@ export class e621 extends Website {
   private getRating(rating: SubmissionRating) {
     switch (rating) {
       case SubmissionRating.MATURE:
-        return 'questionable';
+        return 'q';
       case SubmissionRating.ADULT:
       case SubmissionRating.EXTREME:
-        return 'explicit';
+        return 'e';
       case SubmissionRating.GENERAL:
       default:
-        return 'safe';
+        return 's';
     }
   }
 
