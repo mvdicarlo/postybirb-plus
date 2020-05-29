@@ -154,7 +154,11 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
         (websiteData[status.website].children as any[]).push({
           key: status._id,
           value: status._id,
-          title: `${name}: ${status.alias}`,
+          title: (
+            <span>
+              <span className="select-tree-website-tag">[{name}]</span> {status.alias}
+            </span>
+          ),
           isLeaf: true
         });
       });
@@ -164,15 +168,11 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
   }
 
   getSelectedWebsiteIds(): string[] {
-    return _.sortBy(
-      [
-        ...Object.values(this.state.parts)
-          .filter(p => !p.isDefault)
-          .filter(p => !this.state.removedParts.includes(p.accountId))
-          .map(p => p.accountId)
-      ],
-      'title'
-    );
+    return Object.values(this.state.parts)
+      .filter(p => !p.isDefault)
+      .filter(p => !this.state.removedParts.includes(p.accountId))
+      .sort((a, b) => a.website.localeCompare(b.website))
+      .map(p => p.accountId);
   }
 
   getSelectedWebsiteParts(): Array<SubmissionPart<any>> {
@@ -385,7 +385,10 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
                 <Anchor.Link title="Defaults" href="#Defaults" />
                 <Anchor.Link title="Websites" href="#Websites" />
                 {this.getSelectedWebsites().map(website => (
-                  <Anchor.Link title={<span>{WebsiteRegistry.websites[website].name}</span>} href={`#${website}`} />
+                  <Anchor.Link
+                    title={<span>{WebsiteRegistry.websites[website].name}</span>}
+                    href={`#${website}`}
+                  />
                 ))}
               </Anchor>
             </div>

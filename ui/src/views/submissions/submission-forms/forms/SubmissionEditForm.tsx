@@ -257,7 +257,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       (websiteData[status.website].children as any[]).push({
         key: status._id,
         value: status._id,
-        title: `${name}: ${status.alias}`,
+        title: (
+          <span>
+            <span className="select-tree-website-tag">[{name}]</span> {status.alias}
+          </span>
+        ),
         isLeaf: true
       });
     });
@@ -267,15 +271,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   }
 
   getSelectedWebsiteIds(): string[] {
-    return _.sortBy(
-      [
-        ...Object.values(this.state.parts)
-          .filter(p => !p.isDefault)
-          .filter(p => !this.state.removedParts.includes(p.accountId))
-          .map(p => p.accountId)
-      ],
-      'title'
-    );
+    return Object.values(this.state.parts)
+      .filter(p => !p.isDefault)
+      .filter(p => !this.state.removedParts.includes(p.accountId))
+      .sort((a, b) => a.website.localeCompare(b.website))
+      .map(p => p.accountId);
   }
 
   getSelectedWebsiteParts(): Array<SubmissionPart<any>> {
