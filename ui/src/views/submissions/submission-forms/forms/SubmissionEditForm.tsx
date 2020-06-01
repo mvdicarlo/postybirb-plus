@@ -254,6 +254,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       websiteData[status.website].title = <strong>{name}</strong>;
       websiteData[status.website].key = name;
       websiteData[status.website].value = status.website;
+      (websiteData[status.website] as any).search = status.website.toLowerCase();
       (websiteData[status.website].children as any[]).push({
         key: status._id,
         value: status._id,
@@ -262,6 +263,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
             <span className="select-tree-website-tag">[{name}]</span> {status.alias}
           </span>
         ),
+        search: `${name} ${status.alias}`.toLowerCase(),
         isLeaf: true
       });
     });
@@ -787,6 +789,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                   value={this.getSelectedWebsiteIds()}
                   treeData={this.getWebsiteTreeData()}
                   onChange={this.handleWebsiteSelect}
+                  filterTreeNode={(input, node) => node.props.search.includes(input.toLowerCase())}
                   placeholder="Select websites to post to"
                 />
               </Form.Item>
