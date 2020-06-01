@@ -25,6 +25,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { NewgroundsDefaultFileOptions } from './newgrounds.defaults';
 import { NewgroundsFileOptions } from './newgrounds.interface';
+import * as cheerio from 'cheerio';
 
 @Injectable()
 export class Newgrounds extends Website {
@@ -41,8 +42,10 @@ export class Newgrounds extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(this.BASE_URL, data._id);
-    if (!res.body.includes('passport_login')) {
+    const res = await Http.get<string>(this.BASE_URL, data._id, {
+      requestOptions: { rejectUnauthorized: false },
+    });
+    if (res.body.includes('activeuser')) {
       status.loggedIn = true;
       status.username = res.body.match(/"name":"(.*?)"/)[1];
     }
@@ -61,7 +64,9 @@ export class Newgrounds extends Website {
     cancellationToken: CancellationToken,
     data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
-    const page = await Http.get<string>(`${this.BASE_URL}/account/news/post`, data.part.accountId);
+    const page = await Http.get<string>(`${this.BASE_URL}/account/news/post`, data.part.accountId, {
+      requestOptions: { rejectUnauthorized: false },
+    });
     this.verifyResponse(page);
 
     this.checkCancelled(cancellationToken);
@@ -80,7 +85,10 @@ export class Newgrounds extends Website {
           'tags[]': this.formatTags(data.tags),
           body: `<p>${data.description}</p>`,
         },
-        requestOptions: { qsStringifyOptions: { arrayFormat: 'repeat' } },
+        requestOptions: {
+          qsStringifyOptions: { arrayFormat: 'repeat' },
+          rejectUnauthorized: false,
+        },
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           Origin: 'https://www.newgrounds.com',
@@ -107,7 +115,9 @@ export class Newgrounds extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<NewgroundsFileOptions>,
   ): Promise<PostResponse> {
-    const page = await Http.get<string>(`${this.BASE_URL}/art/submit/create`, data.part.accountId);
+    const page = await Http.get<string>(`${this.BASE_URL}/art/submit/create`, data.part.accountId, {
+      requestOptions: { rejectUnauthorized: false },
+    });
     this.verifyResponse(page, 'Get page');
 
     const userkey = HtmlParserUtil.getInputValue(page.body, 'userkey');
@@ -119,7 +129,7 @@ export class Newgrounds extends Website {
       errors: string[];
     }>(`${this.BASE_URL}/parkfile`, data.part.accountId, {
       type: 'multipart',
-      requestOptions: { json: true },
+      requestOptions: { json: true, rejectUnauthorized: false },
       data: {
         userkey,
         qquuid: v1(),
@@ -200,14 +210,18 @@ export class Newgrounds extends Website {
       return (newCookies[cookieParts[0]] = cookieParts[1]);
     });
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ succes: boolean; url: string; errors: string[] }>(
+    const post = await Http.post<{ succes: boolean; url: string; errors: string[]; error: string }>(
       `${this.BASE_URL}/art/submit/create`,
       undefined,
       {
         type: 'multipart',
         data: form,
         skipCookies: true,
-        requestOptions: { json: true, qsStringifyOptions: { arrayFormat: 'repeat' } },
+        requestOptions: {
+          json: true,
+          qsStringifyOptions: { arrayFormat: 'repeat' },
+          rejectUnauthorized: false,
+        },
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           Origin: 'https://www.newgrounds.com',
@@ -226,15 +240,19 @@ export class Newgrounds extends Website {
     if (post.body.url) {
       return this.createPostResponse({ source: `https:${post.body.url}` });
     } else {
+      let message = '';
       try {
-        return Promise.reject(
-          this.createPostResponse({
-            additionalInfo: post.body,
-            message: post.body.errors.join(' '),
-          }),
-        );
-      } catch {}
-      return Promise.reject({ additionalInfo: post.body });
+        message = post.body.errors.join(' ');
+      } catch (err) {
+        console.log('1', post.body.error);
+        message = (cheerio.load(post.body.error) as any).text();
+      }
+      return Promise.reject(
+        this.createPostResponse({
+          additionalInfo: post.body,
+          message,
+        }),
+      );
     }
   }
 
