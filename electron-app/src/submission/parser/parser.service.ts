@@ -25,11 +25,9 @@ import { FilePostData, PostFileRecord } from '../post/interfaces/file-post-data.
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { HTMLFormatParser } from 'src/description-parsing/html/html.parser';
 import { SubmissionType } from '../enums/submission-type.enum';
-import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class ParserService {
-  private readonly logger = new Logger(ParserService.name);
   private websiteDescriptionShortcuts: Record<string, UsernameShortcut[]>;
 
   constructor(
@@ -248,7 +246,6 @@ export class ParserService {
     const record = this.fileRecordAsPostFileRecord(file);
     if (canScale && this.fileManipulator.canScale(file.mimetype)) {
       const scaleOptions = website.getScalingOptions(file);
-      this.logger.log(scaleOptions);
       if (scaleOptions) {
         const { buffer, mimetype } = await this.fileManipulator.scale(
           file.buffer,

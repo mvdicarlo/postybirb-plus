@@ -54,7 +54,7 @@ export class SubmissionService {
     @Inject(forwardRef(() => AccountService))
     private readonly accountService,
     private readonly websiteProvider: WebsiteProvider,
-  ) {}
+  ) { }
 
   @Interval(60000)
   async queueScheduledSubmissions() {

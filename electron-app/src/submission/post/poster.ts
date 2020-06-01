@@ -174,8 +174,8 @@ export class Poster extends EventEmitter {
         time: new Date().toLocaleString(),
       };
       if (error instanceof Error) {
-          errorMsg.stack = error.stack;
-          this.logger.error(error.stack);
+        errorMsg.stack = error.stack;
+        this.logger.error(error.stack);
         errorMsg.error = error.message;
       } else {
         Object.assign(errorMsg, error);
@@ -200,15 +200,15 @@ export class Poster extends EventEmitter {
         const res = await (this.isFilePost(data)
           ? this.website.postFileSubmission(this.cancellationToken, data as any, accountData)
           : this.website.postNotificationSubmission(
-              this.cancellationToken,
-              data as any,
-              accountData,
-            ));
+            this.cancellationToken,
+            data as any,
+            accountData,
+          ));
         this.status = 'SUCCESS';
         this.done(res);
         return;
       } catch (err) {
-          error = err;
+        error = err;
         if (this.isCancelled()) {
           totalTries = 0; // kill when cancelled
         }
@@ -222,7 +222,7 @@ export class Poster extends EventEmitter {
       const random = _.random(0, 100);
       if (random > 90) {
         setTimeout(
-          function() {
+          function () {
             resolve({ website: this.part.website });
           }.bind(this),
           _.random(8000),
