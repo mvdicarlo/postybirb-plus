@@ -8,6 +8,7 @@ export const DiscordDefaultFileOptions: DiscordFileOptions = {
   ...GenericDefaultFileOptions,
   spoiler: false,
   useTitle: true,
+  sources: [],
 };
 
 export const DiscordDefaultNotificationOptions: DiscordNotificationOptions = {

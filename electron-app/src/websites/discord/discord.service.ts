@@ -35,13 +35,14 @@ export class Discord extends Website {
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
+  readonly acceptsSourceUrls: boolean = true;
 
   readonly fileSubmissionOptions: DiscordFileOptions = DiscordDefaultFileOptions;
   readonly notificationSubmissionOptions: DiscordNotificationOptions = DiscordDefaultNotificationOptions;
   readonly defaultDescriptionParser = MarkdownParser.parse;
 
   readonly usernameShortcuts = [];
-  private maxMBPerFile = 0;
+  private maxMBPerFile = 8;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -70,7 +71,6 @@ export class Discord extends Website {
     data: PostData<Submission, DiscordNotificationOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    this.logger.log("postNotificationSubmission");
     let description = data.description.substring(0, 2000).trim();
 
     const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
@@ -120,41 +120,47 @@ export class Discord extends Website {
     data: FilePostData<DiscordFileOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    this.logger.log("postFileSubmission");
-    /*if (data.description && data.description.length) {
-        this.logger.log("Passed data.description check");
-        await this.postNotificationSubmission(
+    this.logger.log("Sources: ");
+    this.logger.log([...data.options.sources, ...data.sources]
+      .filter(s => s)
+      .slice(0, 5)
+      .join('%0A'));
+      /*await this.postNotificationSubmission(
             cancellationToken,
             data as PostData<Submission, DiscordFileOptions>,
             accountData,
-        );
-    }*/
+        );*/
 
-    let description = data.description.substring(0, 2000).trim();
+    var json = {};
 
-    const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
+    if ((data.description && data.description.length) || data.options.useTitle) {
+      let description = data.description.substring(0, 2000).trim();
 
-    var json = {
-      content: mentions.length ? mentions.join(' ') : undefined,
-      allowed_mentions: {
-        parse: ['everyone', 'users', 'roles'],
-      },
-      embeds: [
-        {
-          title: data.options.useTitle ? data.title : undefined,
-          description,
-          color: 12487374
+      const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
+
+      json = {
+        content: mentions.length ? mentions.join(' ') : undefined,
+        allowed_mentions: {
+          parse: ['everyone', 'users', 'roles'],
         },
-      ],
-    };
+        embeds: [
+          {
+            title: data.options.useTitle ? data.title : undefined,
+            description,
+            color: 12487374
+          },
+        ],
+      };
+    }
 
     // There should be an easier way to get the setting for advertise, but I'm not sure how it's set up so for now this will do.
     this.logger.log("Advertise Setting: " + this.settings.get("advertise").value());
     if (this.settings.get("advertise").value()) {
-      json["username"] = "PostyBirb";
-      json["avatar_url"] = "https://i.imgur.com/l2mt2Q7.png";
-      json.embeds[0]["footer"] = {};
-      json.embeds[0]["footer"]["text"] = "Posted using PostyBirb";
+      json['username'] = "PostyBirb";
+      json['avatar_url'] = "https://i.imgur.com/l2mt2Q7.png";
+      if (!json['embeds']) json['embeds'] = {};
+      json['embeds'][0]['footer'] = {};
+      json['embeds'][0]['footer']['text'] = "Posted using PostyBirb";
     }
     this.logger.log(JSON.stringify(json));
 

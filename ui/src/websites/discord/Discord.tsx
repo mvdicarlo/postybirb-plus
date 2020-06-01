@@ -19,7 +19,8 @@ import { SubmissionType } from '../../shared/enums/submission-type.enum';
 const defaultOptions: DiscordFileOptions = {
   ...GenericDefaultFileOptions,
   spoiler: false,
-  useTitle: true
+  useTitle: true,
+  sources: []
 };
 
 const defaultNotificationOptions: DiscordNotificationOptions = {
