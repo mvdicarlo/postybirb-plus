@@ -153,8 +153,10 @@ export class Discord extends Website {
     if (this.settings.get("advertise").value()) {
       json["username"] = "PostyBirb";
       json["avatar_url"] = "https://i.imgur.com/l2mt2Q7.png";
-      json.embeds[0]["footer"] = "Posted using PostyBirb";
+      json.embeds[0]["footer"] = {};
+      json.embeds[0]["footer"]["text"] = "Posted using PostyBirb";
     }
+    this.logger.log(JSON.stringify(json));
 
     let error = null;
     const files = [data.primary, ...data.additional];
