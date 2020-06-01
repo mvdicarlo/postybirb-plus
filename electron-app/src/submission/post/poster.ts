@@ -17,6 +17,7 @@ import { ParserService } from '../parser/parser.service';
 import { FilePostData } from './interfaces/file-post-data.interface';
 import { CancellationToken } from './cancellation/cancellation-token';
 import { CancellationException } from './cancellation/cancellation.exception';
+import { Injectable, Logger } from '@nestjs/common';
 
 export interface Poster {
   on(
@@ -89,6 +90,7 @@ export interface Poster {
 }
 
 export class Poster extends EventEmitter {
+  private readonly logger = new Logger(Poster.name);
   isPosting: boolean = false;
   isReady: boolean = false;
   isDone: boolean = false;
@@ -172,7 +174,8 @@ export class Poster extends EventEmitter {
         time: new Date().toLocaleString(),
       };
       if (error instanceof Error) {
-        errorMsg.stack = error.stack;
+          errorMsg.stack = error.stack;
+          this.logger.error(error.stack);
         errorMsg.error = error.message;
       } else {
         Object.assign(errorMsg, error);
@@ -205,7 +208,7 @@ export class Poster extends EventEmitter {
         this.done(res);
         return;
       } catch (err) {
-        error = err;
+          error = err;
         if (this.isCancelled()) {
           totalTries = 0; // kill when cancelled
         }
