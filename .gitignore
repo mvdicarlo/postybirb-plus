@@ -61,3 +61,4 @@ typings/
 .next
 /.vs
 /package-lock.json
+/testrun.bat

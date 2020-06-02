@@ -126,10 +126,6 @@ export class Discord extends Website {
     data: FilePostData<DiscordFileOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    /*
-      .filter(s => s)
-      .slice(0, 5)
-      .join('%0A'));*/
       /*await this.postNotificationSubmission(
             cancellationToken,
             data as PostData<Submission, DiscordFileOptions>,
@@ -214,7 +210,6 @@ export class Discord extends Website {
     }
 
     if (error) {
-      this.logger.log(error);
       return Promise.reject(error);
     }
 
