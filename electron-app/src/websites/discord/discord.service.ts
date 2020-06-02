@@ -94,8 +94,7 @@ export class Discord extends Website {
         },
       ],
     };
-
-    this.logger.log("Advertise Setting: " + this.settings.get("advertise").value());
+    
     if (this.settings.get("advertise").value()) {
       json["username"] = "PostyBirb";
       json["avatar_url"] = "https://i.imgur.com/l2mt2Q7.png";
@@ -127,14 +126,10 @@ export class Discord extends Website {
     data: FilePostData<DiscordFileOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    this.logger.log("Options Sources: ");
-    this.logger.log(data.options.sources);
     /*
       .filter(s => s)
       .slice(0, 5)
       .join('%0A'));*/
-    this.logger.log("Data Sources: ");
-    this.logger.log(data.sources); // Use This
       /*await this.postNotificationSubmission(
             cancellationToken,
             data as PostData<Submission, DiscordFileOptions>,
@@ -153,7 +148,6 @@ export class Discord extends Website {
       let description = data.description.substring(0, 2000).trim();
 
       const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
-      this.logger.log(sourceLinks);
 
       json = {
         content: sourceLinks + (mentions.length ? mentions.join(' ') : ''),
@@ -176,7 +170,6 @@ export class Discord extends Website {
     }
 
     // There should be an easier way to get the setting for advertise, but I'm not sure how it's set up so for now this will do.
-    this.logger.log("Advertise Setting: " + this.settings.get("advertise").value());
     if (this.settings.get("advertise").value()) {
       json['username'] = "PostyBirb";
       json['avatar_url'] = "https://i.imgur.com/l2mt2Q7.png";
@@ -184,7 +177,6 @@ export class Discord extends Website {
       json['embeds'][0]['footer'] = {};
       json['embeds'][0]['footer']['text'] = "Posted using PostyBirb";
     }
-    this.logger.log(JSON.stringify(json));
 
     let error = null;
     const files = [data.primary, ...data.additional];
