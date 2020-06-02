@@ -6,9 +6,11 @@ import {
 export interface DiscordFileOptions extends DefaultFileOptions {
   spoiler: boolean;
   useTitle: boolean;
+  embedColor: number;
   sources: string[];
 }
 
 export interface DiscordNotificationOptions extends DefaultOptions {
   useTitle: boolean;
+  embedColor: number;
 }

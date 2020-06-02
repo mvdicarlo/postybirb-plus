@@ -7,6 +7,7 @@ import BrowserLink from '../../components/BrowserLink';
 interface State {
   name: string;
   webhook: string;
+  embedColor: number;
   sending: boolean;
 }
 
@@ -14,6 +15,7 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
   state: State = {
     name: '',
     webhook: '',
+    embedColor: 0,
     sending: false
   };
 
@@ -29,7 +31,9 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
     this.setState({ sending: true });
     LoginService.setAccountData(this.props.account._id, {
       name: this.state.name,
-      webhook: this.state.webhook
+      webhook: this.state.webhook,
+      embedColor: this.state.embedColor,
+
     })
       .then(() => {
         message.success('Discord updated.');
@@ -66,6 +70,28 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
               className="w-full"
               defaultValue={this.state.webhook}
               onBlur={({ target }) => this.setState({ webhook: target.value })}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Default Embed Color Hex"
+          >
+            <Input
+              className="w-full"
+              defaultValue={this.state.embedColor.toString(16).padStart(6, "0")}
+              onBlur={({ target }) => {
+                if (/^#?[0-9A-F]{6}$/i.test(target.value) && parseInt(target.value, 16)) {
+                  this.setState({ embedColor: parseInt(target.value, 16) });
+                }
+                else {
+                  if (parseInt(target.value) === 0) {
+                    this.setState({ embedColor: 0 });
+                  }
+                  else {
+                    this.setState({ embedColor: this.state.embedColor });
+                    message.error("Embed Color Invalid.");
+                  }
+                }
+              }}
             />
           </Form.Item>
           <Form.Item>

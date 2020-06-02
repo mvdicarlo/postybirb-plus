@@ -84,6 +84,7 @@ export class Discord extends Website {
         {
           title: data.options.useTitle ? data.title : undefined,
           description,
+          color: data.options.embedColor || accountData.embedColor
         },
       ],
     };
@@ -147,7 +148,7 @@ export class Discord extends Website {
           {
             title: data.options.useTitle ? data.title : undefined,
             description,
-            color: 12487374
+            color: data.options.embedColor || accountData.embedColor
           },
         ],
       };
