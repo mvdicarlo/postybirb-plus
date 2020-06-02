@@ -82,14 +82,15 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
                 if (/^#?[0-9A-F]{6}$/i.test(target.value) && parseInt(target.value, 16)) {
                   this.setState({ embedColor: parseInt(target.value, 16) });
                 }
+                else if (parseInt(target.value) === 0) {
+                  this.setState({ embedColor: 0 });
+                }
+                else if (target.value === '') {
+                  this.setState({ embedColor: 0 });
+                }
                 else {
-                  if (parseInt(target.value) === 0) {
-                    this.setState({ embedColor: 0 });
-                  }
-                  else {
-                    this.setState({ embedColor: this.state.embedColor });
-                    message.error("Embed Color Invalid.");
-                  }
+                  this.setState({ embedColor: this.state.embedColor });
+                  message.error("Embed Color Invalid.");
                 }
               }}
             />

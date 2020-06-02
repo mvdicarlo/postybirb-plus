@@ -108,25 +108,24 @@ export class DiscordFileSubmissionForm extends GenericFileSubmissionSection<Disc
       <div>
         <Form.Item label="Embed Color Hex">
           <Input
-            defaultValue={data.embedColor.toString(16).padStart(6, "0")}
+            defaultValue={data.embedColor ? data.embedColor.toString(16).padStart(6, "0") : ''}
             onChange={(e) => {
             if (/^#?[0-9A-F]{6}$/i.test(e.target.value) && parseInt(e.target.value, 16)) {
               this.setValue('embedColor', parseInt(e.target.value, 16));
+              // Using html because I don't know antd, and couldn't figure out in their documentation how to dynamically change a label of a form.item, sorry.
+              document.getElementById('hexConfirmationText')!.innerHTML = '<b><font color="#00FF00">Valid Hex</font></b>';
+            }
+            else if (e.target.value === "000000") {
+              this.setValue('embedColor', 0);
               document.getElementById('hexConfirmationText')!.innerHTML = '<b><font color="#00FF00">Valid Hex</font></b>';
             }
             else {
-              if (e.target.value === "000000") {
-                this.setValue('embedColor', 0);
-                document.getElementById('hexConfirmationText')!.innerHTML = '<b><font color="#00FF00">Valid Hex</font></b>';
+              this.setValue('embedColor', '');
+              if (e.target.value !== '') {
+                document.getElementById('hexConfirmationText')!.innerHTML = '<b><font color="#FF0000">Invalid Hex</font></b>';
               }
               else {
-                this.setValue('embedColor', '');
-                if (e.target.value !== '') {
-                  document.getElementById('hexConfirmationText')!.innerHTML = '<b><font color="#FF0000">Invalid Hex</font></b>';
-                }
-                else {
-                  document.getElementById('hexConfirmationText')!.innerHTML = '<p></p>';
-                }
+                document.getElementById('hexConfirmationText')!.innerHTML = '<p></p>';
               }
             }
           }} />

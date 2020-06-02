@@ -121,11 +121,14 @@ export class Discord extends Website {
     data: FilePostData<DiscordFileOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    this.logger.log("Sources: ");
-    this.logger.log([...data.options.sources, ...data.sources]
+    this.logger.log("Options Sources: ");
+    this.logger.log(data.options.sources);
+    /*
       .filter(s => s)
       .slice(0, 5)
-      .join('%0A'));
+      .join('%0A'));*/
+    this.logger.log("Data Sources: ");
+    this.logger.log(data.sources);
       /*await this.postNotificationSubmission(
             cancellationToken,
             data as PostData<Submission, DiscordFileOptions>,
