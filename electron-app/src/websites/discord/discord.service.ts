@@ -75,8 +75,14 @@ export class Discord extends Website {
 
     const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
+    var sourceLinks = "";
+    for (var url of data.sources) {
+      sourceLinks += this.transformSourceLink(url) + " ";
+    }
+    sourceLinks += "\r\n";
+
     const json = {
-      content: mentions.length ? mentions.join(' ') : undefined,
+      content: sourceLinks + (mentions.length ? mentions.join(' ') : ''),
       allowed_mentions: {
         parse: ['everyone', 'users', 'roles'],
       },
@@ -128,12 +134,18 @@ export class Discord extends Website {
       .slice(0, 5)
       .join('%0A'));*/
     this.logger.log("Data Sources: ");
-    this.logger.log(data.sources);
+    this.logger.log(data.sources); // Use This
       /*await this.postNotificationSubmission(
             cancellationToken,
             data as PostData<Submission, DiscordFileOptions>,
             accountData,
         );*/
+
+    var sourceLinks = "";
+    for (var url of data.sources) {
+      sourceLinks += this.transformSourceLink(url) + " ";
+    }
+    sourceLinks += "\r\n";
 
     var json = {};
 
@@ -141,9 +153,10 @@ export class Discord extends Website {
       let description = data.description.substring(0, 2000).trim();
 
       const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
+      this.logger.log(sourceLinks);
 
       json = {
-        content: mentions.length ? mentions.join(' ') : undefined,
+        content: sourceLinks + (mentions.length ? mentions.join(' ') : ''),
         allowed_mentions: {
           parse: ['everyone', 'users', 'roles'],
         },
@@ -155,6 +168,11 @@ export class Discord extends Website {
           },
         ],
       };
+    }
+    else {
+      json = {
+        content: sourceLinks
+      }
     }
 
     // There should be an easier way to get the setting for advertise, but I'm not sure how it's set up so for now this will do.
@@ -209,6 +227,76 @@ export class Discord extends Website {
     }
 
     return this.createPostResponse({});
+  }
+
+  transformSourceLink(rawUrl: string) {
+    let url = new URL(rawUrl);
+
+    // Wanted to use a switch statement here, but would like to use includes, so going to use if else statements even though they look nasty
+    if (url.hostname.includes("furaffinity")) {
+      return "[[FurAffinity]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("aryion")) {
+      return "[[Aryion]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("deviantart")) {
+      return "[[DeviantArt]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("furiffic")) {
+      return "[[Furiffic]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("furrynetwork")) {
+      return "[[Furry Network]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("furrylife")) {
+      return "[[FurryLife]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("hentai-foundry")) {
+      return "[[Hentai Foundry]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("inkbunny")) {
+      return "[[Inkbunny]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("ko-fi")) {
+      return "[[Ko-fi]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("newgrounds")) {
+      return "[[Newgrounds]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("newtumbl")) {
+      return "[[newTumbl]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("patreon")) {
+      return "[[Patreon]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("piczel")) {
+      return "[[Piczel]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("pixiv")) {
+      return "[[Pixiv]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("route50")) {
+      return "[[Route 50]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("sofurry")) {
+      return "[[SoFurry]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("subscribestar")) {
+      return "[[SubscribeStar]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("tumblr")) {
+      return "[[Tumblr]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("twitter")) {
+      return "[[Twitter]](" + rawUrl + ")";
+    }
+    else if (url.hostname.includes("weasyl")) {
+      return "[[Weasyl]](" + rawUrl + ")";
+    }
+    else {
+      return "[[Link]](" + rawUrl + ")";
+    }
+    // What a mess ^
   }
 
   transformAccountData(data: DiscordAccountData) {
