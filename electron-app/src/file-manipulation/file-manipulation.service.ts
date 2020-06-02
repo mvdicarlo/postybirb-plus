@@ -60,10 +60,18 @@ export class FileManipulationService {
       }
     }
 
-    this.logger.debug(
-      `File scaled from ${buffer.length / 1048576}MB -> ${newBuffer.length / 1048576}MB`,
-    );
-    this.logger.debug(`File MIME changed from ${mimeType} -> ${newMimeType}`);
+    if (buffer.length !== newBuffer.length) {
+      this.logger.log(
+        `File scaled from ${(buffer.length / 1048576).toFixed(2)}MB -> ${(
+          newBuffer.length / 1048576
+        ).toFixed(2)}MB`,
+      );
+    }
+
+    if (mimeType !== newMimeType) {
+      this.logger.debug(`File MIME changed from ${mimeType} -> ${newMimeType}`);
+    }
+
     return { buffer: newBuffer, mimetype: newMimeType };
   }
 
@@ -99,10 +107,12 @@ export class FileManipulationService {
     for (const scale of scaleSteps) {
       const scaled = await im.scale(scale).getData();
       if (scaled.buffer.length <= targetSize) {
+        this.logger.log(`File Compressed successfully at ${scale} scale`, 'PNG COMPRESSION');
         return scaled.buffer;
       }
     }
 
+    this.logger.log(`File Compressed successfully at ${lastStep} scale`, 'PNG COMPRESSION');
     return lastScaled.buffer;
   }
 
@@ -123,24 +133,44 @@ export class FileManipulationService {
     const lastScaled = await im.scale(lastStep).getData(); // check end first to see if we should calculate anything between
     if (lastScaled.buffer.length <= targetSize) {
       if (lastScaled.buffer.length === targetSize) {
+        this.logger.log(
+          `File Compressed successfully at ${lastStep} scale`,
+          'JPEG SCALE COMPRESSION',
+        );
         return lastScaled.buffer;
       }
       for (const scale of scaleSteps.slice(0, -1)) {
         const scaled = await im.scale(scale).getData();
         if (scaled.buffer.length <= targetSize) {
+          this.logger.log(
+            `File Compressed successfully at ${scale} scale`,
+            'JPEG SCALE COMPRESSION',
+          );
           return scaled.buffer;
         }
       }
+
+      this.logger.log(
+        `File Compressed successfully at ${lastStep} scale`,
+        'JPEG SCALE COMPRESSION',
+      );
       return lastScaled.buffer;
     }
 
-    const qualitySteps = [99, ...this.getSteps(maxQualityReduction, 2).map(step => (1 - step / 100) * 100)];
+    const qualitySteps = [
+      99,
+      ...this.getSteps(maxQualityReduction, 2).map(step => (1 - step / 100) * 100),
+    ];
     // Attempt combo of quality + size (which is probably pretty slow)
     for (const scale of scaleSteps) {
       for (const quality of qualitySteps) {
         im.toJPEG(quality).scale(scale);
         const scaled = await im.getData();
         if (scaled.buffer.length <= targetSize) {
+          this.logger.log(
+            `File Compressed successfully at ${quality}% quality and ${scale} scale`,
+            'JPEG SCALE AND QUALITY COMPRESSION',
+          );
           return scaled.buffer;
         }
       }

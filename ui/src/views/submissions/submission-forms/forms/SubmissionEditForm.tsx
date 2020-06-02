@@ -254,10 +254,16 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       websiteData[status.website].title = <strong>{name}</strong>;
       websiteData[status.website].key = name;
       websiteData[status.website].value = status.website;
+      (websiteData[status.website] as any).search = status.website.toLowerCase();
       (websiteData[status.website].children as any[]).push({
         key: status._id,
         value: status._id,
-        title: `${name}: ${status.alias}`,
+        title: (
+          <span>
+            <span className="select-tree-website-tag">[{name}]</span> {status.alias}
+          </span>
+        ),
+        search: `${name} ${status.alias}`.toLowerCase(),
         isLeaf: true
       });
     });
@@ -267,15 +273,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   }
 
   getSelectedWebsiteIds(): string[] {
-    return _.sortBy(
-      [
-        ...Object.values(this.state.parts)
-          .filter(p => !p.isDefault)
-          .filter(p => !this.state.removedParts.includes(p.accountId))
-          .map(p => p.accountId)
-      ],
-      'title'
-    );
+    return Object.values(this.state.parts)
+      .filter(p => !p.isDefault)
+      .filter(p => !this.state.removedParts.includes(p.accountId))
+      .sort((a, b) => a.website.localeCompare(b.website))
+      .map(p => p.accountId);
   }
 
   getSelectedWebsiteParts(): Array<SubmissionPart<any>> {
@@ -787,6 +789,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                   value={this.getSelectedWebsiteIds()}
                   treeData={this.getWebsiteTreeData()}
                   onChange={this.handleWebsiteSelect}
+                  filterTreeNode={(input, node) => node.props.search.includes(input.toLowerCase())}
                   placeholder="Select websites to post to"
                 />
               </Form.Item>

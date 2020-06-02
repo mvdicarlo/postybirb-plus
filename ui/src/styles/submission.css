@@ -63,3 +63,7 @@
   flex: 0.5;
   margin: 0;
 }
+
+.ant-select-tree-title .select-tree-website-tag {
+  display: none;
+}
