@@ -75,6 +75,9 @@ export class Discord extends Website {
 
     const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
+    // Strip BBCode from description
+    description = description.replace(/\\\[\/?(?:b|i|u|url|quote|code|img|color|size)*?.*?\\\]/img, '');
+
     var sourceLinks = "";
     for (var url of data.sources) {
       sourceLinks += this.transformSourceLink(url) + " ";
