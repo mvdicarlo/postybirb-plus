@@ -75,8 +75,7 @@ export class Discord extends Website {
 
     const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
-    // Strip BBCode from description
-    description = description.replace(/\\?\[\/?(\s*?)(b|s|u|i|code|url|quote|sup|sub|color|left|right|center)(.*?)(\s*?\\?\])/img, '');
+    description = this.formatDescription(description);
 
     var sourceLinks = "";
     for (var url of data.sources) {
@@ -148,8 +147,7 @@ export class Discord extends Website {
 
       const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
-      // Strip BBCode from description
-      description = description.replace(/\\?\[\/?(\s*?)(b|s|u|i|code|url|quote|sup|sub|color|left|right|center)(.*?)(\s*?\\?\])/img, '');
+      description = this.formatDescription(description);
 
       json = {
         content: sourceLinks + (mentions.length ? mentions.join(' ') : ''),
@@ -290,6 +288,26 @@ export class Discord extends Website {
       return "[[Link]](" + rawUrl + ")";
     }
     // What a mess ^
+  }
+
+  formatDescription(description: string) {
+    // Replace URLs in description with Discord formatting
+    description = description.replace(/\\?\[\/?(?:\s*?)url="?(.*?)(?:(?:\s|")*?\\?\])(.*?)\\?\[\/\s*url\s*\\?\]/img, "[$2]($1)");
+    // Replace bold text in description
+    description = description.replace(/\\?\[\/?(?:\s*?)b?(?:(?:\s|")*?\\?\])(.*?)\\?\[\/\s*b\s*\\?\]/img, "**$1**");
+    // Replace italic text in description
+    description = description.replace(/\\?\[\/?(?:\s*?)i?(?:(?:\s|")*?\\?\])(.*?)\\?\[\/\s*i\s*\\?\]/img, "*$1*");
+    // Replace strikethrough text
+    description = description.replace(/\\?\[\/?(?:\s*?)s?(?:(?:\s|")*?\\?\])(.*?)\\?\[\/\s*s\s*\\?\]/img, "~~$1~~");
+    // Replace underline text
+    description = description.replace(/\\?\[\/?(?:\s*?)u?(?:(?:\s|")*?\\?\])(.*?)\\?\[\/\s*u\s*\\?\]/img, "__$1__");
+    // Replace code block
+    description = description.replace(/\\?\[\/?(?:\s*?)code?(?:(?:\s|")*?\\?\])(.*?)\\?\[\/\s*code\s*\\?\]/img, "```\r\n$1\r\n```");
+
+    // Strip BBCode from description
+    description = description.replace(/\\?\[\/?(?:\s*?)(?:b|s|u|i|code|url|quote|sup|sub|color|left|right|center)(?:.*?)(?:\s*?\\?\])/img, '');
+
+    return description;
   }
 
   transformAccountData(data: DiscordAccountData) {
