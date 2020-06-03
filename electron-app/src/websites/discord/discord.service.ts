@@ -76,7 +76,7 @@ export class Discord extends Website {
     const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
     // Strip BBCode from description
-    description = description.replace(/\\\[\/?(?:b|i|u|url|quote|code|img|color|size)*?.*?\\\]/img, '');
+    description = description.replace(/\\?\[\/?(\s*?)(b|s|u|i|code|url|quote|sup|sub|color|left|right|center)(.*?)(\s*?\\?\])/img, '');
 
     var sourceLinks = "";
     for (var url of data.sources) {
@@ -149,7 +149,7 @@ export class Discord extends Website {
       const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
       // Strip BBCode from description
-      description = description.replace(/\\\[\/?(?:b|i|u|url|quote|code|img|color|size)*?.*?\\\]/img, '');
+      description = description.replace(/\\?\[\/?(\s*?)(b|s|u|i|code|url|quote|sup|sub|color|left|right|center)(.*?)(\s*?\\?\])/img, '');
 
       json = {
         content: sourceLinks + (mentions.length ? mentions.join(' ') : ''),
