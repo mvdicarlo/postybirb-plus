@@ -19,7 +19,7 @@ import { Submission } from 'src/submission/interfaces/submission.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
 import HtmlParserUtil from 'src/utils/html-parser.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
-import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
+import { FilePostData, PostFile } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/submission/post/interfaces/post-data.interface';
 import * as FormData from 'form-data';
 import BrowserWindowUtil from 'src/utils/browser-window.util';
@@ -27,6 +27,7 @@ import BrowserWindowUtil from 'src/utils/browser-window.util';
 @Injectable()
 export class Pillowfort extends Website {
   readonly BASE_URL = 'https://www.pillowfort.social';
+  readonly acceptsAdditionalFiles = true;
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
   readonly fileSubmissionOptions = PillowfortDefaultFileOptions;
   readonly notificationSubmissionOptions = PillowfortDefaultNotificationOptions;
@@ -56,55 +57,87 @@ export class Pillowfort extends Website {
     return undefined;
   }
 
+  private async uploadImage(
+    photo: PostFile,
+    profileId: string,
+    auth: string,
+  ): Promise<{ full_image: string; small_image: string }> {
+    const upload = await Http.post<any>(`${this.BASE_URL}/image_upload`, profileId, {
+      type: 'multipart',
+      data: {
+        file_name: photo.options.filename,
+        photo,
+      },
+      requestOptions: { json: true },
+      headers: {
+        'X-CSRF-Token': auth,
+      },
+    });
+
+    this.verifyResponse(upload, 'Image upload verify');
+    return upload.body;
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<PillowfortFileOptions>,
   ): Promise<PostResponse> {
-    return null;
-    // const url = `${this.BASE_URL}/upload/details?contentType=${this.getSubmissionType(
-    //   data.primary.type,
-    // )}`;
-    // const page = await Http.get<string>(url, data.part.accountId);
-    // this.verifyResponse(page, 'Get form page');
+    const page = await Http.get<string>(`${this.BASE_URL}/posts/new`, data.part.accountId);
+    this.verifyResponse(page, 'Get form page');
 
-    // const form: any = {
-    //   YII_CSRF_TOKEN: HtmlParserUtil.getInputValue(page.body, 'YII_CSRF_TOKEN'),
-    //   'UploadForm[binarycontent_5]': data.thumbnail || '',
-    //   'UploadForm[P_title]': data.title,
-    //   'UploadForm[description]': data.description.replace(/<\/div>(\n|\r)/g, '</div>'),
-    //   'UploadForm[formtags]': this.formatTags(data.tags),
-    //   'UploadForm[contentLevel]': this.getRating(data.rating),
-    //   'UploadForm[P_hidePublic]': '0',
-    //   'UploadForm[folderId]': data.options.folder || '0',
-    // };
+    const form: any = {
+      authenticity_token: HtmlParserUtil.getInputValue(page.body, 'authenticity_token'),
+      utf8: '✓',
+      post_to: 'current_user',
+      post_type: 'picture',
+      title: data.title,
+      content: `<p>${data.description}</p>`,
+      privacy: data.options.privacy,
+      tags: this.formatTags(data.tags),
+      commit: 'Submit',
+    };
 
-    // if (data.primary.type === FileSubmissionType.TEXT) {
-    //   form['UploadForm[textcontent]'] = data.primary.file.value;
-    //   if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
-    //     form['UploadForm[textcontent]'] = data.fallback.value;
-    //   }
-    //   if (data.options.thumbnailAsCoverArt) {
-    //     form['UploadForm[binarycontent_25]'] = data.thumbnail || '';
-    //   }
-    // } else {
-    //   form['UploadForm[binarycontent]'] = data.primary.file;
-    // }
+    if (data.options.allowReblogging) {
+      form.rebloggable = 'on';
+    }
+    if (!data.options.allowComments) {
+      form.commentable = 'on';
+    }
+    if (data.rating !== SubmissionRating.GENERAL) {
+      form.nsfw = 'on';
+    }
 
-    // this.checkCancelled(cancellationToken);
-    // const post = await Http.post<string>(url, data.part.accountId, {
-    //   type: 'multipart',
-    //   data: form,
-    //   headers: {
-    //     referer: url,
-    //   },
-    // });
+    const uploads = await Promise.all(
+      [data.primary, ...data.additional]
+        .map(f => f.file)
+        .map(f => this.uploadImage(f, data.part.accountId, form.authenticity_token)),
+    );
 
-    // this.verifyResponse(post, 'Verify posted');
-    // if (post.body.includes('edit')) {
-    //   return this.createPostResponse({ source: post.returnUrl });
-    // }
+    this.checkCancelled(cancellationToken);
+    const post = await Http.post<string>(`${this.BASE_URL}/posts/create`, data.part.accountId, {
+      type: 'function',
+      data: (fd: FormData) => {
+        Object.entries(form).forEach(([key, value]) => {
+          fd.append(key, value);
+        });
 
-    // return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
+        uploads.forEach((upload, i) => {
+          fd.append('picture[][pic_url]', upload.full_image);
+          fd.append('picture[][small_image_url]', upload.small_image);
+          fd.append('picture[][b2_lg_url]', '');
+          fd.append('picture[][b2_sm_url]', '');
+          fd.append('picture[][row]', `${i + 1}`);
+          fd.append('picture[][col]', '0');
+        });
+      },
+    });
+
+    this.verifyResponse(post, 'Verify post success');
+    if (post.response.statusCode === 200) {
+      return this.createPostResponse({});
+    }
+
+    return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
   }
 
   async postNotificationSubmission(

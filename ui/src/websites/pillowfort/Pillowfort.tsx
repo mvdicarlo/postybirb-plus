@@ -41,7 +41,7 @@ const privacyOptions = {
 export class Pillowfort implements Website {
   internalName: string = 'Pillowfort';
   name: string = 'Pillowfort';
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="https://www.pillowfort.social/users/sign_in" {...props} />
