@@ -24,6 +24,7 @@ import { Tumblr } from './tumblr/Tumblr';
 import { DeviantArt } from './deviant-art/DeviantArt';
 import { Mastodon } from './mastodon/Mastodon';
 import { Twitter } from './twitter/Twitter';
+import { Pillowfort } from './pillowfort/Pillowfort';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -44,6 +45,7 @@ export class WebsiteRegistry {
     Newgrounds: new Newgrounds(),
     Patreon: new Patreon(),
     Piczel: new Piczel(),
+    Pillowfort: new Pillowfort(),
     Pixiv: new Pixiv(),
     Route50: new Route50(),
     SoFurry: new SoFurry(),

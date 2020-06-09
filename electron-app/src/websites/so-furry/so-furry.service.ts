@@ -32,7 +32,7 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 @Injectable()
 export class SoFurry extends Website {
   readonly BASE_URL: string = 'https://www.sofurry.com';
-  readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3'];
+  readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3', 'mp4'];
 
   readonly fileSubmissionOptions: SoFurryFileOptions = SoFurryDefaultFileOptions;
 
