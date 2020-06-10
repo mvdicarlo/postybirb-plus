@@ -49,10 +49,10 @@ export default class DescriptionInput extends React.Component<Props, State> {
       'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3;Header 4=h4;Header 5=h5;Header 6=h6',
     content_style: 'p {margin: 0}',
     height: 200,
-    plugins: 'autoresize autolink link preview paste hr template help code',
+    plugins: 'autoresize autolink link preview paste hr template help code lists',
     menubar: 'file edit insert view tools help',
     toolbar:
-      'newdocument undo redo | formatselect removeformat | link unlink hr | bold italic underline strikethrough forecolor | alignleft aligncenter alignright | code template help',
+      'newdocument undo redo | formatselect removeformat | link unlink hr | bold italic underline strikethrough forecolor | alignleft aligncenter alignright | bullist | code template help',
     templates: [],
     formats: {
       underline: { inline: 'u', exact: true },

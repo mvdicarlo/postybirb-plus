@@ -13,7 +13,7 @@ interface GetOptions {
 
 interface PostOptions extends GetOptions {
   data?: any;
-  type?: 'form' | 'multipart' | 'json';
+  type?: 'form' | 'multipart' | 'json' | 'function';
 }
 
 export interface HttpResponse<T> {
@@ -175,12 +175,14 @@ export default class Http {
       opts.formData = options.data;
     } else if (options.type === 'form') {
       opts.form = options.data;
+    } else if (options.type === 'function') {
+      // Do nothing here
     } else {
       opts.body = options.data;
     }
 
     return new Promise(resolve => {
-      Http.Request[type](uri, opts, (error, response, body) => {
+      const request = Http.Request[type](uri, opts, (error, response, body) => {
         const res: HttpResponse<T> = {
           error,
           response,
@@ -189,6 +191,10 @@ export default class Http {
         };
         resolve(res);
       });
+
+      if (options.type === 'function' && options.data) {
+        options.data(request.form());
+      }
     });
   }
 }

@@ -59,7 +59,7 @@ export class Custom extends Website {
       case 'bbcode':
         return BBCodeParser.parse;
       case 'html':
-        return HtmlParser.parse;
+        return undefined;
       case 'md':
         return MarkdownParser.parse;
       case 'text':
