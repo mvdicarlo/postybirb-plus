@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { LoginStatusStore } from '../../../../stores/login-status.store';
-import { Modal, Button, Form, TreeSelect } from 'antd';
+import { Modal, Button, Form, TreeSelect, Checkbox } from 'antd';
 import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
@@ -19,6 +19,7 @@ interface Props {
 }
 
 interface State {
+  keepTemplateTitle: boolean;
   modalOpen: boolean;
   selected?: { [key: string]: SubmissionPart<any> };
   selectedFields: string[];
@@ -28,13 +29,19 @@ interface State {
 @observer
 export default class ImportDataSelect extends React.Component<Props, State> {
   state: State = {
+    keepTemplateTitle: false,
     modalOpen: false,
     selected: undefined,
     selectedFields: []
   };
 
   hideModal = () => {
-    this.setState({ modalOpen: false, selected: undefined, selectedFields: [] });
+    this.setState({
+      modalOpen: false,
+      selected: undefined,
+      selectedFields: [],
+      keepTemplateTitle: false
+    });
   };
 
   showModal = () => this.setState({ modalOpen: true });
@@ -42,9 +49,14 @@ export default class ImportDataSelect extends React.Component<Props, State> {
   handleComplete = () => {
     this.props.onPropsSelect(
       _.cloneDeep(
-        Object.values(this.state.selected!).filter(p =>
-          this.state.selectedFields.includes(p.accountId)
-        )
+        Object.values(this.state.selected!)
+          .filter(p => this.state.selectedFields.includes(p.accountId))
+          .map(p => {
+            if (!this.state.keepTemplateTitle) {
+              delete p.data.title;
+            }
+            return p;
+          })
       )
     );
     this.hideModal();
@@ -118,6 +130,16 @@ export default class ImportDataSelect extends React.Component<Props, State> {
                 value={this.state.selectedFields}
               />
             </Form.Item>
+            {this.state.selected ? (
+              <Form.Item>
+                <Checkbox
+                  value={this.state.keepTemplateTitle}
+                  onChange={e => this.setState({ keepTemplateTitle: e.target.checked })}
+                >
+                  Use title from import
+                </Checkbox>
+              </Form.Item>
+            ) : null}
           </Form>
         </Modal>
       </div>
