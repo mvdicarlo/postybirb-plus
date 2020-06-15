@@ -34,6 +34,7 @@ import {
   Tabs,
   message
 } from 'antd';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const { Content, Sider } = Layout;
 
@@ -385,21 +386,26 @@ export default class AppLayout extends React.Component<Props, State> {
             </div>
             <Content className="container primary-layout-container">
               <div className="px-3 h-full overflow-y-auto bg-inherit" id="primary-container">
-                <Route exact path="/" component={Home} />
-                <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
-                <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
-                <Route path={'/submission-templates'} component={SubmissionTemplates} />
-                <Route path="/edit/submission/:type/:id" component={SubmissionEditForm} />
-                <Route path="/edit/multiple-submissions/:id" component={MultiSubmissionEditForm} />
-                <Route
-                  path="/edit/submission-template/:id"
-                  component={SubmissionTemplateEditForm}
-                />
-                <BackTop target={() => document.getElementById('primary-container') || window} />
-                <Prompt
-                  when={this.props.uiStore!.state.hasPendingChanges}
-                  message="Are you sure you want to navigate? Any unsaved changes will be lost."
-                />
+                <ErrorBoundary>
+                  <Route exact path="/" component={Home} />
+                  <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
+                  <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
+                  <Route path={'/submission-templates'} component={SubmissionTemplates} />
+                  <Route path="/edit/submission/:type/:id" component={SubmissionEditForm} />
+                  <Route
+                    path="/edit/multiple-submissions/:id"
+                    component={MultiSubmissionEditForm}
+                  />
+                  <Route
+                    path="/edit/submission-template/:id"
+                    component={SubmissionTemplateEditForm}
+                  />
+                  <BackTop target={() => document.getElementById('primary-container') || window} />
+                  <Prompt
+                    when={this.props.uiStore!.state.hasPendingChanges}
+                    message="Are you sure you want to navigate? Any unsaved changes will be lost."
+                  />
+                </ErrorBoundary>
               </div>
             </Content>
           </Layout>

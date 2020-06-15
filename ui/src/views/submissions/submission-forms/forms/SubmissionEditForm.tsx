@@ -61,7 +61,6 @@ export interface SubmissionEditFormState {
   submission?: Submission;
   submissionType: SubmissionType;
   touched: boolean;
-  hasError: boolean;
   showThumbnailCropper: boolean;
   thumbnailFileForCrop?: File;
   imageCropperResolve?: (file: File) => void;
@@ -88,7 +87,6 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   };
 
   state: SubmissionEditFormState = {
-    hasError: false,
     loading: true,
     parts: {},
     postAt: undefined,
@@ -530,28 +528,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     });
   }
 
-  static getDerivedStateFromError(error: Error) {
-    console.error(error);
-    alert(`${error.message}\n\n${error.stack}`);
-    return { hasError: true };
-  }
-
   isFileSubmission(submission: Submission): submission is FileSubmission {
     return submission.type === SubmissionType.FILE;
   }
 
   render() {
-    if (this.state.hasError) {
-      return (
-        <div>
-          <Alert
-            type="error"
-            message="An error has occured and the submission is unreadable."
-          ></Alert>
-        </div>
-      );
-    }
-
     if (!this.state.loading) {
       this.removeDeletedAccountParts();
       uiStore.setPendingChanges(this.formHasChanges());

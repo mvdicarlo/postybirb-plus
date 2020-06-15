@@ -16,17 +16,7 @@ import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
 import { SubmissionTemplate } from '../../../../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
 import SubmissionTemplateService from '../../../../services/submission-template.service';
 import { DefaultOptions } from '../../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
-import {
-  Form,
-  Button,
-  Typography,
-  Spin,
-  message,
-  TreeSelect,
-  Anchor,
-  Popconfirm,
-  Alert
-} from 'antd';
+import { Form, Button, Typography, Spin, message, TreeSelect, Anchor, Popconfirm } from 'antd';
 
 interface Props {
   match: Match;
@@ -40,7 +30,6 @@ export interface SubmissionTemplateEditFormState {
   loading: boolean;
   touched: boolean;
   removedParts: string[];
-  hasError: boolean;
 }
 
 @inject('loginStatusStore')
@@ -67,8 +56,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
     parts: {},
     loading: true,
     touched: false,
-    removedParts: [],
-    hasError: false
+    removedParts: []
   };
 
   constructor(props: Props) {
@@ -267,11 +255,6 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
     return '#Defaults';
   };
 
-  static getDerivedStateFromError(error) {
-    console.error(error);
-    return { hasError: true };
-  }
-
   componentWillUnmount() {
     uiStore.setPendingChanges(false);
   }
@@ -314,17 +297,6 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
   }
 
   render() {
-    if (this.state.hasError) {
-      return (
-        <div>
-          <Alert
-            type="error"
-            message="An error has occured and the submission template is unreadable."
-          ></Alert>
-        </div>
-      );
-    }
-
     if (!this.state.loading) {
       this.removeDeletedAccountParts();
       uiStore.setPendingChanges(this.formHasChanges());
