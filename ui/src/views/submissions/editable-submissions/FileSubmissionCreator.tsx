@@ -25,7 +25,7 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
     showUploadList: false,
     beforeUpload: (file: RcFile, list: RcFile[]) => {
       this.performUpload(list);
-      return Promise.reject(); // don't want to upload using component method
+      return false; // don't want to upload using component method
     }
   };
 
