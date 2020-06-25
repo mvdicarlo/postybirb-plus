@@ -33,7 +33,7 @@ export class KoFi extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<string>(`${this.BASE_URL}/settings`, data._id);
-    if (!res.body.includes('Start a Page')) {
+    if (!res.body.includes('btn-login')) {
       status.loggedIn = true;
       status.username = HtmlParserUtil.getInputValue(res.body, 'DisplayName');
       this.storeAccountInformation(data._id, 'id', res.body.match(/pageId:\s'(.*?)'/)[1]);
