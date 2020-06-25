@@ -1,4 +1,5 @@
 import React from 'react';
+import * as _ from 'lodash';
 import SubmissionService from '../../../services/submission.service';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { Button, Input, message, Icon, Upload } from 'antd';
@@ -16,26 +17,18 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
     canCopyClipboard: window.electron.clipboard.availableFormats().includes('image/png'),
     importUrl: ''
   };
+  private uploadQueue: RcFile[] = [];
   private clipboardCheckInterval: any;
   private uploadProps = {
     name: 'file',
     multiple: true,
     showUploadList: false,
-    beforeUpload: (file: RcFile) => {
-      SubmissionService.create({
-        type: SubmissionType.FILE,
-        file: file,
-        path: file['path']
-      })
-        .then(() => {
-          message.success(`${file.name} file uploaded successfully.`);
-        })
-        .catch(() => {
-          message.error(`${file.name} file upload failed.`);
-        });
+    beforeUpload: (file: RcFile, list: RcFile[]) => {
+      this.performUpload(list);
       return Promise.reject(); // don't want to upload using component method
     }
   };
+
   constructor(props: any) {
     super(props);
     this.clipboardCheckInterval = setInterval(() => {
@@ -48,14 +41,39 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
       }
     }, 2000);
   }
+
   componentWillUnmount() {
     clearInterval(this.clipboardCheckInterval);
   }
+
   createFromClipboard() {
     SubmissionService.createFromClipboard()
       .then(() => message.success('Submission created.'))
       .catch(() => message.error('Failed to create submission.'));
   }
+
+  performUpload = _.debounce(async (files: RcFile[]) => {
+    const isPoster: boolean = this.uploadQueue.length === 0;
+    if (files) {
+      this.uploadQueue.push(...files.filter(f => !this.uploadQueue.includes(f)));
+    }
+    if (isPoster) {
+      let file: RcFile | undefined = undefined;
+      while ((file = this.uploadQueue.shift()) !== undefined) {
+        try {
+          await SubmissionService.create({
+            type: SubmissionType.FILE,
+            file: file,
+            path: file['path']
+          });
+          message.success(`${file!.name} file uploaded successfully.`);
+        } catch {
+          message.error(`${file!.name} file upload failed.`);
+        }
+      }
+    }
+  }, 100);
+
   async createFromImportURL() {
     const importUrl = this.state.importUrl.trim();
     if (importUrl.length) {
@@ -82,6 +100,7 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
       }
     }
   }
+
   render() {
     return (
       <div>
