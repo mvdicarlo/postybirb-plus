@@ -219,8 +219,8 @@ export class FurryNetwork extends Website {
     );
 
     const res = responses.shift();
-    if (!res.body.id) {
-      throw this.createPostResponse({ additionalInfo: res.body });
+    if (!res.body || !res.body.id) {
+      throw this.createPostResponse({ additionalInfo: res.body || res });
     }
     return res.body;
   }
