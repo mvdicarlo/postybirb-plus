@@ -1,5 +1,5 @@
 {
-  "name": "postybirb-plus",
+  "name": "postybirb-plus-client-server",
   "version": "3.0.12",
   "description": "(ClientServer) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "main": "main.js",
