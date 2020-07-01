@@ -149,7 +149,7 @@ export class Mastodon extends Website {
 
     const { options } = data;
     const form: any = {
-      status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`.substring(0, 500),
+      status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`,
       sensitive:
         isSensitive || options.spoilerText
           ? 'yes'
@@ -178,7 +178,9 @@ export class Mastodon extends Website {
     );
 
     if (description.length > 500) {
-      warnings.push('Max description length allowed is 500 characters.');
+      warnings.push(
+        'Max description length allowed is 500 characters (for most Mastodon clients).',
+      );
     }
 
     const files = [
@@ -222,7 +224,9 @@ export class Mastodon extends Website {
     );
 
     if (description.length > 500) {
-      warnings.push('Max description length allowed is 500 characters.');
+      warnings.push(
+        'Max description length allowed is 500 characters (for most Mastodon clients).',
+      );
     }
     return { problems: [], warnings };
   }
