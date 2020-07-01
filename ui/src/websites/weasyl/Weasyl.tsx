@@ -109,9 +109,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
     WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
       ({ data }) => {
         if (data) {
-          if (!_.isEqual(this.state.folders, data)) {
-            this.setState({ folders: data });
-          }
+          this.setState({ folders: data });
         }
       }
     );

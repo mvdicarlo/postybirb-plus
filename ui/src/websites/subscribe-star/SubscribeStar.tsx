@@ -16,6 +16,8 @@ import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
+import WebsiteService from '../../services/website.service';
 
 const defaultFileOptions: SubscribeStarFileOptions = {
   ...GenericDefaultFileOptions,
@@ -73,9 +75,32 @@ export class SubscribeStar implements Website {
   }
 }
 
+interface SubscribeStarSubmissionState {
+  tiers: Folder[];
+}
+
 export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSection<
   SubscribeStarNotificationOptions
 > {
+  state: SubscribeStarSubmissionState = {
+    tiers: []
+  };
+
+  constructor(props: WebsiteSectionProps<FileSubmission, SubscribeStarNotificationOptions>) {
+    super(props);
+    this.state = {
+      tiers: []
+    };
+
+    WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
+      ({ data }) => {
+        if (data) {
+          this.setState({ tiers: data });
+        }
+      }
+    );
+  }
+
   renderLeftForm(data: SubscribeStarNotificationOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
@@ -86,8 +111,9 @@ export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSe
           value={data.tier}
           onSelect={this.setValue.bind(this, 'tier')}
         >
-          <Select.Option value="free">Free</Select.Option>
-          <Select.Option value="basic">Subscribers Only</Select.Option>
+          {this.state.tiers.map(tier => (
+            <Select.Option value={tier.value}>{tier.label}</Select.Option>
+          ))}
         </Select>
       </Form.Item>
     );
@@ -98,6 +124,25 @@ export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSe
 export class SubscribeStarFileSubmissionForm extends GenericFileSubmissionSection<
   SubscribeStarFileOptions
 > {
+  state: SubscribeStarSubmissionState = {
+    tiers: []
+  };
+
+  constructor(props: WebsiteSectionProps<FileSubmission, SubscribeStarFileOptions>) {
+    super(props);
+    this.state = {
+      tiers: []
+    };
+
+    WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
+      ({ data }) => {
+        if (data) {
+          this.setState({ tiers: data });
+        }
+      }
+    );
+  }
+
   renderRightForm(data: SubscribeStarFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
@@ -108,8 +153,9 @@ export class SubscribeStarFileSubmissionForm extends GenericFileSubmissionSectio
           value={data.tier}
           onSelect={this.setValue.bind(this, 'tier')}
         >
-          <Select.Option value="free">Free</Select.Option>
-          <Select.Option value="basic">Subscribers Only</Select.Option>
+          {this.state.tiers.map(tier => (
+            <Select.Option value={tier.value}>{tier.label}</Select.Option>
+          ))}
         </Select>
       </Form.Item>
     );

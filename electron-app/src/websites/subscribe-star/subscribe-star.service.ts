@@ -24,7 +24,14 @@ import {
   SubscribeStarDefaultFileOptions,
   SubscribeStarDefaultNotificationOptions,
 } from './subscribe-star.defaults';
-import { SubscribeStarFileOptions } from './subscribe-star.interface';
+import {
+  SubscribeStarFileOptions,
+  SubscribeStarNotificationOptions,
+} from './subscribe-star.interface';
+import { Folder } from '../interfaces/folder.interface';
+import BrowserWindowUtil from 'src/utils/browser-window.util';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
+import _ = require('lodash');
 
 @Injectable()
 export class SubscribeStar extends Website {
@@ -52,8 +59,34 @@ export class SubscribeStar extends Website {
         'username',
         res.body.match(/class="top_bar-branding">(.*?)href="(.*?)"/ims)[2],
       );
+      await this.getTiers(data._id);
     }
     return status;
+  }
+
+  private async getTiers(profileId: string) {
+    const tiers: Folder[] = [
+      {
+        label: 'Public',
+        value: 'free',
+      },
+      {
+        label: 'Subscribers Only',
+        value: 'basic',
+      },
+    ];
+
+    const body = await BrowserWindowUtil.getPage(profileId, `${this.BASE_URL}/profile/settings`, true);
+    const $ = cheerio.load(body);
+    $('.tiers-settings_item').each((i, el) => {
+      const $el = $(el);
+      tiers.push({
+        label: $el.find('.tiers-settings_item-title').text(),
+        value: $el.attr('data-id'),
+      });
+    });
+
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
@@ -226,6 +259,17 @@ export class SubscribeStar extends Website {
       problems.push('No access tier selected.');
     }
 
+    if (submissionPart.data.tier) {
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(submissionPart.accountId),
+        GenericAccountProp.FOLDERS,
+        [],
+      );
+      if (!folders.find(f => f.value === submissionPart.data.tier)) {
+        warnings.push(`Access Tier (${submissionPart.data.tier}) not found.`);
+      }
+    }
+
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
@@ -236,9 +280,13 @@ export class SubscribeStar extends Website {
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       let maxMB = 5;
-      if (type === FileSubmissionType.AUDIO) maxMB = 50;
-      else if (type === FileSubmissionType.TEXT) maxMB = 300;
-      else if (type === FileSubmissionType.VIDEO) maxMB = 250;
+      if (type === FileSubmissionType.AUDIO) {
+        maxMB = 50;
+      } else if (type === FileSubmissionType.TEXT) {
+        maxMB = 300;
+      } else if (type === FileSubmissionType.VIDEO) {
+        maxMB = 250;
+      }
 
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (
@@ -253,6 +301,31 @@ export class SubscribeStar extends Website {
       }
     });
 
+    return { problems, warnings };
+  }
+
+  validateNotificationSubmission(
+    submission: Submission,
+    submissionPart: SubmissionPart<SubscribeStarNotificationOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): ValidationParts {
+    const problems: string[] = [];
+    const warnings: string[] = [];
+
+    if (!submissionPart.data.tier) {
+      problems.push('No access tier selected.');
+    }
+
+    if (submissionPart.data.tier) {
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(submissionPart.accountId),
+        GenericAccountProp.FOLDERS,
+        [],
+      );
+      if (!folders.find(f => f.value === submissionPart.data.tier)) {
+        warnings.push(`Access Tier (${submissionPart.data.tier}) not found.`);
+      }
+    }
     return { problems, warnings };
   }
 }
