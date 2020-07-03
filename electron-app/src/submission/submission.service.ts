@@ -390,24 +390,15 @@ export class SubmissionService {
     const submissions = (await this.getAll(movingSubmission.type)).sort(
       (a, b) => a.order - b.order,
     );
-    while (from < 0) {
-      from += submissions.length;
-    }
-    while (to < 0) {
-      to += submissions.length;
-    }
-    if (to >= submissions.length) {
-      let k = to - submissions.length + 1;
-      while (k--) {
-        submissions.push(undefined);
-      }
-    }
-    submissions.splice(to, 0, submissions.splice(from, 1)[0]);
+    const fromSubmission = submissions.find(s => s._id === id);
+    fromSubmission.order = from < to ? to + 0.1 : to - 0.1;
     await Promise.all(
-      submissions.map((record, index) => {
-        record.order = index;
-        return this.repository.update(record);
-      }),
+      submissions
+        .sort((a, b) => a.order - b.order)
+        .map((record, index) => {
+          record.order = index;
+          return this.repository.update(record);
+        }),
     );
     this.orderSubmissions(movingSubmission.type); // somewhat doubles up, but ensures all UI get notified
   }

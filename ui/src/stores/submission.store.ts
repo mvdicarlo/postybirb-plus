@@ -98,7 +98,10 @@ export class SubmissionStore {
   @action
   updateOrder(orderRecords: Record<string, number>) {
     this.state.submissions.forEach(record => {
-      if (orderRecords[record.submission._id] !== undefined) {
+      if (
+        orderRecords[record.submission._id] &&
+        record.submission.order !== orderRecords[record.submission._id]
+      ) {
         record.submission.order = orderRecords[record.submission._id];
       }
     });
@@ -119,25 +122,16 @@ export class SubmissionStore {
   @action
   changeOrder(id: string, from: number, to: number) {
     const fromSubmission = this.state.submissions.find(s => s.submission._id === id)!;
-    const submissions: any[] = this.all.filter(
+    const submissions: SubmissionPackage<any>[] = this.all.filter(
       s => s.submission.type === fromSubmission.submission.type
     );
-    while (from < 0) {
-      from += submissions.length;
-    }
-    while (to < 0) {
-      to += submissions.length;
-    }
-    if (to >= submissions.length) {
-      let k = to - submissions.length + 1;
-      while (k--) {
-        submissions.push(undefined);
-      }
-    }
-    submissions.splice(to, 0, submissions.splice(from, 1)[0]);
-    submissions.forEach((record, index) => {
-      record.submission.order = index;
-    });
+    fromSubmission.submission.order = from < to ? to + 0.1 : to - 0.1;
+    submissions
+      .sort((a, b) => a.submission.order - b.submission.order)
+      .forEach((record, index) => {
+        record.submission.order = index;
+      });
+
     SubmissionService.changeOrder(id, to, from);
   }
 }

@@ -41,7 +41,6 @@ export interface MultiSubmissionEditFormState {
   loading: boolean;
   touched: boolean;
   removedParts: string[];
-  hasError: boolean;
   saveVisible: boolean;
 }
 
@@ -79,7 +78,6 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
     loading: false,
     touched: false,
     removedParts: [],
-    hasError: false,
     saveVisible: false
   };
 
@@ -267,11 +265,6 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
     return '#Defaults';
   };
 
-  static getDerivedStateFromError(error) {
-    console.error(error);
-    return { hasError: true };
-  }
-
   componentWillUnmount() {
     uiStore.setPendingChanges(false);
   }
@@ -315,17 +308,6 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
   }
 
   render() {
-    if (this.state.hasError) {
-      return (
-        <div>
-          <Alert
-            type="error"
-            message="An error has occured and the form is unable to be displayed."
-          ></Alert>
-        </div>
-      );
-    }
-
     if (!this.state.loading) {
       this.removeDeletedAccountParts();
       uiStore.setPendingChanges(this.formHasChanges());

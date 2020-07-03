@@ -48,8 +48,8 @@ export default class BrowserWindowUtil {
     }
   }
 
-  public static async getPage(partition: string, url: string): Promise<string> {
-    return BrowserWindowUtil.runScriptOnPage<string>(partition, url, 'document.body.innerText');
+  public static async getPage(partition: string, url: string, html: boolean = false): Promise<string> {
+    return BrowserWindowUtil.runScriptOnPage<string>(partition, url, html ? 'document.body.innerHTML' : 'document.body.innerText');
   }
 
   public static async runScriptOnPage<T>(

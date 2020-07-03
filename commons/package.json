@@ -1,0 +1,21 @@
+{
+  "name": "postybirb-plus-commons",
+  "version": "1.0.0",
+  "description": "Common classes, interfaces, enums, etc. for PostyBirb that would be shared between UI and Electron-App",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "author": "Michael DiCarlo",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.5"
+  }
+}
