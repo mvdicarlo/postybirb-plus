@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { WebsiteProvider } from './website-provider.service';
 import { WebsitesService } from './websites.service';
+import { ArtconomyModule } from './artconomy/artconomy.module';
 import { PiczelModule } from './piczel/piczel.module';
 import { WeasylModule } from './weasyl/weasyl.module';
 import { FurifficModule } from './furiffic/furiffic.module';
@@ -34,6 +35,7 @@ import { PillowfortModule } from './pillowfort/pillowfort.module';
   providers: [WebsiteProvider, WebsitesService],
   exports: [WebsiteProvider, WebsitesService],
   imports: [
+    ArtconomyModule,
     PiczelModule,
     WeasylModule,
     FurifficModule,
