@@ -33,7 +33,7 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 @Injectable()
 export class FurAffinity extends Website {
   readonly BASE_URL = 'https://www.furaffinity.net';
-  readonly waitBetweenPostsInterval = 60000;
+  readonly waitBetweenPostsInterval = 70000;
   readonly fileSubmissionOptions = FurAffinityDefaultFileOptions;
   readonly notificationSubmissionOptions = FurAffinityDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
