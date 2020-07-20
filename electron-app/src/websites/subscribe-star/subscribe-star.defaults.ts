@@ -10,9 +10,11 @@ import {
 export const SubscribeStarDefaultFileOptions: SubscribeStarFileOptions = {
   ...GenericDefaultFileOptions,
   tier: 'free',
+  useTitle: true,
 };
 
 export const SubscribeStarDefaultNotificationOptions: SubscribeStarNotificationOptions = {
   ...GenericDefaultNotificationOptions,
   tier: 'free',
+  useTitle: true,
 };
