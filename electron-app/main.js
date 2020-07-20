@@ -21,6 +21,10 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 
 process.env.PORT = process.env.PORT || 9247;
+// Allow override if using a staging/dev server.
+if (!process.env.ARTCONOMY_URL) {
+  process.env.ARTCONOMY_URL = 'https://artconomy.com'
+}
 global.AUTH_SERVER_URL = 'http://postybirb.cleverapps.io';
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');

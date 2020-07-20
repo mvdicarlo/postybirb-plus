@@ -3,16 +3,16 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { Checkbox } from 'antd';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { ArtconomyOptions } from '../../../../electron-app/src/websites/artconomy/artconomy.interface';
+import { ArtconomyFileOptions } from '../../../../electron-app/src/websites/artconomy/artconomy.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import ArtconomyLogin from "./ArtconomyLogin";
 
-const defaultOptions: ArtconomyOptions = {
+const defaultOptions: ArtconomyFileOptions = {
   ...GenericDefaultFileOptions,
-  comments_disabled: false,
-  is_artist: true,
+  commentsDisabled: false,
+  isArtist: true,
   private: false,
 };
 
@@ -22,7 +22,7 @@ export class Artconomy implements Website {
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   LoginDialog = (props: LoginDialogProps) => <ArtconomyLogin {...props} />;
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyOptions>) => (
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyFileOptions>) => (
     <ArtconomyFileSubmissionForm
       ratingOptions={{
         show: true,
@@ -55,23 +55,23 @@ export class Artconomy implements Website {
   }
 }
 
-export class ArtconomyFileSubmissionForm extends GenericFileSubmissionSection<ArtconomyOptions> {
+export class ArtconomyFileSubmissionForm extends GenericFileSubmissionSection<ArtconomyFileOptions> {
 
-  renderLeftForm(data: ArtconomyOptions) {
+  renderLeftForm(data: ArtconomyFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
       <div>
         <Checkbox
-          checked={data.is_artist}
-          onChange={this.handleCheckedChange.bind(this, 'is_artist')}
+          checked={data.isArtist}
+          onChange={this.handleCheckedChange.bind(this, 'isArtist')}
         >
           I made dis
         </Checkbox>
       </div>,
       <div>
         <Checkbox
-          checked={data.comments_disabled}
-          onChange={this.handleCheckedChange.bind(this, 'comments_disabled')}
+          checked={data.commentsDisabled}
+          onChange={this.handleCheckedChange.bind(this, 'commentsDisabled')}
         >
           Comments Disabled
         </Checkbox>

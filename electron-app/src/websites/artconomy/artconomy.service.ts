@@ -21,13 +21,13 @@ import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
 import { Website } from '../website.base';
 import { ArtconomyAccountData } from './artconomy-account.interface';
 import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
-import { ArtconomyOptions } from './artconomy.interface';
+import { ArtconomyFileOptions } from './artconomy.interface';
 import {MarkdownParser} from "src/description-parsing/markdown/markdown.parser";
 
 
 @Injectable()
 export class Artconomy extends Website {
-  readonly BASE_URL: string = 'https://artconomy.com';
+  readonly BASE_URL: string = process.env['ARTCONOMY_URL'];
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',
@@ -44,21 +44,23 @@ export class Artconomy extends Website {
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ac',
-      url: 'https://artconomy/$1',
+      url: process.env['ARTCONOMY_URL'] + '/$1',
     },
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null};
-    if (!data.data && data.data.authtoken) {
-      return status
-    }
-    const authCheck = await Http.get<any>(`${this.BASE_URL}/api/profiles/v1/data/requester/`, data._id, {
-      requestOptions: { json: true, headers: {Authorization: `Token ${data.data.authtoken}`} },
-    });
-    if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
-      status.username = authCheck.response.body.username;
-      status.loggedIn = true;
+    if (data.data && data.data.authtoken) {
+      const authCheck = await Http.get<any>(`${this.BASE_URL}/api/profiles/v1/data/requester/`, data._id, {
+        requestOptions: {
+          json: true,
+          headers: {Authorization: `Token ${data.data.authtoken}`},
+        },
+      });
+      if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
+        status.username = authCheck.response.body.username;
+        status.loggedIn = true;
+      }
     }
     return status;
   }
@@ -69,20 +71,6 @@ export class Artconomy extends Website {
 
   getScalingOptions(file: FileRecord): ScalingOptions | undefined {
     return { maxSize: FileSize.MBtoBytes(200) };
-  }
-
-  preparseDescription(text: string) {
-    text = UsernameParser.replaceText(text, 'fa', '[fa]$1[/fa]');
-    text = UsernameParser.replaceText(text, 'sf', '[sf]$1[/sf]');
-    text = UsernameParser.replaceText(text, 'da', '[da]$1[/da]');
-    text = UsernameParser.replaceText(text, 'ws', '[w]$1[/w]');
-    text = UsernameParser.replaceText(text, 'ib', '[iconname]$1[/iconname]');
-    return text;
-  }
-
-  parseDescription(text: string) {
-    text = super.parseDescription(text);
-    return text.replace(/\[hr\]/g, '-----');
   }
 
   private getRating(rating: SubmissionRating | string) {
@@ -101,8 +89,8 @@ export class Artconomy extends Website {
     }
   }
 
-  checkAssetUpload(upload: HttpResponse<{id: string}>) {
-    if (!(upload.body.id)) {
+  async checkAssetUpload(upload: HttpResponse<{id: string}>) {
+    if (!upload.body.id) {
       return Promise.reject(
           this.createPostResponse({
             message: upload.response.statusMessage,
@@ -114,7 +102,7 @@ export class Artconomy extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<ArtconomyOptions>,
+    data: FilePostData<ArtconomyFileOptions>,
     accountData: ArtconomyAccountData,
   ): Promise<PostResponse> {
     const primaryAssetForm: any = {
@@ -124,7 +112,13 @@ export class Artconomy extends Website {
     const thumbnailAssetForm = {
       'files[]': data.thumbnail,
     }
-    const requestOptions = { json: true, headers: {Authorization: `Token ${accountData.authtoken}`}};
+    const requestOptions = {
+      json: true,
+      headers: {
+        Authorization: `Token ${accountData.authtoken}`,
+        'X-CSRFToken': `${accountData.csrftoken}`,
+      },
+    };
     this.checkCancelled(cancellationToken);
     let upload = await Http.post<{ id: string }>(
       `${this.BASE_URL}/api/lib/v1/asset/`,
@@ -136,10 +130,7 @@ export class Artconomy extends Website {
         data: primaryAssetForm,
       },
     );
-    let check = this.checkAssetUpload(upload)
-    if (check) {
-      return check
-    }
+    await this.checkAssetUpload(upload)
 
     const primaryAsset = upload.body.id;
     let thumbnailAsset: null|string = null
@@ -154,10 +145,7 @@ export class Artconomy extends Website {
             data: thumbnailAssetForm,
           },
       );
-      check = this.checkAssetUpload(upload)
-      if (check) {
-        return check
-      }
+      await this.checkAssetUpload(upload)
       thumbnailAsset = upload.body.id;
     }
 
@@ -169,24 +157,21 @@ export class Artconomy extends Website {
       tags: this.formatTags(data.tags),
       rating: this.getRating(data.rating),
       private: data.options.private,
-      comments_disabled: data.options.comments_disabled,
+      comments_disabled: data.options.commentsDisabled,
       artists: [],
     };
-    if (data.options.is_artist) {
+    if (data.options.isArtist) {
       editForm.artists.push(accountData.id)
     }
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<any>(`${this.BASE_URL}/api/profiles/v1/account/${accountData.username}/submissions/`, undefined, {
       type: 'json',
-      data: {},
+      data: editForm,
       requestOptions,
       skipCookies: true,
     })
-    check = this.checkAssetUpload(post)
-    if (check) {
-      return check
-    }
+    await this.checkAssetUpload(post)
     return this.createPostResponse({ source: `${this.BASE_URL}/submissions/${post.body.id}` });
   }
 
@@ -200,7 +185,7 @@ export class Artconomy extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<ArtconomyOptions>,
+    submissionPart: SubmissionPart<ArtconomyFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

@@ -32,7 +32,7 @@ export default class ArtconomyLogin extends React.Component<LoginDialogProps, St
     async submit() {
         this.setState({ sending: true });
         const auth = await Axios.post<{ id: number, username: string, csrftoken: string, token: string[] }>(
-            'https://artconomy.com/api/profiles/v1/login/',
+            `${window.electron.environment.ARTCONOMY_URL}/api/profiles/v1/login/`,
             {...this.state},
             { responseType: 'json' },
         ).catch((error: AxiosError) => {
@@ -40,7 +40,7 @@ export default class ArtconomyLogin extends React.Component<LoginDialogProps, St
                 message.error("Unable to contact Artconomy's servers. Are you online?")
             }
             const response = error.response!
-            if (response.data.token && !this.state.token) {
+            if (response.data.token.length && !this.state.token) {
                 this.setState({ sending: false });
                 this.setState({ show2fa: true });
             } else if (response.data.token.length) {
@@ -51,9 +51,9 @@ export default class ArtconomyLogin extends React.Component<LoginDialogProps, St
             }
         });
         if (!auth) {
+            this.setState({ sending: false });
             return
         }
-        this.setState({ sending: false });
         LoginService.setAccountData(this.props.account._id, auth.data)
             .then(() => {
                 message.success('Login success.');

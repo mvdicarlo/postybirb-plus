@@ -1,9 +1,9 @@
-import { ArtconomyOptions } from './artconomy.interface';
+import { ArtconomyFileOptions } from './artconomy.interface';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
-export const ArtconomyDefaultFileOptions: ArtconomyOptions = {
+export const ArtconomyDefaultFileOptions: ArtconomyFileOptions = {
   ...GenericDefaultFileOptions,
-  comments_disabled: false,
-  is_artist: true,
+  commentsDisabled: false,
+  isArtist: true,
   private: false,
 };
