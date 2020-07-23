@@ -65,8 +65,8 @@ export class Patreon extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(`${this.BASE_URL}/user`, data._id);
-    const match = res.body.match(/"full_name": "(.*?)"/);
+    const body = await BrowserWindowUtil.getPage(data._id, `${this.BASE_URL}/creator-home`, true);
+    const match = body.match(/"full_name": "(.*?)"/);
     if (match) {
       status.loggedIn = true;
       status.username = match[1];
@@ -145,8 +145,8 @@ export class Patreon extends Website {
   }
 
   private async getCSRF(profileId: string): Promise<string> {
-    const page = await Http.get<string>(`${this.BASE_URL}/post`, profileId);
-    const match = page.body.match(/csrfSignature = "(.*?)"/);
+    const page = await BrowserWindowUtil.getPage(profileId, `${this.BASE_URL}/post`, true);
+    const match = page.match(/csrfSignature = "(.*?)"/);
     if (!match) {
       throw new Error('No CSRF Token found.');
     }
