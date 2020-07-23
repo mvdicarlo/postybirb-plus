@@ -7,7 +7,7 @@ import { ArtconomyFileOptions } from '../../../../electron-app/src/websites/artc
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import ArtconomyLogin from "./ArtconomyLogin";
+import ArtconomyLogin from './ArtconomyLogin';
 
 const defaultOptions: ArtconomyFileOptions = {
   ...GenericDefaultFileOptions,

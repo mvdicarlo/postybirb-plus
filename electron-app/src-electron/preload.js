@@ -14,13 +14,8 @@ process.once('loaded', () => {
   global.Buffer = _Buffer;
 });
 
-// Process.env is overwritten in the .tsx files for login. Why, I'm unsure, but I suspect it may be security related.
-// Assuming it is, this will act as a whitelist of environment variables to include from the electron-app process,
-// such that it should be (at least marginally) more difficult to pull system information from a potential unsafe eval,
-// should such an exploit exist.
 const environment = {
-  // Should be set with fallback by main.js
-  ARTCONOMY_URL: process.env.ARTCONOMY_URL,
+  ARTCONOMY_URL: process.env.ARTCONOMY_URL || '',
 }
 
 window.PORT = remote.getCurrentWindow().PORT;

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/account/models/user-account.entity';
-import { UsernameParser } from 'src/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
 import Http, {HttpResponse} from 'src/http/http.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
@@ -22,12 +21,12 @@ import { Website } from '../website.base';
 import { ArtconomyAccountData } from './artconomy-account.interface';
 import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
 import { ArtconomyFileOptions } from './artconomy.interface';
-import {MarkdownParser} from "src/description-parsing/markdown/markdown.parser";
+import { MarkdownParser } from "src/description-parsing/markdown/markdown.parser";
 
 
 @Injectable()
 export class Artconomy extends Website {
-  readonly BASE_URL: string = process.env['ARTCONOMY_URL'];
+  readonly BASE_URL: string = process.env['ARTCONOMY_URL'] || 'https://artconomy.com';
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',
@@ -80,12 +79,12 @@ export class Artconomy extends Website {
       case SubmissionRating.MATURE:
         return 1;
       case SubmissionRating.ADULT:
-        return 2
+        return 2;
       case SubmissionRating.EXTREME:
-        return 3
+        return 3;
       default:
         // Safest assumption.
-        return 2
+        return 2;
     }
   }
 

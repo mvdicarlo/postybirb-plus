@@ -1,5 +1,5 @@
 export interface ArtconomyAccountData {
-  id: number,
+  id: number;
   username: string;
   csrftoken: string;
   authtoken: string;

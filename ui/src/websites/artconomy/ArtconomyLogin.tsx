@@ -13,6 +13,7 @@ interface State {
 }
 
 export default class ArtconomyLogin extends React.Component<LoginDialogProps, State> {
+    ARTCONOMY_URL = window.electron.environment.ARTCONOMY_URL || 'https://artconomy.com'
     state: State = {
         email: '',
         password: '',
@@ -41,8 +42,7 @@ export default class ArtconomyLogin extends React.Component<LoginDialogProps, St
             }
             const response = error.response!
             if (response.data.token.length && !this.state.token) {
-                this.setState({ sending: false });
-                this.setState({ show2fa: true });
+                this.setState({ sending: false, show2fa: true });
             } else if (response.data.token.length) {
                 message.error(response.data.token[0]);
             } else {

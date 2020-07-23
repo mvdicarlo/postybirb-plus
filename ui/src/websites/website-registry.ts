@@ -1,5 +1,5 @@
 import { Website } from './interfaces/website.interface';
-import { Artconomy } from "./artconomy/Artconomy";
+import { Artconomy } from './artconomy/Artconomy';
 import { Weasyl } from './weasyl/Weasyl';
 import { Discord } from './discord/Discord';
 import { Furiffic } from './furiffic/Furiffic';
