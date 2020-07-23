@@ -62,3 +62,6 @@ typings/
 
 # Jetbrains IDEs
 .idea/*
+
+# Local configuration file.
+electron-app/src-electron/config.local.js

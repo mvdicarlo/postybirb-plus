@@ -22,7 +22,7 @@ export class Artconomy implements Website {
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   LoginDialog = (props: LoginDialogProps) => (
-      <GenericLoginDialog url="https://artconomy.com/auth/login" {...props} />
+      <GenericLoginDialog url={(window.electron.config.ARTCONOMY_URL || 'https://artconomy.com') + '/auth/login'} {...props} />
   );
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyFileOptions>) => (
     <ArtconomyFileSubmissionForm

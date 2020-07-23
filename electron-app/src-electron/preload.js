@@ -1,4 +1,5 @@
 const { remote, clipboard, shell } = require('electron');
+const { config } = require('./config')
 const { app, session } = remote;
 
 // Authorizers
@@ -13,10 +14,6 @@ process.once('loaded', () => {
   global.clearImmediate = _clearImmediate;
   global.Buffer = _Buffer;
 });
-
-const environment = {
-  ARTCONOMY_URL: process.env.ARTCONOMY_URL || '',
-}
 
 window.PORT = remote.getCurrentWindow().PORT;
 window.AUTH_ID = remote.getCurrentWindow().AUTH_ID;
@@ -41,7 +38,7 @@ window.electron = {
       return session.fromPartition(`persist:${id}`).clearStorageData();
     },
   },
-  environment,
+  config,
   shell: {
     openInBrowser(url) {
       return shell.openExternal(url);

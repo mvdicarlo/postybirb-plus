@@ -18,15 +18,15 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
 import { Website } from '../website.base';
-import { ArtconomyAccountData } from './artconomy-account.interface';
 import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
 import { ArtconomyFileOptions } from './artconomy.interface';
 import { MarkdownParser } from "src/description-parsing/markdown/markdown.parser";
+import { config } from 'src-electron/config';
 
 
 @Injectable()
 export class Artconomy extends Website {
-  readonly BASE_URL: string = process.env['ARTCONOMY_URL'] || 'https://artconomy.com';
+  readonly BASE_URL: string = config.ARTCONOMY_URL || 'https://artconomy.com';
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',
@@ -43,28 +43,26 @@ export class Artconomy extends Website {
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ac',
-      url: process.env['ARTCONOMY_URL'] + '/$1',
+      url: (config.ARTCONOMY_URL || 'https://artconomy.com') + '/$1',
     },
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    const status: LoginResponse = { loggedIn: false, username: null};
-    this.accountInformation
+    const status: LoginResponse = { loggedIn: false, username: null };
     const authCheck = await Http.get<any>(`${this.BASE_URL}/api/profiles/v1/data/requester/`, data._id, {
       requestOptions: {
         json: true,
       },
     });
     if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
-      this.accountInformation.set(data._id, authCheck.response.body)
+      this.storeAccountInformation(data._id, 'id', authCheck.response.body.id)
+      this.storeAccountInformation(data._id, 'username', authCheck.response.body.username)
+      this.storeAccountInformation(data._id, 'authToken', authCheck.response.body.authtoken)
+      this.storeAccountInformation(data._id, 'csrfToken', authCheck.response.body.csrftoken)
       status.username = authCheck.response.body.username;
       status.loggedIn = true;
     }
     return status;
-  }
-
-  transformAccountData(data: ArtconomyAccountData) {
-    return { username: data.username, id: data.id, csrftoken: data.csrftoken, authtoken: data.authtoken };
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions | undefined {
@@ -101,11 +99,14 @@ export class Artconomy extends Website {
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<ArtconomyFileOptions>,
-    accountData: ArtconomyAccountData,
   ): Promise<PostResponse> {
     const primaryAssetForm: any = {
       'files[]': data.primary.file,
     };
+    const id = this.getAccountInfo(data.part.accountId,'id');
+    const username = this.getAccountInfo(data.part.accountId,'username');
+    const authToken = this.getAccountInfo(data.part.accountId, 'authToken');
+    const csrfToken = this.getAccountInfo(data.part.accountId,'csrfToken');
 
     const thumbnailAssetForm = {
       'files[]': data.thumbnail,
@@ -113,8 +114,8 @@ export class Artconomy extends Website {
     const requestOptions = {
       json: true,
       headers: {
-        Authorization: `Token ${accountData.authtoken}`,
-        'X-CSRFToken': `${accountData.csrftoken}`,
+        Authorization: `Token ${authToken}`,
+        'X-CSRFToken': `${csrfToken}`,
       },
     };
     this.checkCancelled(cancellationToken);
@@ -128,7 +129,7 @@ export class Artconomy extends Website {
         data: primaryAssetForm,
       },
     );
-    await this.checkAssetUpload(upload)
+    await this.checkAssetUpload(upload);
 
     const primaryAsset = upload.body.id;
     let thumbnailAsset: null|string = null
@@ -159,11 +160,11 @@ export class Artconomy extends Website {
       artists: [],
     };
     if (data.options.isArtist) {
-      editForm.artists.push(accountData.id)
+      editForm.artists.push(id)
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<any>(`${this.BASE_URL}/api/profiles/v1/account/${accountData.username}/submissions/`, undefined, {
+    const post = await Http.post<any>(`${this.BASE_URL}/api/profiles/v1/account/${username}/submissions/`, undefined, {
       type: 'json',
       data: editForm,
       requestOptions,
