@@ -7,7 +7,7 @@ import { ArtconomyFileOptions } from '../../../../electron-app/src/websites/artc
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import ArtconomyLogin from './ArtconomyLogin';
+import {GenericLoginDialog} from "../generic/GenericLoginDialog";
 
 const defaultOptions: ArtconomyFileOptions = {
   ...GenericDefaultFileOptions,
@@ -21,7 +21,9 @@ export class Artconomy implements Website {
   name: string = 'Artconomy';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => <ArtconomyLogin {...props} />;
+  LoginDialog = (props: LoginDialogProps) => (
+      <GenericLoginDialog url="https://artconomy.com/auth/login" {...props} />
+  );
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyFileOptions>) => (
     <ArtconomyFileSubmissionForm
       ratingOptions={{

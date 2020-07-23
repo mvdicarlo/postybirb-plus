@@ -49,17 +49,16 @@ export class Artconomy extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null};
-    if (data.data && data.data.authtoken) {
-      const authCheck = await Http.get<any>(`${this.BASE_URL}/api/profiles/v1/data/requester/`, data._id, {
-        requestOptions: {
-          json: true,
-          headers: {Authorization: `Token ${data.data.authtoken}`},
-        },
-      });
-      if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
-        status.username = authCheck.response.body.username;
-        status.loggedIn = true;
-      }
+    this.accountInformation
+    const authCheck = await Http.get<any>(`${this.BASE_URL}/api/profiles/v1/data/requester/`, data._id, {
+      requestOptions: {
+        json: true,
+      },
+    });
+    if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
+      this.accountInformation.set(data._id, authCheck.response.body)
+      status.username = authCheck.response.body.username;
+      status.loggedIn = true;
     }
     return status;
   }
