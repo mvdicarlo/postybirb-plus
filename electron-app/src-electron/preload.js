@@ -1,5 +1,4 @@
 const { remote, clipboard, shell } = require('electron');
-const { config } = require('./config')
 const { app, session } = remote;
 
 // Authorizers
@@ -38,7 +37,6 @@ window.electron = {
       return session.fromPartition(`persist:${id}`).clearStorageData();
     },
   },
-  config,
   shell: {
     openInBrowser(url) {
       return shell.openExternal(url);

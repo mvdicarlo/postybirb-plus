@@ -18,7 +18,6 @@ declare global {
         getCookies(accountId: string): Promise<any[]>;
         clearSessionData(id: string): Promise<void>;
       };
-      config: {[key: string]: string};
       shell: {
         openInBrowser(url: string): Promise<void>;
       };

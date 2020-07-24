@@ -21,12 +21,11 @@ import { Website } from '../website.base';
 import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
 import { ArtconomyFileOptions } from './artconomy.interface';
 import { MarkdownParser } from "src/description-parsing/markdown/markdown.parser";
-import { config } from 'src-electron/config';
 
 
 @Injectable()
 export class Artconomy extends Website {
-  readonly BASE_URL: string = config.ARTCONOMY_URL || 'https://artconomy.com';
+  readonly BASE_URL: string = 'https://artconomy.com';
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',
@@ -43,7 +42,7 @@ export class Artconomy extends Website {
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ac',
-      url: (config.ARTCONOMY_URL || 'https://artconomy.com') + '/$1',
+      url: 'https://artconomy.com/$1',
     },
   ];
 
