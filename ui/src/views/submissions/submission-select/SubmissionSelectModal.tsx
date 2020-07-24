@@ -17,6 +17,7 @@ interface Props {
   title: string;
   validOnly?: boolean;
   visible: boolean;
+  hideUseTemplateTitle?: boolean;
 }
 
 interface State {

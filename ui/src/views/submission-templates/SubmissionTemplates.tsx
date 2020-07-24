@@ -159,7 +159,7 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
 
   updateName() {
     if (this.renameIsValid()) {
-      SubmissionTemplateService.renameTemplate(this.props._id, this.state.renameValue)
+      SubmissionTemplateService.renameTemplate(this.props._id, this.state.renameValue.trim())
         .then(() => message.success('Submission template renamed'))
         .catch(() => message.error('Failed to rename submission template.'));
       this.hideRenameModal();
@@ -173,7 +173,7 @@ class ListItem extends React.Component<SubmissionTemplate, ListItemState> {
   }
 
   setRenameValue({ target }) {
-    this.setState({ renameValue: target.value.trim() });
+    this.setState({ renameValue: target.value });
   }
 
   render() {

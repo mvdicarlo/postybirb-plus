@@ -16,6 +16,7 @@ interface Props {
   loginStatusStore?: LoginStatusStore;
   onPropsSelect: (props: Array<SubmissionPart<any>>) => void;
   submissionType: SubmissionType;
+  hideUseTemplateTitle?: boolean;
 }
 
 interface State {
@@ -35,6 +36,18 @@ export default class ImportDataSelect extends React.Component<Props, State> {
     selectedFields: []
   };
 
+  sanitizeData = (parts: SubmissionPart<any>[]) => {
+    return parts.map(p => {
+      if (!p.data.title) {
+        delete p.data.title;
+      }
+      if (!p.data.rating) {
+        delete p.data.rating;
+      }
+      return p;
+    });
+  };
+
   hideModal = () => {
     this.setState({
       modalOpen: false,
@@ -48,15 +61,17 @@ export default class ImportDataSelect extends React.Component<Props, State> {
 
   handleComplete = () => {
     this.props.onPropsSelect(
-      _.cloneDeep(
-        Object.values(this.state.selected!)
-          .filter(p => this.state.selectedFields.includes(p.accountId))
-          .map(p => {
-            if (!this.state.keepTemplateTitle) {
-              delete p.data.title;
-            }
-            return p;
-          })
+      this.sanitizeData(
+        _.cloneDeep(
+          Object.values(this.state.selected!)
+            .filter(p => this.state.selectedFields.includes(p.accountId))
+            .map(p => {
+              if (!this.state.keepTemplateTitle) {
+                delete p.data.title;
+              }
+              return p;
+            })
+        )
       )
     );
     this.hideModal();
@@ -130,7 +145,7 @@ export default class ImportDataSelect extends React.Component<Props, State> {
                 value={this.state.selectedFields}
               />
             </Form.Item>
-            {this.state.selected ? (
+            {!this.props.hideUseTemplateTitle && this.state.selected ? (
               <Form.Item>
                 <Checkbox
                   value={this.state.keepTemplateTitle}

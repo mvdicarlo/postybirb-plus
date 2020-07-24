@@ -123,6 +123,12 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
       p.submissionId = 'multi';
       if (existing) {
         p._id = existing._id;
+        if (!p.data.title) {
+          p.data.title = existing.data.title;
+        }
+        if (!p.data.rating) {
+          p.data.rating = existing.data.rating;
+        }
       } else {
         p._id = `multi-${p.accountId}`;
       }
@@ -384,6 +390,7 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
               className="mr-1"
               submissionType={this.submissionType}
               onPropsSelect={this.importData.bind(this)}
+              hideUseTemplateTitle={true}
             />
             <Popconfirm
               title="Are you sure?."

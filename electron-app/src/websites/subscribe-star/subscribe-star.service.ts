@@ -76,7 +76,11 @@ export class SubscribeStar extends Website {
       },
     ];
 
-    const body = await BrowserWindowUtil.getPage(profileId, `${this.BASE_URL}/profile/settings`, true);
+    const body = await BrowserWindowUtil.getPage(
+      profileId,
+      `${this.BASE_URL}/profile/settings`,
+      true,
+    );
     const $ = cheerio.load(body);
     $('.tiers-settings_item').each((i, el) => {
       const $el = $(el);
@@ -111,7 +115,9 @@ export class SubscribeStar extends Website {
 
     const form = {
       utf8: '✓',
-      html_content: `<div>${data.description}</div>`,
+      html_content: `<div>${data.options.useTitle ? `<h1>${data.title}</h1>` : ''}${
+        data.description
+      }</div>`,
       pinned_uploads: '[]',
       new_editor: 'true',
       tier_id: data.options.tier,
@@ -212,7 +218,9 @@ export class SubscribeStar extends Website {
 
     const form = {
       utf8: '✓',
-      html_content: `<div>${data.description}</div>`,
+      html_content: `<div>${data.options.useTitle ? `<h1>${data.title}</h1>` : ''}${
+        data.description
+      }</div>`,
       pinned_uploads: '[]',
       new_editor: 'true',
       tier_id: data.options.tier,

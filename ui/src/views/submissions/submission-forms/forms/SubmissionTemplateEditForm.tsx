@@ -113,6 +113,12 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
       p.submissionId = this.id;
       if (existing) {
         p._id = existing._id;
+        if (!p.data.title) {
+          p.data.title = existing.data.title;
+        }
+        if (!p.data.rating) {
+          p.data.rating = existing.data.rating;
+        }
       } else {
         p._id = `${this.id}-${p.accountId}`;
       }
@@ -374,6 +380,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
               ignoreId={this.id}
               submissionType={this.state.template!.type}
               onPropsSelect={this.importData.bind(this)}
+              hideUseTemplateTitle={true}
             />
             <Popconfirm
               disabled={!this.formHasChanges()}

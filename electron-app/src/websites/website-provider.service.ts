@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Artconomy } from './artconomy/artconomy.service';
 import { Weasyl } from './weasyl/weasyl.service';
 import { Website } from './website.base';
 import { Discord } from './discord/discord.service';
@@ -33,6 +34,7 @@ export class WebsiteProvider {
   private readonly websiteModulesMap: Record<string, Website> = {};
 
   constructor(
+    readonly artconomy: Artconomy,
     readonly weasyl: Weasyl,
     readonly discord: Discord,
     readonly furiffic: Furiffic,
@@ -58,7 +60,7 @@ export class WebsiteProvider {
     readonly deviantArt: DeviantArt,
     readonly mastodon: Mastodon,
     readonly twitter: Twitter,
-    readonly pillowfort: Pillowfort
+    readonly pillowfort: Pillowfort,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

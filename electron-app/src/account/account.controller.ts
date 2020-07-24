@@ -28,7 +28,7 @@ export class AccountController {
   }
 
   @Patch('rename')
-  async rename(@Body() body: { id: string, alias: string }) {
+  async rename(@Body() body: { id: string; alias: string }) {
     return this.service.renameAccount(body.id, body.alias);
   }
 

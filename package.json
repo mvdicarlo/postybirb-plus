@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
   "main": "index.js",
   "scripts": {
@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/mvdicarlo/postybirb-plus/issues"
   },
-  "homepage": "https://github.com/mvdicarlo/postybirb-plus#readme"
+  "homepage": "https://github.com/mvdicarlo/postybirb-plus#readme",
+  "dependencies": {
+    "yarn": "^1.22.4"
+  }
 }

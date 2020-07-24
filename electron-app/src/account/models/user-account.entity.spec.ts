@@ -42,7 +42,6 @@ describe('UserAccountEntity', () => {
       const entity = plainToClass(UserAccountEntity, plain);
       expect(entity instanceof UserAccountEntity).toBe(true);
       expect(entity).toEqual(plain);
-
     });
 
     it('should convert to plain', async () => {

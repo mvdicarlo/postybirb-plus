@@ -35,10 +35,6 @@ export class DatabaseFactory {
   public static persisted<T extends Entity, K extends EntityIntf>(
     options: DatabaseFactoryOptions<T, K>,
   ): NedbDatabase<T, K> {
-    return new PersistedDatabase<T, K>(
-      options.databaseName,
-      options.entity,
-      options.descriminator,
-    );
+    return new PersistedDatabase<T, K>(options.databaseName, options.entity, options.descriminator);
   }
 }

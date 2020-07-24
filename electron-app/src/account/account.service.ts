@@ -1,4 +1,11 @@
-import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { session } from 'electron';
 import * as _ from 'lodash';
 import { EventsGateway } from 'src/events/events.gateway';

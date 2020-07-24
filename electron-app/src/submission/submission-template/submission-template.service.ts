@@ -1,6 +1,9 @@
 import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
 import * as _ from 'lodash';
-import { SubmissionTemplateRepository, SubmissionTemplateRepositoryToken } from './submission-template.repository';
+import {
+  SubmissionTemplateRepository,
+  SubmissionTemplateRepositoryToken,
+} from './submission-template.repository';
 import { EventsGateway } from 'src/events/events.gateway';
 import { SubmissionTemplateEvent } from './enums/submission-template.events.enum';
 import { CreateSubmissionTemplateModel } from './models/create-template.model';

@@ -6,7 +6,7 @@ import {
   SubscribeStarFileOptions,
   SubscribeStarNotificationOptions
 } from '../../../../electron-app/src/websites/subscribe-star/subscribe-star.interface';
-import { Form, Select } from 'antd';
+import { Form, Select, Checkbox } from 'antd';
 import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -21,12 +21,14 @@ import WebsiteService from '../../services/website.service';
 
 const defaultFileOptions: SubscribeStarFileOptions = {
   ...GenericDefaultFileOptions,
-  tier: 'free'
+  tier: 'free',
+  useTitle: true
 };
 
 const defaultNotificationOptions: SubscribeStarNotificationOptions = {
   ...GenericDefaultNotificationOptions,
-  tier: 'free'
+  tier: 'free',
+  useTitle: true
 };
 
 export class SubscribeStar implements Website {
@@ -104,6 +106,14 @@ export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSe
   renderLeftForm(data: SubscribeStarNotificationOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
+      <div>
+        <Checkbox
+          checked={data.useTitle}
+          onChange={this.handleCheckedChange.bind(this, 'useTitle')}
+        >
+          Use Title
+        </Checkbox>
+      </div>,
       <Form.Item label="Access Tier">
         <Select
           {...GenericSelectProps}
@@ -143,9 +153,17 @@ export class SubscribeStarFileSubmissionForm extends GenericFileSubmissionSectio
     );
   }
 
-  renderRightForm(data: SubscribeStarFileOptions) {
-    const elements = super.renderRightForm(data);
+  renderLeftForm(data: SubscribeStarFileOptions) {
+    const elements = super.renderLeftForm(data);
     elements.push(
+      <div>
+        <Checkbox
+          checked={data.useTitle}
+          onChange={this.handleCheckedChange.bind(this, 'useTitle')}
+        >
+          Use Title
+        </Checkbox>
+      </div>,
       <Form.Item label="Access Tier">
         <Select
           {...GenericSelectProps}

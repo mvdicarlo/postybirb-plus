@@ -5,6 +5,6 @@ import { Piczel } from './piczel.service';
 @Module({
   controllers: [PiczelController],
   providers: [Piczel],
-  exports: [Piczel]
+  exports: [Piczel],
 })
 export class PiczelModule {}
