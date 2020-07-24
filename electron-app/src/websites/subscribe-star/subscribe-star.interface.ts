@@ -5,8 +5,10 @@ import {
 
 export interface SubscribeStarFileOptions extends DefaultFileOptions {
   tier?: string;
+  useTitle: boolean;
 }
 
 export interface SubscribeStarNotificationOptions extends DefaultOptions {
   tier?: string;
+  useTitle: boolean;
 }

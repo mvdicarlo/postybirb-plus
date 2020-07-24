@@ -165,7 +165,7 @@ export class DeviantArt extends Website {
     accountData: DeviantArtAccountData,
   ): Promise<PostResponse> {
     const uploadForm: any = {
-      title: data.title,
+      title: data.title.substring(0, 50),
       access_token: accountData.access_token,
       file: data.primary.file,
       artist_comments: data.description,
@@ -291,6 +291,11 @@ export class DeviantArt extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
+
+    const title = submissionPart.data.title || defaultPart.data.title || submission.title;
+    if (title.length > 50) {
+      warnings.push(`Title will be truncated to 50 characters: ${title.substring(0, 50)}`);
+    }
 
     if (submissionPart.data.folders && submissionPart.data.folders.length) {
       const folders: Folder[] = _.get(

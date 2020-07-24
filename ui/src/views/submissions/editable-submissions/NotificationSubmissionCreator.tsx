@@ -34,7 +34,7 @@ export class NotificationSubmissionCreator extends React.Component<
       }
       SubmissionService.create({
         type: SubmissionType.NOTIFICATION,
-        title: this.state.value,
+        title: this.state.value || 'PLACEHOLDER',
         parts: sanitizedParts ? JSON.stringify(Object.values(sanitizedParts)) : undefined
       })
         .then(() => message.success('Submission created.'))
@@ -42,18 +42,25 @@ export class NotificationSubmissionCreator extends React.Component<
       this.hideModal();
     }
   }
+
   hideModal() {
     this.setState({ modalVisible: false, value: '', parts: undefined, keepTemplateTitle: false });
   }
+
   showModal() {
     this.setState({ modalVisible: true });
   }
+
   onNameChange({ target }) {
     this.setState({ value: target.value });
   }
+
   isValid(): boolean {
-    return !!this.state.value && !!this.state.value.trim().length;
+    return this.state.keepTemplateTitle && this.state.parts
+      ? true
+      : !!this.state.value && !!this.state.value.trim().length;
   }
+
   render() {
     return (
       <div>
