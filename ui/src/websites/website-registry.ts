@@ -1,4 +1,5 @@
 import { Website } from './interfaces/website.interface';
+import { Artconomy } from './artconomy/Artconomy';
 import { Weasyl } from './weasyl/Weasyl';
 import { Discord } from './discord/Discord';
 import { Furiffic } from './furiffic/Furiffic';
@@ -28,6 +29,7 @@ import { Pillowfort } from './pillowfort/Pillowfort';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
+    Artconomy: new Artconomy(),
     Aryion: new Aryion(),
     Custom: new Custom(),
     Derpibooru: new Derpibooru(),
