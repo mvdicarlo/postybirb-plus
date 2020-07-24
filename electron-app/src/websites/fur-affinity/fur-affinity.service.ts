@@ -25,7 +25,10 @@ import { Folder } from '../interfaces/folder.interface';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { FurAffinityDefaultFileOptions, FurAffinityDefaultNotificationOptions } from './fur-affinity.defaults';
+import {
+  FurAffinityDefaultFileOptions,
+  FurAffinityDefaultNotificationOptions,
+} from './fur-affinity.defaults';
 import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
 import _ = require('lodash');
 import { GenericAccountProp } from '../generic/generic-account-props.enum';

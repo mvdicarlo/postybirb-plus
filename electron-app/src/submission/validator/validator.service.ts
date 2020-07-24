@@ -46,7 +46,11 @@ export class ValidatorService {
     const parsedPart = this.parsePart(part, defaultPart);
     switch (submission.type) {
       case SubmissionType.FILE:
-        return website.validateFileSubmission(submission as FileSubmissionEntity, parsedPart, defaultPart);
+        return website.validateFileSubmission(
+          submission as FileSubmissionEntity,
+          parsedPart,
+          defaultPart,
+        );
       case SubmissionType.NOTIFICATION:
         return website.validateNotificationSubmission(submission, parsedPart, defaultPart);
     }

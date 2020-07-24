@@ -6,13 +6,19 @@ export class UsernameParser {
    * @param  replacement Regex replacement string e.g. https://www.furaffinity.net/user/$1
    */
   public static parse(html: string, code: string, replacement: string): string {
-    if (!html) { return ''; }
+    if (!html) {
+      return '';
+    }
 
     const regex = new RegExp(`{${code}:(.+?)}`, 'gi');
     html = html.replace(regex, (match, first) => {
-      if (!first) { return match; }
+      if (!first) {
+        return match;
+      }
       const trimmedMatch = first.replace(/<(?:[^>'"]*|(['"]).*?\1)*>/gi, '').trim();
-      if (!trimmedMatch.length) { return match; }
+      if (!trimmedMatch.length) {
+        return match;
+      }
       return `<a href="${replacement.replace('$1', trimmedMatch)}">${trimmedMatch}</a>`;
     });
 
@@ -31,13 +37,19 @@ export class UsernameParser {
     replacement: string,
     parseFn?: (s) => string,
   ): string {
-    if (!html) { return ''; }
+    if (!html) {
+      return '';
+    }
 
     const regex = new RegExp(`{${code}:(.+?)}`, 'gi');
     html = html.replace(regex, (match, first) => {
-      if (!first) { return match; }
+      if (!first) {
+        return match;
+      }
       let trimmedMatch = first.replace(/<(?:[^>'"]*|(['"]).*?\1)*>/gi, '').trim();
-      if (!trimmedMatch.length) { return match; }
+      if (!trimmedMatch.length) {
+        return match;
+      }
       if (parseFn) {
         trimmedMatch = parseFn(trimmedMatch);
       }

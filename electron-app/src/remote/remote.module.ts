@@ -4,6 +4,6 @@ import { RemoteService } from './remote.service';
 
 @Module({
   controllers: [RemoteController],
-  providers: [RemoteService]
+  providers: [RemoteService],
 })
 export class RemoteModule {}

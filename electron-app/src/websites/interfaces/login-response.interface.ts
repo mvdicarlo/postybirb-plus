@@ -4,7 +4,6 @@ export interface LoginResponse {
   username: string;
 }
 
-
 export interface LoginResponseDto {
   loggedIn: boolean;
   username: string;

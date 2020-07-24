@@ -60,7 +60,7 @@ export class WebsiteProvider {
     readonly deviantArt: DeviantArt,
     readonly mastodon: Mastodon,
     readonly twitter: Twitter,
-    readonly pillowfort: Pillowfort
+    readonly pillowfort: Pillowfort,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

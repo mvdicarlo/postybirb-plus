@@ -10,7 +10,10 @@ import { FileSubmission } from 'src/submission/file-submission/interfaces/file-s
 import { CancellationToken } from 'src/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/submission/post/interfaces/file-post-data.interface';
 import { PostResponse } from 'src/submission/post/interfaces/post-response.interface';
-import { DefaultFileOptions, DefaultOptions } from 'src/submission/submission-part/interfaces/default-options.interface';
+import {
+  DefaultFileOptions,
+  DefaultOptions,
+} from 'src/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/utils/filesize.util';

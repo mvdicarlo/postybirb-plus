@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/account/models/user-account.entity';
 import ImageManipulator from 'src/file-manipulation/manipulators/image.manipulator';
-import Http, {HttpResponse} from 'src/http/http.util';
+import Http, { HttpResponse } from 'src/http/http.util';
 import { SubmissionRating } from 'src/submission/enums/submission-rating.enum';
 import { FileSubmissionType } from 'src/submission/file-submission/enums/file-submission-type.enum';
 import { FileRecord } from 'src/submission/file-submission/interfaces/file-record.interface';
@@ -20,8 +20,7 @@ import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
 import { Website } from '../website.base';
 import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
 import { ArtconomyFileOptions } from './artconomy.interface';
-import { MarkdownParser } from "src/description-parsing/markdown/markdown.parser";
-
+import { MarkdownParser } from 'src/description-parsing/markdown/markdown.parser';
 
 @Injectable()
 export class Artconomy extends Website {
@@ -48,16 +47,20 @@ export class Artconomy extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const authCheck = await Http.get<any>(`${this.BASE_URL}/api/profiles/v1/data/requester/`, data._id, {
-      requestOptions: {
-        json: true,
+    const authCheck = await Http.get<any>(
+      `${this.BASE_URL}/api/profiles/v1/data/requester/`,
+      data._id,
+      {
+        requestOptions: {
+          json: true,
+        },
       },
-    });
+    );
     if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
-      this.storeAccountInformation(data._id, 'id', authCheck.response.body.id)
-      this.storeAccountInformation(data._id, 'username', authCheck.response.body.username)
-      this.storeAccountInformation(data._id, 'authToken', authCheck.response.body.authtoken)
-      this.storeAccountInformation(data._id, 'csrfToken', authCheck.response.body.csrftoken)
+      this.storeAccountInformation(data._id, 'id', authCheck.response.body.id);
+      this.storeAccountInformation(data._id, 'username', authCheck.response.body.username);
+      this.storeAccountInformation(data._id, 'authToken', authCheck.response.body.authtoken);
+      this.storeAccountInformation(data._id, 'csrfToken', authCheck.response.body.csrftoken);
       status.username = authCheck.response.body.username;
       status.loggedIn = true;
     }
@@ -84,13 +87,13 @@ export class Artconomy extends Website {
     }
   }
 
-  async checkAssetUpload(upload: HttpResponse<{id: string}>) {
+  async checkAssetUpload(upload: HttpResponse<{ id: string }>) {
     if (!upload.body.id) {
       return Promise.reject(
-          this.createPostResponse({
-            message: upload.response.statusMessage,
-            additionalInfo: JSON.stringify(upload.body),
-          }),
+        this.createPostResponse({
+          message: upload.response.statusMessage,
+          additionalInfo: JSON.stringify(upload.body),
+        }),
       );
     }
   }
@@ -102,14 +105,14 @@ export class Artconomy extends Website {
     const primaryAssetForm: any = {
       'files[]': data.primary.file,
     };
-    const id = this.getAccountInfo(data.part.accountId,'id');
-    const username = this.getAccountInfo(data.part.accountId,'username');
+    const id = this.getAccountInfo(data.part.accountId, 'id');
+    const username = this.getAccountInfo(data.part.accountId, 'username');
     const authToken = this.getAccountInfo(data.part.accountId, 'authToken');
-    const csrfToken = this.getAccountInfo(data.part.accountId,'csrfToken');
+    const csrfToken = this.getAccountInfo(data.part.accountId, 'csrfToken');
 
     const thumbnailAssetForm = {
       'files[]': data.thumbnail,
-    }
+    };
     const requestOptions = {
       json: true,
       headers: {
@@ -118,32 +121,24 @@ export class Artconomy extends Website {
       },
     };
     this.checkCancelled(cancellationToken);
-    let upload = await Http.post<{ id: string }>(
-      `${this.BASE_URL}/api/lib/v1/asset/`,
-      undefined,
-      {
-        requestOptions,
-        type: 'multipart',
-        skipCookies: true,
-        data: primaryAssetForm,
-      },
-    );
+    let upload = await Http.post<{ id: string }>(`${this.BASE_URL}/api/lib/v1/asset/`, undefined, {
+      requestOptions,
+      type: 'multipart',
+      skipCookies: true,
+      data: primaryAssetForm,
+    });
     await this.checkAssetUpload(upload);
 
     const primaryAsset = upload.body.id;
-    let thumbnailAsset: null|string = null
+    let thumbnailAsset: null | string = null;
     if (data.thumbnail) {
-      upload = await Http.post<{ id: string }>(
-          `${this.BASE_URL}/api/lib/v1/asset/`,
-          undefined,
-          {
-            requestOptions,
-            type: 'multipart',
-            skipCookies: true,
-            data: thumbnailAssetForm,
-          },
-      );
-      await this.checkAssetUpload(upload)
+      upload = await Http.post<{ id: string }>(`${this.BASE_URL}/api/lib/v1/asset/`, undefined, {
+        requestOptions,
+        type: 'multipart',
+        skipCookies: true,
+        data: thumbnailAssetForm,
+      });
+      await this.checkAssetUpload(upload);
       thumbnailAsset = upload.body.id;
     }
 
@@ -159,25 +154,27 @@ export class Artconomy extends Website {
       artists: [],
     };
     if (data.options.isArtist) {
-      editForm.artists.push(id)
+      editForm.artists.push(id);
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<any>(`${this.BASE_URL}/api/profiles/v1/account/${username}/submissions/`, undefined, {
-      type: 'json',
-      data: editForm,
-      requestOptions,
-      skipCookies: true,
-    })
-    await this.checkAssetUpload(post)
+    const post = await Http.post<any>(
+      `${this.BASE_URL}/api/profiles/v1/account/${username}/submissions/`,
+      undefined,
+      {
+        type: 'json',
+        data: editForm,
+        requestOptions,
+        skipCookies: true,
+      },
+    );
+    await this.checkAssetUpload(post);
     return this.createPostResponse({ source: `${this.BASE_URL}/submissions/${post.body.id}` });
   }
 
   parseTags(tags: string[]) {
     return tags.map(tag => {
-      return tag
-        .trim()
-        .replace(/\s/gm, '_')
+      return tag.trim().replace(/\s/gm, '_');
     });
   }
 

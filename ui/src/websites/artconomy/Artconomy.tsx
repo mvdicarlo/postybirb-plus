@@ -7,13 +7,13 @@ import { ArtconomyFileOptions } from '../../../../electron-app/src/websites/artc
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import {GenericLoginDialog} from "../generic/GenericLoginDialog";
+import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 
 const defaultOptions: ArtconomyFileOptions = {
   ...GenericDefaultFileOptions,
   commentsDisabled: false,
   isArtist: true,
-  private: false,
+  private: false
 };
 
 export class Artconomy implements Website {
@@ -22,7 +22,7 @@ export class Artconomy implements Website {
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   LoginDialog = (props: LoginDialogProps) => (
-      <GenericLoginDialog url="https://artconomy.com/auth/login" {...props} />
+    <GenericLoginDialog url="https://artconomy.com/auth/login" {...props} />
   );
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyFileOptions>) => (
     <ArtconomyFileSubmissionForm
@@ -57,8 +57,9 @@ export class Artconomy implements Website {
   }
 }
 
-export class ArtconomyFileSubmissionForm extends GenericFileSubmissionSection<ArtconomyFileOptions> {
-
+export class ArtconomyFileSubmissionForm extends GenericFileSubmissionSection<
+  ArtconomyFileOptions
+> {
   renderLeftForm(data: ArtconomyFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
@@ -82,7 +83,7 @@ export class ArtconomyFileSubmissionForm extends GenericFileSubmissionSection<Ar
         <Checkbox checked={data.private} onChange={this.handleCheckedChange.bind(this, 'private')}>
           Private
         </Checkbox>
-      </div>,
+      </div>
     );
     return elements;
   }

@@ -1,7 +1,16 @@
 import Entity from 'src/database/models/entity.model';
 import { Submission } from '../interfaces/submission.interface';
 import { SubmissionType } from '../enums/submission-type.enum';
-import { IsBoolean, IsString, IsEnum, IsArray, ValidateNested, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsBoolean,
+  IsString,
+  IsEnum,
+  IsArray,
+  ValidateNested,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import SubmissionScheduleModel from './submission-schedule.model';
 
