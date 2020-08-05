@@ -41,7 +41,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
     inline: false,
     statusbar: false,
     paste_data_images: false,
-    browser_spellcheck: false, // should be supported in electron 8
+    browser_spellcheck: true, // should be supported in electron 8
     entity_encoding: 'raw',
     paste_retain_style_properties: 'color',
     invalid_elements: 'img,audio,video',
@@ -156,7 +156,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
                 content={
                   <div className="overflow-auto" style={{ maxHeight: '50vh' }}>
                     <em>
-                      Example: {'{tw:minnownade}'} -> https://twitter.com/minnownade (would appear
+                      Example: {'{tw:minnownade}'} -&gt; https://twitter.com/minnownade (would appear
                       as @minnownade on Twitter)
                     </em>
                     {Object.entries(WebsiteService.usernameShortcuts)
