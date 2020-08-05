@@ -39,7 +39,6 @@ require('electron-context-menu')({
 });
 
 let nest;
-let window = null;
 let initializedOnce = false;
 let mainWindowState = null;
 let backgroundAlertTimeout = null;
@@ -110,7 +109,7 @@ function createWindow() {
     });
   }
 
-  window = new BrowserWindow({
+  global.window = new BrowserWindow({
     show: false,
     width: mainWindowState.width,
     height: mainWindowState.height,
@@ -132,17 +131,17 @@ function createWindow() {
     },
   });
 
-  window.PORT = process.env.PORT;
-  window.AUTH_ID = global.AUTH_ID;
-  window.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
-  window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
+  global.window.PORT = process.env.PORT;
+  global.window.AUTH_ID = global.AUTH_ID;
+  global.window.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
+  global.window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
   if (!global.DEBUG_MODE) {
     mainWindowState.manage(window);
   }
 
-  window.webContents.on('new-window', event => event.preventDefault());
-  window.on('closed', () => {
-    window = null;
+  global.window.webContents.on('new-window', event => event.preventDefault());
+  global.window.on('closed', () => {
+    global.window = null;
     if (global.tray && util.isWindows()) {
       clearTimeout(backgroundAlertTimeout);
       backgroundAlertTimeout = setTimeout(() => {
@@ -156,11 +155,11 @@ function createWindow() {
     }
   });
 
-  window.loadFile(`./build/index.html`).then(() => {
+  global.window.loadFile(`./build/index.html`).then(() => {
     loader.hide();
-    window.show();
+    global.window.show();
     if (global.DEBUG_MODE) {
-      window.webContents.openDevTools();
+      global.window.webContents.openDevTools();
     }
   });
 }
@@ -216,16 +215,16 @@ function buildTray(image) {
 }
 
 function show() {
-  if (!window) {
+  if (!global.window) {
     createWindow();
     return;
   }
-  if (window.isMinimized()) {
-    window.restore();
+  if (global.window.isMinimized()) {
+    global.window.restore();
   } else {
-    window.show();
+    global.window.show();
   }
-  window.focus();
+  global.window.focus();
 }
 
 global.showApp = show;
