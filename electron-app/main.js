@@ -32,6 +32,7 @@ if (DEBUG_MODE) {
   console.log(`APP: ${app.getPath('userData')}`);
 }
 
+require('./src-electron/crash-handler');
 require('./src-electron/auth-generator');
 require('./src-electron/settings');
 require('electron-context-menu')({

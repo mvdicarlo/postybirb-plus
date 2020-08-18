@@ -22,9 +22,6 @@ export class CustomLogger extends Logger {
 
   error(message: any, trace?: string, context?: string) {
     super.error(message, trace, context);
-    console.log('content', context);
-    console.log(trace);
-    console.log(context);
     CustomLogger.logger.error(`[${context || this.context}] ${message}\n${trace}`);
   }
 
