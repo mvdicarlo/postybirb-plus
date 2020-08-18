@@ -109,7 +109,7 @@ function createWindow() {
     });
   }
 
-  global.window = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     show: false,
     width: mainWindowState.width,
     height: mainWindowState.height,
@@ -131,17 +131,17 @@ function createWindow() {
     },
   });
 
-  global.window.PORT = process.env.PORT;
-  global.window.AUTH_ID = global.AUTH_ID;
-  global.window.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
-  global.window.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
+  mainWindow.PORT = process.env.PORT;
+  mainWindow.AUTH_ID = global.AUTH_ID;
+  mainWindow.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
+  mainWindow.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
   if (!global.DEBUG_MODE) {
     mainWindowState.manage(window);
   }
 
-  global.window.webContents.on('new-window', event => event.preventDefault());
-  global.window.on('closed', () => {
-    global.window = null;
+  mainWindow.webContents.on('new-window', event => event.preventDefault());
+  mainWindow.on('closed', () => {
+    mainWindow = null;
     if (global.tray && util.isWindows()) {
       clearTimeout(backgroundAlertTimeout);
       backgroundAlertTimeout = setTimeout(() => {
@@ -155,11 +155,11 @@ function createWindow() {
     }
   });
 
-  global.window.loadFile(`./build/index.html`).then(() => {
+  mainWindow.loadFile(`./build/index.html`).then(() => {
     loader.hide();
-    global.window.show();
+    mainWindow.show();
     if (global.DEBUG_MODE) {
-      global.window.webContents.openDevTools();
+      mainWindow.webContents.openDevTools();
     }
   });
 }
@@ -215,16 +215,16 @@ function buildTray(image) {
 }
 
 function show() {
-  if (!global.window) {
+  if (!mainWindow) {
     createWindow();
     return;
   }
-  if (global.window.isMinimized()) {
-    global.window.restore();
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
   } else {
-    global.window.show();
+    mainWindow.show();
   }
-  global.window.focus();
+  mainWindow.focus();
 }
 
 global.showApp = show;
