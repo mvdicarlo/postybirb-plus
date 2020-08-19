@@ -29,6 +29,8 @@ async function bootstrap() {
 }
 
 process.on('uncaughtException', err => logger.error(err.message, err.stack, 'Uncaught Exception'));
-process.on('unhandledRejection', err => logger.error(err, '', 'Unhandled Rejection'));
+process.on('unhandledRejection', (err: any) =>
+  logger.error(err.message, err.stack, 'Unhandled Rejection'),
+);
 
 module.exports = bootstrap;

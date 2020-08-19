@@ -42,6 +42,7 @@ require('electron-context-menu')({
 let nest;
 let initializedOnce = false;
 let mainWindowState = null;
+let mainWindow = null;
 let backgroundAlertTimeout = null;
 const icon = path.join(__dirname, '/build/assets/icons/minnowicon.png');
 
@@ -137,7 +138,7 @@ function createWindow() {
   mainWindow.AUTH_SERVER_URL = global.AUTH_SERVER_URL;
   mainWindow.IS_DARK_THEME = nativeTheme.shouldUseDarkColors;
   if (!global.DEBUG_MODE) {
-    mainWindowState.manage(window);
+    mainWindowState.manage(mainWindow);
   }
 
   mainWindow.webContents.on('new-window', event => event.preventDefault());
