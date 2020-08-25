@@ -1,4 +1,5 @@
-const { app, shell } = require('electron');
+/* tslint:disable: no-console no-var-requires variable-name */
+import { app, shell } from 'electron';
 const util = require('./utils');
 
 const template = [
@@ -105,7 +106,6 @@ if (util.isOSX()) {
       },
       {
         role: 'services',
-        submenu: [],
       },
       {
         type: 'separator',

@@ -1,4 +1,5 @@
-const { app } = require('electron');
+/* tslint:disable: no-console no-var-requires variable-name */
+import { app } from 'electron';
 const fs = require('fs-extra');
 const path = require('path');
 const nanoid = require('nanoid');
@@ -13,4 +14,4 @@ if (!fs.existsSync(idPath)) {
   global.AUTH_ID = fs.readFileSync(idPath).toString();
 }
 
-console.log('\033[1m\x1b[36m', `\n\nAUTH ID: ${global.AUTH_ID}\n\n`, '\x1b[0m\033[0m');
+console.log(`\n\nAUTH ID: ${global.AUTH_ID}\n\n`);

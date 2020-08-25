@@ -1,13 +1,11 @@
-function isWindows() {
+export function isWindows(): boolean {
   return process.platform === 'win32';
 }
 
-function isOSX() {
+export function isOSX(): boolean {
   return process.platform === 'darwin';
 }
 
-function isLinux() {
+export function isLinux(): boolean {
   return !(isWindows() || isOSX());
 }
-
-module.exports = { isWindows, isOSX, isLinux };

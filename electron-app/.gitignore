@@ -4,6 +4,7 @@
 /node_modules
 /electron-dist
 /release
+tsconfig.build.tsbuildinfo
 
 # Logs
 logs

@@ -1,31 +1,32 @@
-const express = require('express');
-const { getURL } = require('./common.auth');
-const Request = require('request');
+import * as express from 'express';
+import { getURL } from './common.auth';
+import * as Request from 'request';
+import { Server } from 'http';
 
 const app = express();
-let cb;
-let server;
+let cb: (data: any) => any;
+let server: Server;
 
-exports.getAuthURL = function() {
+export function getAuthURL() {
   return getURL('deviant-art/v1/authorize');
-};
+}
 
-exports.start = function(callback) {
+export function start(callback: (data: any) => any) {
   cb = callback;
   if (!server) {
     server = app.listen(4200); // Hard coded 4200 because DA bad >:(
   }
-};
+}
 
-exports.stop = function() {
+export function stop() {
   if (server) {
     server.close();
   }
   cb = null;
   server = null;
-};
+}
 
-function getAccessToken(code) {
+function getAccessToken(code: string) {
   Request.post(
     getURL('deviant-art/v1/authorize'),
     {
@@ -47,5 +48,5 @@ function getAccessToken(code) {
 
 app.get('/deviantart', (req, res) => {
   res.redirect('https://www.deviantart.com');
-  getAccessToken(req.query.code);
+  getAccessToken(req.query.code as string);
 });

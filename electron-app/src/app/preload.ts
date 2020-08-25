@@ -1,4 +1,5 @@
-const { remote, clipboard, shell } = require('electron');
+/* tslint:disable: no-console no-var-requires variable-name */
+import { remote, clipboard, shell } from 'electron';
 const { app, session } = remote;
 
 // Authorizers
@@ -14,12 +15,12 @@ process.once('loaded', () => {
   global.Buffer = _Buffer;
 });
 
-window.PORT = remote.getCurrentWindow().PORT;
-window.AUTH_ID = remote.getCurrentWindow().AUTH_ID;
-window.IS_DARK_THEME = remote.getCurrentWindow().IS_DARK_THEME;
-window.AUTH_SERVER_URL = remote.getCurrentWindow().AUTH_SERVER_URL;
-window.appVersion = app.getVersion();
-window.electron = {
+(window as any).PORT = (remote.getCurrentWindow() as any).PORT;
+(window as any).AUTH_ID = (remote.getCurrentWindow() as any).AUTH_ID;
+(window as any).IS_DARK_THEME = (remote.getCurrentWindow() as any).IS_DARK_THEME;
+(window as any).AUTH_SERVER_URL = (remote.getCurrentWindow() as any).AUTH_SERVER_URL;
+(window as any).appVersion = app.getVersion();
+(window as any).electron = {
   clipboard: {
     availableFormats: clipboard.availableFormats,
     read() {

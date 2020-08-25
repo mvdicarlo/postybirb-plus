@@ -1,11 +1,12 @@
-const { app } = require('electron');
+/* tslint:disable: no-console no-var-requires */
+import { app } from 'electron';
 const fs = require('fs-extra');
 const path = require('path');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const util = require('./utils');
 
-const settingsPath = path.join(BASE_DIRECTORY, 'data', 'settings.json');
+const settingsPath = path.join(global.BASE_DIRECTORY, 'data', 'settings.json');
 fs.ensureFileSync(settingsPath);
 const adapter = new FileSync(settingsPath);
 const settings = low(adapter);
