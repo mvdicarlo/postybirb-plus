@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { UserAccountDto } from '../../../electron-app/src/account/interfaces/user-account.dto.interface';
+import { UserAccountDto } from '../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
 import RemoteService from './remote.service';
 
 export default class LoginService {

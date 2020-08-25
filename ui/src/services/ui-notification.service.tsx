@@ -1,5 +1,5 @@
 import { message, notification } from 'antd';
-import { UINotification } from '../../../electron-app/src/notification/interfaces/ui-notification.interface';
+import { UINotification } from '../../../electron-app/src/server/notification/interfaces/ui-notification.interface';
 import { UINotificationEvent } from '../shared/enums/ui-notification.events.enum';
 import socket from '../utils/websocket';
 

@@ -3,11 +3,11 @@ import * as _ from 'lodash';
 import './TagGroup.css';
 import { inject, observer } from 'mobx-react';
 import { TagGroupStore } from '../../stores/tag-group.store';
-import { TagGroup } from '../../../../electron-app/src/tag-group/interfaces/tag-group.interface';
+import { TagGroup } from '../../../../electron-app/src/server/tag-group/interfaces/tag-group.interface';
 import TagGroupService from '../../services/tag-group.service';
 import TagInput from '../submissions/submission-forms/form-components/TagInput';
 import { Input, Button, message, Popconfirm, Spin, Empty, Card, Icon } from 'antd';
-import { TagData } from '../../../../electron-app/src/submission/submission-part/interfaces/tag-data.interface';
+import { TagData } from '../../../../electron-app/src/server/submission/submission-part/interfaces/tag-data.interface';
 
 interface Props {
   tagGroupStore?: TagGroupStore;

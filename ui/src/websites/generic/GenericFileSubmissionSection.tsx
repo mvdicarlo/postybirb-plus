@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { DefaultFileOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { DefaultFileOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import WebsiteFormSection from '../form-sections/WebsiteFormSection';
 
 export default class GenericFileSubmissionSection<

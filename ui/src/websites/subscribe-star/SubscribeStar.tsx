@@ -5,10 +5,10 @@ import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import {
   SubscribeStarFileOptions,
   SubscribeStarNotificationOptions
-} from '../../../../electron-app/src/websites/subscribe-star/subscribe-star.interface';
+} from '../../../../electron-app/src/server/websites/subscribe-star/subscribe-star.interface';
 import { Form, Select, Checkbox } from 'antd';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
@@ -16,7 +16,7 @@ import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
+import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
 import WebsiteService from '../../services/website.service';
 
 const defaultFileOptions: SubscribeStarFileOptions = {

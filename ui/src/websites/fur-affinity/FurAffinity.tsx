@@ -6,12 +6,12 @@ import { SubmissionSectionProps } from '../../views/submissions/submission-forms
 import {
   FurAffinityFileOptions,
   FurAffinityNotificationOptions
-} from '../../../../electron-app/src/websites/fur-affinity/fur-affinity.interface';
-import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
+} from '../../../../electron-app/src/server/websites/fur-affinity/fur-affinity.interface';
+import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
 import { Form, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';

@@ -60,7 +60,7 @@ app.on('ready', () => {
   if (!global.SERVER_ONLY_MODE) {
     loader.show();
   }
-  nest = require('./dist/main');
+  nest = require('./dist/server/main');
   initialize();
 });
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {

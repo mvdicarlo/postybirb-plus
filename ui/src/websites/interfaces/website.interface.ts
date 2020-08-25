@@ -1,6 +1,6 @@
-import { UserAccountDto } from '../../../../electron-app/src/account/interfaces/user-account.dto.interface';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import { UserAccountDto } from '../../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 

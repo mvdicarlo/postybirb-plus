@@ -2,13 +2,13 @@ import React from 'react';
 import SubmissionService from '../../../services/submission.service';
 import SubmissionUtil from '../../../utils/submission.util';
 import moment from 'moment';
-import { FileSubmission } from '../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from '../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Link } from 'react-router-dom';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { List, Avatar, Icon, Popconfirm, Typography, message, Modal, DatePicker } from 'antd';
 import PostService from '../../../services/post.service';
-import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
-import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { Submission } from '../../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { SubmissionPackage } from '../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 
 interface ListItemProps {
   item: SubmissionPackage<Submission>;

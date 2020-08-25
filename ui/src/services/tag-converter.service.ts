@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { TagConverter } from '../../../electron-app/src/tag-converter/interfaces/tag-converter.interface';
+import { TagConverter } from '../../../electron-app/src/server/tag-converter/interfaces/tag-converter.interface';
 
 export default class TagConverterService {
   static getAll() {

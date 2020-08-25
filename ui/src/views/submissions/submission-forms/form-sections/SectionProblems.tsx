@@ -1,5 +1,5 @@
 import React from 'react';
-import { Problem } from '../../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { Problem } from '../../../../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
 import { Alert } from 'antd';
 
 const SectionProblems: React.FunctionComponent<{ problems?: Problem }> = props => (

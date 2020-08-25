@@ -3,7 +3,7 @@ import SubmissionService from '../../../services/submission.service';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { Button, Input, message, Form, Modal, Checkbox } from 'antd';
 import SubmissionTemplateSelect from '../submission-template-select/SubmissionTemplateSelect';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
 import * as _ from 'lodash';
 
 interface NotificationSubmissionCreateState {

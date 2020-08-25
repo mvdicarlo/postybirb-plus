@@ -3,9 +3,9 @@ import socket from '../utils/websocket';
 import {
   PostStatuses,
   PostInfo
-} from '../../../electron-app/src/submission/post/interfaces/post-status.interface';
+} from '../../../electron-app/src/server/submission/post/interfaces/post-status.interface';
 import PostService from '../services/post.service';
-import { Submission } from '../../../electron-app/src/submission/interfaces/submission.interface';
+import { Submission } from '../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { PostEvent } from '../shared/enums/post.events.enum';
 
 export class PostStatusStore {

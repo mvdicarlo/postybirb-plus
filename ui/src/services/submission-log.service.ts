@@ -1,6 +1,6 @@
 import axios from '../utils/http';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
-import { SubmissionLog } from '../../../electron-app/src/submission/log/interfaces/submission-log.interface';
+import { SubmissionLog } from '../../../electron-app/src/server/submission/log/interfaces/submission-log.interface';
 
 export default class SubmissionLogService {
   static getLogs(type: SubmissionType) {

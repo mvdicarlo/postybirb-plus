@@ -2,7 +2,7 @@ import { Button, Form, Input, message, Spin } from 'antd';
 import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { MastodonAccountData } from '../../../../electron-app/src/websites/mastodon/mastodon-account.interface';
+import { MastodonAccountData } from '../../../../electron-app/src/server/websites/mastodon/mastodon-account.interface';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 

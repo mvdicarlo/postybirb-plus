@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { Form, Select } from 'antd';
-import { SubmissionPart } from '../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
 import { SubmissionType } from '../../../shared/enums/submission-type.enum';
 import { SubmissionStore } from '../../../stores/submission.store';
 import { SubmissionTemplateStore } from '../../../stores/submission-template.store';

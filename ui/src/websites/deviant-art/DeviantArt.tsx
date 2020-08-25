@@ -1,11 +1,11 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
-import { DeviantArtFileOptions } from '../../../../electron-app/src/websites/deviant-art/deviant-art.interface';
-import { Folder } from '../../../../electron-app/src/websites/interfaces/folder.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { DeviantArtFileOptions } from '../../../../electron-app/src/server/websites/deviant-art/deviant-art.interface';
+import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
 import WebsiteService from '../../services/website.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';

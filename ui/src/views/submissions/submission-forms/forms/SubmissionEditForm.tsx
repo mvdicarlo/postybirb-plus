@@ -4,25 +4,25 @@ import { WebsiteRegistry } from '../../../../websites/website-registry';
 import DefaultFormSection from '../form-sections/DefaultFormSection';
 import SubmissionService from '../../../../services/submission.service';
 import SubmissionUtil from '../../../../utils/submission.util';
-import { FileSubmission } from '../../../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from '../../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import { LoginStatusStore } from '../../../../stores/login-status.store';
 import { Match, withRouter, history } from 'react-router-dom';
 import { headerStore } from '../../../../stores/header.store';
 import { inject, observer } from 'mobx-react';
 import { uiStore } from '../../../../stores/ui.store';
-import { SubmissionPackage } from '../../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from '../../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 import { TreeNode } from 'antd/lib/tree-select';
 import { RcFile, UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
 import moment from 'moment';
 import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
-import { Submission } from '../../../../../../electron-app/src/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
-import { FileRecord } from '../../../../../../electron-app/src/submission/file-submission/interfaces/file-record.interface';
-import { UserAccountDto } from '../../../../../../electron-app/src/account/interfaces/user-account.dto.interface';
+import { Submission } from '../../../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { FileRecord } from '../../../../../../electron-app/src/server/submission/file-submission/interfaces/file-record.interface';
+import { UserAccountDto } from '../../../../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
 import { submissionStore } from '../../../../stores/submission.store';
 import PostService from '../../../../services/post.service';
 import FallbackStoryInput from '../form-components/FallbackStoryInput';
@@ -44,7 +44,7 @@ import {
   Alert,
   Tooltip
 } from 'antd';
-import { Problem } from '../../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { Problem } from '../../../../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
 
 interface Props {
   match: Match;

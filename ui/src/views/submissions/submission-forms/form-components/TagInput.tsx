@@ -2,7 +2,7 @@ import { Dropdown, Form, Icon, Input, Menu, Select, Switch, Tag, Tooltip, Typogr
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
-import { TagData } from '../../../../../../electron-app/src/submission/submission-part/interfaces/tag-data.interface';
+import { TagData } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/tag-data.interface';
 import { TagGroupStore } from '../../../../stores/tag-group.store';
 
 const { Text } = Typography;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
-import { SubmissionLog } from '../../../../electron-app/src/submission/log/interfaces/submission-log.interface';
+import { SubmissionLog } from '../../../../electron-app/src/server/submission/log/interfaces/submission-log.interface';
 import SubmissionLogService from '../../services/submission-log.service';
 import { saveAs } from 'file-saver';
 import { List, Button, Icon, Typography, message, Modal } from 'antd';

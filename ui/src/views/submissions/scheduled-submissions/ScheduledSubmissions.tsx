@@ -2,8 +2,8 @@ import React from 'react';
 import SubmissionService from '../../../services/submission.service';
 import SubmissionUtil from '../../../utils/submission.util';
 import moment from 'moment';
-import { Submission } from '../../../../../electron-app/src/submission/interfaces/submission.interface';
-import { SubmissionPackage } from '../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { Submission } from '../../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { SubmissionPackage } from '../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 import {
   Calendar,
   Button,

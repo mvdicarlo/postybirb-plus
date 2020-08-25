@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { TagGroup } from '../../../electron-app/src/tag-group/interfaces/tag-group.interface';
+import { TagGroup } from '../../../electron-app/src/server/tag-group/interfaces/tag-group.interface';
 import TagGroupService from '../services/tag-group.service';
 import { TagGroupEvent } from '../shared/enums/tag-group.events.enum';
 
