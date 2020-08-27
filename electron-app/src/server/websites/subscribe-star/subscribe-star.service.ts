@@ -75,12 +75,7 @@ export class SubscribeStar extends Website {
         value: 'basic',
       },
     ];
-
-    const body = await BrowserWindowUtil.getPage(
-      profileId,
-      `${this.BASE_URL}/profile/settings`,
-      true,
-    );
+    const { body } = await Http.get<string>(`${this.BASE_URL}/profile/settings`, profileId);
     const $ = cheerio.load(body);
     $('.tiers-settings_item').each((i, el) => {
       const $el = $(el);
@@ -89,7 +84,6 @@ export class SubscribeStar extends Website {
         value: $el.attr('data-id'),
       });
     });
-
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
   }
 
