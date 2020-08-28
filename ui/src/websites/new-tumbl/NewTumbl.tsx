@@ -1,13 +1,13 @@
 import { Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { NewTumblBlog } from '../../../../electron-app/src/websites/new-tumbl/new-tumbl-blog.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { NewTumblBlog } from '../../../../electron-app/src/server/websites/new-tumbl/new-tumbl-blog.interface';
 import {
   NewTumblFileOptions,
   NewTumblNotificationOptions
-} from '../../../../electron-app/src/websites/new-tumbl/new-tumbl.interface';
+} from '../../../../electron-app/src/server/websites/new-tumbl/new-tumbl.interface';
 import WebsiteService from '../../services/website.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';

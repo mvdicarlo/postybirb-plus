@@ -1,7 +1,7 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import SubmissionTemplateService from '../services/submission-template.service';
-import { SubmissionTemplate } from '../../../electron-app/src/submission/submission-template/interfaces/submission-template.interface';
+import { SubmissionTemplate } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
 import { SubmissionTemplateEvent } from '../shared/enums/submission-template.events.enum';
 
 export interface SubmissionStoreState {

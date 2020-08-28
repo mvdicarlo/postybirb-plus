@@ -10,6 +10,7 @@ declare global {
       DEBUG_MODE: boolean;
       SERVER_ONLY_MODE: boolean;
       settingsDB: lowdb.LowdbSync<any>;
+      tray: any;
       showApp: () => void;
     }
   }

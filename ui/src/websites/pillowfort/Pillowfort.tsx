@@ -1,12 +1,12 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import {
   PillowfortFileOptions,
   PillowfortNotificationOptions
-} from '../../../../electron-app/src/websites/pillowfort/pillowfort.interface';
+} from '../../../../electron-app/src/server/websites/pillowfort/pillowfort.interface';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';

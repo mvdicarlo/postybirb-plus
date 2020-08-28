@@ -1,6 +1,6 @@
 import axios from '../utils/http';
-import { UsernameShortcut } from '../../../electron-app/src/websites/interfaces/username-shortcut.interface';
-import { Folder } from '../../../electron-app/src/websites/interfaces/folder.interface';
+import { UsernameShortcut } from '../../../electron-app/src/server/websites/interfaces/username-shortcut.interface';
+import { Folder } from '../../../electron-app/src/server/websites/interfaces/folder.interface';
 
 export default class WebsiteService {
   static usernameShortcuts: { [key: string]: UsernameShortcut[] } = {};

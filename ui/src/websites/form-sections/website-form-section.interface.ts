@@ -1,5 +1,5 @@
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { TagOptions } from '../../views/submissions/submission-forms/form-components/TagInput';
 

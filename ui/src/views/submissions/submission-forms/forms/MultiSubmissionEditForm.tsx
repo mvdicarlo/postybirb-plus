@@ -11,13 +11,13 @@ import { TreeNode } from 'antd/lib/tree-select';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { SubmissionPart } from '../../../../../../electron-app/src/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
 import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
 import SubmissionSelectModal from '../../submission-select/SubmissionSelectModal';
-import { SubmissionPackage } from '../../../../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from '../../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 import SubmissionService from '../../../../services/submission.service';
 import SubmissionUtil from '../../../../utils/submission.util';
-import { DefaultOptions } from '../../../../../../electron-app/src/submission/submission-part/interfaces/default-options.interface';
+import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import {
   Form,
   Button,

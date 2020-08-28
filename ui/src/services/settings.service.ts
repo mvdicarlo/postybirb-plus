@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { Settings } from '../../../electron-app/src/settings/settings.interface';
+import { Settings } from '../../../electron-app/src/server/settings/settings.interface';
 
 export default class SettingsService {
   static getSettings() {

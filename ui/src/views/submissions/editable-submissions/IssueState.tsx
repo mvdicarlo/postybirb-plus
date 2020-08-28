@@ -1,5 +1,5 @@
 import React from 'react';
-import { Problems } from '../../../../../electron-app/src/submission/validator/interfaces/problems.interface';
+import { Problems } from '../../../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
 import { Icon, Tooltip, Typography } from 'antd';
 import { ProblemTree } from './ProblemTree';
 

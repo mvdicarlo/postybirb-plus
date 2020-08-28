@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { PostyBirbNotification } from '../../../electron-app/src/notification/interfaces/postybirb-notification.interface';
+import { PostyBirbNotification } from '../../../electron-app/src/server/notification/interfaces/postybirb-notification.interface';
 import NotificationService from '../services/notification.service';
 import { NotificationEvent } from '../shared/enums/notification.events.enum';
 

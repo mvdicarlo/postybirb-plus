@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { Spin, message } from 'antd';
 import { Authorizer } from '../interfaces/authorizer.interface';
-import { DeviantArtAccountData } from '../../../../electron-app/src/websites/deviant-art/deviant-art-account.interface';
+import { DeviantArtAccountData } from '../../../../electron-app/src/server/websites/deviant-art/deviant-art-account.interface';
 import LoginService from '../../services/login.service';
 
 interface State {

@@ -2,7 +2,7 @@ import { Badge, Form, Icon, Input, List, message, Modal, Popconfirm, Typography 
 import React from 'react';
 import LoginService from '../../services/login.service';
 import RemoteService from '../../services/remote.service';
-import { UserAccountDto } from '../../../../electron-app/src/account/interfaces/user-account.dto.interface';
+import { UserAccountDto } from '../../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
 import { Website } from '../../websites/interfaces/website.interface';
 
 interface AccountInfoProps {

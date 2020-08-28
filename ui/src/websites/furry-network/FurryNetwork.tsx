@@ -1,12 +1,12 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/submission/interfaces/submission.interface';
+import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import {
   FurryNetworkFileOptions,
   FurryNetworkNotificationOptions
-} from '../../../../electron-app/src/websites/furry-network/furry-network.interface';
+} from '../../../../electron-app/src/server/websites/furry-network/furry-network.interface';
 import WebsiteService from '../../services/website.service';
 import { SubmissionType } from '../../shared/enums/submission-type.enum';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';

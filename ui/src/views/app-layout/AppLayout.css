@@ -1,6 +1,5 @@
 .logo {
   height: 32px;
-  margin: 16px;
   background-size: contain;
   background-repeat: no-repeat;
   padding-left: 36px;
@@ -13,10 +12,15 @@
   top: 0;
   z-index: 10;
   background-color: inherit;
+  margin: 16px;
 }
 
 .update .ant-progress-text {
   color: hsla(0, 0%, 100%, 0.65) !important;
+}
+
+.update-container {
+  height: 6px;
 }
 
 .ant-layout-sider-collapsed .logo {

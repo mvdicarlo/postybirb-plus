@@ -1,4 +1,4 @@
-import { EventsGateway } from 'src/events/events.gateway';
+import { EventsGateway } from 'src/server/events/events.gateway';
 
 export const mockEventEmitterProvider = {
   provide: EventsGateway,

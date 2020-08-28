@@ -1,13 +1,13 @@
 import socket from '../utils/websocket';
 import * as _ from 'lodash';
-import { SubmissionPackage } from '../../../electron-app/src/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from '../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 import { observable, computed, action } from 'mobx';
 import { SubmissionEvent } from '../shared/enums/submission.events.enum';
-import { Submission } from '../../../electron-app/src/submission/interfaces/submission.interface';
+import { Submission } from '../../../electron-app/src/server/submission/interfaces/submission.interface';
 import SubmissionService from '../services/submission.service';
 import { SubmissionType } from '../shared/enums/submission-type.enum';
 import SubmissionUtil from '../utils/submission.util';
-import { FileSubmission } from '../../../electron-app/src/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from '../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import RemoteService from '../services/remote.service';
 
 export interface SubmissionState {

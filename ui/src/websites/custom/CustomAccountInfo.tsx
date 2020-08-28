@@ -1,7 +1,7 @@
 import { Button, Form, Input, message, Radio } from 'antd';
 import * as _ from 'lodash';
 import React from 'react';
-import { CustomAccountData } from '../../../../electron-app/src/websites/custom/custom-account.interface';
+import { CustomAccountData } from '../../../../electron-app/src/server/websites/custom/custom-account.interface';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { Spin, message } from 'antd';
 import { Authorizer } from '../interfaces/authorizer.interface';
-import { TumblrAccountData } from '../../../../electron-app/src/websites/tumblr/tumblr-account.interface';
+import { TumblrAccountData } from '../../../../electron-app/src/server/websites/tumblr/tumblr-account.interface';
 import LoginService from '../../services/login.service';
 
 interface State {
