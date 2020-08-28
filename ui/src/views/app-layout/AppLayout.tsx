@@ -162,7 +162,7 @@ export default class AppLayout extends React.Component<Props, State> {
                   <span className="text-xs">{window.appVersion}</span>
                 </div>
               </Link>
-              <div className="text-center mx-1">
+              <div className="update-container text-center mx-1">
                 <AppUpdate />
               </div>
             </div>
