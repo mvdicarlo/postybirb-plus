@@ -114,7 +114,30 @@ export class Derpibooru extends Website {
       maxLength: 100,
     });
     const ratingTag: string = this.getRating(data.rating);
-    if (!tags.includes(ratingTag)) tags.push(ratingTag);
+    const knownRatings: string[] = [
+      'safe',
+      'suggestive',
+      'questionable',
+      'explicit',
+      'semi-grimdark',
+      'grimdark',
+      'grotesque',
+    ];
+    const lowerCaseTags = tags.map(t => t.toLowerCase());
+    if (!lowerCaseTags.includes(ratingTag)) {
+      let add = true;
+
+      for (const r of knownRatings) {
+        if (lowerCaseTags.includes(r)) {
+          add = false;
+          break;
+        }
+      }
+
+      if (add) {
+        tags.push(ratingTag);
+      }
+    }
 
     const form: any = {
       ...(await BrowserWindowUtil.getFormData(data.part.accountId, `${this.BASE_URL}/images/new`, {
