@@ -321,7 +321,7 @@ export class Weasyl extends Website {
     }
 
     const { type, size, name, mimetype } = submission.primary;
-    let maxMB: number = 10;
+    let maxMB: number = 50;
     if (type === FileSubmissionType.VIDEO || type === FileSubmissionType.AUDIO) {
       maxMB = 15;
     } else if (type === FileSubmissionType.TEXT) {
