@@ -47,6 +47,10 @@
   overflow: auto;
 }
 
+.fullscreen-modal .ant-modal-header {
+  border-radius: 0px !important;
+}
+
 .fullscreen-modal-with-footer .ant-modal {
   padding: 0;
   margin: 0;
@@ -55,8 +59,13 @@
   height: 100vh;
 }
 
+.fullscreen-modal-with-footer .ant-modal-header {
+  border-radius: 0px !important;
+}
+
 .fullscreen-modal-with-footer .ant-modal-content {
   height: 100%;
+  border-radius: 0px !important;
 }
 
 .fullscreen-modal-with-footer .ant-modal-body {

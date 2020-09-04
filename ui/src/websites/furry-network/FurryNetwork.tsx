@@ -18,6 +18,7 @@ import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
 import { FileSubmissionType } from '../../shared/enums/file-submission-type.enum';
+import FurryNetworkLoginHelp from './FurryNetworkLoginHelp';
 
 const defaultFileOptions: FurryNetworkFileOptions = {
   ...GenericDefaultFileOptions,
@@ -40,6 +41,8 @@ export class FurryNetwork implements Website {
   LoginDialog = (props: LoginDialogProps) => (
     <GenericLoginDialog url="https://furrynetwork.com/" {...props} />
   );
+
+  LoginHelp = (props: LoginDialogProps) => <FurryNetworkLoginHelp {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, FurryNetworkFileOptions>) => (
     <FurryNetworkFileSubmissionForm
@@ -250,7 +253,10 @@ export class FurryNetworkFileSubmissionForm extends GenericFileSubmissionSection
 
   renderRightForm(data: FurryNetworkFileOptions) {
     const elements = super.renderRightForm(data);
-    let type = this.props.submission && this.props.submission.primary ? this.props.submission.primary.type : FileSubmissionType.IMAGE;
+    let type =
+      this.props.submission && this.props.submission.primary
+        ? this.props.submission.primary.type
+        : FileSubmissionType.IMAGE;
     if (this.props.submission && this.props.submission.primary.mimetype === 'image/gif') {
       type = FileSubmissionType.VIDEO;
     }

@@ -70,10 +70,11 @@ export default class AccountInfo extends React.Component<AccountInfoProps, Accou
   }
   render() {
     const { accountInfo } = this.props;
-    const LoginDialog = this.props.website.LoginDialog({
+    const LoginProps = {
       account: this.props.accountInfo,
       data: this.props.accountInfo.data
-    });
+    };
+    const LoginDialog = this.props.website.LoginDialog(LoginProps);
     return (
       <List.Item
         actions={[
@@ -152,7 +153,14 @@ export default class AccountInfo extends React.Component<AccountInfoProps, Accou
           />
         </span>
         <Modal
-          title={`${this.props.website.name} - ${this.props.accountInfo.alias}`}
+          title={
+            <div>
+              <span className="mr-2">{`${this.props.website.name} - ${this.props.accountInfo.alias}`}</span>
+              <span>
+                {this.props.website.LoginHelp ? this.props.website.LoginHelp(LoginProps) : null}
+              </span>
+            </div>
+          }
           visible={this.state.modalVisible}
           destroyOnClose={true}
           footer={null}
