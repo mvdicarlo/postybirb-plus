@@ -43,6 +43,7 @@ export class SubscribeStar implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, SubscribeStarFileOptions>) => (
     <SubscribeStarFileSubmissionForm
       key={props.part.accountId}
+      hideThumbnailOptions={true}
       hideTitle={true}
       ratingOptions={{
         show: false

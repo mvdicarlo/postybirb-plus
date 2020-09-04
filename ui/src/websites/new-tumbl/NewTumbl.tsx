@@ -41,6 +41,7 @@ export class NewTumbl implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, NewTumblFileOptions>) => (
     <NewTumblFileSubmissionForm
       key={props.part.accountId}
+      hideThumbnailOptions={true}
       ratingOptions={{
         show: true,
         ratings: [

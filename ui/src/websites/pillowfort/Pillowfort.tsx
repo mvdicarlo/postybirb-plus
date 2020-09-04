@@ -50,6 +50,7 @@ export class Pillowfort implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PillowfortFileOptions>) => (
     <PillowfortFileSubmissionForm
       key={props.part.accountId}
+      hideThumbnailOptions={true}
       ratingOptions={{
         show: true,
         ratings: [

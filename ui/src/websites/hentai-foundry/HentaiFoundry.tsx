@@ -59,6 +59,7 @@ export class HentaiFoundry implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, HentaiFoundryFileOptions>) => (
     <HentaiFoundryFileSubmissionForm
       key={props.part.accountId}
+      hideThumbnailOptions={true}
       ratingOptions={{
         show: false
       }}

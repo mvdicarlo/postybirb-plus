@@ -34,7 +34,11 @@ export class FurryLife implements Website {
   );
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, FurryLifeFileOptions>) => (
-    <FurryLifeFileSubmissionForm key={props.part.accountId} {...props} />
+    <FurryLifeFileSubmissionForm
+      key={props.part.accountId}
+      {...props}
+      hideThumbnailOptions={true}
+    />
   );
 
   NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
