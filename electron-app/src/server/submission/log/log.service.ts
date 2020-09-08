@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { app } from 'electron';
-import { SubmissionType } from '../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import SubmissionEntity from '../models/submission.entity';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { PartWithResponse } from './interfaces/submission-log.interface';

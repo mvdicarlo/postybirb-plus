@@ -5,7 +5,7 @@ import { loginStatusStore, LoginStatusStore } from '../../../../stores/login-sta
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { Form, Typography, Tabs, Badge, Empty } from 'antd';
 import { inject, observer } from 'mobx-react';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { FileSubmission } from '../../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';

@@ -8,6 +8,7 @@ import { Form, Input, Radio } from 'antd';
 import { Submission } from '../../../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import SectionProblems from './SectionProblems';
+import { SubmissionRating } from 'postybirb-commons';
 
 export default class DefaultFormSection extends React.Component<
   SubmissionSectionProps<Submission, DefaultOptions>
@@ -44,10 +45,10 @@ export default class DefaultFormSection extends React.Component<
             value={data.rating}
             buttonStyle="solid"
           >
-            <Radio.Button value="general">General</Radio.Button>
-            <Radio.Button value="mature">Mature</Radio.Button>
-            <Radio.Button value="adult">Adult</Radio.Button>
-            <Radio.Button value="extreme">Extreme</Radio.Button>
+            <Radio.Button value={SubmissionRating.GENERAL}>General</Radio.Button>
+            <Radio.Button value={SubmissionRating.MATURE}>Mature</Radio.Button>
+            <Radio.Button value={SubmissionRating.ADULT}>Adult</Radio.Button>
+            <Radio.Button value={SubmissionRating.EXTREME}>Extreme</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <TagInput

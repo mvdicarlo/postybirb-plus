@@ -1,5 +1,5 @@
 import React from 'react';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { SubmissionLog } from '../../../../electron-app/src/server/submission/log/interfaces/submission-log.interface';
 import SubmissionLogService from '../../services/submission-log.service';
 import { saveAs } from 'file-saver';

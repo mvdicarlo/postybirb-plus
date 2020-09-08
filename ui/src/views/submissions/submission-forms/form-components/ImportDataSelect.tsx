@@ -7,7 +7,7 @@ import { SubmissionPart } from '../../../../../../electron-app/src/server/submis
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import SubmissionTemplateSelect from '../../submission-template-select/SubmissionTemplateSelect';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 interface Props {
   className?: string;

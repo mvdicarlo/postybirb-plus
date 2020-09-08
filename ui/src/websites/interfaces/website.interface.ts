@@ -2,7 +2,7 @@ import { UserAccountDto } from '../../../../electron-app/src/server/account/inte
 import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 export interface LoginDialogProps {
   account: UserAccountDto;

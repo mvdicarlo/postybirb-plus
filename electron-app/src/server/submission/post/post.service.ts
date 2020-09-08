@@ -3,7 +3,7 @@ import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import { SubmissionService } from '../submission.service';
 import { Submission } from '../interfaces/submission.interface';
-import { SubmissionType } from '../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { SettingsService } from 'src/server/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
@@ -15,7 +15,7 @@ import { Poster } from './poster';
 import { LogService } from '../log/log.service';
 import { PostStatuses, PostInfo } from './interfaces/post-status.interface';
 import { EventsGateway } from 'src/server/events/events.gateway';
-import { PostEvent } from './enums/post.events.enum';
+import { Events } from 'postybirb-commons';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import SubmissionEntity from '../models/submission.entity';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
@@ -471,6 +471,6 @@ export class PostService {
   );
 
   private notifyPostingStatusChanged() {
-    this.eventEmitter.emit(PostEvent.UPDATED, this.getPostingStatus());
+    this.eventEmitter.emit(Events.PostEvent.UPDATED, this.getPostingStatus());
   }
 }

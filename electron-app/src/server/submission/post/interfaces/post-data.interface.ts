@@ -4,7 +4,7 @@ import {
   DefaultOptions,
   DefaultFileOptions,
 } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 
 export interface PostData<T extends Submission, K extends DefaultOptions> {
   description: string;

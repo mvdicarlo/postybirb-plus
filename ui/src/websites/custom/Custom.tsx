@@ -12,7 +12,7 @@ import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
 import CustomAccountInfo from './CustomAccountInfo';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
 export class Custom implements Website {

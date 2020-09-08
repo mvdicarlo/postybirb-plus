@@ -8,7 +8,7 @@ import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { NewgroundsFileOptions } from '../../../../electron-app/src/server/websites/newgrounds/newgrounds.interface';
 import { Checkbox, Form, Radio } from 'antd';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';

@@ -15,7 +15,7 @@ import { Submission } from '../../../../electron-app/src/server/submission/inter
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { FurAffinityCategories } from './FurAffinityCategories';
 import { FurAffinityThemes } from './FurAffinityThemes';
 import { FurAffinitySpecies } from './FurAffinitySpecies';
@@ -65,15 +65,15 @@ export class FurAffinity implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Adult'
           }
         ]

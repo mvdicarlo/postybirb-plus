@@ -18,7 +18,7 @@ import { CancellationToken } from 'src/server/submission/post/cancellation/cance
 import { Submission } from 'src/server/submission/interfaces/submission.interface';
 import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import { FilePostData, PostFile } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import * as FormData from 'form-data';

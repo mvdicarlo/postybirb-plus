@@ -1,4 +1,4 @@
-import { SubmissionType } from '../../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { EntityIntf } from '../../../database/interfaces/entity.interface';
 import { Parts } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
 

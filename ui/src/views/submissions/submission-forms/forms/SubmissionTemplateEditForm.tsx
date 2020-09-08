@@ -12,7 +12,7 @@ import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
 import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { SubmissionTemplate } from '../../../../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
 import SubmissionTemplateService from '../../../../services/submission-template.service';
 import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';

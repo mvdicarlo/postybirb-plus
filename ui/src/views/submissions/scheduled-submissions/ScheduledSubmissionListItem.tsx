@@ -4,7 +4,7 @@ import SubmissionUtil from '../../../utils/submission.util';
 import moment from 'moment';
 import { FileSubmission } from '../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Link } from 'react-router-dom';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { List, Avatar, Icon, Popconfirm, Typography, message, Modal, DatePicker } from 'antd';
 import PostService from '../../../services/post.service';
 import { Submission } from '../../../../../electron-app/src/server/submission/interfaces/submission.interface';

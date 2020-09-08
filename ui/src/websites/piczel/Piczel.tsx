@@ -12,6 +12,7 @@ import { WebsiteSectionProps } from '../form-sections/website-form-section.inter
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { SubmissionRating } from 'postybirb-commons';
 
 const defaultOptions: PiczelFileOptions = {
   ...GenericDefaultFileOptions,
@@ -32,8 +33,8 @@ export class Piczel implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { value: 'general', name: 'SFW' },
-          { value: 'adult', name: 'NSFW' }
+          { value: SubmissionRating.GENERAL, name: 'SFW' },
+          { value: SubmissionRating.ADULT, name: 'NSFW' }
         ]
       }}
       key={props.part.accountId}

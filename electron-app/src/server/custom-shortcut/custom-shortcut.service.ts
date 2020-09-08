@@ -5,7 +5,7 @@ import {
 } from './custom-shortcut.repository';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import CustomShortcutEntity from './models/custom-shortcut.entity';
-import { CustomShortcutEvent } from './enums/custom-shortcut.events.enum';
+import { Events } from 'postybirb-commons';
 
 @Injectable()
 export class CustomShortcutService {
@@ -35,13 +35,13 @@ export class CustomShortcutService {
       throw new BadRequestException('Shortcut must be unique');
     }
     const dt = await this.repository.save(customShortcutDto);
-    this.eventEmitter.emit(CustomShortcutEvent.CREATED, dt);
+    this.eventEmitter.emit(Events.CustomShortcutEvent.CREATED, dt);
     return dt;
   }
 
   remove(id: string) {
     this.logger.log(id, 'Delete Custom Shortcut');
-    this.eventEmitter.emit(CustomShortcutEvent.REMOVED, id);
+    this.eventEmitter.emit(Events.CustomShortcutEvent.REMOVED, id);
     return this.repository.remove(id);
   }
 
@@ -53,7 +53,7 @@ export class CustomShortcutService {
     exists.isDynamic = update.isDynamic;
     await this.repository.update(exists);
 
-    this.eventEmitter.emit(CustomShortcutEvent.UPDATED, exists);
+    this.eventEmitter.emit(Events.CustomShortcutEvent.UPDATED, exists);
   }
 
   async isUniqueShortcut(shortcut: string): Promise<boolean> {

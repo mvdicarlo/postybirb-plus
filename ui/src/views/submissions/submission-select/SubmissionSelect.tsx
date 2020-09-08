@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { SubmissionStore } from '../../../stores/submission.store';
 import { SubmissionPackage } from '../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 import { Select, Avatar } from 'antd';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { FileSubmission } from '../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import SubmissionUtil from '../../../utils/submission.util';
 

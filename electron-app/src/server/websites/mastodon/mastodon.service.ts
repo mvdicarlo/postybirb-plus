@@ -23,9 +23,9 @@ import { DefaultOptions } from 'src/server/submission/submission-part/interfaces
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import FormContent from 'src/server/utils/form-content.util';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import Http from 'src/server/http/http.util';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 

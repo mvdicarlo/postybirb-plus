@@ -8,7 +8,7 @@ import {
   FurryNetworkNotificationOptions
 } from '../../../../electron-app/src/server/websites/furry-network/furry-network.interface';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -17,7 +17,7 @@ import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
-import { FileSubmissionType } from '../../shared/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import FurryNetworkLoginHelp from './FurryNetworkLoginHelp';
 
 const defaultFileOptions: FurryNetworkFileOptions = {
@@ -58,15 +58,15 @@ export class FurryNetwork implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Explicit'
           }
         ]
@@ -90,15 +90,15 @@ export class FurryNetwork implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Explicit'
           }
         ]

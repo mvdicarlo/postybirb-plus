@@ -11,7 +11,7 @@ import { DefaultOptions } from '../../../../electron-app/src/server/submission/s
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { HentaiFoundryCategories } from './hentai-foundry-categories';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';

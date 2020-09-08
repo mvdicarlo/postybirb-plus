@@ -13,6 +13,7 @@ import { WebsiteSectionProps } from '../form-sections/website-form-section.inter
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
+import { SubmissionRating } from 'postybirb-commons';
 
 // TODO make a separate notification options
 const defaultOptions: SoFurryFileOptions = {
@@ -48,9 +49,9 @@ export class SoFurry implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { value: 'general', name: 'All Ages' },
-          { value: 'adult', name: 'Adult' },
-          { value: 'extreme', name: 'Extreme' }
+          { value: SubmissionRating.GENERAL, name: 'All Ages' },
+          { value: SubmissionRating.ADULT, name: 'Adult' },
+          { value: SubmissionRating.EXTREME, name: 'Extreme' }
         ]
       }}
       tagOptions={{
@@ -69,9 +70,9 @@ export class SoFurry implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { value: 'general', name: 'All Ages' },
-          { value: 'adult', name: 'Adult' },
-          { value: 'extreme', name: 'Extreme' }
+          { value: SubmissionRating.GENERAL, name: 'All Ages' },
+          { value: SubmissionRating.ADULT, name: 'Adult' },
+          { value: SubmissionRating.EXTREME, name: 'Extreme' }
         ]
       }}
       {...props}

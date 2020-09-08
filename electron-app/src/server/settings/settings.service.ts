@@ -1,7 +1,7 @@
 import { app } from 'electron';
 import { Injectable, Logger } from '@nestjs/common';
 import * as lowdb from 'lowdb';
-import { SettingEvent } from './settings.events.enum';
+import { Events } from 'postybirb-commons';
 import { Settings } from './settings.interface';
 import { EventsGateway } from 'src/server/events/events.gateway';
 
@@ -31,6 +31,6 @@ export class SettingsService {
     }
 
     this.settings.set(setting, value).write();
-    this.eventEmitter.emit(SettingEvent.UPDATED, this.settings.getState());
+    this.eventEmitter.emit(Events.SettingEvent.UPDATED, this.settings.getState());
   }
 }

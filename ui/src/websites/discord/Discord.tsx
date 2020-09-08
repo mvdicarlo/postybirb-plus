@@ -14,7 +14,7 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 const defaultOptions: DiscordFileOptions = {
   ...GenericDefaultFileOptions,

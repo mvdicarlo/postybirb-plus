@@ -19,10 +19,10 @@ import { FileSubmission } from 'src/server/submission/file-submission/interfaces
 import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FormContent from 'src/server/utils/form-content.util';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 
 @Injectable()

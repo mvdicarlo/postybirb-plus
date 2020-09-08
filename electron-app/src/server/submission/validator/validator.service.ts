@@ -4,7 +4,7 @@ import { SubmissionPart } from '../submission-part/interfaces/submission-part.in
 import { Submission } from '../interfaces/submission.interface';
 import * as _ from 'lodash';
 import { Problems } from './interfaces/problems.interface';
-import { SubmissionType } from '../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
 import { ValidationParts } from './interfaces/validation-parts.interface';
 import { Website } from 'src/server/websites/website.base';

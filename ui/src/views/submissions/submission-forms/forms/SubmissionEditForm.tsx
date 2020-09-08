@@ -18,7 +18,7 @@ import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
 import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
 import moment from 'moment';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { Submission } from '../../../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import { FileRecord } from '../../../../../../electron-app/src/server/submission/file-submission/interfaces/file-record.interface';

@@ -1,7 +1,7 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { TagConverter } from '../../../electron-app/src/server/tag-converter/interfaces/tag-converter.interface';
-import { TagConverterEvent } from '../shared/enums/tag-converter.events.enum';
+import { Events } from 'postybirb-commons';
 import TagConverterService from '../services/tag-converter.service';
 
 export interface TagConverterState {
@@ -39,14 +39,14 @@ export class TagConverterStore {
 
 export const tagConverterStore = new TagConverterStore();
 
-socket.on(TagConverterEvent.CREATED, (data: TagConverter) => {
+socket.on(Events.TagConverterEvent.CREATED, (data: TagConverter) => {
   tagConverterStore.addOrUpdate(data);
 });
 
-socket.on(TagConverterEvent.UPDATED, (data: TagConverter) => {
+socket.on(Events.TagConverterEvent.UPDATED, (data: TagConverter) => {
   tagConverterStore.addOrUpdate(data);
 });
 
-socket.on(TagConverterEvent.REMOVED, (id: string) => {
+socket.on(Events.TagConverterEvent.REMOVED, (id: string) => {
   tagConverterStore.remove(id);
 });

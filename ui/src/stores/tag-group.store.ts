@@ -2,7 +2,7 @@ import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { TagGroup } from '../../../electron-app/src/server/tag-group/interfaces/tag-group.interface';
 import TagGroupService from '../services/tag-group.service';
-import { TagGroupEvent } from '../shared/enums/tag-group.events.enum';
+import { Events } from 'postybirb-commons';
 
 export interface TagGroupState {
   groups: TagGroup[];
@@ -37,14 +37,14 @@ export class TagGroupStore {
 
 export const tagGroupStore = new TagGroupStore();
 
-socket.on(TagGroupEvent.CREATED, (data: TagGroup) => {
+socket.on(Events.TagGroupEvent.CREATED, (data: TagGroup) => {
   tagGroupStore.addOrUpdateTagGroup(data);
 });
 
-socket.on(TagGroupEvent.UPDATED, (data: TagGroup) => {
+socket.on(Events.TagGroupEvent.UPDATED, (data: TagGroup) => {
   tagGroupStore.addOrUpdateTagGroup(data);
 });
 
-socket.on(TagGroupEvent.REMOVED, (id: string) => {
+socket.on(Events.TagGroupEvent.REMOVED, (id: string) => {
   tagGroupStore.removeGroup(id);
 });

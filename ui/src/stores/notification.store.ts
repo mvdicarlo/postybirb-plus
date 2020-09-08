@@ -2,7 +2,7 @@ import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { PostyBirbNotification } from '../../../electron-app/src/server/notification/interfaces/postybirb-notification.interface';
 import NotificationService from '../services/notification.service';
-import { NotificationEvent } from '../shared/enums/notification.events.enum';
+import { Events } from 'postybirb-commons';
 
 export interface NotificationState {
   notifications: PostyBirbNotification[];
@@ -31,6 +31,6 @@ export class NotificationStore {
 
 export const notificationStore = new NotificationStore();
 
-socket.on(NotificationEvent.UPDATE, (notifications: PostyBirbNotification[]) =>
+socket.on(Events.NotificationEvent.UPDATE, (notifications: PostyBirbNotification[]) =>
   notificationStore.setNotifications(notifications)
 );

@@ -1,4 +1,4 @@
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import { TagData } from './tag-data.interface';
 import { DescriptionData } from './description-data.interface';
 
@@ -6,7 +6,7 @@ export interface DefaultOptions {
   title?: string;
   tags: TagData;
   description: DescriptionData;
-  rating: SubmissionRating;
+  rating: SubmissionRating | null;
   sources?: string[];
 }
 

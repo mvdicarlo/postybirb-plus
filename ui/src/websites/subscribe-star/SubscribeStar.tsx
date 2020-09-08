@@ -13,7 +13,7 @@ import { WebsiteSectionProps } from '../form-sections/website-form-section.inter
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';

@@ -17,14 +17,14 @@ import { AdInsertParser } from 'src/server/description-parsing/miscellaneous/ad.
 import { WebsitesService } from 'src/server/websites/websites.service';
 import { UsernameShortcut } from 'src/server/websites/interfaces/username-shortcut.interface';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
-import { SubmissionRating } from '../enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import { Submission } from '../interfaces/submission.interface';
 import { FileSubmission } from '../file-submission/interfaces/file-submission.interface';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 import { FilePostData, PostFileRecord } from '../post/interfaces/file-post-data.interface';
 import { FileRecord } from '../file-submission/interfaces/file-record.interface';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
-import { SubmissionType } from '../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 @Injectable()
 export class ParserService {

@@ -11,7 +11,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
-import { SubmissionType } from './enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
 import { SubmissionPart } from './submission-part/interfaces/submission-part.interface';

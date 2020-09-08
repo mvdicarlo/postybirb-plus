@@ -3,7 +3,7 @@ import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from 'src/server/submission/interfaces/submission.interface';

@@ -7,7 +7,7 @@ import {
   PatreonFileOptions,
   PatreonNotificationOptions
 } from '../../../../electron-app/src/server/websites/patreon/patreon.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';

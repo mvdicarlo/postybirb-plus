@@ -7,7 +7,7 @@ import { DefaultOptions } from '../../../../electron-app/src/server/submission/s
 import { FurryLifeFileOptions } from '../../../../electron-app/src/server/websites/furry-life/furry-life.interface';
 import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';

@@ -19,7 +19,7 @@ import { Submission } from '../../../../../electron-app/src/server/submission/in
 import { Problems } from '../../../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
 import PostService from '../../../services/post.service';
 import SubmissionService from '../../../services/submission.service';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import SubmissionUtil from '../../../utils/submission.util';
 import { WebsiteRegistry } from '../../../websites/website-registry';
 import { IssueState } from './IssueState';

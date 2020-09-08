@@ -1,6 +1,6 @@
 import { message, notification } from 'antd';
 import { UINotification } from '../../../electron-app/src/server/notification/interfaces/ui-notification.interface';
-import { UINotificationEvent } from '../shared/enums/ui-notification.events.enum';
+import { Events } from 'postybirb-commons';
 import socket from '../utils/websocket';
 
 // Deals with displaying system notifications to the UI
@@ -13,15 +13,15 @@ export default class UINotificationService {
     notification[msg.type.toLowerCase()]({
       message: msg.title ? msg.title : 'System Notification',
       description: msg.message,
-      duration: msg.duration,
+      duration: msg.duration
     });
   }
 }
 
-socket.on(UINotificationEvent.MESSAGE, (data: UINotification) =>
+socket.on(Events.UINotificationEvent.MESSAGE, (data: UINotification) =>
   UINotificationService.showMessage(data)
 );
 
-socket.on(UINotificationEvent.NOTIFICATION, (data: UINotification) =>
+socket.on(Events.UINotificationEvent.NOTIFICATION, (data: UINotification) =>
   UINotificationService.showNotification(data)
 );

@@ -2,7 +2,7 @@ import Entity from 'src/server/database/models/entity.model';
 import { SubmissionLog, PartWithResponse } from '../interfaces/submission-log.interface';
 import { Submission } from '../../interfaces/submission.interface';
 import { IsNotEmpty, IsArray, IsString } from 'class-validator';
-import { SubmissionType } from 'src/server/submission/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
 

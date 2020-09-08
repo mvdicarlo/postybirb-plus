@@ -4,7 +4,7 @@ import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import { HttpResponse } from 'src/server/http/http.util';
-import { SubmissionType } from 'src/server/submission/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from 'src/server/submission/interfaces/submission.interface';

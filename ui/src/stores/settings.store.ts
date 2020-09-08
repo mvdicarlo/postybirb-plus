@@ -2,7 +2,7 @@ import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import { Settings } from '../../../electron-app/src/server/settings/settings.interface';
 import SettingsService from '../services/settings.service';
-import { SettingEvent } from '../shared/enums/settings.events.enum';
+import { Events } from 'postybirb-commons';
 
 export class SettingsStore {
   @observable state: Settings = {
@@ -38,6 +38,6 @@ export class SettingsStore {
 
 export const settingsStore = new SettingsStore();
 
-socket.on(SettingEvent.UPDATED, (data: Settings) => {
+socket.on(Events.SettingEvent.UPDATED, (data: Settings) => {
   settingsStore.updateSettings(data);
 });

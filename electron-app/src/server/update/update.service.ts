@@ -5,12 +5,7 @@ import { BrowserWindow } from 'electron';
 import { PostService } from 'src/server/submission/post/post.service';
 import { Interval } from '@nestjs/schedule';
 import { CustomLogger } from 'src/server/custom.logger';
-
-enum UpdateEvent {
-  AVAILABLE = '[UPDATE] AVAILABLE',
-  BLOCKED = '[UPDATE] BLOCKED RESTART',
-  ERROR = '[UPDATE] ERROR',
-}
+import { Events } from 'postybirb-commons';
 
 interface UpdateInfo {
   available: boolean;
@@ -52,12 +47,12 @@ export class UpdateService {
         note => `<h2>${note.version}</h2>${note.note}`,
       );
       this.updateAvailable.version = info.version;
-      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
+      this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
     });
 
     autoUpdater.on('download-progress', ({ percent }) => {
       this.updateAvailable.percent = percent;
-      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
+      this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
     });
 
     autoUpdater.on('error', err => {
@@ -68,14 +63,14 @@ export class UpdateService {
 
       this.logger.error(err);
 
-      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
-      this.eventEmitter.emit(UpdateEvent.ERROR, err);
+      this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
+      this.eventEmitter.emit(Events.UpdateEvent.ERROR, err);
     });
 
     autoUpdater.on('update-downloaded', () => {
       this.updateAvailable.percent = 100;
       this.updateAvailable.isUpdating = false;
-      this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
+      this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
 
       if (!this.postService.isCurrentlyPostingToAny()) {
         BrowserWindow.getAllWindows().forEach(w => {
@@ -84,7 +79,7 @@ export class UpdateService {
 
         setTimeout(() => autoUpdater.quitAndInstall(false, true), 1000);
       } else {
-        this.eventEmitter.emit(UpdateEvent.BLOCKED, true);
+        this.eventEmitter.emit(Events.UpdateEvent.BLOCKED, true);
       }
     });
 
@@ -110,7 +105,7 @@ export class UpdateService {
     this.updateAvailable.isUpdating = true;
     this.updateAvailable.error = '';
 
-    this.eventEmitter.emit(UpdateEvent.AVAILABLE, this.updateAvailable);
+    this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
     autoUpdater.downloadUpdate();
   }
 

@@ -2,6 +2,7 @@ import { Submission } from '../../../../electron-app/src/server/submission/inter
 import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { TagOptions } from '../../views/submissions/submission-forms/form-components/TagInput';
+import { SubmissionRating } from 'postybirb-commons';
 
 export interface WebsiteSectionProps<T extends Submission, K extends DefaultOptions>
   extends SubmissionSectionProps<T, K> {
@@ -21,7 +22,7 @@ export interface WebsiteSectionProps<T extends Submission, K extends DefaultOpti
   ratingOptions?: {
     show: boolean;
     ratings?: {
-      value: 'general' | 'mature' | 'adult' | 'extreme' | string;
+      value: SubmissionRating | string;
       name: string;
     }[];
   };

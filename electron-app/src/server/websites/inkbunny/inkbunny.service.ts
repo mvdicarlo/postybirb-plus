@@ -4,8 +4,8 @@ import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parse
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { SubmissionRating } from 'postybirb-commons';
+import { FileSubmissionType } from 'postybirb-commons';
 import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';

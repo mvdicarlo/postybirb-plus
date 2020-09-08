@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { SubmissionPackage } from '../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
 import moment from 'moment';
 import SubmissionSelectModal from '../submission-select/SubmissionSelectModal';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { Submission } from '../../../../../electron-app/src/server/submission/interfaces/submission.interface';
 import PostService from '../../../services/post.service';
 import { submissionStore } from '../../../stores/submission.store';

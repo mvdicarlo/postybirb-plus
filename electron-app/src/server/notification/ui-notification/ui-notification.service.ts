@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { NotificationType } from '../enums/notification-type.enum';
-import { UINotificationEvent } from '../enums/ui-notification.events.enum';
+import { Events } from 'postybirb-commons';
 import { UINotification } from '../interfaces/ui-notification.interface';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class UiNotificationService {
       duration,
       message,
     };
-    this.eventEmitter.emit(UINotificationEvent.MESSAGE, event);
+    this.eventEmitter.emit(Events.UINotificationEvent.MESSAGE, event);
   }
 
   createUINotification(
@@ -29,6 +29,6 @@ export class UiNotificationService {
       message,
       title,
     };
-    this.eventEmitter.emit(UINotificationEvent.NOTIFICATION, event);
+    this.eventEmitter.emit(Events.UINotificationEvent.NOTIFICATION, event);
   }
 }

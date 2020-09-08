@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { LogService } from './log.service';
-import { SubmissionType } from '../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 @Controller('submission-log')
 export class LogController {

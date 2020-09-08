@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 import { SubmissionTemplate } from '../../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
 import SubmissionTemplateService from '../../services/submission-template.service';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import {
   List,
   Button,

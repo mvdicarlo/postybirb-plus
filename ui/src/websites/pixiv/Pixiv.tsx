@@ -9,6 +9,7 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { SubmissionRating } from 'postybirb-commons';
 
 const defaultOptions: PixivFileOptions = {
   ...GenericDefaultFileOptions,
@@ -36,15 +37,15 @@ export class Pixiv implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'All ages'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'R-18'
           },
           {
-            value: 'extreme',
+            value: SubmissionRating.EXTREME,
             name: 'R-18G'
           }
         ]

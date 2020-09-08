@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { CustomHTMLParser } from 'src/server/description-parsing/html/custom.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from 'src/server/submission/interfaces/submission.interface';
@@ -21,7 +21,7 @@ import { Website } from '../website.base';
 import { TumblrAccountData } from './tumblr-account.interface';
 import { TumblrFileOptions, TumblrNotificationOptions } from './tumblr.interface';
 import { TumblrDefaultFileOptions, TumblrDefaultNotificationOptions } from './tumblr.defaults';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import Http from 'src/server/http/http.util';
 import { OAuthUtil } from 'src/server/utils/oauth.util';
 

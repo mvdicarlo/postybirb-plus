@@ -15,6 +15,7 @@ import { WebsiteSectionProps } from '../form-sections/website-form-section.inter
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { SubmissionRating } from 'postybirb-commons';
 
 const defaultOptions: WeasylFileOptions = {
   ...GenericDefaultFileOptions,
@@ -40,15 +41,15 @@ export class Weasyl implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature (18+ non-sexual)'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Explicit (18+ sexual)'
           }
         ]
@@ -65,15 +66,15 @@ export class Weasyl implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature (18+ non-sexual)'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Explicit (18+ sexual)'
           }
         ]

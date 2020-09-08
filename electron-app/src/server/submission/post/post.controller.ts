@@ -3,7 +3,7 @@ import { Controller, Post, Param, BadRequestException, Get } from '@nestjs/commo
 import { PostService } from './post.service';
 import { SubmissionService } from '../submission.service';
 import { Submission } from '../interfaces/submission.interface';
-import { SubmissionType } from '../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 @Controller('post')
 export class PostController {

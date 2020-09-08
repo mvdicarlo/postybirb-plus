@@ -12,12 +12,12 @@ import { EventsGateway } from 'src/server/events/events.gateway';
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import { Problems } from './validator/interfaces/problems.interface';
 import { Submission } from './interfaces/submission.interface';
-import { SubmissionEvent } from './enums/submission.events.enum';
+import { Events } from 'postybirb-commons';
 import { SubmissionPackage } from './interfaces/submission-package.interface';
 import { SubmissionPart, Parts } from './submission-part/interfaces/submission-part.interface';
 import { SubmissionPartService } from './submission-part/submission-part.service';
 import { SubmissionRepository, SubmissionRepositoryToken } from './submission.repository';
-import { SubmissionType } from './enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { SubmissionUpdate } from './interfaces/submission-update.interface';
 import { ValidatorService } from './validator/validator.service';
 import { UploadedFile } from 'src/server/file-manager/interfaces/uploaded-file.interface';
@@ -33,7 +33,7 @@ import SubmissionLogEntity from './log/models/submission-log.entity';
 import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
 import { AccountService } from 'src/server//account/account.service';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
-import { FileSubmissionType } from './file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import SubmissionCreateModel from './models/submission-create.model';
 
 type SubmissionEntityReference = string | SubmissionEntity;
@@ -115,7 +115,7 @@ export class SubmissionService {
   }
 
   postingStateChanged(): void {
-    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
+    this.eventEmitter.emitOnComplete(Events.SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
 
   async create(createDto: SubmissionCreateModel): Promise<SubmissionEntity> {
@@ -167,7 +167,7 @@ export class SubmissionService {
       throw new InternalServerErrorException(err);
     }
 
-    this.eventEmitter.emitOnComplete(SubmissionEvent.CREATED, this.validate(completedSubmission));
+    this.eventEmitter.emitOnComplete(Events.SubmissionEvent.CREATED, this.validate(completedSubmission));
     return completedSubmission;
   }
 
@@ -276,7 +276,7 @@ export class SubmissionService {
     }
 
     const s = await this.getAndValidate(newSubmission._id);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [s]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [s]);
     return s.submission;
   }
 
@@ -328,7 +328,7 @@ export class SubmissionService {
         );
 
         this.eventEmitter
-          .emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission))
+          .emitOnComplete(Events.SubmissionEvent.CREATED, this.validate(createdSubmission))
           .then(() => {
             this.orderSubmissions(submission.type);
           });
@@ -372,7 +372,7 @@ export class SubmissionService {
       );
 
       this.eventEmitter
-        .emitOnComplete(SubmissionEvent.CREATED, this.validate(createdSubmission))
+        .emitOnComplete(Events.SubmissionEvent.CREATED, this.validate(createdSubmission))
         .then(() => {
           this.orderSubmissions(duplicate.type);
         });
@@ -417,7 +417,7 @@ export class SubmissionService {
     Object.values(ordered).forEach(submission => {
       orderRecord[submission._id] = submission.order;
     });
-    this.eventEmitter.emit(SubmissionEvent.REORDER, orderRecord);
+    this.eventEmitter.emit(Events.SubmissionEvent.REORDER, orderRecord);
   }
 
   async validate(submission: SubmissionEntityReference): Promise<SubmissionPackage<any>> {
@@ -445,7 +445,7 @@ export class SubmissionService {
   }
 
   async verifyAll(): Promise<void> {
-    this.eventEmitter.emitOnComplete(SubmissionEvent.UPDATED, this.getAllAndValidate());
+    this.eventEmitter.emitOnComplete(Events.SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
 
   async dryValidate(
@@ -478,7 +478,7 @@ export class SubmissionService {
 
     await this.repository.remove(id);
     await this.partService.removeBySubmissionId(id);
-    this.eventEmitter.emit(SubmissionEvent.REMOVED, id);
+    this.eventEmitter.emit(Events.SubmissionEvent.REMOVED, id);
   }
 
   async updateSubmission(update: SubmissionUpdate): Promise<SubmissionPackage<any>> {
@@ -500,7 +500,7 @@ export class SubmissionService {
     await Promise.all(parts.map(p => this.setPart(submissionToUpdate, p)));
 
     const packaged: SubmissionPackage<any> = await this.validate(submissionToUpdate);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [packaged]);
 
     return packaged;
   }
@@ -520,7 +520,7 @@ export class SubmissionService {
     await Promise.all(removeParts.map(p => this.partService.removeSubmissionPart(p._id)));
 
     const packaged: SubmissionPackage<any> = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [packaged]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [packaged]);
   }
 
   async scheduleSubmission(
@@ -550,7 +550,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     this.eventEmitter.emitOnComplete(
-      SubmissionEvent.UPDATED,
+      Events.SubmissionEvent.UPDATED,
       Promise.all([this.validate(submission)]),
     );
   }
@@ -602,7 +602,7 @@ export class SubmissionService {
     submission.schedule.postAt = postAt;
     await this.repository.update(submission);
     this.eventEmitter.emitOnComplete(
-      SubmissionEvent.UPDATED,
+      Events.SubmissionEvent.UPDATED,
       Promise.all([this.validate(submission)]),
     );
   }
@@ -640,7 +640,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
@@ -658,7 +658,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
@@ -677,7 +677,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
@@ -697,7 +697,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
@@ -721,7 +721,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
@@ -741,7 +741,7 @@ export class SubmissionService {
     await this.repository.update(submission);
 
     const validated = await this.validate(submission);
-    this.eventEmitter.emit(SubmissionEvent.UPDATED, [validated]);
+    this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [validated]);
     return validated;
   }
 
@@ -762,7 +762,7 @@ export class SubmissionService {
         this.repository.update(submission);
 
         this.eventEmitter.emitOnComplete(
-          SubmissionEvent.UPDATED,
+          Events.SubmissionEvent.UPDATED,
           Promise.all([this.validate(submission)]),
         );
       }

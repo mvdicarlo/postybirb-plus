@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
 import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
 import { Submission } from 'src/server/submission/interfaces/submission.interface';
@@ -22,7 +22,7 @@ import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { SubmissionType } from 'src/server/submission/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 @Injectable()
 export class KoFi extends Website {

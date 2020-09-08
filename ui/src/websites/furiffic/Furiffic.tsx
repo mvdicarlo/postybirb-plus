@@ -11,7 +11,7 @@ import {
 } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
@@ -32,15 +32,15 @@ export class Furiffic implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'Tame'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Adult'
           }
         ]
@@ -56,15 +56,15 @@ export class Furiffic implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'Tame'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Adult'
           }
         ]

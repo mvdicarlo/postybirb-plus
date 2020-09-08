@@ -9,7 +9,7 @@ import {
   NewTumblNotificationOptions
 } from '../../../../electron-app/src/server/websites/new-tumbl/new-tumbl.interface';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -46,7 +46,7 @@ export class NewTumbl implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'F'
           },
           {
@@ -54,15 +54,15 @@ export class NewTumbl implements Website {
             name: 'O'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'M'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'X'
           },
           {
-            value: 'extreme',
+            value: SubmissionRating.EXTREME,
             name: 'W'
           }
         ]
@@ -81,7 +81,7 @@ export class NewTumbl implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'F'
           },
           {
@@ -89,15 +89,15 @@ export class NewTumbl implements Website {
             name: 'O'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'M'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'X'
           },
           {
-            value: 'extreme',
+            value: SubmissionRating.EXTREME,
             name: 'W'
           }
         ]

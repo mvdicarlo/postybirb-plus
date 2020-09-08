@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { SubmissionType } from '../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { SubmissionTemplate } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
 import { SubmissionTemplateUpdateDto } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template-update.interface';
 

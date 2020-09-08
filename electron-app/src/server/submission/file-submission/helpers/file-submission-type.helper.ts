@@ -1,12 +1,5 @@
 import * as path from 'path';
-
-export enum FileSubmissionType {
-  IMAGE = 'IMAGE',
-  TEXT = 'TEXT',
-  VIDEO = 'VIDEO',
-  AUDIO = 'AUDIO',
-  UNKNOWN = 'UNKNOWN',
-}
+import { FileSubmissionType } from 'postybirb-commons';
 
 const IMAGE_TYPES: string[] = [
   'png',

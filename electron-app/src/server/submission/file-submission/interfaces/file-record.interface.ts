@@ -1,4 +1,4 @@
-import { FileSubmissionType } from '../enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 
 export interface FileRecord {
   location: string;

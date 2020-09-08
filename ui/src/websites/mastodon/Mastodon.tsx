@@ -7,7 +7,7 @@ import {
   MastodonFileOptions,
   MastodonNotificationOptions
 } from '../../../../electron-app/src/server/websites/mastodon/mastodon.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -41,8 +41,8 @@ export class Mastodon implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { name: 'Safe', value: 'general' },
-          { name: 'Sensitive', value: 'adult' }
+          { name: 'Safe', value: SubmissionRating.GENERAL },
+          { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
       tagOptions={{ show: false }}
@@ -59,8 +59,8 @@ export class Mastodon implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { name: 'Safe', value: 'general' },
-          { name: 'Sensitive', value: 'adult' }
+          { name: 'Safe', value: SubmissionRating.GENERAL },
+          { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
       tagOptions={{ show: false }}

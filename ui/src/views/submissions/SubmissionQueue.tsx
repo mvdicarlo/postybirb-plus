@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { PostStatusStore } from '../../stores/post-status.store';
 import { List, Avatar, message, Button, Typography, Card, Empty, Descriptions, Badge } from 'antd';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
 import { submissionStore } from '../../stores/submission.store';
 import { PostInfoStatus } from '../../../../electron-app/src/server/submission/post/interfaces/post-status.interface';

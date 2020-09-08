@@ -7,7 +7,7 @@ import { DefaultOptions } from '../../../../electron-app/src/server/submission/s
 import { DeviantArtFileOptions } from '../../../../electron-app/src/server/websites/deviant-art/deviant-art.interface';
 import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';

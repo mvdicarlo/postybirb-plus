@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'lodash';
 import SubmissionService from '../../../services/submission.service';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { Button, Input, message, Icon, Upload } from 'antd';
 import { RcFile } from 'antd/lib/upload';
 import Axios from 'axios';
