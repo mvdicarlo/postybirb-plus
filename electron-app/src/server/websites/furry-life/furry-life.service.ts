@@ -59,7 +59,7 @@ export class FurryLife extends Website {
   }
 
   private async loadAlbums(profileId: string, url: string) {
-    const { body } = await Http.get<string>(`${url}?tag=node_gallery_gallery`, profileId);
+    const { body } = await Http.get<string>(`${url}?tab=node_gallery_gallery`, profileId);
     const $ = cheerio.load(body);
     const albumUrls: string[] = [];
     $('a').each((i: number, el: CheerioElement) => {
