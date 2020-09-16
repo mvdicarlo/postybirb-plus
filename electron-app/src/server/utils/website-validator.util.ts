@@ -1,5 +1,5 @@
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { Folder } from 'src/server/websites/interfaces/folder.interface';
+import { FileRecord, Folder } from 'postybirb-commons';
+
 import * as path from 'path';
 
 export default class WebsiteValidator {

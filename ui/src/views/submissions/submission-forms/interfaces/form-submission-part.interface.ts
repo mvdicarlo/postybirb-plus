@@ -1,5 +1,5 @@
-import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
-import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart } from 'postybirb-commons';
+import { DefaultOptions } from 'postybirb-commons';
 
 export interface FormSubmissionPart<T extends DefaultOptions> extends SubmissionPart<T> {
   isNew?: boolean;

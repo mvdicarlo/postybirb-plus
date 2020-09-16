@@ -4,7 +4,15 @@ import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,
 } from '../generic/generic.defaults';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
+import {
+  FileRecord,
+  DefaultFileOptions,
+  DefaultOptions,
+  PostResponse,
+  Submission,
+  FileSubmission,
+  SubmissionPart,
+} from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
@@ -14,16 +22,10 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { TwitterAccountData } from './twitter-account.interface';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import {
-  DefaultFileOptions,
-  DefaultOptions,
-} from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
+
 import Http from 'src/server/http/http.util';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import { FileSubmissionType } from 'postybirb-commons';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';

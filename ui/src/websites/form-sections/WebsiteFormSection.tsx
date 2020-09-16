@@ -1,9 +1,9 @@
 import React from 'react';
 import _ from 'lodash';
 import { WebsiteSectionProps } from './website-form-section.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from '../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
+import { Submission } from 'postybirb-commons';
+import { DefaultOptions } from 'postybirb-commons';
+import { SubmissionPart } from 'postybirb-commons';
 import SectionProblems from '../../views/submissions/submission-forms/form-sections/SectionProblems';
 import { Form, Input, Radio } from 'antd';
 import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';

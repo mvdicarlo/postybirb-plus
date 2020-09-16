@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { TagConverter } from '../../../electron-app/src/server/tag-converter/interfaces/tag-converter.interface';
+import { TagConverter } from 'postybirb-commons';
 import { Events } from 'postybirb-commons';
 import TagConverterService from '../services/tag-converter.service';
 

@@ -1,7 +1,7 @@
 import { validateOrReject } from 'class-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
 import CustomShortcutEntity from './custom-shortcut.entity';
-import { CustomShortcut } from '../interfaces/custom-shortcut.interface';
+import { CustomShortcut } from 'postybirb-commons';
 
 describe('CustomShortcutEntity', () => {
   let plain: CustomShortcut;

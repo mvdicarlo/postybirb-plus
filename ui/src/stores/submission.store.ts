@@ -1,12 +1,12 @@
 import socket from '../utils/websocket';
 import * as _ from 'lodash';
-import { SubmissionPackage } from '../../../electron-app/src/server/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from 'postybirb-commons';
 import { observable, computed, action } from 'mobx';
-import { Submission } from '../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { Submission } from 'postybirb-commons';
 import SubmissionService from '../services/submission.service';
 import { SubmissionType, Events } from 'postybirb-commons';
 import SubmissionUtil from '../utils/submission.util';
-import { FileSubmission } from '../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from 'postybirb-commons';
 import RemoteService from '../services/remote.service';
 
 export interface SubmissionState {

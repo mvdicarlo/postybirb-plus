@@ -1,10 +1,10 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
-import { TumblrBlog } from '../../../../electron-app/src/server/websites/tumblr/tumblr-account.interface';
-import { TumblrFileOptions, TumblrNotificationOptions } from '../../../../electron-app/src/server/websites/tumblr/tumblr.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
+import { TumblrBlog } from 'postybirb-commons';
+import { TumblrFileOptions, TumblrNotificationOptions } from 'postybirb-commons';
 import WebsiteService from '../../services/website.service';
 import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';

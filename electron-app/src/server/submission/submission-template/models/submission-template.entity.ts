@@ -1,7 +1,7 @@
 import Entity from 'src/server/database/models/entity.model';
-import { SubmissionTemplate } from '../interfaces/submission-template.interface';
+import { SubmissionTemplate, Parts } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
-import { Parts } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { IsNotEmpty, IsString, IsEnum, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import SubmissionPartEntity from 'src/server/submission/submission-part/models/submission-part.entity';

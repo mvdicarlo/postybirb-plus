@@ -6,22 +6,28 @@ import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaint
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { FileSubmissionType } from 'postybirb-commons';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
+import {
+  FileRecord,
+  FileSubmission,
+  PostResponse,
+  DefaultOptions,
+  SubmissionPart,
+  Folder,
+  AryionFileOptions,
+} from 'postybirb-commons';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { Folder } from '../interfaces/folder.interface';
+
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { AryionDefaultFileOptions } from './aryion.defaults';
-import { AryionFileOptions } from './aryion.interface';
+
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()

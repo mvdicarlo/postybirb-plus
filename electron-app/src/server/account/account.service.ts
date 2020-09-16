@@ -16,7 +16,7 @@ import { LoginResponse } from 'src/server/websites/interfaces/login-response.int
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { AccountRepository, AccountRepositoryToken } from './account.repository';
 import { Events } from 'postybirb-commons';
-import { UserAccountDto } from './interfaces/user-account.dto.interface';
+import { UserAccountDto } from 'postybirb-commons';
 import UserAccountEntity from './models/user-account.entity';
 
 @Injectable()

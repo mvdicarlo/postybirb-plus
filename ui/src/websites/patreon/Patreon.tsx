@@ -1,12 +1,12 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import {
   PatreonFileOptions,
   PatreonNotificationOptions
-} from '../../../../electron-app/src/server/websites/patreon/patreon.interface';
+} from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
@@ -17,7 +17,7 @@ import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import WebsiteService from '../../services/website.service';
-import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
+import { Folder } from 'postybirb-commons';
 
 const defaultFileOptions: PatreonFileOptions = {
   ...GenericDefaultFileOptions,

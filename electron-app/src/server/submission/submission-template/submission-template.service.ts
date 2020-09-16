@@ -8,10 +8,10 @@ import { EventsGateway } from 'src/server/events/events.gateway';
 import { Events } from 'postybirb-commons';
 import { CreateSubmissionTemplateModel } from './models/create-template.model';
 import { UpdateSubmissionTemplateModel } from './models/update-template.model';
-import { SubmissionTemplate } from './interfaces/submission-template.interface';
-import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+import { SubmissionTemplate, DefaultOptions, Parts } from 'postybirb-commons';
+
 import SubmissionTemplateEntity from './models/submission-template.entity';
-import { Parts } from '../submission-part/interfaces/submission-part.interface';
+
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { Settings } from '../../../electron-app/src/server/settings/settings.interface';
+import { Settings } from 'postybirb-commons';
 import SettingsService from '../services/settings.service';
 import { Events } from 'postybirb-commons';
 

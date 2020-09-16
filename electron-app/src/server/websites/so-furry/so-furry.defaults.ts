@@ -1,4 +1,4 @@
-import { SoFurryFileOptions } from './so-furry.interface';
+import { SoFurryFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const SoFurryDefaultFileOptions: SoFurryFileOptions = {

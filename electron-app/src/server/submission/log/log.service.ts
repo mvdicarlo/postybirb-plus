@@ -3,7 +3,7 @@ import { app } from 'electron';
 import { SubmissionType } from 'postybirb-commons';
 import SubmissionEntity from '../models/submission.entity';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
-import { PartWithResponse } from './interfaces/submission-log.interface';
+import { PartWithResponse } from 'postybirb-commons';
 import { SubmissionLogRepository, SubmissionLogRepositoryToken } from './log.repository';
 import SubmissionLogEntity from './models/submission-log.entity';
 

@@ -10,19 +10,27 @@ import {
 import * as fs from 'fs-extra';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { FileSubmissionService } from './file-submission/file-submission.service';
-import { Problems } from './validator/interfaces/problems.interface';
-import { Submission } from './interfaces/submission.interface';
+import {
+  Problems,
+  Submission,
+  SubmissionPackage,
+  SubmissionPart,
+  Parts,
+  SubmissionUpdate,
+  UploadedFile,
+  SubmissionOverwrite,
+  FileRecord,
+  FileSubmission,
+} from 'postybirb-commons';
+
 import { Events } from 'postybirb-commons';
-import { SubmissionPackage } from './interfaces/submission-package.interface';
-import { SubmissionPart, Parts } from './submission-part/interfaces/submission-part.interface';
+
 import { SubmissionPartService } from './submission-part/submission-part.service';
 import { SubmissionRepository, SubmissionRepositoryToken } from './submission.repository';
 import { SubmissionType } from 'postybirb-commons';
-import { SubmissionUpdate } from './interfaces/submission-update.interface';
+
 import { ValidatorService } from './validator/validator.service';
-import { UploadedFile } from 'src/server/file-manager/interfaces/uploaded-file.interface';
-import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
-import { FileRecord } from './file-submission/interfaces/file-record.interface';
+
 import { PostService } from './post/post.service';
 import { Interval } from '@nestjs/schedule';
 import SubmissionEntity from './models/submission.entity';
@@ -30,7 +38,7 @@ import SubmissionScheduleModel from './models/submission-schedule.model';
 import SubmissionPartEntity from './submission-part/models/submission-part.entity';
 import FileSubmissionEntity from './file-submission/models/file-submission.entity';
 import SubmissionLogEntity from './log/models/submission-log.entity';
-import { FileSubmission } from './file-submission/interfaces/file-submission.interface';
+
 import { AccountService } from 'src/server//account/account.service';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { FileSubmissionType } from 'postybirb-commons';
@@ -167,7 +175,10 @@ export class SubmissionService {
       throw new InternalServerErrorException(err);
     }
 
-    this.eventEmitter.emitOnComplete(Events.SubmissionEvent.CREATED, this.validate(completedSubmission));
+    this.eventEmitter.emitOnComplete(
+      Events.SubmissionEvent.CREATED,
+      this.validate(completedSubmission),
+    );
     return completedSubmission;
   }
 

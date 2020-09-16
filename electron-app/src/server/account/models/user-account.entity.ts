@@ -1,4 +1,4 @@
-import { UserAccount } from '../interfaces/user-account.interface';
+import { UserAccount } from 'postybirb-commons';
 import Entity from 'src/server/database/models/entity.model';
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 

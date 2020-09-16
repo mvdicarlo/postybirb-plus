@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { CustomShortcut } from '../../../electron-app/src/server/custom-shortcut/interfaces/custom-shortcut.interface';
+import { CustomShortcut } from 'postybirb-commons';
 import CustomShortcutService from '../services/custom-shortcut.service';
 import { Events } from 'postybirb-commons';
 

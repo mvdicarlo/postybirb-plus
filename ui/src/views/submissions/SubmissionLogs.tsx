@@ -1,6 +1,6 @@
 import React from 'react';
 import { SubmissionType } from 'postybirb-commons';
-import { SubmissionLog } from '../../../../electron-app/src/server/submission/log/interfaces/submission-log.interface';
+import { SubmissionLog } from 'postybirb-commons';
 import SubmissionLogService from '../../services/submission-log.service';
 import { saveAs } from 'file-saver';
 import { List, Button, Icon, Typography, message, Modal } from 'antd';

@@ -1,7 +1,6 @@
 import { IsOptional, IsObject, IsString, IsNotEmpty, IsEnum } from 'class-validator';
-import { UploadedFile } from 'src/server/file-manager/interfaces/uploaded-file.interface';
+import { UploadedFile, SubmissionCreate } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
-import { SubmissionCreate } from '../interfaces/submission-create.interface';
 
 export default class SubmissionCreateModel implements SubmissionCreate {
   @IsEnum(SubmissionType)

@@ -2,7 +2,7 @@ import { Button, Form, Input, message, Spin } from 'antd';
 import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { TumblrAccountData } from '../../../../electron-app/src/server/websites/tumblr/tumblr-account.interface';
+import { TumblrAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 

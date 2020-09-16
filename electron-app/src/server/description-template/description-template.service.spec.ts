@@ -4,7 +4,7 @@ import { mockEventEmitterProvider } from 'test/common';
 import { DescriptionTemplateService } from './description-template.service';
 import DescriptionTemplateEntity from './models/description-template.entity';
 import { DescriptionTemplateRepositoryToken } from './description-template.repository';
-import { DescriptionTemplate } from './interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 
 describe('DescriptionTemplateService', () => {
   let service: DescriptionTemplateService;

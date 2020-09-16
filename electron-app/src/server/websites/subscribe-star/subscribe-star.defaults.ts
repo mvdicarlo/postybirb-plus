@@ -1,7 +1,4 @@
-import {
-  SubscribeStarFileOptions,
-  SubscribeStarNotificationOptions,
-} from './subscribe-star.interface';
+import { SubscribeStarFileOptions, SubscribeStarNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

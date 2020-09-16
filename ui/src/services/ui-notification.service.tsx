@@ -1,5 +1,5 @@
 import { message, notification } from 'antd';
-import { UINotification } from '../../../electron-app/src/server/notification/interfaces/ui-notification.interface';
+import { UINotification } from 'postybirb-commons';
 import { Events } from 'postybirb-commons';
 import socket from '../utils/websocket';
 

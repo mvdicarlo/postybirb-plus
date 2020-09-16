@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { DescriptionTemplate } from '../../../electron-app/src/server/description-template/interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 
 export default class DescriptionTemplateService {
   static getAll() {

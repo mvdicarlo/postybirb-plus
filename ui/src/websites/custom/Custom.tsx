@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import {
   DefaultFileOptions,
   DefaultOptions
-} from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+} from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';

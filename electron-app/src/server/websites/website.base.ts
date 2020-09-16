@@ -5,23 +5,25 @@ import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parse
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import { HttpResponse } from 'src/server/http/http.util';
 import { SubmissionType } from 'postybirb-commons';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
+import {
+  FileRecord,
+  FileSubmission,
+  Submission,
+  PostResponse,
+  DefaultFileOptions,
+  DefaultOptions,
+  SubmissionPart,
+  UsernameShortcut,
+} from 'postybirb-commons';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
-import {
-  DefaultFileOptions,
-  DefaultOptions,
-} from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import { FallbackInformation } from './interfaces/fallback-information.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
 import { ScalingOptions } from './interfaces/scaling-options.interface';
-import { UsernameShortcut } from './interfaces/username-shortcut.interface';
 
 interface TagParseOptions {
   spaceReplacer: string;

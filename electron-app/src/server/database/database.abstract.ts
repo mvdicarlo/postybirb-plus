@@ -1,5 +1,5 @@
 import Entity from './models/entity.model';
-import { EntityIntf } from './interfaces/entity.interface';
+import { EntityIntf } from 'postybirb-commons';
 
 export abstract class Database<T extends Entity, K extends EntityIntf> {
   constructor(

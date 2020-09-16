@@ -1,6 +1,6 @@
-import { UserAccountDto } from '../../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { UserAccountDto } from 'postybirb-commons';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import { SubmissionType } from 'postybirb-commons';
 

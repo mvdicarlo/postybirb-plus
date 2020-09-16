@@ -3,7 +3,7 @@ import { NotificationRepository, NotificationRepositoryToken } from './notificat
 import { EventsGateway } from 'src/server/events/events.gateway';
 import PostyBirbNotificationEntity from './models/postybirb-notification.entity';
 import { Events } from 'postybirb-commons';
-import { PostyBirbNotification } from './interfaces/postybirb-notification.interface';
+import { PostyBirbNotification } from 'postybirb-commons';
 import { Notification } from 'electron';
 import { SettingsService } from 'src/server/settings/settings.service';
 

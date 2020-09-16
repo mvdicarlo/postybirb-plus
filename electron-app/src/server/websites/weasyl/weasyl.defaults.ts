@@ -1,4 +1,4 @@
-import { WeasylFileOptions } from './weasyl.interface';
+import { WeasylFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const WeasylDefaultFileOptions: WeasylFileOptions = {

@@ -1,25 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { Website } from '../website.base';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
+import {
+  FileRecord,
+  MastodonAccountData,
+  PostResponse,
+  Submission,
+  MastodonFileOptions,
+  MastodonNotificationOptions,
+  FileSubmission,
+  SubmissionPart,
+  DefaultOptions,
+} from 'postybirb-commons';
 import FileSize from 'src/server/utils/filesize.util';
 import * as MastodonInstance from 'mastodon-api';
-import { MastodonAccountData } from './mastodon-account.interface';
+
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { FilePostData, PostFile } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
+import {
+  FilePostData,
+  PostFile,
+} from 'src/server/submission/post/interfaces/file-post-data.interface';
+
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
+
 import {
   MastodonDefaultFileOptions,
   MastodonDefaultNotificationOptions,
 } from './mastodon.defaults';
-import { MastodonFileOptions, MastodonNotificationOptions } from './mastodon.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import FormContent from 'src/server/utils/form-content.util';

@@ -1,4 +1,4 @@
-import { HentaiFoundryFileOptions } from './hentai-foundry.interface';
+import { HentaiFoundryFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const HentaiFoundryDefaultFileOptions: HentaiFoundryFileOptions = {

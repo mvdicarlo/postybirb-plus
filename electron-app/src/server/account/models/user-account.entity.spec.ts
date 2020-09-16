@@ -1,7 +1,7 @@
 import UserAccountEntity from './user-account.entity';
 import { validateOrReject } from 'class-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { UserAccount } from '../interfaces/user-account.interface';
+import { UserAccount } from 'postybirb-commons';
 
 describe('UserAccountEntity', () => {
   let plain: UserAccount;

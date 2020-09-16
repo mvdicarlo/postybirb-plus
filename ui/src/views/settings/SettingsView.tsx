@@ -2,7 +2,7 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { SettingsStore } from '../../stores/settings.store';
 import SettingsService from '../../services/settings.service';
-import { Settings } from '../../../../electron-app/src/server/settings/settings.interface';
+import { Settings } from 'postybirb-commons';
 import { Form, Collapse, Switch, Tooltip, InputNumber, Radio, Input, Typography } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 

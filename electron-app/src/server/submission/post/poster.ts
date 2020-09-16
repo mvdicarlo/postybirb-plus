@@ -5,14 +5,17 @@ import { PostData } from './interfaces/post-data.interface';
 import {
   DefaultOptions,
   DefaultFileOptions,
-} from '../submission-part/interfaces/default-options.interface';
+  PostResponse,
+  Submission,
+  PostStatus,
+} from 'postybirb-commons';
 import { Website } from 'src/server/websites/website.base';
 import { SettingsService } from 'src/server/settings/settings.service';
-import { PostResponse } from './interfaces/post-response.interface';
+
 import SubmissionEntity from '../models/submission.entity';
-import { Submission } from '../interfaces/submission.interface';
+
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
-import { PostStatus } from '../submission-part/interfaces/submission-part.interface';
+
 import { ParserService } from '../parser/parser.service';
 import { FilePostData } from './interfaces/file-post-data.interface';
 import { CancellationToken } from './cancellation/cancellation-token';

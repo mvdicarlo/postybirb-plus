@@ -1,8 +1,8 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { PixivFileOptions } from '../../../../electron-app/src/server/websites/pixiv/pixiv.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { PixivFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';

@@ -63,7 +63,7 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
         try {
           await SubmissionService.create({
             type: SubmissionType.FILE,
-            file: file,
+            file: file as any,
             path: file['path']
           });
           message.success(`${file!.name} file uploaded successfully.`);
@@ -87,7 +87,7 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
         SubmissionService.create({
           type: SubmissionType.FILE,
           title: filename,
-          file
+          file: file as any
         })
           .then(() => {
             message.success('Image imported.');

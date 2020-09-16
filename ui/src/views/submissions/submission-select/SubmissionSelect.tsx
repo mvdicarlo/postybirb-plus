@@ -2,10 +2,10 @@ import React from 'react';
 import * as _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { SubmissionStore } from '../../../stores/submission.store';
-import { SubmissionPackage } from '../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from 'postybirb-commons';
 import { Select, Avatar } from 'antd';
 import { SubmissionType } from 'postybirb-commons';
-import { FileSubmission } from '../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from 'postybirb-commons';
 import SubmissionUtil from '../../../utils/submission.util';
 
 interface Props {

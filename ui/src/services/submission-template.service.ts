@@ -1,7 +1,7 @@
 import axios from '../utils/http';
 import { SubmissionType } from 'postybirb-commons';
-import { SubmissionTemplate } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
-import { SubmissionTemplateUpdateDto } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template-update.interface';
+import { SubmissionTemplate } from 'postybirb-commons';
+import { SubmissionTemplateUpdateDto } from 'postybirb-commons';
 
 export default class SubmissionTemplateService {
   static createTemplate(alias: string, type: SubmissionType) {

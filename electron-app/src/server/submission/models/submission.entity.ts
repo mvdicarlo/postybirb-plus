@@ -1,5 +1,5 @@
 import Entity from 'src/server/database/models/entity.model';
-import { Submission } from '../interfaces/submission.interface';
+import { Submission } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
 import {
   IsBoolean,

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
-import { SubmissionPart } from '../submission-part/interfaces/submission-part.interface';
-import { Submission } from '../interfaces/submission.interface';
+import { SubmissionPart, Submission, Problems, DefaultOptions } from 'postybirb-commons';
+
 import * as _ from 'lodash';
-import { Problems } from './interfaces/problems.interface';
+
 import { SubmissionType } from 'postybirb-commons';
-import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+
 import { ValidationParts } from './interfaces/validation-parts.interface';
 import { Website } from 'src/server/websites/website.base';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';

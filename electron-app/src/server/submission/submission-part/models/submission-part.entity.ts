@@ -1,6 +1,6 @@
 import Entity from 'src/server/database/models/entity.model';
-import { SubmissionPart, PostStatus } from '../interfaces/submission-part.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
+import { SubmissionPart, PostStatus, DefaultOptions } from 'postybirb-commons';
+
 import { IsBoolean, IsObject, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { Expose } from 'class-transformer';
 

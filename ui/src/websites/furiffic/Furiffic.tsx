@@ -2,13 +2,13 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import {
   DefaultOptions,
   DefaultFileOptions
-} from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+} from 'postybirb-commons';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import { SubmissionType, SubmissionRating } from 'postybirb-commons';

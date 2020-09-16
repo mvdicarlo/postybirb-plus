@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { NotificationType } from '../enums/notification-type.enum';
 import { Events } from 'postybirb-commons';
-import { UINotification } from '../interfaces/ui-notification.interface';
+import { UINotification } from 'postybirb-commons';
 
 @Injectable()
 export class UiNotificationService {

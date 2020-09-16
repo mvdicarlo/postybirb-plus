@@ -1,7 +1,6 @@
 import { PostData } from './post-data.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission, DefaultFileOptions } from 'postybirb-commons';
 import { FileSubmissionType } from 'postybirb-commons';
-import { DefaultFileOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
 
 export interface FilePostData<T extends DefaultFileOptions> extends PostData<FileSubmission, T> {
   primary: PostFileRecord;

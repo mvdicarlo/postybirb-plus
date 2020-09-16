@@ -2,14 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { Website } from '../website.base';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
-import { CustomAccountData } from './custom-account.interface';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
 import {
+  CustomAccountData,
+  FileRecord,
   DefaultFileOptions,
   DefaultOptions,
-} from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+  FileSubmission,
+  SubmissionPart,
+  Submission,
+  PostResponse,
+} from 'postybirb-commons';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import HtmlParser from 'src/server/description-parsing/html-node/parser';
@@ -17,8 +20,7 @@ import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
+
 import Http from 'src/server/http/http.util';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import {

@@ -2,11 +2,11 @@ import React from 'react';
 import * as sanitize from 'sanitize-html';
 import { uiStore } from '../../../../stores/ui.store';
 import SubmissionService from '../../../../services/submission.service';
-import { FileSubmission } from '../../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from 'postybirb-commons';
 import { Website } from '../../../../websites/interfaces/website.interface';
 import { Card, Alert, Modal, Spin, message } from 'antd';
 import { Editor } from '@tinymce/tinymce-react';
-import { SubmissionPackage } from '../../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from 'postybirb-commons';
 
 interface Props {
   submission: FileSubmission;

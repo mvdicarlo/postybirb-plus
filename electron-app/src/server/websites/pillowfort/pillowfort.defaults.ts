@@ -1,4 +1,4 @@
-import { PillowfortFileOptions, PillowfortNotificationOptions } from './pillowfort.interface';
+import { PillowfortFileOptions, PillowfortNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

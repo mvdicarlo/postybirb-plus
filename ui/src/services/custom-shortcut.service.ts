@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { CustomShortcut } from '../../../electron-app/src/server/custom-shortcut/interfaces/custom-shortcut.interface';
+import { CustomShortcut } from 'postybirb-commons';
 
 export default class CustomShortcutService {
   static getAll() {

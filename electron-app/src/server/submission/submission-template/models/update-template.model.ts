@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsObject } from 'class-validator';
-import { Parts } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+import { Parts } from 'postybirb-commons';
 
 export class UpdateSubmissionTemplateModel {
   @IsNotEmpty()

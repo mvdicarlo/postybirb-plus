@@ -3,7 +3,7 @@ import MemoryDatabase from 'src/server/database/databases/memory.database';
 import { mockEventEmitterProvider } from 'test/common';
 import PostyBirbNotificationEntity from './models/postybirb-notification.entity';
 import { NotificationService } from './notification.service';
-import { PostyBirbNotification } from './interfaces/postybirb-notification.interface';
+import { PostyBirbNotification } from 'postybirb-commons';
 import { NotificationRepositoryToken } from './notification.repository';
 
 describe('NotificationService', () => {

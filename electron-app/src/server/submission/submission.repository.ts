@@ -1,4 +1,4 @@
-import { Submission } from './interfaces/submission.interface';
+import { Submission } from 'postybirb-commons';
 import PersistedDatabase from 'src/server/database/databases/persisted.database';
 import SubmissionEntity from './models/submission.entity';
 import MemoryDatabase from 'src/server/database/databases/memory.database';

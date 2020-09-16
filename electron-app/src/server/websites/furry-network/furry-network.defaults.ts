@@ -1,7 +1,4 @@
-import {
-  FurryNetworkFileOptions,
-  FurryNetworkNotificationOptions,
-} from './furry-network.interface';
+import { FurryNetworkFileOptions, FurryNetworkNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

@@ -1,4 +1,4 @@
-import { FurAffinityFileOptions, FurAffinityNotificationOptions } from './fur-affinity.interface';
+import { FurAffinityFileOptions, FurAffinityNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

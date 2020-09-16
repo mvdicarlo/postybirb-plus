@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WebsiteProvider } from './website-provider.service';
-import { UsernameShortcut } from './interfaces/username-shortcut.interface';
+import { UsernameShortcut } from 'postybirb-commons';
 
 @Injectable()
 export class WebsitesService {

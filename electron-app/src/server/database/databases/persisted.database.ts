@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DATABASE_DIRECTORY } from 'src/server/directories';
 import * as path from 'path';
 import Entity from '../models/entity.model';
-import { EntityIntf } from '../interfaces/entity.interface';
+import { EntityIntf } from 'postybirb-commons';
 import NedbDatabase from './nedb.database';
 
 @Injectable()

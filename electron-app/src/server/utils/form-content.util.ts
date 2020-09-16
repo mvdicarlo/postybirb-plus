@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
-import { DescriptionData } from 'src/server/submission/submission-part/interfaces/description-data.interface';
-import { TagData } from 'src/server/submission/submission-part/interfaces/tag-data.interface';
+import { DescriptionData, TagData } from 'postybirb-commons';
 
 export default class FormContent {
   private constructor() {}

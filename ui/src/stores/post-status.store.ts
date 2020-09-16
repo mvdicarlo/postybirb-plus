@@ -3,9 +3,9 @@ import socket from '../utils/websocket';
 import {
   PostStatuses,
   PostInfo
-} from '../../../electron-app/src/server/submission/post/interfaces/post-status.interface';
+} from 'postybirb-commons';
 import PostService from '../services/post.service';
-import { Submission } from '../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { Submission } from 'postybirb-commons';
 import { Events } from 'postybirb-commons';
 
 export class PostStatusStore {

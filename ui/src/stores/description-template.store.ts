@@ -1,6 +1,6 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { DescriptionTemplate } from '../../../electron-app/src/server/description-template/interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 import DescriptionTemplateService from '../services/description-template.service';
 import { Events } from 'postybirb-commons';
 

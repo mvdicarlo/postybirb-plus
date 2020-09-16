@@ -2,18 +2,18 @@ import { Injectable, Logger, Inject, forwardRef, BadRequestException } from '@ne
 import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import { SubmissionService } from '../submission.service';
-import { Submission } from '../interfaces/submission.interface';
+import { Submission, DefaultOptions, FileRecord, PostStatuses, PostInfo } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { SettingsService } from 'src/server/settings/settings.service';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { AccountService } from 'src/server//account/account.service';
-import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+
 import { Website } from 'src/server/websites/website.base';
-import { FileRecord } from '../file-submission/interfaces/file-record.interface';
+
 import { Poster } from './poster';
 import { LogService } from '../log/log.service';
-import { PostStatuses, PostInfo } from './interfaces/post-status.interface';
+
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { Events } from 'postybirb-commons';
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';

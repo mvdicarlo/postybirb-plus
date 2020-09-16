@@ -1,6 +1,6 @@
 import { validateOrReject } from 'class-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { TagConverter } from '../interfaces/tag-converter.interface';
+import { TagConverter } from 'postybirb-commons';
 import TagConverterEntity from './tag-converter.entity';
 
 describe('TagConverterEntity', () => {

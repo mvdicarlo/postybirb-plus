@@ -1,7 +1,7 @@
 import React from 'react';
 import SubmissionSelect from './SubmissionSelect';
 import { Modal } from 'antd';
-import { SubmissionPackage } from '../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
 
 interface Props {

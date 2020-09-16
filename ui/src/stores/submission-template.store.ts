@@ -1,7 +1,7 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import SubmissionTemplateService from '../services/submission-template.service';
-import { SubmissionTemplate } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
+import { SubmissionTemplate } from 'postybirb-commons';
 import { Events } from 'postybirb-commons';
 
 export interface SubmissionStoreState {

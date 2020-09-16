@@ -1,12 +1,12 @@
 import React from 'react';
 import _ from 'lodash';
-import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from 'postybirb-commons';
 import { SubmissionSectionProps } from '../interfaces/submission-section.interface';
 import TagInput from '../form-components/TagInput';
 import DescriptionInput from '../form-components/DescriptionInput';
 import { Form, Input, Radio } from 'antd';
-import { Submission } from '../../../../../../electron-app/src/server/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { Submission } from 'postybirb-commons';
+import { DefaultOptions } from 'postybirb-commons';
 import SectionProblems from './SectionProblems';
 import { SubmissionRating } from 'postybirb-commons';
 

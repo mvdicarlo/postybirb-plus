@@ -1,4 +1,4 @@
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
+import { FileRecord } from 'postybirb-commons';
 import WebsiteValidator from './website-validator.util';
 
 describe('WebsiteValidator', () => {

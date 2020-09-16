@@ -1,7 +1,4 @@
-import {
-  DefaultFileOptions,
-  DefaultOptions,
-} from '../../submission/submission-part/interfaces/default-options.interface';
+import { DefaultFileOptions, DefaultOptions } from 'postybirb-commons';
 
 export const GenericDefaultNotificationOptions: DefaultOptions = {
   tags: {
