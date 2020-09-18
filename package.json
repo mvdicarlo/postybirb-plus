@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run build:common && yarn run build:ui && yarn run build:app",
     "build:app": "cd electron-app && npm install && yarn run build",
-    "build:common": "cd common && npm install && npm run build",
+    "build:common": "cd commons && npm install && npm run build",
     "build:ui": "cd ui && npm install && yarn run build",
     "release:windows": "node create-signer.js &&  yarn run build && cd electron-app && yarn run release:windows",
     "release:linux": "node create-signer.js &&  yarn run build && cd electron-app && yarn run release:linux"
