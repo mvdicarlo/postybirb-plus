@@ -2,7 +2,7 @@ import { notification } from 'antd';
 import { action, observable } from 'mobx';
 import React from 'react';
 import UpdateService from '../services/update.service';
-import { UpdateEvent } from '../shared/enums/update.events.enum';
+import { Events } from 'postybirb-commons';
 import socket from '../utils/websocket';
 
 interface UpdateState {
@@ -45,9 +45,9 @@ export class UpdateStore {
 
 export const updateStore = new UpdateStore();
 
-socket.on(UpdateEvent.AVAILABLE, (data: UpdateState) => updateStore.updateAvailable(data));
+socket.on(Events.UpdateEvent.AVAILABLE, (data: UpdateState) => updateStore.updateAvailable(data));
 
-socket.on(UpdateEvent.ERROR, (err: any) => {
+socket.on(Events.UpdateEvent.ERROR, (err: any) => {
   updateStore.setError(err);
   notification.error({
     message: 'PostyBirb Update Failed',
@@ -64,7 +64,7 @@ socket.on(UpdateEvent.ERROR, (err: any) => {
   });
 });
 
-socket.on(UpdateEvent.BLOCKED, () => {
+socket.on(Events.UpdateEvent.BLOCKED, () => {
   notification.warning({
     message: 'PostyBirb Update Stopped',
     description: 'PostyBirb could not update because it is currently posting.'

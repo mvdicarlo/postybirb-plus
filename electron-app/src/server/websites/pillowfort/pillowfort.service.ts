@@ -7,19 +7,27 @@ import {
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import Http from 'src/server/http/http.util';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { PillowfortFileOptions, PillowfortNotificationOptions } from './pillowfort.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
+import {
+  FileRecord,
+  PillowfortFileOptions,
+  PillowfortNotificationOptions,
+  FileSubmission,
+  SubmissionPart,
+  DefaultOptions,
+  Submission,
+  PostResponse,
+} from 'postybirb-commons';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
+
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
-import { FilePostData, PostFile } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import { SubmissionRating } from 'postybirb-commons';
+import {
+  FilePostData,
+  PostFile,
+} from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import * as FormData from 'form-data';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';

@@ -1,3 +1,3 @@
-import { DefaultFileOptions } from '../../submission/submission-part/interfaces/default-options.interface';
+import { DefaultFileOptions } from 'postybirb-commons';
 
 export interface FurifficOptions extends DefaultFileOptions {}

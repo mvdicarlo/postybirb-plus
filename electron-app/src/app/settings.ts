@@ -1,5 +1,6 @@
 /* tslint:disable: no-console no-var-requires */
 import { app } from 'electron';
+import { Settings } from 'postybirb-commons';
 const fs = require('fs-extra');
 const path = require('path');
 const low = require('lowdb');
@@ -10,21 +11,20 @@ const settingsPath = path.join(global.BASE_DIRECTORY, 'data', 'settings.json');
 fs.ensureFileSync(settingsPath);
 const adapter = new FileSync(settingsPath);
 const settings = low(adapter);
-settings
-  .defaults({
-    advertise: true,
-    emptyQueueOnFailedPost: true,
-    postRetries: 0,
-    openWindowOnStartup: true,
-    openOnLogin: false,
-    useHardwareAcceleration: !util.isLinux(),
-    maxPNGSizeCompression: 50,
-    maxPNGSizeCompressionWithAlpha: 60,
-    maxJPEGQualityCompression: 15,
-    maxJPEGSizeCompression: 50,
-    silentNotifications: false,
-  })
-  .write();
+const settingDefauls: Settings = {
+  advertise: true,
+  emptyQueueOnFailedPost: true,
+  postRetries: 0,
+  openWindowOnStartup: true,
+  openOnLogin: false,
+  useHardwareAcceleration: !util.isLinux(),
+  maxPNGSizeCompression: 50,
+  maxPNGSizeCompressionWithAlpha: 60,
+  maxJPEGQualityCompression: 15,
+  maxJPEGSizeCompression: 50,
+  silentNotification: false,
+};
+settings.defaults(settingDefauls).write();
 
 if (!settings.getState().useHardwareAcceleration || util.isLinux()) {
   console.log('Hardware acceleration disabled');

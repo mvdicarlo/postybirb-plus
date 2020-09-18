@@ -1,10 +1,10 @@
-import { FileRecord } from '../../../electron-app/src/server/submission/file-submission/interfaces/file-record.interface';
-import { SubmissionCreate } from '../../../electron-app/src/server/submission/interfaces/submission-create.interface';
-import { SubmissionOverwrite } from '../../../electron-app/src/server/submission/interfaces/submission-overwrite.interface';
-import { SubmissionPackage } from '../../../electron-app/src/server/submission/interfaces/submission-package.interface';
-import { SubmissionUpdate } from '../../../electron-app/src/server/submission/interfaces/submission-update.interface';
-import { SubmissionLog } from '../../../electron-app/src/server/submission/log/interfaces/submission-log.interface';
-import { Problems } from '../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
+import { FileRecord } from 'postybirb-commons';
+import { SubmissionCreate } from 'postybirb-commons';
+import { SubmissionOverwrite } from 'postybirb-commons';
+import { SubmissionPackage } from 'postybirb-commons';
+import { SubmissionUpdate } from 'postybirb-commons';
+import { SubmissionLog } from 'postybirb-commons';
+import { Problems } from 'postybirb-commons';
 import axios from '../utils/http';
 import { FormSubmissionPart } from '../views/submissions/submission-forms/interfaces/form-submission-part.interface';
 

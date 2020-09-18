@@ -1,7 +1,7 @@
 import { Button, Card, Form, Input, List, message, Modal } from 'antd';
 import { inject, observer } from 'mobx-react';
 import React from 'react';
-import { UserAccountDto } from '../../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
+import { UserAccountDto } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginStatusStore } from '../../stores/login-status.store';
 import { UIStore } from '../../stores/ui.store';

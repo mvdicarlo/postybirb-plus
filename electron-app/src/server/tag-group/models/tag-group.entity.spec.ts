@@ -1,7 +1,7 @@
 import TagGroupEntity from './tag-group.entity';
 import { validateOrReject } from 'class-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { TagGroup } from '../interfaces/tag-group.interface';
+import { TagGroup } from 'postybirb-commons';
 
 describe('TagGroupEntity', () => {
   let plain: TagGroup;

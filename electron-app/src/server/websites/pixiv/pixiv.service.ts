@@ -1,28 +1,33 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
 import { Website } from '../website.base';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
+import {
+  FileRecord,
+  PixivFileOptions,
+  Submission,
+  DefaultOptions,
+  PostResponse,
+  FileSubmission,
+  SubmissionPart,
+} from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import Http from 'src/server/http/http.util';
 import { PixivDefaultFileOptions } from './pixiv.defaults';
-import { PixivFileOptions } from './pixiv.interface';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
+
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FormContent from 'src/server/utils/form-content.util';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
+import { SubmissionRating } from 'postybirb-commons';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 
 @Injectable()

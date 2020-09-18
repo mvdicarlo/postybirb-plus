@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { PostyBirbNotification } from '../../../electron-app/src/server/notification/interfaces/postybirb-notification.interface';
+import { PostyBirbNotification } from 'postybirb-commons';
 
 export default class NotificationService {
   static remove(id: string) {

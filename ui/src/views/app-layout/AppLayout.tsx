@@ -14,7 +14,7 @@ import SubmissionTemplateEditForm from '../submissions/submission-forms/forms/Su
 import MultiSubmissionEditForm from '../submissions/submission-forms/forms/MultiSubmissionEditForm';
 import { Link, Route, Prompt } from 'react-router-dom';
 import { Login } from '../login/Login';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { UIStore } from '../../stores/ui.store';
 import { WebsiteRegistry } from '../../websites/website-registry';
 import { inject, observer } from 'mobx-react';

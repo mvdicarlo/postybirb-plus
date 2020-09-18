@@ -4,17 +4,17 @@ import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import {
   DiscordFileOptions,
   DiscordNotificationOptions
-} from '../../../../electron-app/src/server/websites/discord/discord.interface';
+} from 'postybirb-commons';
 import { Checkbox } from 'antd';
 import DiscordLogin from './DiscordLogin';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 const defaultOptions: DiscordFileOptions = {
   ...GenericDefaultFileOptions,

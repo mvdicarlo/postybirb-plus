@@ -1,8 +1,8 @@
-import { UserAccountDto } from '../../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { UserAccountDto } from 'postybirb-commons';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 export interface LoginDialogProps {
   account: UserAccountDto;
@@ -16,6 +16,7 @@ export interface Website {
   supportsAdditionalFiles?: boolean;
   supportsTags?: boolean;
   LoginDialog: (props: LoginDialogProps) => JSX.Element;
+  LoginHelp?: (props: LoginDialogProps) => JSX.Element;
   FileSubmissionForm: (props: WebsiteSectionProps<FileSubmission, any>) => JSX.Element;
   NotificationSubmissionForm?: (props: WebsiteSectionProps<Submission, any>) => JSX.Element;
   getDefaults(type: SubmissionType): any;

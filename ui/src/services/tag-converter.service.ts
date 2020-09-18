@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { TagConverter } from '../../../electron-app/src/server/tag-converter/interfaces/tag-converter.interface';
+import { TagConverter } from 'postybirb-commons';
 
 export default class TagConverterService {
   static getAll() {

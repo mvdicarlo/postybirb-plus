@@ -17,7 +17,7 @@ import {
   Alert,
   Popover
 } from 'antd';
-import { CustomShortcut } from '../../../../electron-app/src/server/custom-shortcut/interfaces/custom-shortcut.interface';
+import { CustomShortcut } from 'postybirb-commons';
 import _ from 'lodash';
 import DescriptionInput from '../submissions/submission-forms/form-components/DescriptionInput';
 

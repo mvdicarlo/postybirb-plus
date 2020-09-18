@@ -2,11 +2,11 @@ import * as fs from 'fs-extra';
 import * as shortid from 'shortid';
 import * as _ from 'lodash';
 import * as path from 'path';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileRecord, FileSubmission, UploadedFile } from 'postybirb-commons';
+
 import { Injectable, Logger } from '@nestjs/common';
 import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/server/directories';
-import { UploadedFile } from './interfaces/uploaded-file.interface';
+
 import { app, nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';

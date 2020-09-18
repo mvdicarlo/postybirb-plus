@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { headerStore } from '../../stores/header.store';
 import { Card, Descriptions } from 'antd';
 import { Link } from 'react-router-dom';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { SubmissionStore } from '../../stores/submission.store';
 
 interface Props {

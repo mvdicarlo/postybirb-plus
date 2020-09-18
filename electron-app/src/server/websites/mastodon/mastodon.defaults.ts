@@ -1,4 +1,4 @@
-import { MastodonFileOptions, MastodonNotificationOptions } from './mastodon.interface';
+import { MastodonFileOptions, MastodonNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

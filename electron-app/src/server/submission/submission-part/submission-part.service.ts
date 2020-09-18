@@ -4,9 +4,9 @@ import {
   SubmissionPartRepositoryToken,
 } from './submission-part.repository';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
-import { Submission } from '../interfaces/submission.interface';
-import { SubmissionType } from '../enums/submission-type.enum';
-import { DefaultOptions } from './interfaces/default-options.interface';
+import { Submission, DefaultOptions } from 'postybirb-commons';
+import { SubmissionType } from 'postybirb-commons';
+
 import { Website } from 'src/server/websites/website.base';
 import SubmissionPartEntity from './models/submission-part.entity';
 

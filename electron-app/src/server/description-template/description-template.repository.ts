@@ -1,6 +1,6 @@
 import DescriptionTemplateEntity from './models/description-template.entity';
 import PersistedDatabase from 'src/server/database/databases/persisted.database';
-import { DescriptionTemplate } from './interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 import MemoryDatabase from 'src/server/database/databases/memory.database';
 
 export const DescriptionTemplateRepositoryToken = 'DescriptionTemplateRepositoryToken';

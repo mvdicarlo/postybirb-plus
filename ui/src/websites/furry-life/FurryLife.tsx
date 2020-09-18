@@ -1,13 +1,13 @@
 import { Form, Input, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
-import { FurryLifeFileOptions } from '../../../../electron-app/src/server/websites/furry-life/furry-life.interface';
-import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
+import { DefaultOptions } from 'postybirb-commons';
+import { FurryLifeFileOptions } from 'postybirb-commons';
+import { Folder } from 'postybirb-commons';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -34,7 +34,11 @@ export class FurryLife implements Website {
   );
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, FurryLifeFileOptions>) => (
-    <FurryLifeFileSubmissionForm key={props.part.accountId} {...props} />
+    <FurryLifeFileSubmissionForm
+      key={props.part.accountId}
+      {...props}
+      hideThumbnailOptions={true}
+    />
   );
 
   NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (

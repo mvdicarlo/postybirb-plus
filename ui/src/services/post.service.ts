@@ -1,6 +1,6 @@
 import axios from '../utils/http';
-import { PostStatuses } from '../../../electron-app/src/server/submission/post/interfaces/post-status.interface';
-import { SubmissionType } from '../../../electron-app/src/server/submission/enums/submission-type.enum';
+import { PostStatuses } from 'postybirb-commons';
+import { SubmissionType } from 'postybirb-commons';
 
 export default class PostService {
   static cancel(id: string) {

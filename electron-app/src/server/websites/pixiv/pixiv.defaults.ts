@@ -1,4 +1,4 @@
-import { PixivFileOptions } from './pixiv.interface';
+import { PixivFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const PixivDefaultFileOptions: PixivFileOptions = {

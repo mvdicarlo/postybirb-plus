@@ -1,6 +1,6 @@
 import { validateOrReject } from 'class-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { PostyBirbNotification } from '../interfaces/postybirb-notification.interface';
+import { PostyBirbNotification } from 'postybirb-commons';
 import PostyBirbNotificationEntity from './postybirb-notification.entity';
 import { NotificationType } from '../enums/notification-type.enum';
 

@@ -1,4 +1,4 @@
-import { DerpibooruOptions } from './derpibooru.interface';
+import { DerpibooruOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const DerpibooruDefaultFileOptions: DerpibooruOptions = {

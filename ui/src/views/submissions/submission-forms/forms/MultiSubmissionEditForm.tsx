@@ -11,13 +11,13 @@ import { TreeNode } from 'antd/lib/tree-select';
 import ImportDataSelect from '../form-components/ImportDataSelect';
 import WebsiteSections from '../form-sections/WebsiteSections';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionPart } from 'postybirb-commons';
+import { SubmissionType } from 'postybirb-commons';
 import SubmissionSelectModal from '../../submission-select/SubmissionSelectModal';
-import { SubmissionPackage } from '../../../../../../electron-app/src/server/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from 'postybirb-commons';
 import SubmissionService from '../../../../services/submission.service';
 import SubmissionUtil from '../../../../utils/submission.util';
-import { DefaultOptions } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { DefaultOptions } from 'postybirb-commons';
 import {
   Form,
   Button,

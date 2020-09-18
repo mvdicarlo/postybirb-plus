@@ -1,7 +1,7 @@
 import PersistedDatabase from './databases/persisted.database';
 import MemoryDatabase from './databases/memory.database';
 import Entity from './models/entity.model';
-import { EntityIntf } from './interfaces/entity.interface';
+import { EntityIntf } from 'postybirb-commons';
 import NedbDatabase from './databases/nedb.database';
 import { Provider } from '@nestjs/common/interfaces/modules/provider.interface';
 

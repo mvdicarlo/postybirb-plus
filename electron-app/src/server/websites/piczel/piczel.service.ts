@@ -3,23 +3,29 @@ import * as _ from 'lodash';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
+import { SubmissionRating } from 'postybirb-commons';
+import { FileSubmissionType } from 'postybirb-commons';
+import {
+  FileRecord,
+  FileSubmission,
+  PostResponse,
+  DefaultOptions,
+  SubmissionPart,
+  Folder,
+  PiczelFileOptions,
+} from 'postybirb-commons';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
-import { Folder } from 'src/server/websites/interfaces/folder.interface';
+
 import { LoginResponse } from 'src/server/websites/interfaces/login-response.interface';
 import { Website } from 'src/server/websites/website.base';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { PiczelDefaultFileOptions } from './piczel.defaults';
-import { PiczelFileOptions } from './piczel.interface';
+
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';

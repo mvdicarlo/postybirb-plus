@@ -1,4 +1,4 @@
-import { PatreonFileOptions, PatreonNotificationOptions } from './patreon.interface';
+import { PatreonFileOptions, PatreonNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

@@ -1,12 +1,12 @@
 {
-  "name": "postybirb-plus-commons",
+  "name": "postybirb-commons",
   "version": "1.0.0",
   "description": "Common classes, interfaces, enums, etc. for PostyBirb that would be shared between UI and Electron-App",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index",
+  "types": "lib/index",
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf dist",
+    "build": "npm run prebuild && tsc",
+    "prebuild": "rimraf lib",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },

@@ -1,14 +1,15 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { PixivFileOptions } from '../../../../electron-app/src/server/websites/pixiv/pixiv.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { PixivFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { SubmissionRating } from 'postybirb-commons';
 
 const defaultOptions: PixivFileOptions = {
   ...GenericDefaultFileOptions,
@@ -36,15 +37,15 @@ export class Pixiv implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'All ages'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'R-18'
           },
           {
-            value: 'extreme',
+            value: SubmissionRating.EXTREME,
             name: 'R-18G'
           }
         ]

@@ -5,13 +5,13 @@ import {
   SubmissionTemplateRepositoryToken,
 } from './submission-template.repository';
 import { EventsGateway } from 'src/server/events/events.gateway';
-import { SubmissionTemplateEvent } from './enums/submission-template.events.enum';
+import { Events } from 'postybirb-commons';
 import { CreateSubmissionTemplateModel } from './models/create-template.model';
 import { UpdateSubmissionTemplateModel } from './models/update-template.model';
-import { SubmissionTemplate } from './interfaces/submission-template.interface';
-import { DefaultOptions } from '../submission-part/interfaces/default-options.interface';
+import { SubmissionTemplate, DefaultOptions, Parts } from 'postybirb-commons';
+
 import SubmissionTemplateEntity from './models/submission-template.entity';
-import { Parts } from '../submission-part/interfaces/submission-part.interface';
+
 import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 
 @Injectable()
@@ -69,14 +69,14 @@ export class SubmissionTemplateService {
     });
 
     const createdTemplate = await this.repository.save(template);
-    this.eventEmitter.emit(SubmissionTemplateEvent.CREATED, createdTemplate);
+    this.eventEmitter.emit(Events.SubmissionTemplateEvent.CREATED, createdTemplate);
     return createdTemplate;
   }
 
   async remove(id: string): Promise<void> {
     this.logger.log(id, 'Delete Submission Template');
     await this.repository.remove(id);
-    this.eventEmitter.emit(SubmissionTemplateEvent.REMOVED, id);
+    this.eventEmitter.emit(Events.SubmissionTemplateEvent.REMOVED, id);
   }
 
   async update(updateDto: UpdateSubmissionTemplateModel): Promise<SubmissionTemplate> {
@@ -95,7 +95,7 @@ export class SubmissionTemplateService {
     });
     templateToUpdate.parts = newParts;
     await this.repository.update(templateToUpdate);
-    this.eventEmitter.emit(SubmissionTemplateEvent.UPDATED, templateToUpdate);
+    this.eventEmitter.emit(Events.SubmissionTemplateEvent.UPDATED, templateToUpdate);
     return templateToUpdate;
   }
 
@@ -107,7 +107,7 @@ export class SubmissionTemplateService {
     );
     templateToUpdate.alias = alias.trim();
     await this.repository.update(templateToUpdate);
-    this.eventEmitter.emit(SubmissionTemplateEvent.UPDATED, templateToUpdate);
+    this.eventEmitter.emit(Events.SubmissionTemplateEvent.UPDATED, templateToUpdate);
     return templateToUpdate;
   }
 
@@ -119,7 +119,7 @@ export class SubmissionTemplateService {
         if (template.parts[accountId]) {
           delete template.parts[accountId];
           await this.repository.update(template);
-          this.eventEmitter.emit(SubmissionTemplateEvent.UPDATED, template);
+          this.eventEmitter.emit(Events.SubmissionTemplateEvent.UPDATED, template);
         }
       }
     });

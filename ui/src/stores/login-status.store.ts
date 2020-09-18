@@ -1,8 +1,8 @@
 import { observable, computed, action } from 'mobx';
 import socket from '../utils/websocket';
-import { UserAccountDto } from '../../../electron-app/src/server/account/interfaces/user-account.dto.interface';
+import { UserAccountDto } from 'postybirb-commons';
 import LoginService from '../services/login.service';
-import { AccountEvent } from '../shared/enums/account.events.enum';
+import { Events } from 'postybirb-commons';
 
 export interface LoginStatusState {
   statuses: UserAccountDto[];
@@ -50,6 +50,6 @@ export class LoginStatusStore {
 
 export const loginStatusStore = new LoginStatusStore();
 
-socket.on(AccountEvent.STATUS_UPDATED, (data: UserAccountDto[]) =>
+socket.on(Events.AccountEvent.STATUS_UPDATED, (data: UserAccountDto[]) =>
   loginStatusStore.updateStatuses(data)
 );

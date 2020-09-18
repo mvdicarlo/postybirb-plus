@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { Editor } from '@tinymce/tinymce-react';
 import { Form, Switch, Button, Popover, Typography } from 'antd';
 import { DescriptionTemplateStore } from '../../../../stores/description-template.store';
-import { DescriptionData } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/description-data.interface';
+import { DescriptionData } from 'postybirb-commons';
 import WebsiteService from '../../../../services/website.service';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { uiStore } from '../../../../stores/ui.store';

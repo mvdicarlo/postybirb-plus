@@ -1,5 +1,5 @@
-import { SubmissionPackage } from '../../../electron-app/src/server/submission/interfaces/submission-package.interface';
-import { Problems } from '../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
+import { SubmissionPackage } from 'postybirb-commons';
+import { Problems } from 'postybirb-commons';
 
 export default class SubmissionUtil {
   static getSubmissionTitle(submissionPackage: SubmissionPackage<any>): string {

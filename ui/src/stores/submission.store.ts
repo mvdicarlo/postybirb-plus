@@ -1,13 +1,12 @@
 import socket from '../utils/websocket';
 import * as _ from 'lodash';
-import { SubmissionPackage } from '../../../electron-app/src/server/submission/interfaces/submission-package.interface';
+import { SubmissionPackage } from 'postybirb-commons';
 import { observable, computed, action } from 'mobx';
-import { SubmissionEvent } from '../shared/enums/submission.events.enum';
-import { Submission } from '../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { Submission } from 'postybirb-commons';
 import SubmissionService from '../services/submission.service';
-import { SubmissionType } from '../shared/enums/submission-type.enum';
+import { SubmissionType, Events } from 'postybirb-commons';
 import SubmissionUtil from '../utils/submission.util';
-import { FileSubmission } from '../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from 'postybirb-commons';
 import RemoteService from '../services/remote.service';
 
 export interface SubmissionState {
@@ -138,18 +137,18 @@ export class SubmissionStore {
 
 export const submissionStore = new SubmissionStore();
 
-socket.on(SubmissionEvent.REMOVED, (id: string) => {
+socket.on(Events.SubmissionEvent.REMOVED, (id: string) => {
   submissionStore.removeSubmission(id);
 });
 
-socket.on(SubmissionEvent.UPDATED, (data: Array<SubmissionPackage<Submission>>) => {
+socket.on(Events.SubmissionEvent.UPDATED, (data: Array<SubmissionPackage<Submission>>) => {
   submissionStore.addOrUpdateSubmissions(data);
 });
 
-socket.on(SubmissionEvent.CREATED, (data: SubmissionPackage<Submission>) => {
+socket.on(Events.SubmissionEvent.CREATED, (data: SubmissionPackage<Submission>) => {
   submissionStore.addOrUpdateSubmissions([data]);
 });
 
-socket.on(SubmissionEvent.REORDER, (orderRecords: Record<string, number>) => {
+socket.on(Events.SubmissionEvent.REORDER, (orderRecords: Record<string, number>) => {
   submissionStore.updateOrder(orderRecords);
 });

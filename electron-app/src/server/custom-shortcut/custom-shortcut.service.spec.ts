@@ -4,7 +4,7 @@ import { CustomShortcutRepositoryToken } from './custom-shortcut.repository';
 import CustomShortcutEntity from './models/custom-shortcut.entity';
 import { mockEventEmitterProvider } from 'test/common';
 import MemoryDatabase from 'src/server/database/databases/memory.database';
-import { CustomShortcut } from './interfaces/custom-shortcut.interface';
+import { CustomShortcut } from 'postybirb-commons';
 
 describe('CustomShortcutService', () => {
   let service: CustomShortcutService;

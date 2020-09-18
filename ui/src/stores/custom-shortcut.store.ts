@@ -1,8 +1,8 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
-import { CustomShortcut } from '../../../electron-app/src/server/custom-shortcut/interfaces/custom-shortcut.interface';
+import { CustomShortcut } from 'postybirb-commons';
 import CustomShortcutService from '../services/custom-shortcut.service';
-import { CustomShortcutEvent } from '../shared/enums/custom-shortcut.events.enum';
+import { Events } from 'postybirb-commons';
 
 export interface CustomShortcutState {
   shortcuts: CustomShortcut[];
@@ -39,14 +39,14 @@ export class CustomShortcutStore {
 
 export const customShortcutStore = new CustomShortcutStore();
 
-socket.on(CustomShortcutEvent.CREATED, (data: CustomShortcut) => {
+socket.on(Events.CustomShortcutEvent.CREATED, (data: CustomShortcut) => {
   customShortcutStore.addOrUpdate(data);
 });
 
-socket.on(CustomShortcutEvent.UPDATED, (data: CustomShortcut) => {
+socket.on(Events.CustomShortcutEvent.UPDATED, (data: CustomShortcut) => {
   customShortcutStore.addOrUpdate(data);
 });
 
-socket.on(CustomShortcutEvent.REMOVED, (id: string) => {
+socket.on(Events.CustomShortcutEvent.REMOVED, (id: string) => {
   customShortcutStore.remove(id);
 });

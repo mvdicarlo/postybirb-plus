@@ -1,6 +1,6 @@
 import Entity from 'src/server/database/models/entity.model';
 import { IsString, IsNotEmpty, IsBoolean, IsObject } from 'class-validator';
-import { TagConverter } from '../interfaces/tag-converter.interface';
+import { TagConverter } from 'postybirb-commons';
 
 export default class TagConverterEntity extends Entity implements TagConverter {
   @IsString()

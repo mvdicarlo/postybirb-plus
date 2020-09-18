@@ -2,16 +2,16 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { HentaiFoundryFileOptions } from '../../../../electron-app/src/server/websites/hentai-foundry/hentai-foundry.interface';
+import { HentaiFoundryFileOptions } from 'postybirb-commons';
 import { Form, Checkbox, Select, Input } from 'antd';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { DefaultOptions } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { HentaiFoundryCategories } from './hentai-foundry-categories';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
@@ -59,6 +59,7 @@ export class HentaiFoundry implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, HentaiFoundryFileOptions>) => (
     <HentaiFoundryFileSubmissionForm
       key={props.part.accountId}
+      hideThumbnailOptions={true}
       ratingOptions={{
         show: false
       }}

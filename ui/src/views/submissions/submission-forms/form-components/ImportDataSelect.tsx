@@ -3,11 +3,11 @@ import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { LoginStatusStore } from '../../../../stores/login-status.store';
 import { Modal, Button, Form, TreeSelect, Checkbox } from 'antd';
-import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from 'postybirb-commons';
 import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import SubmissionTemplateSelect from '../../submission-template-select/SubmissionTemplateSelect';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 interface Props {
   className?: string;

@@ -1,4 +1,4 @@
-import { SubmissionSchedule } from '../interfaces/submission-schedule.interface';
+import { SubmissionSchedule } from 'postybirb-commons';
 import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export default class SubmissionScheduleModel implements SubmissionSchedule {

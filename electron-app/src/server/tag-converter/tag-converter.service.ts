@@ -2,7 +2,7 @@ import { Injectable, Logger, Inject, NotFoundException, BadRequestException } fr
 import { TagConverterRepositoryToken, TagConverterRepository } from './tag-converter.repository';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import TagConverterEntity from './models/tag-converter.entity';
-import { TagConverterEvent } from './enums/tag-converter.events.enum';
+import { Events } from 'postybirb-commons';
 
 @Injectable()
 export class TagConverterService {
@@ -38,13 +38,13 @@ export class TagConverterService {
     }
     customShortcutDto.conversions = customShortcutDto.conversions || {};
     const dt = await this.repository.save(customShortcutDto);
-    this.eventEmitter.emit(TagConverterEvent.CREATED, dt);
+    this.eventEmitter.emit(Events.TagConverterEvent.CREATED, dt);
     return dt;
   }
 
   remove(id: string) {
     this.logger.log(id, 'Delete Custom Shortcut');
-    this.eventEmitter.emit(TagConverterEvent.REMOVED, id);
+    this.eventEmitter.emit(Events.TagConverterEvent.REMOVED, id);
     return this.repository.remove(id);
   }
 
@@ -55,7 +55,7 @@ export class TagConverterService {
     exists.conversions = update.conversions;
     await this.repository.update(exists);
 
-    this.eventEmitter.emit(TagConverterEvent.UPDATED, exists);
+    this.eventEmitter.emit(Events.TagConverterEvent.UPDATED, exists);
   }
 
   async isUnique(tag: string): Promise<boolean> {

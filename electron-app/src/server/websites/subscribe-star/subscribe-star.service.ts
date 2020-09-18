@@ -4,16 +4,23 @@ import { nativeImage } from 'electron';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
+import { FileSubmissionType } from 'postybirb-commons';
+import {
+  FileRecord,
+  FileSubmission,
+  Submission,
+  PostResponse,
+  DefaultOptions,
+  SubmissionPart,
+  SubscribeStarFileOptions,
+  SubscribeStarNotificationOptions,
+  Folder,
+} from 'postybirb-commons';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import { v1 } from 'uuid';
@@ -24,11 +31,7 @@ import {
   SubscribeStarDefaultFileOptions,
   SubscribeStarDefaultNotificationOptions,
 } from './subscribe-star.defaults';
-import {
-  SubscribeStarFileOptions,
-  SubscribeStarNotificationOptions,
-} from './subscribe-star.interface';
-import { Folder } from '../interfaces/folder.interface';
+
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import _ = require('lodash');

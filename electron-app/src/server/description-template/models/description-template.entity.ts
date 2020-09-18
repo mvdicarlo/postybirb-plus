@@ -1,5 +1,5 @@
 import Entity from 'src/server/database/models/entity.model';
-import { DescriptionTemplate } from '../interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export default class DescriptionTemplateEntity extends Entity implements DescriptionTemplate {

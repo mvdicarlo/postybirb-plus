@@ -1,4 +1,4 @@
-import { SubmissionLog } from './interfaces/submission-log.interface';
+import { SubmissionLog } from 'postybirb-commons';
 import PersistedDatabase from 'src/server/database/databases/persisted.database';
 import SubmissionLogEntity from './models/submission-log.entity';
 import MemoryDatabase from 'src/server/database/databases/memory.database';

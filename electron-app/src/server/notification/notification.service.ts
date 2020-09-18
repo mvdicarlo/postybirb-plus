@@ -2,8 +2,8 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { NotificationRepository, NotificationRepositoryToken } from './notification.repository';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import PostyBirbNotificationEntity from './models/postybirb-notification.entity';
-import { NotificationEvent } from './enums/notification.events.enum';
-import { PostyBirbNotification } from './interfaces/postybirb-notification.interface';
+import { Events } from 'postybirb-commons';
+import { PostyBirbNotification } from 'postybirb-commons';
 import { Notification } from 'electron';
 import { SettingsService } from 'src/server/settings/settings.service';
 
@@ -31,7 +31,7 @@ export class NotificationService {
   async create(notification: Partial<PostyBirbNotification>, icon?: string | Electron.NativeImage) {
     const entity = new PostyBirbNotificationEntity(notification);
     await this.repository.save(entity);
-    this.eventEmitter.emitOnComplete(NotificationEvent.UPDATE, this.getAll());
+    this.eventEmitter.emitOnComplete(Events.NotificationEvent.UPDATE, this.getAll());
     this.emitSystemNotification(entity, icon);
   }
 
@@ -64,16 +64,16 @@ export class NotificationService {
         }),
     );
 
-    this.eventEmitter.emitOnComplete(NotificationEvent.UPDATE, this.getAll());
+    this.eventEmitter.emitOnComplete(Events.NotificationEvent.UPDATE, this.getAll());
   }
 
   async remove(id: string) {
     await this.repository.remove(id);
-    this.eventEmitter.emitOnComplete(NotificationEvent.UPDATE, this.getAll());
+    this.eventEmitter.emitOnComplete(Events.NotificationEvent.UPDATE, this.getAll());
   }
 
   async removeAll() {
     await this.repository.removeAll();
-    this.eventEmitter.emit(NotificationEvent.UPDATE, []);
+    this.eventEmitter.emit(Events.NotificationEvent.UPDATE, []);
   }
 }

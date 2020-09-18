@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { DescriptionTemplateStore } from '../../stores/description-template.store';
 import DescriptionTemplateService from '../../services/description-template.service';
 import { Empty, Button, Form, message, Spin, Card, Input, Icon, Popconfirm } from 'antd';
-import { DescriptionTemplate } from '../../../../electron-app/src/server/description-template/interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 import DescriptionInput from '../submissions/submission-forms/form-components/DescriptionInput';
 
 interface Props {

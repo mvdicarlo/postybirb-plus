@@ -1,4 +1,4 @@
-import { InkbunnyOptions } from './inkbunny.interface';
+import { InkbunnyOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const InkbunnyDefaultFileOptions: InkbunnyOptions = {

@@ -1,4 +1,4 @@
-import { TumblrFileOptions, TumblrNotificationOptions } from './tumblr.interface';
+import { TumblrFileOptions, TumblrNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

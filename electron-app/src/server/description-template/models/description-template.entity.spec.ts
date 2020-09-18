@@ -1,6 +1,6 @@
 import { validateOrReject } from 'class-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { DescriptionTemplate } from '../interfaces/description-template.interface';
+import { DescriptionTemplate } from 'postybirb-commons';
 import DescriptionTemplateEntity from './description-template.entity';
 
 describe('DescriptionTemplateEntity', () => {

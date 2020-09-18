@@ -1,8 +1,9 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { FileSubmission } from './interfaces/file-submission.interface';
+import { FileSubmission, UploadedFile } from 'postybirb-commons';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
-import { UploadedFile } from 'src/server/file-manager/interfaces/uploaded-file.interface';
-import { getSubmissionType, FileSubmissionType } from './enums/file-submission-type.enum';
+
+import { getSubmissionType } from './helpers/file-submission-type.helper';
+import { FileSubmissionType } from 'postybirb-commons';
 import FileSubmissionEntity from './models/file-submission.entity';
 import SubmissionEntity from '../models/submission.entity';
 import SubmissionCreateModel from '../models/submission-create.model';

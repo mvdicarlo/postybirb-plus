@@ -3,7 +3,7 @@ import { TagGroupService } from './tag-group.service';
 import { TagGroupRepositoryToken } from './tag-group.repository';
 import MemoryDatabase from 'src/server/database/databases/memory.database';
 import TagGroupEntity from './models/tag-group.entity';
-import { TagGroup } from './interfaces/tag-group.interface';
+import { TagGroup } from 'postybirb-commons';
 import { mockEventEmitterProvider } from 'test/common';
 
 describe('TagGroupService', () => {

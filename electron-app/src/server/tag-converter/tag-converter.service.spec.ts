@@ -4,7 +4,7 @@ import MemoryDatabase from 'src/server/database/databases/memory.database';
 import { TagConverterService } from './tag-converter.service';
 import TagConverterEntity from './models/tag-converter.entity';
 import { TagConverterRepositoryToken } from './tag-converter.repository';
-import { TagConverter } from './interfaces/tag-converter.interface';
+import { TagConverter } from 'postybirb-commons';
 
 describe('TagConverterService', () => {
   let service: TagConverterService;

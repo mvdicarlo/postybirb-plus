@@ -1,18 +1,18 @@
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import {
   DefaultFileOptions,
   DefaultOptions
-} from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+} from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps, Website } from '../interfaces/website.interface';
 import CustomAccountInfo from './CustomAccountInfo';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
 export class Custom implements Website {

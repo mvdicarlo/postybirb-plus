@@ -11,12 +11,16 @@ import {
   Patch,
 } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
-import { SubmissionType } from './enums/submission-type.enum';
-import { SubmissionUpdate } from './interfaces/submission-update.interface';
-import { SubmissionOverwrite } from './interfaces/submission-overwrite.interface';
-import { SubmissionPart } from './submission-part/interfaces/submission-part.interface';
+import { SubmissionType } from 'postybirb-commons';
+import {
+  SubmissionUpdate,
+  SubmissionOverwrite,
+  SubmissionPart,
+  FileRecord,
+} from 'postybirb-commons';
+
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FileRecord } from './file-submission/interfaces/file-record.interface';
+
 import SubmissionScheduleModel from './models/submission-schedule.model';
 import SubmissionLogEntity from './log/models/submission-log.entity';
 import SubmissionCreateModel from './models/submission-create.model';

@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Delete, Param, Get, Patch } from '@nestjs/common';
 import { AccountService } from './account.service';
 import UserAccountEntity from './models/user-account.entity';
-import { UserAccountDto } from './interfaces/user-account.dto.interface';
+import { UserAccountDto } from 'postybirb-commons';
 
 @Controller('account')
 export class AccountController {

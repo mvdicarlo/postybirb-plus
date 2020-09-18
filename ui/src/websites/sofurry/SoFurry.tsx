@@ -3,16 +3,17 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { SoFurryFileOptions } from '../../../../electron-app/src/server/websites/so-furry/so-furry.interface';
-import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
+import { SoFurryFileOptions } from 'postybirb-commons';
+import { Folder } from 'postybirb-commons';
 import { Form, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
+import { SubmissionRating } from 'postybirb-commons';
 
 // TODO make a separate notification options
 const defaultOptions: SoFurryFileOptions = {
@@ -48,9 +49,9 @@ export class SoFurry implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { value: 'general', name: 'All Ages' },
-          { value: 'adult', name: 'Adult' },
-          { value: 'extreme', name: 'Extreme' }
+          { value: SubmissionRating.GENERAL, name: 'All Ages' },
+          { value: SubmissionRating.ADULT, name: 'Adult' },
+          { value: SubmissionRating.EXTREME, name: 'Extreme' }
         ]
       }}
       tagOptions={{
@@ -69,9 +70,9 @@ export class SoFurry implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { value: 'general', name: 'All Ages' },
-          { value: 'adult', name: 'Adult' },
-          { value: 'extreme', name: 'Extreme' }
+          { value: SubmissionRating.GENERAL, name: 'All Ages' },
+          { value: SubmissionRating.ADULT, name: 'Adult' },
+          { value: SubmissionRating.EXTREME, name: 'Extreme' }
         ]
       }}
       {...props}

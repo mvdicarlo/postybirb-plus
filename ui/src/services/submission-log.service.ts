@@ -1,6 +1,6 @@
 import axios from '../utils/http';
-import { SubmissionType } from '../shared/enums/submission-type.enum';
-import { SubmissionLog } from '../../../electron-app/src/server/submission/log/interfaces/submission-log.interface';
+import { SubmissionType } from 'postybirb-commons';
+import { SubmissionLog } from 'postybirb-commons';
 
 export default class SubmissionLogService {
   static getLogs(type: SubmissionType) {

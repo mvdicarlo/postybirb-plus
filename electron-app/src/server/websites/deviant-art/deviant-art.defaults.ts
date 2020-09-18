@@ -1,4 +1,4 @@
-import { DeviantArtFileOptions } from './deviant-art.interface';
+import { DeviantArtFileOptions } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 
 export const DeviantArtDefaultFileOptions: DeviantArtFileOptions = {

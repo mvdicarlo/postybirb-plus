@@ -1,5 +1,5 @@
 import axios from '../utils/http';
-import { Settings } from '../../../electron-app/src/server/settings/settings.interface';
+import { Settings } from 'postybirb-commons';
 
 export default class SettingsService {
   static getSettings() {

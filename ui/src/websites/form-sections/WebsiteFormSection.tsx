@@ -1,13 +1,14 @@
 import React from 'react';
 import _ from 'lodash';
 import { WebsiteSectionProps } from './website-form-section.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
-import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from '../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
+import { Submission } from 'postybirb-commons';
+import { DefaultOptions } from 'postybirb-commons';
+import { SubmissionPart } from 'postybirb-commons';
 import SectionProblems from '../../views/submissions/submission-forms/form-sections/SectionProblems';
 import { Form, Input, Radio } from 'antd';
 import TagInput from '../../views/submissions/submission-forms/form-components/TagInput';
 import DescriptionInput from '../../views/submissions/submission-forms/form-components/DescriptionInput';
+import { SubmissionRating } from 'postybirb-commons';
 
 export default abstract class WebsiteFormSection<
   T extends Submission,
@@ -38,10 +39,10 @@ export default abstract class WebsiteFormSection<
       );
     } else {
       ratings.push(
-        <Radio.Button value="general">General</Radio.Button>,
-        <Radio.Button value="mature">Mature</Radio.Button>,
-        <Radio.Button value="adult">Adult</Radio.Button>,
-        <Radio.Button value="extreme">Extreme</Radio.Button>
+        <Radio.Button value={SubmissionRating.GENERAL}>General</Radio.Button>,
+        <Radio.Button value={SubmissionRating.MATURE}>Mature</Radio.Button>,
+        <Radio.Button value={SubmissionRating.ADULT}>Adult</Radio.Button>,
+        <Radio.Button value={SubmissionRating.EXTREME}>Extreme</Radio.Button>
       );
     }
 

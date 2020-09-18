@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'lodash';
 import SubmissionService from '../../../services/submission.service';
-import { SubmissionType } from '../../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { Button, Input, message, Icon, Upload } from 'antd';
 import { RcFile } from 'antd/lib/upload';
 import Axios from 'axios';
@@ -63,7 +63,7 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
         try {
           await SubmissionService.create({
             type: SubmissionType.FILE,
-            file: file,
+            file: file as any,
             path: file['path']
           });
           message.success(`${file!.name} file uploaded successfully.`);
@@ -87,7 +87,7 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
         SubmissionService.create({
           type: SubmissionType.FILE,
           title: filename,
-          file
+          file: file as any
         })
           .then(() => {
             message.success('Image imported.');

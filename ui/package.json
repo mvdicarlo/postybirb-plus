@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus-ui",
-  "version": "3.0.15",
+  "version": "3.0.16",
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
@@ -17,6 +17,7 @@
     "lodash": "^4.17.15",
     "mobx": "^5.14.2",
     "mobx-react": "^6.1.4",
+    "postybirb-commons": "file:../commons",
     "react": "^16.11.0",
     "react-beautiful-dnd": "^12.2.0",
     "react-cropper": "^1.3.0",

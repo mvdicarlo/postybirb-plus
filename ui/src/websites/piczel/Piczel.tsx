@@ -3,15 +3,16 @@ import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { PiczelFileOptions } from '../../../../electron-app/src/server/websites/piczel/piczel.interface';
-import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
+import { PiczelFileOptions } from 'postybirb-commons';
+import { Folder } from 'postybirb-commons';
 import { Form, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
+import { FileSubmission } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { SubmissionRating } from 'postybirb-commons';
 
 const defaultOptions: PiczelFileOptions = {
   ...GenericDefaultFileOptions,
@@ -32,8 +33,8 @@ export class Piczel implements Website {
       ratingOptions={{
         show: true,
         ratings: [
-          { value: 'general', name: 'SFW' },
-          { value: 'adult', name: 'NSFW' }
+          { value: SubmissionRating.GENERAL, name: 'SFW' },
+          { value: SubmissionRating.ADULT, name: 'NSFW' }
         ]
       }}
       key={props.part.accountId}

@@ -1,4 +1,4 @@
-import { DefaultFileOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { DefaultFileOptions } from 'postybirb-commons';
 
 export const GenericDefaultFileOptions: DefaultFileOptions = {
   tags: {

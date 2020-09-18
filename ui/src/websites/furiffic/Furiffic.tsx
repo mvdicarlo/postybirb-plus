@@ -2,16 +2,16 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import {
   DefaultOptions,
   DefaultFileOptions
-} from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+} from 'postybirb-commons';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 
@@ -32,15 +32,15 @@ export class Furiffic implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'Tame'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Adult'
           }
         ]
@@ -56,15 +56,15 @@ export class Furiffic implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'Tame'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Adult'
           }
         ]

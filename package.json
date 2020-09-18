@@ -1,12 +1,13 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.15",
+  "version": "3.0.16",
   "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
   "main": "index.js",
   "scripts": {
-    "build:ui": "cd ui && npm install && yarn run build",
+    "build": "npm run build:common && yarn run build:ui && yarn run build:app",
     "build:app": "cd electron-app && npm install && yarn run build",
-    "build": "yarn run build:ui && yarn run build:app",
+    "build:common": "cd common && npm install && npm run build",
+    "build:ui": "cd ui && npm install && yarn run build",
     "release:windows": "node create-signer.js &&  yarn run build && cd electron-app && yarn run release:windows",
     "release:linux": "node create-signer.js &&  yarn run build && cd electron-app && yarn run release:linux"
   },

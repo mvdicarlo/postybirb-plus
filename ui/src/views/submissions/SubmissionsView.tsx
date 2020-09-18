@@ -5,7 +5,7 @@ import { EditableSubmissions } from './editable-submissions/EditableSubmissions'
 import { headerStore } from '../../stores/header.store';
 import { SubmissionStore } from '../../stores/submission.store';
 import { inject, observer } from 'mobx-react';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 import { Match, Location } from 'react-router-dom';
 import { Tabs, Badge } from 'antd';
 import ScheduledSubmissions from './scheduled-submissions/ScheduledSubmissions';

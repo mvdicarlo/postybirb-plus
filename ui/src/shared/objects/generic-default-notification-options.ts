@@ -1,4 +1,4 @@
-import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { DefaultOptions } from 'postybirb-commons';
 
 export const GenericDefaultNotificationOptions: DefaultOptions = {
   tags: {

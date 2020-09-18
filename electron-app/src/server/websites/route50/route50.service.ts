@@ -3,18 +3,20 @@ import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
+import { SubmissionRating } from 'postybirb-commons';
+import { FileSubmissionType } from 'postybirb-commons';
 import {
+  FileRecord,
+  FileSubmission,
+  PostResponse,
   DefaultFileOptions,
   DefaultOptions,
-} from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+  SubmissionPart,
+} from 'postybirb-commons';
+
+import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';

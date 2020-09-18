@@ -1,4 +1,4 @@
-import { TagGroup } from '../interfaces/tag-group.interface';
+import { TagGroup } from 'postybirb-commons';
 import { IsArray, IsString, IsNotEmpty } from 'class-validator';
 import Entity from '../../database/models/entity.model';
 

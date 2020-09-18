@@ -1,4 +1,4 @@
-import { NewTumblFileOptions, NewTumblNotificationOptions } from './new-tumbl.interface';
+import { NewTumblFileOptions, NewTumblNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

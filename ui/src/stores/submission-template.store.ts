@@ -1,8 +1,8 @@
 import socket from '../utils/websocket';
 import { observable, computed, action } from 'mobx';
 import SubmissionTemplateService from '../services/submission-template.service';
-import { SubmissionTemplate } from '../../../electron-app/src/server/submission/submission-template/interfaces/submission-template.interface';
-import { SubmissionTemplateEvent } from '../shared/enums/submission-template.events.enum';
+import { SubmissionTemplate } from 'postybirb-commons';
+import { Events } from 'postybirb-commons';
 
 export interface SubmissionStoreState {
   loading: boolean;
@@ -56,14 +56,14 @@ export class SubmissionTemplateStore {
 
 export const submissionTemplateStore = new SubmissionTemplateStore();
 
-socket.on(SubmissionTemplateEvent.REMOVED, (id: string) => {
+socket.on(Events.SubmissionTemplateEvent.REMOVED, (id: string) => {
   submissionTemplateStore.remove(id);
 });
 
-socket.on(SubmissionTemplateEvent.UPDATED, (data: SubmissionTemplate) => {
+socket.on(Events.SubmissionTemplateEvent.UPDATED, (data: SubmissionTemplate) => {
   submissionTemplateStore.addOrUpdate(data);
 });
 
-socket.on(SubmissionTemplateEvent.CREATED, (data: SubmissionTemplate) => {
+socket.on(Events.SubmissionTemplateEvent.CREATED, (data: SubmissionTemplate) => {
   submissionTemplateStore.addOrUpdate(data);
 });

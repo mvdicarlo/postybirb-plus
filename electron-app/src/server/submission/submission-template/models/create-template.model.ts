@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsEnum, IsString } from 'class-validator';
-import { SubmissionType } from '../../enums/submission-type.enum';
+import { SubmissionType } from 'postybirb-commons';
 
 export class CreateSubmissionTemplateModel {
   @IsNotEmpty()

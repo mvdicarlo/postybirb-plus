@@ -2,27 +2,33 @@ import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from 'src/server/submission/interfaces/submission.interface';
+import { SubmissionRating } from 'postybirb-commons';
+import {
+  FileRecord,
+  FileSubmission,
+  Submission,
+  PostResponse,
+  DefaultOptions,
+  SubmissionPart,
+  NewTumblBlog,
+  NewTumblFileOptions,
+  NewTumblNotificationOptions,
+} from 'postybirb-commons';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { Website } from '../website.base';
-import { NewTumblBlog } from './new-tumbl-blog.interface';
-import { NewTumblFileOptions, NewTumblNotificationOptions } from './new-tumbl.interface';
+
 import {
   NewTumblDefaultFileOptions,
   NewTumblDefaultNotificationOptions,
 } from './new-tumbl.defaults';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
+import { FileSubmissionType } from 'postybirb-commons';
 
 @Injectable()
 export class NewTumbl extends Website {

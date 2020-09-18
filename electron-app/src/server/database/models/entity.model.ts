@@ -1,4 +1,4 @@
-import { EntityIntf } from '../interfaces/entity.interface';
+import { EntityIntf } from 'postybirb-commons';
 import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 import * as _ from 'lodash';
 import * as uuid from 'uuid/v1';

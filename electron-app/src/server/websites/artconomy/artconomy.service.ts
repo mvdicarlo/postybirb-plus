@@ -2,24 +2,30 @@ import { Injectable } from '@nestjs/common';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http, { HttpResponse } from 'src/server/http/http.util';
-import { SubmissionRating } from 'src/server/submission/enums/submission-rating.enum';
-import { FileSubmissionType } from 'src/server/submission/file-submission/enums/file-submission-type.enum';
-import { FileRecord } from 'src/server/submission/file-submission/interfaces/file-record.interface';
-import { FileSubmission } from 'src/server/submission/file-submission/interfaces/file-submission.interface';
+import { SubmissionRating } from 'postybirb-commons';
+import { FileSubmissionType } from 'postybirb-commons';
+import {
+  FileRecord,
+  FileSubmission,
+  PostResponse,
+  DefaultOptions,
+  SubmissionPart,
+  UsernameShortcut,
+  ArtconomyFileOptions,
+} from 'postybirb-commons';
+
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostResponse } from 'src/server/submission/post/interfaces/post-response.interface';
-import { DefaultOptions } from 'src/server/submission/submission-part/interfaces/default-options.interface';
-import { SubmissionPart } from 'src/server/submission/submission-part/interfaces/submission-part.interface';
+
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import { UsernameShortcut } from '../interfaces/username-shortcut.interface';
+
 import { Website } from '../website.base';
 import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
-import { ArtconomyFileOptions } from './artconomy.interface';
+
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 
 @Injectable()

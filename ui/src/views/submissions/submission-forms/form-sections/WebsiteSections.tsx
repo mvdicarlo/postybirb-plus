@@ -1,15 +1,15 @@
 import React from 'react';
 import _ from 'lodash';
-import { SubmissionPart } from '../../../../../../electron-app/src/server/submission/submission-part/interfaces/submission-part.interface';
+import { SubmissionPart } from 'postybirb-commons';
 import { loginStatusStore, LoginStatusStore } from '../../../../stores/login-status.store';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { Form, Typography, Tabs, Badge, Empty } from 'antd';
 import { inject, observer } from 'mobx-react';
-import { SubmissionType } from '../../../../shared/enums/submission-type.enum';
-import { FileSubmission } from '../../../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { SubmissionType } from 'postybirb-commons';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import { FormSubmissionPart } from '../interfaces/form-submission-part.interface';
-import { Problems } from '../../../../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
+import { Problems } from 'postybirb-commons';
 
 interface WebsiteSectionsProps {
   loginStatusStore?: LoginStatusStore;

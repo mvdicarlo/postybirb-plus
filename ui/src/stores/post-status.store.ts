@@ -3,10 +3,10 @@ import socket from '../utils/websocket';
 import {
   PostStatuses,
   PostInfo
-} from '../../../electron-app/src/server/submission/post/interfaces/post-status.interface';
+} from 'postybirb-commons';
 import PostService from '../services/post.service';
-import { Submission } from '../../../electron-app/src/server/submission/interfaces/submission.interface';
-import { PostEvent } from '../shared/enums/post.events.enum';
+import { Submission } from 'postybirb-commons';
+import { Events } from 'postybirb-commons';
 
 export class PostStatusStore {
   @observable
@@ -37,4 +37,4 @@ export class PostStatusStore {
 
 export const postStatusStore = new PostStatusStore();
 
-socket.on(PostEvent.UPDATED, (data: PostStatuses) => postStatusStore.updateStatus(data));
+socket.on(Events.PostEvent.UPDATED, (data: PostStatuses) => postStatusStore.updateStatus(data));

@@ -1,4 +1,4 @@
-import { DiscordFileOptions, DiscordNotificationOptions } from './discord.interface';
+import { DiscordFileOptions, DiscordNotificationOptions } from 'postybirb-commons';
 import {
   GenericDefaultFileOptions,
   GenericDefaultNotificationOptions,

@@ -1,6 +1,6 @@
 import SubmissionEntity from 'src/server/submission/models/submission.entity';
-import { FileSubmission } from '../interfaces/file-submission.interface';
-import { FileRecord } from '../interfaces/file-record.interface';
+import { FileSubmission, FileRecord } from 'postybirb-commons';
+
 import { IsNotEmpty, IsOptional, IsArray, IsObject } from 'class-validator';
 
 export default class FileSubmissionEntity extends SubmissionEntity implements FileSubmission {

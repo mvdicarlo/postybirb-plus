@@ -3,7 +3,7 @@ import { LoginDialogProps } from '../interfaces/website.interface';
 import { Form, Input, Button, message } from 'antd';
 import LoginService from '../../services/login.service';
 import BrowserLink from '../../components/BrowserLink';
-import { e621AccountData } from '../../../../electron-app/src/server/websites/e621/e621-account.interface';
+import { e621AccountData } from 'postybirb-commons';
 import Axios from 'axios';
 
 interface State extends e621AccountData {

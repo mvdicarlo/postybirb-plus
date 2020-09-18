@@ -1,13 +1,13 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import {
   PillowfortFileOptions,
   PillowfortNotificationOptions
-} from '../../../../electron-app/src/server/websites/pillowfort/pillowfort.interface';
-import { SubmissionType } from '../../shared/enums/submission-type.enum';
+} from 'postybirb-commons';
+import { SubmissionType, SubmissionRating } from 'postybirb-commons';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -50,16 +50,17 @@ export class Pillowfort implements Website {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PillowfortFileOptions>) => (
     <PillowfortFileSubmissionForm
       key={props.part.accountId}
+      hideThumbnailOptions={true}
       ratingOptions={{
         show: true,
         ratings: [
           {
             name: 'SFW',
-            value: 'general'
+            value: SubmissionRating.GENERAL
           },
           {
             name: 'NSFW',
-            value: 'adult'
+            value: SubmissionRating.ADULT
           }
         ]
       }}
@@ -77,11 +78,11 @@ export class Pillowfort implements Website {
         ratings: [
           {
             name: 'SFW',
-            value: 'general'
+            value: SubmissionRating.GENERAL
           },
           {
             name: 'NSFW',
-            value: 'adult'
+            value: SubmissionRating.ADULT
           }
         ]
       }}

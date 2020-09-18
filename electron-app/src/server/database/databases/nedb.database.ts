@@ -4,7 +4,7 @@ import * as util from 'util';
 import { validateOrReject } from 'class-validator';
 import { classToPlain } from 'class-transformer';
 import Entity from '../models/entity.model';
-import { EntityIntf } from '../interfaces/entity.interface';
+import { EntityIntf } from 'postybirb-commons';
 import { Database } from '../database.abstract';
 
 export default abstract class NedbDatabase<T extends Entity, K extends EntityIntf> extends Database<

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, Logger, Inject } from '@nestjs/common';
-import { DescriptionTemplateEvent } from './enums/description-template.events.enum';
+import { Events } from 'postybirb-commons';
 import {
   DescriptionTemplateRepository,
   DescriptionTemplateRepositoryToken,
@@ -32,13 +32,13 @@ export class DescriptionTemplateService {
   async create(descriptionTemplateDto: DescriptionTemplateEntity) {
     this.logger.log(descriptionTemplateDto, 'Create Description Template');
     const dt = await this.repository.save(descriptionTemplateDto);
-    this.eventEmitter.emit(DescriptionTemplateEvent.CREATED, dt);
+    this.eventEmitter.emit(Events.DescriptionTemplateEvent.CREATED, dt);
     return dt;
   }
 
   remove(id: string) {
     this.logger.log(id, 'Delete Description Template');
-    this.eventEmitter.emit(DescriptionTemplateEvent.REMOVED, id);
+    this.eventEmitter.emit(Events.DescriptionTemplateEvent.REMOVED, id);
     return this.repository.remove(id);
   }
 
@@ -53,6 +53,6 @@ export class DescriptionTemplateService {
     exists.title = update.title;
     await this.repository.update(exists);
 
-    this.eventEmitter.emit(DescriptionTemplateEvent.UPDATED, exists);
+    this.eventEmitter.emit(Events.DescriptionTemplateEvent.UPDATED, exists);
   }
 }

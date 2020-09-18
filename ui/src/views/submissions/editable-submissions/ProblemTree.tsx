@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { Problems } from '../../../../../electron-app/src/server/submission/validator/interfaces/problems.interface';
+import { Problems } from 'postybirb-commons';
 import { loginStatusStore } from '../../../stores/login-status.store';
 import { Tree } from 'antd';
 

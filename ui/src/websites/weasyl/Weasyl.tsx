@@ -2,19 +2,20 @@ import React from 'react';
 import _ from 'lodash';
 import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { WeasylFileOptions } from '../../../../electron-app/src/server/websites/weasyl/weasyl.interface';
-import { Folder } from '../../../../electron-app/src/server/websites/interfaces/folder.interface';
+import { WeasylFileOptions } from 'postybirb-commons';
+import { Folder } from 'postybirb-commons';
 import { Form, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from '../../../../electron-app/src/server/submission/file-submission/interfaces/file-submission.interface';
-import { Submission } from '../../../../electron-app/src/server/submission/interfaces/submission.interface';
+import { FileSubmission } from 'postybirb-commons';
+import { Submission } from 'postybirb-commons';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { DefaultOptions } from '../../../../electron-app/src/server/submission/submission-part/interfaces/default-options.interface';
+import { DefaultOptions } from 'postybirb-commons';
 import { WeasylCategories } from './WeasylCategories';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { SubmissionRating } from 'postybirb-commons';
 
 const defaultOptions: WeasylFileOptions = {
   ...GenericDefaultFileOptions,
@@ -40,15 +41,15 @@ export class Weasyl implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature (18+ non-sexual)'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Explicit (18+ sexual)'
           }
         ]
@@ -65,15 +66,15 @@ export class Weasyl implements Website {
         show: true,
         ratings: [
           {
-            value: 'general',
+            value: SubmissionRating.GENERAL,
             name: 'General'
           },
           {
-            value: 'mature',
+            value: SubmissionRating.MATURE,
             name: 'Mature (18+ non-sexual)'
           },
           {
-            value: 'adult',
+            value: SubmissionRating.ADULT,
             name: 'Explicit (18+ sexual)'
           }
         ]
