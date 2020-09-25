@@ -291,7 +291,7 @@ export class FurryLife extends Website {
     const folder = submissionPart.data.album;
     const rating = submissionPart.data.rating || defaultPart.data.rating;
     if (folder.includes('nsfw') && rating === SubmissionRating.GENERAL) {
-      problems.push('Cannot upload NSFW to SFW Album');
+      warnings.push('Potentially uploading NSFW to SFW Album');
     }
 
     if (
