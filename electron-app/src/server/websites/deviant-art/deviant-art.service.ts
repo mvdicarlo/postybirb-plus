@@ -226,12 +226,22 @@ export class DeviantArt extends Website {
       form.mature_level = options.matureLevel || 'moderate';
       form.is_mature = 'true';
     }
-    if (options.disableComments) form.allow_comments = 'no';
-    if (options.critique) form.request_critique = 'yes';
+    if (options.disableComments) {
+      form.allow_comments = 'no';
+    }
+    if (options.critique) {
+      form.request_critique = 'yes';
+    }
     form.allow_free_download = options.freeDownload ? 'yes' : 'no';
-    if (options.feature) form.feature = 'yes';
-    if (options.displayResolution) form.display_resolution = options.displayResolution;
-    if (options.scraps) form.catpath = 'scraps';
+    if (options.feature) {
+      form.feature = 'yes';
+    }
+    if (options.displayResolution) {
+      form.display_resolution = options.displayResolution;
+    }
+    if (options.scraps) {
+      form.catpath = 'scraps';
+    }
 
     options.folders.forEach((folder, i) => {
       form[`galleryids[${i}]`] = folder;
@@ -318,7 +328,7 @@ export class DeviantArt extends Website {
 
     const rating = submissionPart.data.rating || defaultPart.data.rating;
     if ((rating && rating === SubmissionRating.EXTREME) || rating === SubmissionRating.ADULT) {
-      problems.push(`Does not support rating: ${rating}`);
+      problems.push(`${rating} rating may violate website guidelines.`);
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {

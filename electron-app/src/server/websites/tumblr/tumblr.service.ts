@@ -174,7 +174,7 @@ export class Tumblr extends Website {
 
     const rating = submissionPart.data.rating || defaultPart.data.rating;
     if (rating && rating !== SubmissionRating.GENERAL) {
-      problems.push(`Does not support rating: ${rating}`);
+      warnings.push(`${rating} rating may violate website guidelines.`);
     }
 
     const files = [
@@ -226,7 +226,7 @@ export class Tumblr extends Website {
 
     const rating = submissionPart.data.rating || defaultPart.data.rating;
     if (rating && rating !== SubmissionRating.GENERAL) {
-      problems.push(`Does not support rating: ${rating}`);
+      problems.push(`${rating} rating may violate website guidelines.`);
     }
 
     return { problems, warnings };
