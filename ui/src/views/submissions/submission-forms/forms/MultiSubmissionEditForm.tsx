@@ -390,7 +390,6 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
               className="mr-1"
               submissionType={this.submissionType}
               onPropsSelect={this.importData.bind(this)}
-              hideUseTemplateTitle={true}
             />
             <Popconfirm
               title="Are you sure?."
