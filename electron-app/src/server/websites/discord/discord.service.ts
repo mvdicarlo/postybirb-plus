@@ -1,46 +1,36 @@
 import { Injectable, Logger } from '@nestjs/common';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'postybirb-commons';
 import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
   DefaultOptions,
-  SubmissionPart,
   DiscordFileOptions,
   DiscordNotificationOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  PostResponse,
+  Submission,
+  SubmissionPart,
 } from 'postybirb-commons';
-
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { DiscordDefaultFileOptions, DiscordDefaultNotificationOptions } from './discord.defaults';
-
 import { DiscordAccountData } from './discord.account.interface';
-import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 
 @Injectable()
 export class Discord extends Website {
-  private readonly logger = new Logger(Discord.name);
-
   readonly BASE_URL: string = '';
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
-
-  readonly fileSubmissionOptions: DiscordFileOptions = DiscordDefaultFileOptions;
-  readonly notificationSubmissionOptions: DiscordNotificationOptions = DiscordDefaultNotificationOptions;
   readonly defaultDescriptionParser = MarkdownParser.parse;
 
   readonly usernameShortcuts = [];
@@ -72,8 +62,7 @@ export class Discord extends Website {
     data: PostData<Submission, DiscordNotificationOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    let description = data.description.substring(0, 2000).trim();
-
+    const description = data.description.substring(0, 2000).trim();
     const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
 
     const json = {

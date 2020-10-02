@@ -29,7 +29,7 @@ export default abstract class WebsiteFormSection<
   }
 
   private getRatings(): JSX.Element[] {
-    const ratings = [<Radio.Button value={null}>Default</Radio.Button>];
+    const ratings = [<Radio.Button value={undefined}>Default</Radio.Button>];
 
     if (this.props.ratingOptions && this.props.ratingOptions.ratings) {
       ratings.push(

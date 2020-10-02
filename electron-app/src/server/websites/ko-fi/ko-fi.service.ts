@@ -1,36 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import {
+  DefaultFileOptions,
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+  SubmissionType,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultFileOptions,
-  DefaultOptions,
-  SubmissionPart,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { SubmissionType } from 'postybirb-commons';
 
 @Injectable()
 export class KoFi extends Website {
   readonly BASE_URL: string = 'https://ko-fi.com';
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png'];
-  readonly fileSubmissionOptions: object = GenericDefaultFileOptions;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -203,7 +199,7 @@ export class KoFi extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    const rating: SubmissionRating = submissionPart.data.rating || defaultPart.data.rating;
+    const rating: SubmissionRating | string = submissionPart.data.rating || defaultPart.data.rating;
     if (rating !== SubmissionRating.GENERAL) {
       problems.push(`Does not support rating: ${rating}`);
     }

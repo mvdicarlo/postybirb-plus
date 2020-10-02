@@ -1,37 +1,25 @@
 import { Form, Input, Select } from 'antd';
-import _ from 'lodash';
+import {
+  DefaultOptions,
+  FileSubmission,
+  Folder,
+  FurryLifeFileOptions,
+  Submission
+} from 'postybirb-commons';
 import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import { DefaultOptions } from 'postybirb-commons';
-import { FurryLifeFileOptions } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 
-const defaultFileOptions: FurryLifeFileOptions = {
-  ...GenericDefaultFileOptions,
-  album: '0-sfw',
-  copyright: undefined,
-  credit: undefined
-};
-
-export class FurryLife implements Website {
+export class FurryLife extends WebsiteImpl {
   internalName: string = 'FurryLife';
   name: string = 'FurryLife';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://furrylife.online" {...props} />
-  );
+  loginUrl: string = 'https://furrylife.online';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, FurryLifeFileOptions>) => (
     <FurryLifeFileSubmissionForm
@@ -49,12 +37,6 @@ export class FurryLife implements Website {
       {...props}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : GenericDefaultNotificationOptions
-    );
-  }
 }
 
 interface FurryLifeFileSubmissionState {

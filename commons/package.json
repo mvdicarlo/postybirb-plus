@@ -19,6 +19,8 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "@types/node": "^14.11.1"
+    "@types/node": "^14.11.1",
+    "class-transformer": "^0.3.1",
+    "class-validator": "^0.12.2"
   }
 }

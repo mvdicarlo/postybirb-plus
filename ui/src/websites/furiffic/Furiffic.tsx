@@ -1,28 +1,22 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import {
+  DefaultFileOptions,
   DefaultOptions,
-  DefaultFileOptions
+  FileSubmission,
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
-import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-export class Furiffic implements Website {
+export class Furiffic extends WebsiteImpl {
   internalName: string = 'Furiffic';
   name: string = 'Furiffic';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.furiffic.com/" {...props} />
-  );
+  loginUrl: string = 'https://www.furiffic.com/';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (
     <GenericFileSubmissionSection
@@ -71,12 +65,6 @@ export class Furiffic implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? GenericDefaultFileOptions : GenericDefaultNotificationOptions
-    );
-  }
 
   supportsTextType(type: string): boolean {
     return [

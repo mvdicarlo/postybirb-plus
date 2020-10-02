@@ -1,55 +1,36 @@
-import React from 'react';
+import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import {
+  FileSubmission,
+  Folder,
   FurAffinityFileOptions,
-  FurAffinityNotificationOptions
+  FurAffinityNotificationOptions,
+  Submission,
+  SubmissionRating,
+  SubmissionType
 } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
-import { Form, Checkbox, Select } from 'antd';
+import React from 'react';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { FurAffinityCategories } from './FurAffinityCategories';
-import { FurAffinityThemes } from './FurAffinityThemes';
-import { FurAffinitySpecies } from './FurAffinitySpecies';
-import { FurAffinityGenders } from './FurAffinityGenders';
+import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-
-const defaultFileOptions: FurAffinityFileOptions = {
-  ...GenericDefaultFileOptions,
-  category: '1',
-  disableComments: false,
-  folders: [],
-  gender: '0',
-  reupload: true,
-  scraps: false,
-  species: '1',
-  theme: '1'
-};
-
-const defaultNotificationOptions: FurAffinityNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  feature: true
-};
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
+import { FurAffinityCategories } from './FurAffinityCategories';
+import { FurAffinityGenders } from './FurAffinityGenders';
+import { FurAffinitySpecies } from './FurAffinitySpecies';
+import { FurAffinityThemes } from './FurAffinityThemes';
 
 // TODO supports fallback for all real mimetypes
-export class FurAffinity implements Website {
+export class FurAffinity extends WebsiteImpl {
   internalName: string = 'FurAffinity';
   name: string = 'Fur Affinity';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.furaffinity.net/login" {...props} />
-  );
+  loginUrl: string = 'https://www.furaffinity.net/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, FurAffinityFileOptions>) => (
     <FurAffinityFileSubmissionForm
@@ -92,12 +73,6 @@ export class FurAffinity implements Website {
       ratingOptions={{ show: false }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 interface FurAffinityFileSubmissionState {

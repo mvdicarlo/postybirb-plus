@@ -1,28 +1,16 @@
+import { DefaultFileOptions, DefaultOptions, FileSubmission, Submission } from 'postybirb-commons';
 import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import {
-  DefaultFileOptions,
-  DefaultOptions
-} from 'postybirb-commons';
-import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-export class KoFi implements Website {
+export class KoFi extends WebsiteImpl {
   internalName: string = 'KoFi';
   name: string = 'Ko-fi';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://ko-fi.com/account/login" {...props} />
-  );
+  loginUrl: string = 'https://ko-fi.com/account/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (
     <GenericFileSubmissionSection
@@ -43,10 +31,4 @@ export class KoFi implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? GenericDefaultFileOptions : GenericDefaultNotificationOptions
-    );
-  }
 }

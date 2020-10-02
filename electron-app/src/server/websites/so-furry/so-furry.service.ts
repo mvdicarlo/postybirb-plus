@@ -1,47 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  Folder,
+  PostResponse,
+  SoFurryFileOptions,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  Folder,
-  SoFurryFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { SoFurryDefaultFileOptions } from './so-furry.defaults';
 
 import _ = require('lodash');
-import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class SoFurry extends Website {
   readonly BASE_URL: string = 'https://www.sofurry.com';
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3', 'mp4'];
-
-  readonly fileSubmissionOptions: SoFurryFileOptions = SoFurryDefaultFileOptions;
-
   readonly usernameShortcuts = [
     {
       key: 'sf',

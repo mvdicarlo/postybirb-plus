@@ -1,26 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import {
+  DefaultFileOptions,
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  PostResponse,
+  SubmissionPart,
+  SubmissionRating,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  PostResponse,
-  DefaultFileOptions,
-  DefaultOptions,
-  SubmissionPart,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { GenericDefaultFileOptions } from '../generic/generic.defaults';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
@@ -29,7 +26,6 @@ import { Website } from '../website.base';
 export class Route50 extends Website {
   readonly BASE_URL = 'http://route50.net';
   readonly acceptsFiles = ['jpg', 'png', 'gif', 'txt', 'mp3', 'midi', 'swf'];
-  readonly fileSubmissionOptions = GenericDefaultFileOptions;
   readonly defaultDescriptionParser = PlaintextParser.parse;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
@@ -126,7 +122,7 @@ export class Route50 extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const rating: SubmissionRating = submissionPart.data.rating || defaultPart.data.rating;
+    const rating: SubmissionRating | string = submissionPart.data.rating || defaultPart.data.rating;
     if (rating !== SubmissionRating.GENERAL) {
       problems.push(`Does not support rating: ${rating}`);
     }

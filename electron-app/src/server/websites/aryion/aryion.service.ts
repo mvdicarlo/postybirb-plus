@@ -1,40 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
+import {
+  AryionFileOptions,
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  Folder,
+  PostResponse,
+  SubmissionPart,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  Folder,
-  AryionFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { AryionDefaultFileOptions } from './aryion.defaults';
-
-import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class Aryion extends Website {
   readonly BASE_URL = 'https://aryion.com';
   readonly defaultDescriptionParser = PlaintextParser.parse;
-  readonly fileSubmissionOptions = AryionDefaultFileOptions;
   readonly usernameShortcuts = [
     {
       key: 'ar',

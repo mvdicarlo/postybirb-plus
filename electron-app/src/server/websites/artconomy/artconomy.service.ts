@@ -1,32 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http, { HttpResponse } from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
 import {
+  ArtconomyFileOptions,
+  DefaultOptions,
   FileRecord,
   FileSubmission,
+  FileSubmissionType,
   PostResponse,
-  DefaultOptions,
   SubmissionPart,
+  SubmissionRating,
   UsernameShortcut,
-  ArtconomyFileOptions,
 } from 'postybirb-commons';
-
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http, { HttpResponse } from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-
 import { Website } from '../website.base';
-import { ArtconomyDefaultFileOptions } from './artconomy.defaults';
-
-import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 
 @Injectable()
 export class Artconomy extends Website {
@@ -43,7 +38,6 @@ export class Artconomy extends Website {
     'mp3',
   ];
   readonly defaultDescriptionParser = MarkdownParser.parse;
-  readonly fileSubmissionOptions: object = ArtconomyDefaultFileOptions;
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ac',

@@ -1,37 +1,28 @@
 import { Checkbox, Form, Select } from 'antd';
-import _ from 'lodash';
+import {
+  FileSubmission,
+  Submission,
+  TumblrBlog,
+  TumblrFileOptions,
+  TumblrNotificationOptions
+} from 'postybirb-commons';
 import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import { TumblrBlog } from 'postybirb-commons';
-import { TumblrFileOptions, TumblrNotificationOptions } from 'postybirb-commons';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 import { TumblrLogin } from './TumblrLogin';
 
-const defaultFileOptions: TumblrFileOptions = {
-  ...GenericDefaultFileOptions,
-  useTitle: true,
-  blog: undefined
-};
-const defaultNotificationOptions: TumblrNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  useTitle: true,
-  blog: undefined
-};
-
-export class Tumblr implements Website {
+export class Tumblr extends WebsiteImpl {
   internalName: string = 'Tumblr';
   name: string = 'Tumblr';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <TumblrLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, TumblrFileOptions>) => (
@@ -41,12 +32,6 @@ export class Tumblr implements Website {
   NotificationSubmissionForm = (
     props: WebsiteSectionProps<Submission, TumblrNotificationOptions>
   ) => <TumblrNotificationSubmissionForm key={props.part.accountId} {...props} />;
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 interface TumblrSubmissionState {

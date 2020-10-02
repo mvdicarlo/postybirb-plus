@@ -1,51 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import * as MastodonInstance from 'mastodon-api';
 import {
+  DefaultOptions,
   FileRecord,
+  FileSubmission,
+  FileSubmissionType,
   MastodonAccountData,
-  PostResponse,
-  Submission,
   MastodonFileOptions,
   MastodonNotificationOptions,
-  FileSubmission,
+  PostResponse,
+  Submission,
   SubmissionPart,
-  DefaultOptions,
+  SubmissionRating,
 } from 'postybirb-commons';
-import FileSize from 'src/server/utils/filesize.util';
-import * as MastodonInstance from 'mastodon-api';
-
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
+import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
   PostFile,
 } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
-import {
-  MastodonDefaultFileOptions,
-  MastodonDefaultNotificationOptions,
-} from './mastodon.defaults';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
-import WebsiteValidator from 'src/server/utils/website-validator.util';
+import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
-import { FileSubmissionType } from 'postybirb-commons';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import { SubmissionRating } from 'postybirb-commons';
-import Http from 'src/server/http/http.util';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
 
 @Injectable()
 export class Mastodon extends Website {
   readonly BASE_URL = '';
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
-  readonly fileSubmissionOptions = MastodonDefaultFileOptions;
-  readonly notificationSubmissionOptions = MastodonDefaultNotificationOptions;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsFiles = [
     'png',

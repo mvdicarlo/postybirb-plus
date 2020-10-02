@@ -1,37 +1,26 @@
 import { Checkbox, Form, Input } from 'antd';
-import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
 import {
+  FileSubmission,
   MastodonFileOptions,
-  MastodonNotificationOptions
+  MastodonNotificationOptions,
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 import MastodonLogin from './MastodonLogin';
 
-const defaultFileOptions: MastodonFileOptions = {
-  ...GenericDefaultFileOptions,
-  useTitle: false,
-  spoilerText: ''
-};
-const defaultNotificationOptions: MastodonNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  useTitle: false,
-  spoilerText: ''
-};
-
-export class Mastodon implements Website {
+export class Mastodon extends WebsiteImpl {
   internalName: string = 'Mastodon';
   name: string = 'Mastodon Instance';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = false;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <MastodonLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, MastodonFileOptions>) => (
@@ -66,12 +55,6 @@ export class Mastodon implements Website {
       tagOptions={{ show: false }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 class MastodonNotificationSubmissionForm extends GenericSubmissionSection<

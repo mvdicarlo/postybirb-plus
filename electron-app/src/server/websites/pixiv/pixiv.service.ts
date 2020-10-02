@@ -1,34 +1,30 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
-import { Website } from '../website.base';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import {
-  FileRecord,
-  PixivFileOptions,
-  Submission,
   DefaultOptions,
-  PostResponse,
+  FileRecord,
   FileSubmission,
+  FileSubmissionType,
+  PixivFileOptions,
+  PostResponse,
+  Submission,
   SubmissionPart,
+  SubmissionRating,
 } from 'postybirb-commons';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/server/utils/filesize.util';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import Http from 'src/server/http/http.util';
-import { PixivDefaultFileOptions } from './pixiv.defaults';
-
-import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
-import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
-import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
-import FormContent from 'src/server/utils/form-content.util';
-import { FileSubmissionType } from 'postybirb-commons';
+import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/server/http/http.util';
+import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
+import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
+import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
+import FileSize from 'src/server/utils/filesize.util';
+import FormContent from 'src/server/utils/form-content.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
-import { SubmissionRating } from 'postybirb-commons';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
 
 @Injectable()
 export class Pixiv extends Website {
@@ -36,7 +32,6 @@ export class Pixiv extends Website {
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
   readonly waitBetweenPostsInterval = 360000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
-  readonly fileSubmissionOptions = PixivDefaultFileOptions;
   readonly acceptsAdditionalFiles = true;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {

@@ -1,25 +1,25 @@
-import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
 import {
   DefaultFileOptions,
-  DefaultOptions
+  DefaultOptions,
+  FileSubmission,
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 import { TwitterLogin } from './TwitterLogin';
 
-export class Twitter implements Website {
+export class Twitter extends WebsiteImpl {
   internalName: string = 'Twitter';
   name: string = 'Twitter';
   supportsAdditionalFiles: boolean = true;
   supportsTags = false;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <TwitterLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (
@@ -56,10 +56,4 @@ export class Twitter implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? GenericDefaultFileOptions : GenericDefaultNotificationOptions
-    );
-  }
 }

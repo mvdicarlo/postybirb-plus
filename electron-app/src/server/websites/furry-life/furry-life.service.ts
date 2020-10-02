@@ -1,49 +1,40 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as cheerio from 'cheerio';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  Folder,
+  FurryLifeFileOptions,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  Folder,
-  FurryLifeFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
   PostFile,
 } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
-
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { FurryLifeDefaultFileOptions } from './furry-life.defaults';
-
-import { GenericAccountProp } from '../generic/generic-account-props.enum';
 
 @Injectable()
 export class FurryLife extends Website {
-  private readonly logger = new Logger(FurryLife.name);
   readonly BASE_URL = 'https://furrylife.online';
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'gif'];
   readonly acceptsAdditionalFiles = true;
-  readonly fileSubmissionOptions = FurryLifeDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };

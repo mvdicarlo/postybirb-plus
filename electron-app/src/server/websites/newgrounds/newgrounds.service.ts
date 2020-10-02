@@ -1,43 +1,36 @@
 import { Injectable } from '@nestjs/common';
+import * as cheerio from 'cheerio';
 import { nativeImage } from 'electron';
 import * as gifFrames from 'gif-frames';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  NewgroundsFileOptions,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  NewgroundsFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { v1 } from 'uuid';
-import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { NewgroundsDefaultFileOptions } from './newgrounds.defaults';
-
-import * as cheerio from 'cheerio';
 
 @Injectable()
 export class Newgrounds extends Website {
   readonly BASE_URL: string = 'https://www.newgrounds.com';
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
-  readonly fileSubmissionOptions = NewgroundsDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly usernameShortcuts = [
     {
       key: 'ng',

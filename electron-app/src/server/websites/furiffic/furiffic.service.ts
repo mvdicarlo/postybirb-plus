@@ -1,24 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
@@ -26,15 +24,9 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { FurifficOptions } from './furiffic.interface';
-import {
-  GenericDefaultFileOptions,
-  GenericDefaultNotificationOptions,
-} from '../generic/generic.defaults';
 
 @Injectable()
 export class Furiffic extends Website {
-  private readonly logger = new Logger(Furiffic.name);
-
   readonly BASE_URL: string = 'https://www.furiffic.com';
   readonly acceptsFiles: string[] = [
     'jpg',
@@ -55,10 +47,7 @@ export class Furiffic extends Website {
     'mp4',
   ];
 
-  readonly fileSubmissionOptions = GenericDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly defaultDescriptionParser = BBCodeParser.parse;
-
   readonly usernameShortcuts = [
     {
       key: 'fr',

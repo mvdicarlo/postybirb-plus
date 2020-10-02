@@ -1,34 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
 import {
+  DefaultOptions,
   FileRecord,
   FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
+  FileSubmissionType,
   NewTumblBlog,
   NewTumblFileOptions,
   NewTumblNotificationOptions,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
 } from 'postybirb-commons';
-
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { Website } from '../website.base';
-
-import {
-  NewTumblDefaultFileOptions,
-  NewTumblDefaultNotificationOptions,
-} from './new-tumbl.defaults';
-import { FileSubmissionType } from 'postybirb-commons';
 
 @Injectable()
 export class NewTumbl extends Website {
@@ -37,8 +30,6 @@ export class NewTumbl extends Website {
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'gif', 'mp4'];
   readonly acceptsAdditionalFiles = true;
   readonly usernameShortcuts = [{ key: 'nt', url: 'https://$1.newtumbl.com' }];
-  readonly fileSubmissionOptions = NewTumblDefaultFileOptions;
-  readonly notificationSubmissionOptions = NewTumblDefaultNotificationOptions;
 
   private async getLoginToken(partitionId: string): Promise<string | undefined> {
     const tokenCookie = (await Http.getWebsiteCookies(partitionId, this.BASE_URL))

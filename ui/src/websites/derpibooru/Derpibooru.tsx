@@ -1,51 +1,37 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { DerpibooruOptions } from 'postybirb-commons';
 import { Form, Input } from 'antd';
-import { FileSubmission } from 'postybirb-commons';
-import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { DerpibooruFileOptions, FileSubmission } from 'postybirb-commons';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-const defaultOptions: DerpibooruOptions = {
-  ...GenericDefaultFileOptions,
-  rating: null,
-  source: null
-};
-
-export class Derpibooru implements Website {
+export class Derpibooru extends WebsiteImpl {
   internalName: string = 'Derpibooru';
   name: string = 'Derpibooru';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://derpibooru.org/session/new" {...props} />
-  );
+  loginUrl: string = 'https://derpibooru.org/session/new';
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DerpibooruOptions>) => (
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DerpibooruFileOptions>) => (
     <DerpibooruFileSubmissionForm
       hideThumbnailOptions={true}
       key={props.part.accountId}
       {...props}
     />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 }
 
-export class DerpibooruFileSubmissionForm extends GenericFileSubmissionSection<DerpibooruOptions> {
-  constructor(props: WebsiteSectionProps<FileSubmission, DerpibooruOptions>) {
+export class DerpibooruFileSubmissionForm extends GenericFileSubmissionSection<
+  DerpibooruFileOptions
+> {
+  constructor(props: WebsiteSectionProps<FileSubmission, DerpibooruFileOptions>) {
     super(props);
     this.state = {
       folders: []
     };
   }
 
-  renderRightForm(data: DerpibooruOptions) {
+  renderRightForm(data: DerpibooruFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Source URL">

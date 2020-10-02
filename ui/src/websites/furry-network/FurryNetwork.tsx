@@ -1,46 +1,27 @@
 import { Checkbox, Form, Select } from 'antd';
-import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
 import {
+  FileSubmission,
+  FileSubmissionType,
   FurryNetworkFileOptions,
-  FurryNetworkNotificationOptions
+  FurryNetworkNotificationOptions,
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
+import React from 'react';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
-import { FileSubmissionType } from 'postybirb-commons';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 import FurryNetworkLoginHelp from './FurryNetworkLoginHelp';
 
-const defaultFileOptions: FurryNetworkFileOptions = {
-  ...GenericDefaultFileOptions,
-  profile: undefined,
-  folders: [],
-  communityTags: true
-};
-
-const defaultNotificationOptions: FurryNetworkNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  profile: undefined,
-  folders: [],
-  communityTags: true
-};
-
-export class FurryNetwork implements Website {
+export class FurryNetwork extends WebsiteImpl {
   internalName: string = 'FurryNetwork';
   name: string = 'Furry Network';
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://furrynetwork.com/" {...props} />
-  );
+  loginUrl: string = 'https://furrynetwork.com/';
 
   LoginHelp = (props: LoginDialogProps) => <FurryNetworkLoginHelp {...props} />;
 
@@ -105,12 +86,6 @@ export class FurryNetwork implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 interface FurryNetworkSubmissionState {

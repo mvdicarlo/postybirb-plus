@@ -3,15 +3,16 @@
     "declaration": true,
     "declarationDir": "./lib",
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
-    "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "./lib",
+    "removeComments": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "es2017",
+    "rootDir": "./src"
   },
-  "include": ["./src"],
   "exclude": ["node_modules", "lib"]
 }

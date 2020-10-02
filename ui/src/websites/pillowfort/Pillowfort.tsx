@@ -1,35 +1,17 @@
 import { Checkbox, Form, Select } from 'antd';
-import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
 import {
+  FileSubmission,
   PillowfortFileOptions,
-  PillowfortNotificationOptions
+  PillowfortNotificationOptions,
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
-
-const defaultFileOptions: PillowfortFileOptions = {
-  ...GenericDefaultFileOptions,
-  privacy: 'public',
-  allowComments: true,
-  allowReblogging: true
-};
-
-const defaultNotificationOptions: PillowfortNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  privacy: 'public',
-  allowComments: true,
-  allowReblogging: true
-};
+import { WebsiteImpl } from '../website.base';
 
 const privacyOptions = {
   public: 'Everyone',
@@ -38,14 +20,12 @@ const privacyOptions = {
   private: 'Private'
 };
 
-export class Pillowfort implements Website {
+export class Pillowfort extends WebsiteImpl {
   internalName: string = 'Pillowfort';
   name: string = 'Pillowfort';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.pillowfort.social/users/sign_in" {...props} />
-  );
+  loginUrl: string = 'https://www.pillowfort.social/users/sign_in';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PillowfortFileOptions>) => (
     <PillowfortFileSubmissionForm
@@ -89,12 +69,6 @@ export class Pillowfort implements Website {
       {...props}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 export class PillowfortNotificationSubmissionForm extends GenericSubmissionSection<

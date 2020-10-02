@@ -1,37 +1,21 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import {
-  DiscordFileOptions,
-  DiscordNotificationOptions
-} from 'postybirb-commons';
 import { Checkbox } from 'antd';
-import DiscordLogin from './DiscordLogin';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
+import _ from 'lodash';
+import { DiscordFileOptions, FileSubmission, Submission, SubmissionType } from 'postybirb-commons';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-import { SubmissionType } from 'postybirb-commons';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
+import DiscordLogin from './DiscordLogin';
 
-const defaultOptions: DiscordFileOptions = {
-  ...GenericDefaultFileOptions,
-  spoiler: false,
-  useTitle: true
-};
-
-const defaultNotificationOptions: DiscordNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  useTitle: true
-};
-
-export class Discord implements Website {
+export class Discord extends WebsiteImpl {
   internalName: string = 'Discord';
   name: string = 'Discord';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = false;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <DiscordLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DiscordFileOptions>) => (
@@ -52,10 +36,6 @@ export class Discord implements Website {
       {...props}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(type === SubmissionType.FILE ? defaultOptions : defaultNotificationOptions);
-  }
 }
 
 export class DiscordNotificationSubmissionForm extends GenericSubmissionSection<

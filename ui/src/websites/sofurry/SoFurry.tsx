@@ -1,47 +1,28 @@
-import React from 'react';
+import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { SoFurryFileOptions } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
-import { Form, Checkbox, Select } from 'antd';
+import {
+  FileSubmission,
+  Folder,
+  SoFurryFileOptions,
+  SoFurryNotificationOptions,
+  Submission,
+  SubmissionRating
+} from 'postybirb-commons';
+import React from 'react';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
+import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { SubmissionRating } from 'postybirb-commons';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-// TODO make a separate notification options
-const defaultOptions: SoFurryFileOptions = {
-  title: undefined,
-  useThumbnail: true,
-  autoScale: true,
-  folder: '0',
-  viewOptions: '0',
-  thumbnailAsCoverArt: false,
-  rating: null,
-  tags: {
-    extendDefault: true,
-    value: []
-  },
-  description: {
-    overwriteDefault: false,
-    value: ''
-  }
-};
-
-export class SoFurry implements Website {
+export class SoFurry extends WebsiteImpl {
   internalName: string = 'SoFurry';
   name: string = 'SoFurry';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.sofurry.com/user/login" {...props} />
-  );
+  loginUrl: string = 'https://www.sofurry.com/user/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, SoFurryFileOptions>) => (
     <SoFurryFileSubmissionForm
@@ -64,7 +45,9 @@ export class SoFurry implements Website {
     />
   );
 
-  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, SoFurryFileOptions>) => (
+  NotificationSubmissionForm = (
+    props: WebsiteSectionProps<Submission, SoFurryNotificationOptions>
+  ) => (
     <SoFurryNotificationSubmissionForm
       key={props.part.accountId}
       ratingOptions={{
@@ -79,10 +62,6 @@ export class SoFurry implements Website {
     />
   );
 
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
-
   supportsTextType(type: string): boolean {
     return ['text/plain'].includes(type);
   }
@@ -93,13 +72,13 @@ interface SoFurrySubmissionState {
 }
 
 export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
-  SoFurryFileOptions
+  SoFurryNotificationOptions
 > {
   state: SoFurrySubmissionState = {
     folders: []
   };
 
-  constructor(props: SubmissionSectionProps<FileSubmission, SoFurryFileOptions>) {
+  constructor(props: SubmissionSectionProps<FileSubmission, SoFurryNotificationOptions>) {
     super(props);
     this.state = {
       folders: []
@@ -116,7 +95,7 @@ export class SoFurryNotificationSubmissionForm extends GenericSubmissionSection<
     );
   }
 
-  renderRightForm(data: SoFurryFileOptions) {
+  renderRightForm(data: SoFurryNotificationOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Folder">

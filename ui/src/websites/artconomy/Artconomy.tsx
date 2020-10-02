@@ -1,29 +1,17 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
 import { Checkbox } from 'antd';
-import { FileSubmission } from 'postybirb-commons';
-import { ArtconomyFileOptions } from 'postybirb-commons';
+import { ArtconomyFileOptions, FileSubmission } from 'postybirb-commons';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
+import { WebsiteImpl } from '../website.base';
 
-const defaultOptions: ArtconomyFileOptions = {
-  ...GenericDefaultFileOptions,
-  commentsDisabled: false,
-  isArtist: true,
-  private: false
-};
-
-export class Artconomy implements Website {
+export class Artconomy extends WebsiteImpl {
   internalName: string = 'Artconomy';
   name: string = 'Artconomy';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://artconomy.com/auth/login" {...props} />
-  );
+  loginUrl: string = 'https://artconomy.com/auth/login';
+
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyFileOptions>) => (
     <ArtconomyFileSubmissionForm
       ratingOptions={{
@@ -51,10 +39,6 @@ export class Artconomy implements Website {
       {...props}
     />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 }
 
 export class ArtconomyFileSubmissionForm extends GenericFileSubmissionSection<
