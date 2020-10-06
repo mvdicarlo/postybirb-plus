@@ -124,7 +124,7 @@ export class Inkbunny extends Website {
     }
 
     data.additional.forEach((file, index) => {
-      form[`uploadedfile[${index + 1}]`] = file;
+      form[`uploadedfile[${index + 1}]`] = file.file;
     });
 
     this.checkCancelled(cancellationToken);
@@ -163,13 +163,24 @@ export class Inkbunny extends Website {
     }
 
     const { options } = data;
-    if (options.submissionType) editForm.type = options.submissionType;
-    if (options.scraps) editForm.scraps = 'yes';
-    if (!options.notify) editForm.visibility = 'yes_nowatch';
-    else editForm.visibility = 'yes';
+    if (options.submissionType) {
+      editForm.type = options.submissionType;
+    }
+    if (options.scraps) {
+      editForm.scraps = 'yes';
+    }
+    if (!options.notify) {
+      editForm.visibility = 'yes_nowatch';
+    } else {
+      editForm.visibility = 'yes';
+    }
 
-    if (options.blockGuests) editForm.guest_block = 'yes';
-    if (options.friendsOnly) editForm.friends_only = 'yes';
+    if (options.blockGuests) {
+      editForm.guest_block = 'yes';
+    }
+    if (options.friendsOnly) {
+      editForm.friends_only = 'yes';
+    }
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<any>(`${this.BASE_URL}/api_editsubmission.php`, undefined, {
