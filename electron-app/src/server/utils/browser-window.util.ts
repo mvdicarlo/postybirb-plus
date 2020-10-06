@@ -51,12 +51,14 @@ export default class BrowserWindowUtil {
   public static async getPage(
     partition: string,
     url: string,
-    html: boolean = false,
+    html: boolean,
+    wait: number = 0,
   ): Promise<string> {
     return BrowserWindowUtil.runScriptOnPage<string>(
       partition,
       url,
-      html ? 'document.body.innerHTML' : 'document.body.innerText',
+      html ? 'document.body.parentElement.innerHTML' : 'document.body.innerText',
+      wait,
     );
   }
 
@@ -64,9 +66,13 @@ export default class BrowserWindowUtil {
     partition: string,
     url: string,
     script: string,
+    wait: number = 0,
   ): Promise<T> {
     const bw = await BrowserWindowUtil.createWindow(partition, url);
     try {
+      if (wait) {
+        await WaitUtil.wait(wait);
+      }
       const page = await bw.webContents.executeJavaScript(script);
       return page;
     } catch (err) {

@@ -49,7 +49,7 @@ export class Pillowfort extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<string>(this.BASE_URL, data._id);
-    await BrowserWindowUtil.getPage(data._id, this.BASE_URL);
+    await BrowserWindowUtil.getPage(data._id, this.BASE_URL, false);
     if (res.body.includes('/signout')) {
       status.loggedIn = true;
       status.username = res.body.match(/value="current_user">(.*?)</)[1];

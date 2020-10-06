@@ -100,6 +100,7 @@ export class Patreon extends Website {
     const accessTierPage = await BrowserWindowUtil.getPage(
       profileId,
       `${this.BASE_URL}/api/posts/${json.id}?include=access_rules.tier.null,attachments.null,campaign.access_rules.tier.null,campaign.earnings_visibility,campaign.is_nsfw,images.null,audio.null&fields[access_rule]=access_rule_type`,
+      false,
     );
 
     const tierJson = JSON.parse(accessTierPage);
