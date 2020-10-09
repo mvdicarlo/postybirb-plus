@@ -68,7 +68,7 @@ export class FurryNetwork extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const ls = await BrowserWindowUtil.getLocalStorage(data._id, this.BASE_URL);
+    const ls = await BrowserWindowUtil.getLocalStorage(data._id, this.BASE_URL, 2500);
     if (ls.token && ls.user) {
       status.loggedIn = true;
 

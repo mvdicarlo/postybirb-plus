@@ -22,10 +22,17 @@ export default class FurryNetworkLoginHelp extends React.Component<LoginDialogPr
     if (this.isValid()) {
       this.setState({ waiting: true });
       const webview: any = document.getElementsByClassName('webview')[0];
+      let script: string;
+      try {
+        JSON.parse(this.state.loginData!);
+        script = `var tokens = JSON.parse(${this.state.loginData!});`;
+      } catch {
+        script = `var tokens = ${this.state.loginData!.replace(/("$|^")/g, '')};`;
+      }
       webview
         .executeJavaScript(
           `
-            var tokens = ${this.state.loginData!.replace(/("$|^")/g, '')};
+            ${script}
             Object.keys(tokens).forEach(key => localStorage.setItem(key, tokens[key]));
           `
         )

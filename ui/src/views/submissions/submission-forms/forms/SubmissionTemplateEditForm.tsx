@@ -380,7 +380,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
               ignoreId={this.id}
               submissionType={this.state.template!.type}
               onPropsSelect={this.importData.bind(this)}
-              hideUseTemplateTitle={true}
+              label="Import Template"
             />
             <Popconfirm
               disabled={!this.formHasChanges()}
