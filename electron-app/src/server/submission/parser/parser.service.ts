@@ -28,10 +28,11 @@ import { FilePostData, PostFileRecord } from '../post/interfaces/file-post-data.
 
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
 import { SubmissionType } from 'postybirb-commons';
+import { DescriptionParser } from './section-parsers/description.parser';
 
 @Injectable()
 export class ParserService {
-  private websiteDescriptionShortcuts: Record<string, UsernameShortcut[]>;
+  private descriptionParser: DescriptionParser;
 
   constructor(
     private readonly settings: SettingsService,
@@ -40,7 +41,7 @@ export class ParserService {
     private readonly fileManipulator: FileManipulationService,
     websitesService: WebsitesService,
   ) {
-    this.websiteDescriptionShortcuts = websitesService.getUsernameShortcuts();
+    this.descriptionParser = new DescriptionParser(customShortcuts, websitesService, settings);
   }
 
   public async parse(
@@ -87,68 +88,7 @@ export class ParserService {
     websitePart: SubmissionPartEntity<DefaultOptions>,
     type: SubmissionType,
   ): Promise<string> {
-    let description = FormContent.getDescription(
-      defaultPart.data.description,
-      websitePart.data.description,
-    ).trim();
-
-    if (description.length) {
-      // Replace custom shortcuts
-      description = await this.parseCustomDescriptionShortcuts(description);
-
-      // Standardize HTML
-      description = HTMLFormatParser.parse(description);
-
-      // Run preparser (allows formatting of shortcuts before anything else runs)
-      description = website.preparseDescription(description, type);
-
-      // Parse website shortcuts
-      Object.values(this.websiteDescriptionShortcuts).forEach(websiteShortcuts =>
-        websiteShortcuts.forEach(
-          shortcut => (description = UsernameParser.parse(description, shortcut.key, shortcut.url)),
-        ),
-      );
-
-      // Default parser (typically conversion to HTML, BBCode, Markdown, Plaintext)
-      description = website.parseDescription(description, type);
-    }
-
-    // Advertisement
-    if (website.enableAdvertisement && this.settings.getValue<boolean>('advertise')) {
-      description = AdInsertParser.parse(description, website.defaultDescriptionParser);
-    }
-
-    description = website.postParseDescription(description, type);
-    return description.trim();
-  }
-
-  private async parseCustomDescriptionShortcuts(description: string): Promise<string> {
-    const customShortcuts = await this.customShortcuts.getAll();
-    customShortcuts.forEach(scEntity => {
-      scEntity.content = scEntity.content.replace(/(^<p.*?>|<\/p>$)/g, ''); // Remove surrounding blocks
-      if (scEntity.isDynamic) {
-        const dynamicMatches =
-          description.match(new RegExp(`{${scEntity.shortcut}:(.+?)}`, 'gms')) || [];
-        dynamicMatches.forEach(match => {
-          let content = scEntity.content;
-          const matchedContent =
-            match
-              .replace(/(\{|\})/g, '')
-              .split(':')
-              .pop() || '';
-
-          content = content.replace(/\{\$\}/gm, matchedContent);
-          description = description.replace(match, content);
-        });
-      } else {
-        description = description.replace(
-          new RegExp(`{${scEntity.shortcut}}`, 'gm'),
-          scEntity.content,
-        );
-      }
-    });
-
-    return description;
+    return this.descriptionParser.parse(website, defaultPart, websitePart, type);
   }
 
   public async parseTags(
