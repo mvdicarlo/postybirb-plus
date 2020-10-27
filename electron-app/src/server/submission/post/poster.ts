@@ -20,6 +20,7 @@ import { ParserService } from '../parser/parser.service';
 import { FilePostData } from './interfaces/file-post-data.interface';
 import { CancellationToken } from './cancellation/cancellation-token';
 import { CancellationException } from './cancellation/cancellation.exception';
+import { HttpException, RequestTimeoutException } from '@nestjs/common';
 
 export interface Poster {
   on(
@@ -167,14 +168,19 @@ export class Poster extends EventEmitter {
         part: this.part,
       });
 
-      await this.attemptPost(data);
+      const res = await this.attemptPost(data);
+      this.status = 'SUCCESS';
+      this.done(res);
     } catch (err) {
       const error: Error | PostResponse = err;
       const errorMsg: PostResponse = {
         website: this.part.website,
         time: new Date().toLocaleString(),
       };
-      if (error instanceof Error) {
+      if (error instanceof HttpException) {
+        errorMsg.stack = error.message.stack;
+        errorMsg.error = error.message.message;
+      } else if (error instanceof Error) {
         errorMsg.stack = error.stack;
         errorMsg.error = error.message;
       } else {
@@ -189,32 +195,47 @@ export class Poster extends EventEmitter {
     }
   }
 
-  private async attemptPost(data: PostData<Submission, any>): Promise<PostResponse> {
-    let totalTries = this.retries + 1;
-    let error = null;
-    while (totalTries) {
-      try {
-        totalTries--;
-        const accountData: any = (await this.accountService.get(this.part.accountId)).data;
-        // const res = await this.fakePost();
-        const res = await (this.isFilePost(data)
-          ? this.website.postFileSubmission(this.cancellationToken, data as any, accountData)
-          : this.website.postNotificationSubmission(
-              this.cancellationToken,
-              data as any,
-              accountData,
-            ));
-        this.status = 'SUCCESS';
-        this.done(res);
-        return;
-      } catch (err) {
-        error = err;
-        if (this.isCancelled()) {
-          totalTries = 0; // kill when cancelled
+  private attemptPost(data: PostData<Submission, any>): Promise<PostResponse> {
+    return new Promise(async (resolve, reject) => {
+      let totalTries = this.retries + 1;
+      let error = null;
+      // Timeout after 7 minutes
+      const timeoutTimer = setTimeout(() => {
+        if (!this.isDone) {
+          this.cancel();
+          totalTries = 0;
+          reject(
+            new RequestTimeoutException(
+              `PostyBirb timed out when posting. Please check ${this.website.constructor.name} to see if it actually completed.`,
+            ),
+          );
+        }
+      }, 700000);
+      while (totalTries > 0) {
+        try {
+          totalTries--;
+          const accountData: any = (await this.accountService.get(this.part.accountId)).data;
+          // const res = await this.fakePost();
+          const res = await (this.isFilePost(data)
+            ? this.website.postFileSubmission(this.cancellationToken, data as any, accountData)
+            : this.website.postNotificationSubmission(
+                this.cancellationToken,
+                data as any,
+                accountData,
+              ));
+          clearTimeout(timeoutTimer);
+          resolve(res);
+          return;
+        } catch (err) {
+          error = err;
+          if (this.isCancelled()) {
+            totalTries = 0; // kill when cancelled
+          }
         }
       }
-    }
-    throw error;
+      clearTimeout(timeoutTimer);
+      reject(error);
+    });
   }
 
   private fakePost(): Promise<PostResponse> {
@@ -234,15 +255,17 @@ export class Poster extends EventEmitter {
   }
 
   private done(response: PostResponse) {
-    this.isDone = true;
-    this.isPosting = false;
-    this.response = response;
-    this.emit('done', {
-      submission: this.submission,
-      part: this.part,
-      source: response.source,
-      status: this.status,
-    });
+    if (!this.isDone) {
+      this.isDone = true;
+      this.isPosting = false;
+      this.response = response;
+      this.emit('done', {
+        submission: this.submission,
+        part: this.part,
+        source: response.source,
+        status: this.status,
+      });
+    }
   }
 
   private isFilePost(
@@ -271,10 +294,9 @@ export class Poster extends EventEmitter {
   }
 
   cancel() {
-    if (this.cancellationToken.isCancelled() || this.isDone) {
-      return;
+    if (!(this.cancellationToken.isCancelled() || this.isDone)) {
+      this.cancellationToken.cancel();
     }
-    this.cancellationToken.cancel();
   }
 
   isCancelled(): boolean {
