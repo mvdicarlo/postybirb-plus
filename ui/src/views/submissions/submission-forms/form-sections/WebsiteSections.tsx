@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { SubmissionPart } from 'postybirb-commons';
 import { loginStatusStore, LoginStatusStore } from '../../../../stores/login-status.store';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
-import { Form, Typography, Tabs, Badge, Empty } from 'antd';
+import { Form, Typography, Tabs, Badge, Empty, Collapse } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { SubmissionType } from 'postybirb-commons';
 import { FileSubmission } from 'postybirb-commons';
@@ -71,7 +71,32 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
               {WebsiteRegistry.find(website)?.name}
             </span>
           </Typography.Title>
-          <Tabs>
+          <Collapse bordered={false}>
+            {childrenSections.map(section => {
+              const isLoggedIn: boolean = loginStatusStore.getWebsiteLoginStatusForAccountId(
+                section.key
+              );
+              return (
+                <Collapse.Panel
+                  disabled={!isLoggedIn}
+                  header={
+                    <span>
+                      <span className="mr-1">{section.alias}</span>
+                      {!isLoggedIn ? (
+                        <Typography.Text type="danger">Not logged in.</Typography.Text>
+                      ) : section.problems.length ? (
+                        <Badge count={section.problems.length} />
+                      ) : null}
+                    </span>
+                  }
+                  key={section.key}
+                >
+                  {isLoggedIn ? section.form : null}
+                </Collapse.Panel>
+              );
+            })}
+          </Collapse>
+          {/* <Tabs>
             {childrenSections.map(section => (
               <Tabs.TabPane
                 tab={
@@ -91,7 +116,7 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
                 )}
               </Tabs.TabPane>
             ))}
-          </Tabs>
+          </Tabs> */}
         </Form.Item>
       );
     });

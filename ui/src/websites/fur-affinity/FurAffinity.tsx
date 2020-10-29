@@ -6,18 +6,15 @@ import {
   FurAffinityFileOptions,
   FurAffinityNotificationOptions,
   Submission,
-  SubmissionRating,
-  SubmissionType
+  SubmissionRating
 } from 'postybirb-commons';
 import React from 'react';
 import WebsiteService from '../../services/website.service';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
 import { FurAffinityCategories } from './FurAffinityCategories';
 import { FurAffinityGenders } from './FurAffinityGenders';

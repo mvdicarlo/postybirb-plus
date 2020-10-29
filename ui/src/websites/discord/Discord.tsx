@@ -1,6 +1,5 @@
 import { Checkbox } from 'antd';
-import _ from 'lodash';
-import { DiscordFileOptions, FileSubmission, Submission, SubmissionType } from 'postybirb-commons';
+import { DiscordFileOptions, FileSubmission, Submission } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
