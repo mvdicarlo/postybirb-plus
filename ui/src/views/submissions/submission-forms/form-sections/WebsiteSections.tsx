@@ -71,8 +71,8 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
               {WebsiteRegistry.find(website)?.name}
             </span>
           </Typography.Title>
-          <Collapse bordered={false}>
-            {childrenSections.map(section => {
+          <Collapse bordered={false} defaultActiveKey="0">
+            {childrenSections.map((section, index) => {
               const isLoggedIn: boolean = loginStatusStore.getWebsiteLoginStatusForAccountId(
                 section.key
               );
@@ -89,7 +89,7 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
                       ) : null}
                     </span>
                   }
-                  key={section.key}
+                  key={index}
                 >
                   {isLoggedIn ? section.form : null}
                 </Collapse.Panel>
