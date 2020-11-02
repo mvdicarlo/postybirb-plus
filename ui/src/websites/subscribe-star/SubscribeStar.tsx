@@ -1,44 +1,25 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
+import { Checkbox, Form, Select } from 'antd';
 import {
+  FileSubmission,
+  Folder,
+  Submission,
   SubscribeStarFileOptions,
   SubscribeStarNotificationOptions
 } from 'postybirb-commons';
-import { Form, Select, Checkbox } from 'antd';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
+import React from 'react';
+import WebsiteService from '../../services/website.service';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { Folder } from 'postybirb-commons';
-import WebsiteService from '../../services/website.service';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-const defaultFileOptions: SubscribeStarFileOptions = {
-  ...GenericDefaultFileOptions,
-  tier: 'free',
-  useTitle: true
-};
-
-const defaultNotificationOptions: SubscribeStarNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  tier: 'free',
-  useTitle: true
-};
-
-export class SubscribeStar implements Website {
+export class SubscribeStar extends WebsiteImpl {
   internalName: string = 'SubscribeStar';
   name: string = 'SubscribeStar';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = false;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.subscribestar.com" {...props} />
-  );
+  loginUrl: string = 'https://www.subscribestar.com';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, SubscribeStarFileOptions>) => (
     <SubscribeStarFileSubmissionForm
@@ -70,12 +51,6 @@ export class SubscribeStar implements Website {
       {...props}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 interface SubscribeStarSubmissionState {

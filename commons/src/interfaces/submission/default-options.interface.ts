@@ -6,8 +6,8 @@ export interface DefaultOptions {
   title?: string;
   tags: TagData;
   description: DescriptionData;
-  rating: SubmissionRating | null;
-  sources?: string[];
+  rating?: SubmissionRating | string;
+  sources: string[];
 }
 
 export interface DefaultFileOptions extends DefaultOptions {

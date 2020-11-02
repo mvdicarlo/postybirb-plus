@@ -1,41 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { CustomHTMLParser } from 'src/server/description-parsing/html/custom.parser';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import { FileSubmissionType } from 'postybirb-commons';
 import {
+  DefaultOptions,
   FileRecord,
   FileSubmission,
-  Submission,
+  FileSubmissionType,
   PostResponse,
-  DefaultOptions,
+  Submission,
   SubmissionPart,
+  SubmissionRating,
   TumblrAccountData,
   TumblrFileOptions,
   TumblrNotificationOptions,
 } from 'postybirb-commons';
-
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import { CustomHTMLParser } from 'src/server/description-parsing/html/custom.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
+import { OAuthUtil } from 'src/server/utils/oauth.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
-import { TumblrDefaultFileOptions, TumblrDefaultNotificationOptions } from './tumblr.defaults';
-import { SubmissionRating } from 'postybirb-commons';
-import Http from 'src/server/http/http.util';
-import { OAuthUtil } from 'src/server/utils/oauth.util';
-
 @Injectable()
 export class Tumblr extends Website {
   readonly BASE_URL = '';
-  readonly fileSubmissionOptions = TumblrDefaultFileOptions;
-  readonly notificationSubmissionOptions = TumblrDefaultNotificationOptions;
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp3', 'mp4'];
   readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;

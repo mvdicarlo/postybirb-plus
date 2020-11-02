@@ -1,33 +1,17 @@
 import { Checkbox, Form, Select } from 'antd';
-import _ from 'lodash';
+import { FileSubmission, PixivFileOptions, SubmissionRating } from 'postybirb-commons';
 import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { PixivFileOptions } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
-import { SubmissionRating } from 'postybirb-commons';
+import { WebsiteImpl } from '../website.base';
 
-const defaultOptions: PixivFileOptions = {
-  ...GenericDefaultFileOptions,
-  communityTags: true,
-  matureContent: [],
-  original: false,
-  sexual: undefined,
-  containsContent: []
-};
-
-export class Pixiv implements Website {
+export class Pixiv extends WebsiteImpl {
   internalName: string = 'Pixiv';
   name: string = 'Pixiv';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://accounts.pixiv.net/login?lang=en" {...props} />
-  );
+  loginUrl: string = 'https://accounts.pixiv.net/login?lang=en';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PixivFileOptions>) => (
     <PixivFileSubmissionForm
@@ -53,10 +37,6 @@ export class Pixiv implements Website {
       {...props}
     />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 }
 
 export class PixivFileSubmissionForm extends GenericFileSubmissionSection<PixivFileOptions> {

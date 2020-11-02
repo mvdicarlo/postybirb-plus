@@ -1,45 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
 import {
-  GenericDefaultFileOptions,
-  GenericDefaultNotificationOptions,
-} from '../generic/generic.defaults';
-import {
-  FileRecord,
   DefaultFileOptions,
   DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
   PostResponse,
   Submission,
-  FileSubmission,
   SubmissionPart,
 } from 'postybirb-commons';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import FileSize from 'src/server/utils/filesize.util';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import { TwitterAccountData } from './twitter-account.interface';
+import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
+import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
-import Http from 'src/server/http/http.util';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
-import { FileSubmissionType } from 'postybirb-commons';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import WebsiteValidator from 'src/server/utils/website-validator.util';
+import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import { OAuthUtil } from 'src/server/utils/oauth.util';
+import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import { Website } from '../website.base';
+import { TwitterAccountData } from './twitter-account.interface';
 
 @Injectable()
 export class Twitter extends Website {
   readonly BASE_URL = '';
   readonly acceptsAdditionalFiles = true;
   readonly enableAdvertisement = false;
-  readonly fileSubmissionOptions = GenericDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp4', 'mov'];
   readonly usernameShortcuts = [

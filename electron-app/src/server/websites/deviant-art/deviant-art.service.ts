@@ -1,45 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
+import {
+  DefaultOptions,
+  DeviantArtAccountData,
+  DeviantArtFileOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  Folder,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  Folder,
-  DeviantArtAccountData,
-  DeviantArtFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import { ApiResponse, OAuthUtil } from 'src/server/utils/oauth.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
-import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
-
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
-import { DeviantArtDefaultFileOptions } from './deviant-art.defaults';
-
 @Injectable()
 export class DeviantArt extends Website {
   readonly BASE_URL = 'https://www.deviantart.com';
-  readonly fileSubmissionOptions = DeviantArtDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly acceptsFiles = [
     'jpeg',
     'jpg',
@@ -112,7 +104,9 @@ export class DeviantArt extends Website {
   }
 
   private async getFolders(profileId: string, token: string) {
-    const res = await Http.get<{ results: { folderid: string; name: string; parent: string }[] }>(
+    const res = await Http.get<{
+      results: Array<{ folderid: string; name: string; parent: string }>;
+    }>(
       `${this.BASE_URL}/api/v1/oauth2/gallery/folders?calculate_size=false&limit=50&access_token=${token}`,
       undefined,
       { requestOptions: { json: true } },

@@ -1,49 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  Folder,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+  WeasylFileOptions,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  Folder,
-  WeasylFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-
 import { LoginResponse } from 'src/server/websites/interfaces/login-response.interface';
 import { Website } from 'src/server/websites/website.base';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import { WeasylDefaultFileOptions } from './weasyl.defaults';
-
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
 
 @Injectable()
 export class Weasyl extends Website {
-  private readonly logger = new Logger(Weasyl.name);
-
   readonly BASE_URL: string = 'https://www.weasyl.com';
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
-
-  readonly fileSubmissionOptions: WeasylFileOptions = WeasylDefaultFileOptions;
-
   readonly usernameShortcuts = [
     {
       key: 'ws',
@@ -188,8 +178,12 @@ export class Weasyl extends Website {
     }
 
     const { options } = data;
-    if (options.notify) form.nonotification = 'on';
-    if (options.critique) form.critique = 'on';
+    if (options.notify) {
+      form.nonotification = 'on';
+    }
+    if (options.critique) {
+      form.critique = 'on';
+    }
     form.folderid = options.folder || '';
     form.subtype = options.category || '';
 

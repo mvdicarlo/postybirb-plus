@@ -1,44 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
+import * as FormData from 'form-data';
 import {
-  PillowfortDefaultNotificationOptions,
-  PillowfortDefaultFileOptions,
-} from './pillowfort.defaults';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import Http from 'src/server/http/http.util';
-import {
+  DefaultOptions,
   FileRecord,
+  FileSubmission,
   PillowfortFileOptions,
   PillowfortNotificationOptions,
-  FileSubmission,
-  SubmissionPart,
-  DefaultOptions,
-  Submission,
   PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
 } from 'postybirb-commons';
-
-import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
-import WebsiteValidator from 'src/server/utils/website-validator.util';
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-
-import HtmlParserUtil from 'src/server/utils/html-parser.util';
-import { SubmissionRating } from 'postybirb-commons';
 import {
   FilePostData,
   PostFile,
 } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import * as FormData from 'form-data';
+import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
+import HtmlParserUtil from 'src/server/utils/html-parser.util';
+import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { Website } from '../website.base';
 
 @Injectable()
 export class Pillowfort extends Website {
   readonly BASE_URL = 'https://www.pillowfort.social';
   readonly acceptsAdditionalFiles = true;
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
-  readonly fileSubmissionOptions = PillowfortDefaultFileOptions;
-  readonly notificationSubmissionOptions = PillowfortDefaultNotificationOptions;
   readonly usernameShortcuts = [
     {
       key: 'pf',

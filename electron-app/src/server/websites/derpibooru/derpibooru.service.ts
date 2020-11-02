@@ -1,23 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
+import {
+  DefaultOptions,
+  DerpibooruFileOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  PostResponse,
+  SubmissionPart,
+  SubmissionRating,
+  UsernameShortcut,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  UsernameShortcut,
-  DerpibooruOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
@@ -25,17 +23,12 @@ import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-
 import { Website } from '../website.base';
-import { DerpibooruDefaultFileOptions } from './derpibooru.defaults';
 
 @Injectable()
 export class Derpibooru extends Website {
-  private readonly logger = new Logger(Derpibooru.name);
-
   BASE_URL: string = 'https://derpibooru.org';
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'svg', 'gif', 'webm'];
-  fileSubmissionOptions: object = DerpibooruDefaultFileOptions;
   acceptsSourceUrls: boolean = true;
   enableAdvertisement: boolean = false;
   defaultDescriptionParser = PlaintextParser.parse;
@@ -85,7 +78,7 @@ export class Derpibooru extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<DerpibooruOptions>,
+    data: FilePostData<DerpibooruFileOptions>,
   ): Promise<PostResponse> {
     try {
       return await this.attemptFilePost(cancellationToken, data);
@@ -111,7 +104,7 @@ export class Derpibooru extends Website {
 
   private async attemptFilePost(
     cancellationToken: CancellationToken,
-    data: FilePostData<DerpibooruOptions>,
+    data: FilePostData<DerpibooruFileOptions>,
   ): Promise<PostResponse> {
     const tags: string[] = this.parseTags(data.tags, {
       spaceReplacer: ' ',

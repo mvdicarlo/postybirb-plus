@@ -1,46 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
 import { nativeImage } from 'electron';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'postybirb-commons';
 import {
+  DefaultOptions,
   FileRecord,
   FileSubmission,
-  Submission,
+  FileSubmissionType,
+  Folder,
   PostResponse,
-  DefaultOptions,
+  Submission,
   SubmissionPart,
   SubscribeStarFileOptions,
   SubscribeStarNotificationOptions,
-  Folder,
 } from 'postybirb-commons';
-
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
+import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import { v1 } from 'uuid';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {
-  SubscribeStarDefaultFileOptions,
-  SubscribeStarDefaultNotificationOptions,
-} from './subscribe-star.defaults';
 
-import BrowserWindowUtil from 'src/server/utils/browser-window.util';
-import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import _ = require('lodash');
 
 @Injectable()
 export class SubscribeStar extends Website {
   readonly BASE_URL = 'https://www.subscribestar.com';
-  readonly fileSubmissionOptions = SubscribeStarDefaultFileOptions;
-  readonly notificationSubmissionOptions = SubscribeStarDefaultNotificationOptions;
   readonly acceptsAdditionalFiles = true;
   readonly usernameShortcuts = [
     {

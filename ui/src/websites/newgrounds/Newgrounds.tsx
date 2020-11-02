@@ -1,41 +1,21 @@
+import { Checkbox, Form, Radio } from 'antd';
+import {
+  DefaultOptions,
+  FileSubmission,
+  NewgroundsFileOptions,
+  Submission
+} from 'postybirb-commons';
 import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { DefaultOptions } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { SubmissionType } from 'postybirb-commons';
-import { NewgroundsFileOptions } from 'postybirb-commons';
-import { Checkbox, Form, Radio } from 'antd';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-const defaultFileOptions: NewgroundsFileOptions = {
-  ...GenericDefaultFileOptions,
-  creativeCommons: true,
-  modification: true,
-  commercial: false,
-  sketch: false,
-  category: '1',
-  nudity: undefined,
-  violence: undefined,
-  explicitText: undefined,
-  adultThemes: undefined
-};
-
-const defaultNotificationOptions: DefaultOptions = GenericDefaultNotificationOptions;
-
-export class Newgrounds implements Website {
+export class Newgrounds extends WebsiteImpl {
   internalName: string = 'Newgrounds';
   name: string = 'Newgrounds';
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.newgrounds.com/login" {...props} />
-  );
+  loginUrl: string = 'https://www.newgrounds.com/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, NewgroundsFileOptions>) => (
     <NewgroundsFileSubmissionForm
@@ -68,12 +48,6 @@ export class Newgrounds implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<

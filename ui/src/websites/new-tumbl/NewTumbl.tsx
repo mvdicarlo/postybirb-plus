@@ -1,42 +1,26 @@
 import { Form, Select } from 'antd';
-import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import { NewTumblBlog } from 'postybirb-commons';
 import {
+  FileSubmission,
+  NewTumblBlog,
   NewTumblFileOptions,
-  NewTumblNotificationOptions
+  NewTumblNotificationOptions,
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
+import React from 'react';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType, SubmissionRating } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 
-const defaultFileOptions: NewTumblFileOptions = {
-  ...GenericDefaultFileOptions,
-  blog: ''
-};
-
-const defaultNotificationOptions: NewTumblNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  blog: ''
-};
-
-export class NewTumbl implements Website {
+export class NewTumbl extends WebsiteImpl {
   internalName: string = 'NewTumbl';
   name: string = 'newTumbl';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://newtumbl.com/" {...props} />
-  );
+  loginUrl: string = 'https://newtumbl.com/';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, NewTumblFileOptions>) => (
     <NewTumblFileSubmissionForm
@@ -104,12 +88,6 @@ export class NewTumbl implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 interface NewTumblSubmissionState {

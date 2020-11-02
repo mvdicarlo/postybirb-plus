@@ -59,8 +59,9 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
       overwriteDefault: false,
       value: ''
     },
-    rating: null,
-    title: ''
+    rating: undefined,
+    title: '',
+    sources: []
   };
 
   state: MultiSubmissionEditFormState = {

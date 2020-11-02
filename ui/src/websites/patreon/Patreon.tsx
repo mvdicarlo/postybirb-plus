@@ -1,44 +1,26 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
 import {
+  FileSubmission,
+  Folder,
   PatreonFileOptions,
-  PatreonNotificationOptions
+  PatreonNotificationOptions,
+  Submission
 } from 'postybirb-commons';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
+import React from 'react';
+import WebsiteService from '../../services/website.service';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import WebsiteService from '../../services/website.service';
-import { Folder } from 'postybirb-commons';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 
-const defaultFileOptions: PatreonFileOptions = {
-  ...GenericDefaultFileOptions,
-  tiers: [],
-  charge: false
-};
-
-const defaultNotificationOptions: PatreonNotificationOptions = {
-  ...GenericDefaultNotificationOptions,
-  tiers: [],
-  charge: false
-};
-
-export class Patreon implements Website {
+export class Patreon extends WebsiteImpl {
   internalName: string = 'Patreon';
   name: string = 'Patreon';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.patreon.com/login" {...props} />
-  );
+  loginUrl: string = 'https://www.patreon.com/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PatreonFileOptions>) => (
     <PatreonFileSubmissionForm
@@ -75,12 +57,6 @@ export class Patreon implements Website {
       {...props}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 interface PatreonSubmissionState {

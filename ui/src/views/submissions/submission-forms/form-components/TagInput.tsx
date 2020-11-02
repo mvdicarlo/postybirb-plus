@@ -116,7 +116,7 @@ export default class TagInput extends React.Component<Props> {
             onInputKeyDown={this.onKeyDown}
           >
             {this.props.defaultValue.value.map(tag => (
-              <Select.Option key="tag" value={tag}>
+              <Select.Option key={tag} value={tag}>
                 {tag}
               </Select.Option>
             ))}

@@ -1,18 +1,20 @@
-import { Injectable, Logger, NotFoundException, Inject } from '@nestjs/common';
-import * as _ from 'lodash';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  DefaultOptions,
+  DefaultOptionsEntity,
+  Events,
+  Parts,
+  SubmissionTemplate,
+} from 'postybirb-commons';
+import { EventsGateway } from 'src/server/events/events.gateway';
+import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
+import { CreateSubmissionTemplateModel } from './models/create-template.model';
+import SubmissionTemplateEntity from './models/submission-template.entity';
+import { UpdateSubmissionTemplateModel } from './models/update-template.model';
 import {
   SubmissionTemplateRepository,
   SubmissionTemplateRepositoryToken,
 } from './submission-template.repository';
-import { EventsGateway } from 'src/server/events/events.gateway';
-import { Events } from 'postybirb-commons';
-import { CreateSubmissionTemplateModel } from './models/create-template.model';
-import { UpdateSubmissionTemplateModel } from './models/update-template.model';
-import { SubmissionTemplate, DefaultOptions, Parts } from 'postybirb-commons';
-
-import SubmissionTemplateEntity from './models/submission-template.entity';
-
-import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 
 @Injectable()
 export class SubmissionTemplateService {
@@ -40,19 +42,7 @@ export class SubmissionTemplateService {
   async create(createDto: CreateSubmissionTemplateModel): Promise<SubmissionTemplate> {
     this.logger.log(createDto, 'Create Submission Template');
 
-    const defaultPart: DefaultOptions = {
-      title: '',
-      rating: null,
-      description: {
-        overwriteDefault: false,
-        value: '',
-      },
-      tags: {
-        extendDefault: true,
-        value: [],
-      },
-    };
-
+    const defaultPart: DefaultOptions = new DefaultOptionsEntity({}).asPlain<DefaultOptions>();
     const template: SubmissionTemplateEntity = new SubmissionTemplateEntity({
       alias: createDto.alias.trim(),
       type: createDto.type,

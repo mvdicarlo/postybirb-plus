@@ -1,41 +1,30 @@
 import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
+import {
+  DefaultOptions,
+  DeviantArtFileOptions,
+  FileSubmission,
+  Folder,
+  Submission
+} from 'postybirb-commons';
 import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import { DefaultOptions } from 'postybirb-commons';
-import { DeviantArtFileOptions } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
 import WebsiteService from '../../services/website.service';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 import { DeviantArtLogin } from './DeviantArtLogin';
 
-const defaultFileOptions: DeviantArtFileOptions = {
-  ...GenericDefaultFileOptions,
-  feature: false,
-  disableComments: false,
-  critique: false,
-  freeDownload: true,
-  folders: [],
-  matureClassification: [],
-  matureLevel: '',
-  displayResolution: '0',
-  scraps: false
-};
-
-export class DeviantArt implements Website {
+export class DeviantArt extends WebsiteImpl {
   internalName: string = 'DeviantArt';
   name: string = 'Deviant Art';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <DeviantArtLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DeviantArtFileOptions>) => (
@@ -54,12 +43,6 @@ export class DeviantArt implements Website {
       {...props}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : GenericDefaultNotificationOptions
-    );
-  }
 }
 
 interface DeviantArtFileSubmissionState {

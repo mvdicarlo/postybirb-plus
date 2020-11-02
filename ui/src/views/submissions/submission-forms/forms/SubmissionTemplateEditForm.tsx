@@ -47,8 +47,9 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
       overwriteDefault: false,
       value: ''
     },
-    rating: null,
-    title: ''
+    rating: undefined,
+    title: '',
+    sources: []
   };
 
   state: SubmissionTemplateEditFormState = {

@@ -1,28 +1,26 @@
 import { Injectable } from '@nestjs/common';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  FurryNetworkFileOptions,
+  FurryNetworkNotificationOptions,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionRating,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  FurryNetworkFileOptions,
-  FurryNetworkNotificationOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
   PostFile,
 } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
@@ -31,10 +29,6 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { FurryNetworkAccountData } from './furry-network-account.interface';
-import {
-  FurryNetworkDefaultFileOptions,
-  FurryNetworkDefaultNotificationOptions,
-} from './furry-network.defaults';
 
 import _ = require('lodash');
 
@@ -54,8 +48,6 @@ export class FurryNetwork extends Website {
     'txt',
     'plain',
   ];
-  readonly fileSubmissionOptions: FurryNetworkFileOptions = FurryNetworkDefaultFileOptions;
-  readonly notificationSubmissionOptions: FurryNetworkNotificationOptions = FurryNetworkDefaultNotificationOptions;
   readonly defaultDescriptionParser = MarkdownParser.parse;
   private readonly collections: string[] = ['artwork', 'story', 'multimedia', 'journals'];
 

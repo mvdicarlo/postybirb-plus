@@ -210,7 +210,7 @@ export class PostService {
       this.getPosters(postingSubmission.type).forEach(poster => {
         poster.once('ready', () => this.notifyPostingStatusChanged());
         poster.once('posting', () => this.notifyPostingStatusChanged());
-        poster.once('cancelled', data => this.checkForCompletion(data.submission));
+        poster.once('cancelled', data => this.checkForCompletion(submission));
         poster.once('done', data => {
           if (data.source) {
             this.addSource(submission.type, data.source);
@@ -276,7 +276,7 @@ export class PostService {
     } else {
       this.logService
         .addLog(
-          submission.asPlain(),
+          submission,
           posters
             .filter(poster => poster.status !== 'CANCELLED')
             .map(poster => ({

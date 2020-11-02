@@ -1,31 +1,22 @@
+import { Checkbox, Form, Select } from 'antd';
+import { FileSubmission, InkbunnyFileOptions } from 'postybirb-commons';
 import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { Form, Checkbox, Select } from 'antd';
-import { FileSubmission } from 'postybirb-commons';
-import { InkbunnyOptions } from 'postybirb-commons';
-import InkbunnyLogin from './InkbunnyLogin';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
+import InkbunnyLogin from './InkbunnyLogin';
 
-const defaultOptions: InkbunnyOptions = {
-  ...GenericDefaultFileOptions,
-  blockGuests: false,
-  friendsOnly: false,
-  notify: true,
-  scraps: false,
-  submissionType: undefined
-};
-
-export class Inkbunny implements Website {
+export class Inkbunny extends WebsiteImpl {
   internalName: string = 'Inkbunny';
   name: string = 'Inkbunny';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <InkbunnyLogin {...props} />;
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, InkbunnyOptions>) => (
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, InkbunnyFileOptions>) => (
     <InkbunnyFileSubmissionForm
       ratingOptions={{
         show: true,
@@ -52,14 +43,10 @@ export class Inkbunny implements Website {
       {...props}
     />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 }
 
-export class InkbunnyFileSubmissionForm extends GenericFileSubmissionSection<InkbunnyOptions> {
-  renderRightForm(data: InkbunnyOptions) {
+export class InkbunnyFileSubmissionForm extends GenericFileSubmissionSection<InkbunnyFileOptions> {
+  renderRightForm(data: InkbunnyFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Category">
@@ -89,7 +76,7 @@ export class InkbunnyFileSubmissionForm extends GenericFileSubmissionSection<Ink
     return elements;
   }
 
-  renderLeftForm(data: InkbunnyOptions) {
+  renderLeftForm(data: InkbunnyFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
       <div>

@@ -12,6 +12,7 @@ export interface LoginDialogProps {
 
 export interface Website {
   internalName: string;
+  loginUrl: string;
   name: string;
   supportsAdditionalFiles?: boolean;
   supportsTags?: boolean;

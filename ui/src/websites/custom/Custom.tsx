@@ -1,25 +1,24 @@
-import _ from 'lodash';
-import React from 'react';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
 import {
   DefaultFileOptions,
-  DefaultOptions
+  DefaultOptions,
+  FileSubmission,
+  Submission
 } from 'postybirb-commons';
+import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps, Website } from '../interfaces/website.interface';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
 import CustomAccountInfo from './CustomAccountInfo';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { SubmissionType } from 'postybirb-commons';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
-export class Custom implements Website {
+export class Custom extends WebsiteImpl {
   internalName: string = 'Custom';
   name: string = 'Custom';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <CustomAccountInfo {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (
@@ -29,10 +28,4 @@ export class Custom implements Website {
   NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
     <GenericSubmissionSection key={props.part.accountId} {...props} />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? GenericDefaultFileOptions : GenericDefaultNotificationOptions
-    );
-  }
 }

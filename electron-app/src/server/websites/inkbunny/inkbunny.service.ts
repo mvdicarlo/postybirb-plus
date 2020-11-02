@@ -1,34 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  InkbunnyFileOptions,
+  PostResponse,
+  SubmissionPart,
+  SubmissionRating,
+  UsernameShortcut,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { SubmissionRating } from 'postybirb-commons';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  UsernameShortcut,
-  InkbunnyOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-
 import { Website } from '../website.base';
 import { InkbunnyAccountData } from './inkbunny-account.interface';
-import { InkbunnyDefaultFileOptions } from './inkbunny.defaults';
 
 @Injectable()
 export class Inkbunny extends Website {
@@ -48,7 +44,6 @@ export class Inkbunny extends Website {
   ];
   readonly acceptsAdditionalFiles: boolean = true;
   readonly defaultDescriptionParser = BBCodeParser.parse;
-  readonly fileSubmissionOptions: object = InkbunnyDefaultFileOptions;
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ib',
@@ -111,7 +106,7 @@ export class Inkbunny extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<InkbunnyOptions>,
+    data: FilePostData<InkbunnyFileOptions>,
     accountData: InkbunnyAccountData,
   ): Promise<PostResponse> {
     const form: any = {
@@ -230,7 +225,7 @@ export class Inkbunny extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<InkbunnyOptions>,
+    submissionPart: SubmissionPart<InkbunnyFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];

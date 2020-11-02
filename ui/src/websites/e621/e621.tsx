@@ -1,40 +1,30 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { e621Options } from 'postybirb-commons';
-import { SubmissionPart } from 'postybirb-commons';
 import { Form, Input } from 'antd';
-import { FileSubmission } from 'postybirb-commons';
-import E621Login from './e621Login';
+import _ from 'lodash';
+import { e621FileOptions, FileSubmission, SubmissionPart } from 'postybirb-commons';
+import React from 'react';
+import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { LoginDialogProps } from '../interfaces/website.interface';
+import { WebsiteImpl } from '../website.base';
+import E621Login from './e621Login';
 
-const defaultOptions: e621Options = {
-  ...GenericDefaultFileOptions,
-  sources: [],
-  parentId: undefined
-};
-
-export class e621 implements Website {
+export class e621 extends WebsiteImpl {
   internalName: string = 'e621';
   name: string = 'e621';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
+  loginUrl: string = '';
+
   LoginDialog = (props: LoginDialogProps) => <E621Login {...props} />;
 
-  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, e621Options>) => (
+  FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, e621FileOptions>) => (
     <E621FileSubmissionForm hideThumbnailOptions={true} key={props.part.accountId} {...props} />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 }
 
-export class E621FileSubmissionForm extends GenericFileSubmissionSection<e621Options> {
+export class E621FileSubmissionForm extends GenericFileSubmissionSection<e621FileOptions> {
   handleSourceChange(index: number, { target }) {
-    const part: SubmissionPart<e621Options> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<e621FileOptions> = _.cloneDeep(this.props.part);
     part.data.sources[index] = target.value;
     this.props.onUpdate(part);
   }
@@ -52,7 +42,7 @@ export class E621FileSubmissionForm extends GenericFileSubmissionSection<e621Opt
     return sources;
   }
 
-  renderRightForm(data: e621Options) {
+  renderRightForm(data: e621FileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Parent Id">

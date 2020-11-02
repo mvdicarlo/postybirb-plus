@@ -1,25 +1,26 @@
-import { NotImplementedException } from '@nestjs/common';
+import { Logger, NotImplementedException, UnprocessableEntityException } from '@nestjs/common';
 import * as _ from 'lodash';
+import {
+  DefaultFileOptions,
+  DefaultFileOptionsEntity,
+  DefaultOptions,
+  DefaultOptionsEntity,
+  FileRecord,
+  FileSubmission,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+  SubmissionType,
+  UsernameShortcut,
+  WebsiteOptions,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import { HttpResponse } from 'src/server/http/http.util';
-import { SubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultFileOptions,
-  DefaultOptions,
-  SubmissionPart,
-  UsernameShortcut,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import { FallbackInformation } from './interfaces/fallback-information.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
@@ -32,10 +33,10 @@ interface TagParseOptions {
 }
 
 export abstract class Website {
+  protected readonly logger = new Logger(this.constructor.name);
+
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
-  abstract readonly fileSubmissionOptions: object;
-  readonly notificationSubmissionOptions: object;
 
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
@@ -72,11 +73,23 @@ export abstract class Website {
   }
 
   getDefaultOptions(submissionType: SubmissionType) {
+    const options: {
+      FileOptions: typeof DefaultFileOptionsEntity;
+      NotificationOptions: typeof DefaultOptionsEntity;
+    } = WebsiteOptions[this.constructor.name];
     switch (submissionType) {
       case SubmissionType.FILE:
-        return _.cloneDeep(this.fileSubmissionOptions);
+        const FileObject: typeof DefaultFileOptionsEntity = options
+          ? options.FileOptions || DefaultFileOptionsEntity
+          : DefaultFileOptionsEntity;
+        return FileObject;
       case SubmissionType.NOTIFICATION:
-        return _.cloneDeep(this.notificationSubmissionOptions || this.fileSubmissionOptions); // TODO make it so fallback isn't what I do here. Should force notification options to be specified
+        const NotificationObject: typeof DefaultOptionsEntity = options
+          ? options.NotificationOptions || DefaultOptionsEntity
+          : DefaultOptionsEntity;
+        return NotificationObject;
+      default:
+        throw new UnprocessableEntityException(`Unsupported submission type: ${submissionType}`);
     }
   }
 

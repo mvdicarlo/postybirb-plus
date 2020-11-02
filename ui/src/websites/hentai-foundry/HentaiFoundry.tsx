@@ -1,60 +1,23 @@
+import { Checkbox, Form, Input, Select } from 'antd';
+import {
+  DefaultOptions,
+  FileSubmission,
+  HentaiFoundryFileOptions,
+  Submission
+} from 'postybirb-commons';
 import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { HentaiFoundryFileOptions } from 'postybirb-commons';
-import { Form, Checkbox, Select, Input } from 'antd';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { DefaultOptions } from 'postybirb-commons';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { SubmissionType } from 'postybirb-commons';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
 import { HentaiFoundryCategories } from './hentai-foundry-categories';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { GenericDefaultNotificationOptions } from '../../shared/objects/generic-default-notification-options';
 
-const defaultFileOptions: HentaiFoundryFileOptions = {
-  ...GenericDefaultFileOptions,
-  scraps: false,
-  disableComments: false,
-  category: undefined,
-  nudityRating: '0',
-  violenceRating: '0',
-  profanityRating: '0',
-  racismRating: '0',
-  sexRating: '0',
-  spoilersRating: '0',
-  yaoi: false,
-  yuri: false,
-  teen: false,
-  guro: false,
-  furry: false,
-  beast: false,
-  male: false,
-  female: false,
-  futa: false,
-  other: false,
-  scat: false,
-  incest: false,
-  rape: false,
-  media: '0',
-  timeTaken: undefined,
-  license: '0',
-  reference: undefined
-};
-
-const defaultNotificationOptions: DefaultOptions = GenericDefaultNotificationOptions;
-
-export class HentaiFoundry implements Website {
+export class HentaiFoundry extends WebsiteImpl {
   internalName: string = 'HentaiFoundry';
   name: string = 'Hentai Foundry';
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.hentai-foundry.com/site/login" {...props} />
-  );
+  loginUrl: string = 'https://www.hentai-foundry.com/site/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, HentaiFoundryFileOptions>) => (
     <HentaiFoundryFileSubmissionForm
@@ -84,12 +47,6 @@ export class HentaiFoundry implements Website {
       }}
     />
   );
-
-  getDefaults(type: SubmissionType) {
-    return _.cloneDeep(
-      type === SubmissionType.FILE ? defaultFileOptions : defaultNotificationOptions
-    );
-  }
 }
 
 export class HentaiFoundryFileSubmissionForm extends GenericFileSubmissionSection<

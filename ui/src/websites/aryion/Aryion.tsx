@@ -1,35 +1,19 @@
-import React from 'react';
+import { Cascader, Checkbox, Form, Radio } from 'antd';
 import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { AryionFileOptions } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
-import { Form, Checkbox, Radio, Cascader } from 'antd';
+import { AryionFileOptions, FileSubmission, Folder } from 'postybirb-commons';
+import React from 'react';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from 'postybirb-commons';
+import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
+import { WebsiteImpl } from '../website.base';
 
-const defaultOptions: AryionFileOptions = {
-  ...GenericDefaultFileOptions,
-  folder: [],
-  viewPermissions: 'ALL',
-  commentPermissions: 'USER',
-  tagPermissions: 'USER',
-  requiredTag: undefined,
-  scraps: false
-};
-
-export class Aryion implements Website {
+export class Aryion extends WebsiteImpl {
   internalName: string = 'Aryion';
   name: string = 'Aryion';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://aryion.com/forum/ucp.php?mode=login" {...props} />
-  );
+  loginUrl: string = 'https://aryion.com/forum/ucp.php?mode=login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, AryionFileOptions>) => (
     <AryionFileSubmissionForm
@@ -40,10 +24,6 @@ export class Aryion implements Website {
       {...props}
     />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 
   supportsTextType(type: string): boolean {
     return ['text/plain'].includes(type);

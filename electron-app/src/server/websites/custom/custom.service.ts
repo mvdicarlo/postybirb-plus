@@ -1,39 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { Website } from '../website.base';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { LoginResponse } from '../interfaces/login-response.interface';
 import {
   CustomAccountData,
-  FileRecord,
   DefaultFileOptions,
   DefaultOptions,
+  FileRecord,
   FileSubmission,
-  SubmissionPart,
-  Submission,
   PostResponse,
+  Submission,
+  SubmissionPart,
 } from 'postybirb-commons';
-
-import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
+import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
-import HtmlParser from 'src/server/description-parsing/html-node/parser';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import Http from 'src/server/http/http.util';
+import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import {
-  GenericDefaultFileOptions,
-  GenericDefaultNotificationOptions,
-} from '../generic/generic.defaults';
+import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
+import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
+import { LoginResponse } from '../interfaces/login-response.interface';
+import { Website } from '../website.base';
 
 @Injectable()
 export class Custom extends Website {
   readonly BASE_URL: string = '';
   readonly acceptsFiles: string[] = []; // accepts all
-  readonly fileSubmissionOptions = GenericDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };

@@ -1,32 +1,28 @@
 import { Injectable } from '@nestjs/common';
+import {
+  DefaultOptions,
+  FileRecord,
+  FileSubmission,
+  FileSubmissionType,
+  HentaiFoundryFileOptions,
+  PostResponse,
+  Submission,
+  SubmissionPart,
+} from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
-import { FileSubmissionType } from 'postybirb-commons';
-import {
-  FileRecord,
-  FileSubmission,
-  Submission,
-  PostResponse,
-  DefaultOptions,
-  SubmissionPart,
-  HentaiFoundryFileOptions,
-} from 'postybirb-commons';
-
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { GenericDefaultNotificationOptions } from '../generic/generic.defaults';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { HentaiFoundryDefaultFileOptions } from './hentai-foundry.defaults';
 
 import _ = require('lodash');
 
@@ -35,8 +31,6 @@ export class HentaiFoundry extends Website {
   readonly BASE_URL = 'https://www.hentai-foundry.com';
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'svg', 'gif'];
   readonly defaultDescriptionParser = BBCodeParser.parse;
-  readonly fileSubmissionOptions = HentaiFoundryDefaultFileOptions;
-  readonly notificationSubmissionOptions = GenericDefaultNotificationOptions;
   readonly usernameShortcuts = [
     {
       key: 'hf',

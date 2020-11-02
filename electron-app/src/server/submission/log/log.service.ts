@@ -1,11 +1,12 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { app } from 'electron';
-import { SubmissionType } from 'postybirb-commons';
+import { FileSubmission, Submission, SubmissionType } from 'postybirb-commons';
 import SubmissionEntity from '../models/submission.entity';
 import { SubmissionPartService } from '../submission-part/submission-part.service';
 import { PartWithResponse } from 'postybirb-commons';
 import { SubmissionLogRepository, SubmissionLogRepositoryToken } from './log.repository';
 import SubmissionLogEntity from './models/submission-log.entity';
+import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
 
 @Injectable()
 export class LogService {
@@ -29,9 +30,13 @@ export class LogService {
   async addLog(submission: SubmissionEntity, parts: PartWithResponse[]): Promise<void> {
     if (parts.length) {
       this.logger.log(submission._id, 'Creating Log');
+      const copy: Submission = submission.asPlain();
+      if (submission instanceof FileSubmissionEntity) {
+        this.cleanBuffers(copy as FileSubmission);
+      }
       await this.repository.save(
         new SubmissionLogEntity({
-          submission,
+          submission: copy,
           parts,
           version: app.getVersion(),
           defaultPart: (await this.partService.getPartsForSubmission(submission._id, false)).filter(
@@ -51,5 +56,11 @@ export class LogService {
       sorted.splice(0, this.MAX_LOGS);
       await Promise.all(sorted.map(log => this.repository.remove(log._id)));
     }
+  }
+
+  private cleanBuffers(submission: FileSubmission) {
+    [submission.primary, submission.fallback, submission.thumbnail, ...submission.additional]
+      .filter(s => s)
+      .forEach(file => (file.buffer = undefined));
   }
 }

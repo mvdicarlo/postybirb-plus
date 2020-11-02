@@ -1,38 +1,27 @@
+import { Checkbox, Form, Select } from 'antd';
+import {
+  DefaultOptions,
+  FileSubmission,
+  Folder,
+  Submission,
+  SubmissionRating,
+  WeasylFileOptions
+} from 'postybirb-commons';
 import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { WeasylFileOptions } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
-import { Form, Checkbox, Select } from 'antd';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from 'postybirb-commons';
-import { Submission } from 'postybirb-commons';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { DefaultOptions } from 'postybirb-commons';
-import { WeasylCategories } from './WeasylCategories';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { SubmissionRating } from 'postybirb-commons';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { WebsiteImpl } from '../website.base';
+import { WeasylCategories } from './WeasylCategories';
 
-const defaultOptions: WeasylFileOptions = {
-  ...GenericDefaultFileOptions,
-  notify: true,
-  critique: false,
-  folder: null,
-  category: null
-};
-
-export class Weasyl implements Website {
+export class Weasyl extends WebsiteImpl {
   internalName: string = 'Weasyl';
   name: string = 'Weasyl';
   supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://www.weasyl.com/signin" {...props} />
-  );
+  loginUrl: string = 'https://www.weasyl.com/signin';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, WeasylFileOptions>) => (
     <WeasylFileSubmissionForm
@@ -81,11 +70,6 @@ export class Weasyl implements Website {
       }}
     />
   );
-
-  // TODO make a real notification file option
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 
   supportsTextType(type: string): boolean {
     return ['text/md', 'text/plain', 'text/pdf', 'application/pdf'].includes(type);

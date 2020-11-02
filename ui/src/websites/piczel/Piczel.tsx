@@ -1,32 +1,20 @@
-import React from 'react';
-import _ from 'lodash';
-import { Website, LoginDialogProps } from '../interfaces/website.interface';
-import { GenericLoginDialog } from '../generic/GenericLoginDialog';
-import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
-import { PiczelFileOptions } from 'postybirb-commons';
-import { Folder } from 'postybirb-commons';
 import { Form, Select } from 'antd';
+import _ from 'lodash';
+import { FileSubmission, Folder, PiczelFileOptions, SubmissionRating } from 'postybirb-commons';
+import React from 'react';
 import WebsiteService from '../../services/website.service';
-import { FileSubmission } from 'postybirb-commons';
+import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import { GenericDefaultFileOptions } from '../../shared/objects/generic-default-file-options';
-import { SubmissionRating } from 'postybirb-commons';
+import { WebsiteImpl } from '../website.base';
 
-const defaultOptions: PiczelFileOptions = {
-  ...GenericDefaultFileOptions,
-  folder: null
-};
-
-export class Piczel implements Website {
+export class Piczel extends WebsiteImpl {
   internalName: string = 'Piczel';
   name: string = 'Piczel';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  LoginDialog = (props: LoginDialogProps) => (
-    <GenericLoginDialog url="https://piczel.tv/login" {...props} />
-  );
+  loginUrl: string = 'https://piczel.tv/login';
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, PiczelFileOptions>) => (
     <PiczelFileSubmissionForm
@@ -41,10 +29,6 @@ export class Piczel implements Website {
       {...props}
     />
   );
-
-  getDefaults() {
-    return _.cloneDeep(defaultOptions);
-  }
 }
 
 interface PiczelFileSubmissionState {
