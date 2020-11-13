@@ -64,11 +64,8 @@ export class SubscribeStar extends Website {
         label: 'Public',
         value: 'free',
       },
-      {
-        label: 'Subscribers Only',
-        value: 'basic',
-      },
     ];
+
     const { body } = await Http.get<string>(`${this.BASE_URL}/profile/settings`, profileId);
     const $ = cheerio.load(body);
     $('.tiers-settings_item').each((i, el) => {
@@ -103,12 +100,13 @@ export class SubscribeStar extends Website {
 
     const form = {
       utf8: '✓',
-      html_content: `<div>${data.options.useTitle ? `<h1>${data.title}</h1>` : ''}${
+      html_content: `<div>${data.options.useTitle && data.title ? `<h1>${data.title}</h1>` : ''}${
         data.description
       }</div>`,
       pinned_uploads: '[]',
       new_editor: 'true',
-      tier_id: data.options.tier,
+      'tier_ids[]': data.options.tier === 'free' ? undefined : data.options.tier,
+      'tags[]': data.tags,
     };
 
     this.checkCancelled(cancellationToken);
@@ -120,6 +118,7 @@ export class SubscribeStar extends Website {
         data: form,
         requestOptions: {
           json: true,
+          qsStringifyOptions: { arrayFormat: 'repeat' },
         },
         headers: {
           Referer: 'https://www.subscribestar.com/',
@@ -206,12 +205,13 @@ export class SubscribeStar extends Website {
 
     const form = {
       utf8: '✓',
-      html_content: `<div>${data.options.useTitle ? `<h1>${data.title}</h1>` : ''}${
+      html_content: `<div>${data.options.useTitle && data.title ? `<h1>${data.title}</h1>` : ''}${
         data.description
       }</div>`,
       pinned_uploads: '[]',
       new_editor: 'true',
-      tier_id: data.options.tier,
+      'tier_ids[]': data.options.tier === 'free' ? undefined : data.options.tier,
+      'tags[]': data.tags,
     };
 
     const post = await Http.post<{ error: any; html: string }>(
@@ -222,6 +222,7 @@ export class SubscribeStar extends Website {
         data: form,
         requestOptions: {
           json: true,
+          qsStringifyOptions: { arrayFormat: 'repeat' },
         },
         headers: {
           Referer: 'https://www.subscribestar.com/',

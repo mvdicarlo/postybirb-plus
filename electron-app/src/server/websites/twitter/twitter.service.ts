@@ -124,7 +124,6 @@ export class Twitter extends Website {
       },
     );
 
-    console.log(post.body);
     if (post.body.success) {
       return this.createPostResponse({ source: post.body.data.url });
     }

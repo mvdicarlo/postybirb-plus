@@ -126,7 +126,9 @@ export class Mastodon extends Website {
 
     const { options } = data;
     const form: any = {
-      status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`.substring(0, 500),
+      status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${
+        data.description
+      }`.substring(0, 500),
       sensitive:
         isSensitive || options.spoilerText ? true : data.rating !== SubmissionRating.GENERAL,
       spoiler_text: options.spoilerText,
@@ -149,7 +151,7 @@ export class Mastodon extends Website {
 
     const { options } = data;
     const form: any = {
-      status: `${options.useTitle ? `${data.title}\n` : ''}${data.description}`,
+      status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`,
       sensitive:
         isSensitive || options.spoilerText
           ? 'yes'

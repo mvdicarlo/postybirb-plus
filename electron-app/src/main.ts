@@ -14,7 +14,7 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 
 process.env.PORT = process.env.PORT || '9247';
-global.AUTH_SERVER_URL = 'http://postybirb.cleverapps.io';
+global.AUTH_SERVER_URL = 'https://postybirb.cleverapps.io';
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
