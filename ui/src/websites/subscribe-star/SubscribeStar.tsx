@@ -29,9 +29,6 @@ export class SubscribeStar extends WebsiteImpl {
       ratingOptions={{
         show: false
       }}
-      tagOptions={{
-        show: false
-      }}
       {...props}
     />
   );
@@ -43,9 +40,6 @@ export class SubscribeStar extends WebsiteImpl {
       key={props.part.accountId}
       hideTitle={true}
       ratingOptions={{
-        show: false
-      }}
-      tagOptions={{
         show: false
       }}
       {...props}
