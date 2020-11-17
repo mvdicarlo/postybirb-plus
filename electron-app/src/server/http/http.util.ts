@@ -78,6 +78,20 @@ export default class Http {
     ses.flushStorageData();
   }
 
+  private static getCommonOptions(
+    headers: Record<string, any>,
+    requestOptions?: request.CoreOptions,
+  ): request.CoreOptions {
+    return Object.assign(
+      {
+        headers,
+        followAllRedirects: true,
+        timeout: 120_000,
+      },
+      requestOptions,
+    );
+  }
+
   static async get<T>(
     uri: string,
     partitionId: string,
@@ -94,13 +108,7 @@ export default class Http {
       headers.cookie = await Http.retrieveCookieString(uri, ses, headers.cookie);
     }
 
-    const opts: request.CoreOptions = Object.assign(
-      {
-        headers,
-        followAllRedirects: true,
-      },
-      options.requestOptions,
-    );
+    const opts = Http.getCommonOptions(headers, options.requestOptions);
     return new Promise(resolve => {
       Http.Request.get(uri, opts, async (error, response, body) => {
         const res: HttpResponse<T> = {
@@ -160,14 +168,7 @@ export default class Http {
       headers.cookie = await Http.retrieveCookieString(uri, ses, headers.cookie);
     }
 
-    const opts: request.CoreOptions = Object.assign(
-      {
-        headers,
-        followAllRedirects: true,
-      },
-      options.requestOptions,
-    );
-
+    const opts = Http.getCommonOptions(headers, options.requestOptions);
     if (options.type === 'json') {
       opts.body = options.data;
       opts.json = true;
