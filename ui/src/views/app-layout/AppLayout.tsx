@@ -22,6 +22,8 @@ import { KofiIcon, DiscordIcon } from './SvgIcons';
 import NotificationsView from '../notifications/NotificationsView';
 import CustomShortcuts from '../custom-shortcuts/CustomShortcuts';
 import TagConverters from '../tag-converters/TagConverters';
+import { HotKeys } from 'react-hotkeys';
+import { JumpableHotKeys } from './hotkeys';
 import {
   Icon,
   Layout,
@@ -387,24 +389,28 @@ export default class AppLayout extends React.Component<Props, State> {
             <Content className="container primary-layout-container">
               <div className="px-3 h-full overflow-y-auto bg-inherit" id="primary-container">
                 <ErrorBoundary>
-                  <Route exact path="/" component={Home} />
-                  <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
-                  <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
-                  <Route path={'/submission-templates'} component={SubmissionTemplates} />
-                  <Route path="/edit/submission/:type/:id" component={SubmissionEditForm} />
-                  <Route
-                    path="/edit/multiple-submissions/:id"
-                    component={MultiSubmissionEditForm}
-                  />
-                  <Route
-                    path="/edit/submission-template/:id"
-                    component={SubmissionTemplateEditForm}
-                  />
-                  <BackTop target={() => document.getElementById('primary-container') || window} />
-                  <Prompt
-                    when={this.props.uiStore!.state.hasPendingChanges}
-                    message="Are you sure you want to navigate? Any unsaved changes will be lost."
-                  />
+                  <HotKeys handlers={JumpableHotKeys.handlers} keyMap={JumpableHotKeys.keyMap}>
+                    <Route exact path="/" component={Home} />
+                    <Route path={`/${SubmissionType.FILE}/:view?`} component={SubmissionsView} />
+                    <Route path={`/${SubmissionType.NOTIFICATION}`} component={SubmissionsView} />
+                    <Route path={'/submission-templates'} component={SubmissionTemplates} />
+                    <Route path="/edit/submission/:type/:id" component={SubmissionEditForm} />
+                    <Route
+                      path="/edit/multiple-submissions/:id"
+                      component={MultiSubmissionEditForm}
+                    />
+                    <Route
+                      path="/edit/submission-template/:id"
+                      component={SubmissionTemplateEditForm}
+                    />
+                    <BackTop
+                      target={() => document.getElementById('primary-container') || window}
+                    />
+                    <Prompt
+                      when={this.props.uiStore!.state.hasPendingChanges}
+                      message="Are you sure you want to navigate? Any unsaved changes will be lost."
+                    />
+                  </HotKeys>
                 </ErrorBoundary>
               </div>
             </Content>
