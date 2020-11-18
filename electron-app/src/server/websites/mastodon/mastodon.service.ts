@@ -129,15 +129,17 @@ export class Mastodon extends Website {
       status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${
         data.description
       }`.substring(0, 500),
-      sensitive:
-        isSensitive || options.spoilerText ? true : data.rating !== SubmissionRating.GENERAL,
-      spoiler_text: options.spoilerText,
+      sensitive: isSensitive,
       media_ids: uploadIds,
     };
 
+    if (options.spoilerText) {
+      form.spoiler_text = options.spoilerText;
+    }
+
     this.checkCancelled(cancellationToken);
     const post = await M.post('statuses', form);
-    return this.createPostResponse({ source: post.data.url });
+    return this.createPostResponse({});
   }
 
   async postNotificationSubmission(
@@ -152,14 +154,12 @@ export class Mastodon extends Website {
     const { options } = data;
     const form: any = {
       status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`,
-      sensitive:
-        isSensitive || options.spoilerText
-          ? 'yes'
-          : data.rating !== SubmissionRating.GENERAL
-          ? 'yes'
-          : 'no',
-      spoiler_text: options.spoilerText,
+      sensitive: isSensitive,
     };
+
+    if (options.spoilerText) {
+      form.spoiler_text = options.spoilerText;
+    }
 
     this.checkCancelled(cancellationToken);
     const post = await M.post('statuses', form);
