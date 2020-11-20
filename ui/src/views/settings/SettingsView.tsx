@@ -3,8 +3,19 @@ import { inject, observer } from 'mobx-react';
 import { SettingsStore } from '../../stores/settings.store';
 import SettingsService from '../../services/settings.service';
 import { Settings } from 'postybirb-commons';
-import { Form, Collapse, Switch, Tooltip, InputNumber, Radio, Input, Typography } from 'antd';
+import {
+  Form,
+  Collapse,
+  Switch,
+  Tooltip,
+  InputNumber,
+  Radio,
+  Input,
+  Typography,
+  Button
+} from 'antd';
 import { UIStore } from '../../stores/ui.store';
+import UpdateService from '../../services/update.service';
 
 interface Props {
   settingsStore?: SettingsStore;
@@ -224,6 +235,11 @@ export default class SettingsView extends React.Component<Props> {
                 defaultValue={localStorage.getItem('REMOTE_AUTH') || ''}
                 onBlur={({ target }) => localStorage.setItem('REMOTE_AUTH', target.value)}
               />
+            </Form.Item>
+          </Collapse.Panel>
+          <Collapse.Panel header="Updates" key="updates">
+            <Form.Item>
+              <Button onClick={() => UpdateService.checkForUpdates()}>Check for updates</Button>
             </Form.Item>
           </Collapse.Panel>
         </Collapse>

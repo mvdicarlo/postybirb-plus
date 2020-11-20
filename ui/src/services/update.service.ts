@@ -10,6 +10,10 @@ export default class UpdateService {
     return axios.post('/update');
   }
 
+  static checkForUpdates() {
+    axios.get('/update/check');
+  }
+
   // NOTE: Not really sure where else to stick this
   static getWebStatus() {
     axios
@@ -21,7 +25,7 @@ export default class UpdateService {
           notification.info({
             message: 'Notice',
             description: value,
-            duration: 10,
+            duration: 10
           });
         }
       })
