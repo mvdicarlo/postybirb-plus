@@ -84,7 +84,7 @@ export class FileManagerService {
             thumbnailData.type,
           )}`;
         } catch (err) {
-          this.logger.error(err);
+          this.logger.error(err.message, err.stack);
           throw err;
         } finally {
           im.destroy();

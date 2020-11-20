@@ -60,16 +60,21 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
     if (isPoster) {
       let file: RcFile | undefined = undefined;
       while ((file = this.uploadQueue.shift()) !== undefined) {
-        try {
-          await SubmissionService.create({
-            type: SubmissionType.FILE,
-            file: file as any,
-            path: file['path']
+        await SubmissionService.create({
+          type: SubmissionType.FILE,
+          file: file as any,
+          path: file['path']
+        })
+          .then(() => {
+            message.success(`${file!.name} file uploaded successfully.`);
+          })
+          .catch(err => {
+            message.error(
+              `${file!.name} file upload failed.${
+                err.response.data.message ? ` (${err.response.data.message})` : ''
+              }`
+            );
           });
-          message.success(`${file!.name} file uploaded successfully.`);
-        } catch {
-          message.error(`${file!.name} file upload failed.`);
-        }
       }
     }
   }, 100);
