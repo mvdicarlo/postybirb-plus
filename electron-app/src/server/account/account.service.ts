@@ -40,6 +40,13 @@ export class AccountService {
     this.repository
       .find()
       .then(results => {
+        const removedModules = results.filter(
+          result => !websiteProvider.websiteModuleExists(result.website),
+        );
+        removedModules.forEach(remove => this.removeAccount(remove._id));
+        return results.filter(result => websiteProvider.websiteModuleExists(result.website));
+      })
+      .then(results => {
         results.forEach(result => {
           this.loginStatuses.push({
             _id: result._id,

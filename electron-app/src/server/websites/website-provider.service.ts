@@ -77,4 +77,8 @@ export class WebsiteProvider {
   getAllWebsiteModules(): Website[] {
     return this.websiteModules;
   }
+
+  websiteModuleExists(name: string): boolean {
+    return !!this.websiteModulesMap[name.toLocaleLowerCase()];
+  }
 }
