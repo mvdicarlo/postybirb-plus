@@ -153,6 +153,7 @@ export class SubscribeStar extends Website {
     const postKey = page.body.match(/data-s3-upload-path=\\"(.*?)\\"/)[1];
     const uploadURL = page.body.match(/data-s3-url="(.*?)"/)[1];
     this.checkCancelled(cancellationToken);
+    let processData = null;
     for (const file of files) {
       const key = `${postKey}/${v1()}.${file.options.filename.split('.').pop()}`;
       const postFile = await Http.post<string>(uploadURL, data.part.accountId, {
@@ -201,6 +202,31 @@ export class SubscribeStar extends Website {
         },
       );
       this.verifyResponse(processFile, 'Process File Upload');
+      processData = processFile.body;
+    }
+
+    if (files.length > 1) {
+      const order = processData.imgs_and_videos
+        .sort((a, b) => a.id - b.id)
+        .map(record => record.id);
+
+      const reorder = await Http.post<{ error: any; html: string }>(
+        `${this.BASE_URL}/post_uploads/reorder`,
+        data.part.accountId,
+        {
+          type: 'json',
+          data: {
+            authenticity_token: csrf,
+            upload_ids: order,
+          },
+          headers: {
+            Referer: `https://www.subscribestar.com/${usernameLink}`,
+            Origin: 'https://www.subscribestar.com',
+          },
+        },
+      );
+
+      this.verifyResponse(reorder, 'Reorder Files');
     }
 
     const form = {

@@ -3,13 +3,13 @@ import {
   ArtconomyFileOptions,
   DefaultOptions,
   FileSubmission,
-  Submission,
+  Submission
 } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteImpl } from '../website.base';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection'
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 
 export class Artconomy extends WebsiteImpl {
   internalName: string = 'Artconomy';
@@ -47,12 +47,12 @@ export class Artconomy extends WebsiteImpl {
   );
 
   NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
-      <GenericSubmissionSection
-          key={props.part.accountId}
-          tagOptions={{show: false}}
-          ratingOptions={{show: false}}
-          {...props}
-      />
+    <GenericSubmissionSection
+      key={props.part.accountId}
+      tagOptions={{ show: false }}
+      ratingOptions={{ show: false }}
+      {...props}
+    />
   );
 }
 
