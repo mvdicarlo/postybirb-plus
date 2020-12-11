@@ -5,6 +5,11 @@ import { UpdateService } from './update.service';
 export class UpdateController {
   constructor(private readonly service: UpdateService) {}
 
+  @Get('check')
+  checkForUpdate() {
+    this.service.checkForUpdate();
+  }
+
   @Get()
   async getUpdateInfo() {
     return this.service.updateInfo();

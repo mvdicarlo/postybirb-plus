@@ -11,7 +11,6 @@ import { SoFurry } from './sofurry/SoFurry';
 import { e621 } from './e621/e621';
 import { FurAffinity } from './fur-affinity/FurAffinity';
 import { SubscribeStar } from './subscribe-star/SubscribeStar';
-import { Route50 } from './route-50/Route50';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 import { Aryion } from './aryion/Aryion';
 import { Custom } from './custom/Custom';
@@ -49,7 +48,6 @@ export class WebsiteRegistry {
     Piczel: new Piczel(),
     Pillowfort: new Pillowfort(),
     Pixiv: new Pixiv(),
-    Route50: new Route50(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
     Tumblr: new Tumblr(),

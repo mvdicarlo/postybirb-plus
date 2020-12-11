@@ -316,7 +316,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
         <div className="submission-form">
           <div className="flex">
             <Form layout="vertical" style={{ flex: 10 }}>
-              <Form.Item className="form-section">
+              <Form.Item className="form-section jumpable-section">
                 <Typography.Title level={3}>
                   <span className="form-section-header nav-section-anchor" id="#Defaults">
                     Defaults
@@ -329,7 +329,7 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
                 />
               </Form.Item>
 
-              <Form.Item className="form-section">
+              <Form.Item className="form-section jumpable-section">
                 <Typography.Title level={3}>
                   <span className="form-section-header nav-section-anchor" id="#Websites">
                     Websites

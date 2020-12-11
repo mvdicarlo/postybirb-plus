@@ -9,6 +9,7 @@ import {
   SubmissionPart,
   SubmissionRating,
   UsernameShortcut,
+  Submission,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
@@ -22,6 +23,7 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { PostData } from '../../submission/post/interfaces/post-data.interface';
 
 @Injectable()
 export class Artconomy extends Website {
@@ -107,19 +109,11 @@ export class Artconomy extends Website {
     };
     const id = this.getAccountInfo(data.part.accountId, 'id');
     const username = this.getAccountInfo(data.part.accountId, 'username');
-    const authToken = this.getAccountInfo(data.part.accountId, 'authToken');
-    const csrfToken = this.getAccountInfo(data.part.accountId, 'csrfToken');
 
     const thumbnailAssetForm = {
       'files[]': data.thumbnail,
     };
-    const requestOptions = {
-      json: true,
-      headers: {
-        Authorization: `Token ${authToken}`,
-        'X-CSRFToken': `${csrfToken}`,
-      },
-    };
+    const requestOptions = this.requestOptions(data);
     this.checkCancelled(cancellationToken);
     let upload = await Http.post<{ id: string }>(`${this.BASE_URL}/api/lib/v1/asset/`, undefined, {
       requestOptions,
@@ -170,6 +164,44 @@ export class Artconomy extends Website {
     );
     await this.checkAssetUpload(post);
     return this.createPostResponse({ source: `${this.BASE_URL}/submissions/${post.body.id}` });
+  }
+
+  requestOptions(data: PostData<Submission, DefaultOptions> | FilePostData<ArtconomyFileOptions>) {
+    const authToken = this.getAccountInfo(data.part.accountId, 'authToken');
+    const csrfToken = this.getAccountInfo(data.part.accountId, 'csrfToken');
+    return {
+      json: true,
+      headers: {
+        Authorization: `Token ${authToken}`,
+        'X-CSRFToken': `${csrfToken}`,
+      },
+    };
+  }
+
+  async postNotificationSubmission(
+    cancellationToken: CancellationToken,
+    data: PostData<Submission, DefaultOptions>,
+  ): Promise<PostResponse> {
+    const username = this.getAccountInfo(data.part.accountId, 'username');
+
+    const requestOptions = this.requestOptions(data);
+
+    const journal = {
+      subject: data.title,
+      body: data.description,
+    };
+
+    this.checkCancelled(cancellationToken);
+    const postResponse = await Http.post<string>(
+      `${this.BASE_URL}/api/profiles/v1/account/${username}/journals/`,
+      data.part.accountId,
+      {
+        requestOptions,
+        data: journal,
+      },
+    );
+    this.verifyResponse(postResponse);
+    return this.createPostResponse({});
   }
 
   parseTags(tags: string[]) {

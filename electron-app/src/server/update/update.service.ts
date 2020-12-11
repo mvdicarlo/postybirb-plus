@@ -110,7 +110,7 @@ export class UpdateService {
   }
 
   @Interval(3600000)
-  private checkForUpdate() {
+  public checkForUpdate() {
     if (this.updateAvailable.available || this.DEBUG_MODE || this.isUpdating) {
       return;
     }

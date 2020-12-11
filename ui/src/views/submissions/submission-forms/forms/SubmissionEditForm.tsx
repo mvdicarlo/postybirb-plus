@@ -730,7 +730,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 </Form.Item>
               ) : null}
 
-              <Form.Item className="form-section">
+              <Form.Item className="form-section jumpable-section">
                 <Typography.Title level={3}>
                   <span className="form-section-header nav-section-anchor" id="#Schedule">
                     Schedule
@@ -745,7 +745,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 />
               </Form.Item>
 
-              <Form.Item className="form-section">
+              <Form.Item className="form-section jumpable-section">
                 <Typography.Title level={3}>
                   <span className="form-section-header nav-section-anchor" id="#Defaults">
                     Defaults
@@ -762,7 +762,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 />
               </Form.Item>
 
-              <Form.Item className="form-section">
+              <Form.Item className="form-section jumpable-section">
                 <Typography.Title level={3}>
                   <span className="form-section-header nav-section-anchor" id="#Websites">
                     Websites

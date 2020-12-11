@@ -16,6 +16,11 @@ import { postStatusStore } from './stores/post-status.store';
 import { notificationStore } from './stores/notification.store';
 import { customShortcutStore } from './stores/custom-shortcut.store';
 import { tagConverterStore } from './stores/tag-converter.store';
+import { configure } from 'react-hotkeys';
+
+configure({
+  ignoreTags: ['textarea']
+});
 
 interface State {
   confirmationMessage?: string;

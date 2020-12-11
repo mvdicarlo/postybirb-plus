@@ -1,9 +1,15 @@
 import { Checkbox } from 'antd';
-import { ArtconomyFileOptions, FileSubmission } from 'postybirb-commons';
+import {
+  ArtconomyFileOptions,
+  DefaultOptions,
+  FileSubmission,
+  Submission
+} from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteImpl } from '../website.base';
+import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 
 export class Artconomy extends WebsiteImpl {
   internalName: string = 'Artconomy';
@@ -36,6 +42,15 @@ export class Artconomy extends WebsiteImpl {
         ]
       }}
       key={props.part.accountId}
+      {...props}
+    />
+  );
+
+  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
+    <GenericSubmissionSection
+      key={props.part.accountId}
+      tagOptions={{ show: false }}
+      ratingOptions={{ show: false }}
       {...props}
     />
   );

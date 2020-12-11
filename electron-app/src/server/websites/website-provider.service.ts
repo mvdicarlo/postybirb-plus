@@ -12,7 +12,6 @@ import { SoFurry } from './so-furry/so-furry.service';
 import { e621 } from './e621/e621.service';
 import { FurAffinity } from './fur-affinity/fur-affinity.service';
 import { SubscribeStar } from './subscribe-star/subscribe-star.service';
-import { Route50 } from './route50/route50.service';
 import { HentaiFoundry } from './hentai-foundry/hentai-foundry.service';
 import { Aryion } from './aryion/aryion.service';
 import { Custom } from './custom/custom.service';
@@ -46,7 +45,6 @@ export class WebsiteProvider {
     readonly e621: e621,
     readonly furaffinity: FurAffinity,
     readonly subscribestar: SubscribeStar,
-    readonly route50: Route50,
     readonly hentaiFoundry: HentaiFoundry,
     readonly aryion: Aryion,
     readonly custom: Custom,
@@ -78,5 +76,9 @@ export class WebsiteProvider {
 
   getAllWebsiteModules(): Website[] {
     return this.websiteModules;
+  }
+
+  websiteModuleExists(name: string): boolean {
+    return !!this.websiteModulesMap[name.toLocaleLowerCase()];
   }
 }

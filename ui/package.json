@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus-ui",
-  "version": "3.0.19",
+  "version": "3.0.20",
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
@@ -22,6 +22,7 @@
     "react-beautiful-dnd": "^12.2.0",
     "react-cropper": "^1.3.0",
     "react-dom": "^16.11.0",
+    "react-hotkeys": "^2.0.0",
     "react-intl": "^3.4.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.2.0",

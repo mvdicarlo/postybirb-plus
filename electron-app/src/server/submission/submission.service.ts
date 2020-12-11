@@ -140,16 +140,20 @@ export class SubmissionService {
     });
 
     let completedSubmission = null;
-    switch (createDto.type) {
-      case SubmissionType.FILE:
-        completedSubmission = await this.fileSubmissionService.createSubmission(
-          submission,
-          createDto,
-        );
-        break;
-      case SubmissionType.NOTIFICATION:
-        completedSubmission = submission;
-        break;
+    try {
+      switch (createDto.type) {
+        case SubmissionType.FILE:
+          completedSubmission = await this.fileSubmissionService.createSubmission(
+            submission,
+            createDto,
+          );
+          break;
+        case SubmissionType.NOTIFICATION:
+          completedSubmission = submission;
+          break;
+      }
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
     }
 
     try {
