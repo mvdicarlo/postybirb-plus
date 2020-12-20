@@ -192,7 +192,7 @@ export class Artconomy extends Website {
     };
 
     this.checkCancelled(cancellationToken);
-    const postResponse = await Http.post<string>(
+    const postResponse = await Http.post<{id: number}>(
       `${this.BASE_URL}/api/profiles/v1/account/${username}/journals/`,
       data.part.accountId,
       {
@@ -201,7 +201,7 @@ export class Artconomy extends Website {
       },
     );
     this.verifyResponse(postResponse);
-    return this.createPostResponse({});
+    return this.createPostResponse({ source: `${this.BASE_URL}/profile/${username}/journals/${postResponse.body.id}` });
   }
 
   parseTags(tags: string[]) {
