@@ -102,7 +102,7 @@ export class Newgrounds extends Website {
     try {
       const json: { url: string } = JSON.parse(post.body);
       if (json.url) {
-        return this.createPostResponse({ source: `https:${json.url}` });
+        return this.createPostResponse({ source: json.url });
       }
     } catch {}
 
@@ -236,13 +236,12 @@ export class Newgrounds extends Website {
     );
 
     if (post.body.url) {
-      return this.createPostResponse({ source: `https:${post.body.url}` });
+      return this.createPostResponse({ source: post.body.url });
     } else {
       let message = '';
       try {
         message = post.body.errors.join(' ');
       } catch (err) {
-        console.log('1', post.body.error);
         message = (cheerio.load(post.body.error) as any).text();
       }
       return Promise.reject(
