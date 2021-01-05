@@ -28,7 +28,7 @@ export function stop() {
 }
 
 app.get('/tumblr/auth', (req, res) => {
-  Request.get(getURL('tumblr/v1/authorize'), { json: true }, (err, response, body) => {
+  Request.get(getURL('tumblr/v2/authorize'), { json: true }, (err, response, body) => {
     if (err) {
       res.redirect(`http://localhost:${getPort()}/tumblr`);
     } else {
@@ -40,7 +40,7 @@ app.get('/tumblr/auth', (req, res) => {
 
 app.get('/tumblr', (req, res) => {
   Request.post(
-    getURL('tumblr/v1/authorize'),
+    getURL('tumblr/v2/authorize'),
     {
       json: {
         token: req.query.oauth_token,

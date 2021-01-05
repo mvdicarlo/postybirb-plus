@@ -86,7 +86,7 @@ export class DeviantArt extends Website {
     }
 
     const renew = await Http.post<ApiResponse<DeviantArtAccountData>>(
-      OAuthUtil.getURL('deviant-art/v1/refresh'),
+      OAuthUtil.getURL('deviant-art/v2/refresh'),
       undefined,
       {
         type: 'json',

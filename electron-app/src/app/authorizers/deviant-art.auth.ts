@@ -8,7 +8,7 @@ let cb: (data: any) => any;
 let server: Server;
 
 export function getAuthURL() {
-  return getURL('deviant-art/v1/authorize');
+  return getURL('deviant-art/v2/authorize');
 }
 
 export function start(callback: (data: any) => any) {
@@ -28,7 +28,7 @@ export function stop() {
 
 function getAccessToken(code: string) {
   Request.post(
-    getURL('deviant-art/v1/authorize'),
+    getURL('deviant-art/v2/authorize'),
     {
       json: {
         code,

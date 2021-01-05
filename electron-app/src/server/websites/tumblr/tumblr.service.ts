@@ -91,7 +91,7 @@ export class Tumblr extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<{ success: boolean; data: { id_string: string }; error: string }>(
-      OAuthUtil.getURL('tumblr/v1/post'),
+      OAuthUtil.getURL('tumblr/v2/post'),
       undefined,
       {
         type: 'json',
@@ -133,7 +133,7 @@ export class Tumblr extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<{ success: boolean; data: { id_string: string }; error: string }>(
-      OAuthUtil.getURL('tumblr/v1/post'),
+      OAuthUtil.getURL('tumblr/v2/post'),
       undefined,
       {
         type: 'json',

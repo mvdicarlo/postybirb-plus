@@ -80,7 +80,7 @@ export class Twitter extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<{ success: boolean; data: any; error: string }>(
-      OAuthUtil.getURL('twitter/v1/post'),
+      OAuthUtil.getURL('twitter/v2/post'),
       undefined,
       {
         type: 'json',
@@ -115,7 +115,7 @@ export class Twitter extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<{ success: boolean; data: { url: string }; error: string }>(
-      OAuthUtil.getURL('twitter/v1/post'),
+      OAuthUtil.getURL('twitter/v2/post'),
       undefined,
       {
         type: 'json',

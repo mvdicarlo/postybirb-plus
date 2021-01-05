@@ -29,7 +29,7 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
       view.allowpopups = true;
       view.partition = `persist:${this.props.account._id}`;
       Axios.get<{ data: { url: string; oauth_token: string } }>(
-        `${window.AUTH_SERVER_URL}/twitter/v1/authorize`
+        `${window.AUTH_SERVER_URL}/twitter/v2/authorize`
       )
         .then(({ data }) => {
           view.src = data.data.url;
@@ -54,7 +54,7 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
 
   submit() {
     Axios.post<{ success: boolean; error: string; data: any }>(
-      `${window.AUTH_SERVER_URL}/twitter/v1/authorize/`,
+      `${window.AUTH_SERVER_URL}/twitter/v2/authorize/`,
       {
         verifier: this.state.pin.trim(),
         oauth_token: this.oauth_token
