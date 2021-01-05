@@ -378,13 +378,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   };
 
   primaryFileChangeAction = (file: RcFile) =>
-    `https://localhost:${window['PORT']}/submission/change/primary/${this.state.submission!._id}`;
+    `${RemoteService.getBaseUrl()}/submission/change/primary/${this.state.submission!._id}`;
 
   thumbnailFileChangeAction = (file: RcFile) =>
-    `https://localhost:${window['PORT']}/submission/change/thumbnail/${this.state.submission!._id}`;
+    `${RemoteService.getBaseUrl()}/submission/change/thumbnail/${this.state.submission!._id}`;
 
   additionalFileChangeAction = (file: RcFile) =>
-    `https://localhost:${window['PORT']}/submission/add/additional/${this.state.submission!._id}`;
+    `${RemoteService.getBaseUrl()}/submission/add/additional/${this.state.submission!._id}`;
 
   fileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
     const { status } = info.file;
