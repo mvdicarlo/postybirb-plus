@@ -24,6 +24,7 @@ import { NotificationService } from 'src/server/notification/notification.servic
 import { NotificationType } from 'src/server/notification/enums/notification-type.enum';
 import { UiNotificationService } from 'src/server/notification/ui-notification/ui-notification.service';
 import { ParserService } from '../parser/parser.service';
+import { preventSleep } from 'src/app/power-save';
 
 @Injectable()
 export class PostService {
@@ -66,7 +67,7 @@ export class PostService {
     if (!this.isPosting(submission.type)) {
       this.post(submission).catch(() => {
         if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-          if (!this.hasAnyQueued(submission.type)) {
+          if (!this.hasQueued(submission.type)) {
             return;
           }
           this.emptyQueue(submission.type);
@@ -94,6 +95,7 @@ export class PostService {
     } else {
       this.insert(submission);
     }
+    preventSleep();
   }
 
   cancel(submission: Submission) {
@@ -126,8 +128,12 @@ export class PostService {
     return !!this.submissionQueue[submission.type].find(s => s._id === submission._id);
   }
 
-  hasAnyQueued(type: SubmissionType): boolean {
+  hasQueued(type: SubmissionType): boolean {
     return !!this.submissionQueue[type].length;
+  }
+
+  hasAnyQueued(): boolean {
+    return !!Object.values(this.submissionQueue).filter(q => q.length).length;
   }
 
   getPostingStatus(): PostStatuses {
@@ -387,7 +393,7 @@ export class PostService {
 
   private clearQueueIfRequired(submission: Submission) {
     if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-      if (!this.hasAnyQueued(submission.type)) {
+      if (!this.hasQueued(submission.type)) {
         return;
       }
       this.emptyQueue(submission.type);

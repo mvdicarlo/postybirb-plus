@@ -43,6 +43,7 @@ import { AccountService } from 'src/server//account/account.service';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { FileSubmissionType } from 'postybirb-commons';
 import SubmissionCreateModel from './models/submission-create.model';
+import { enableSleep, preventSleep } from 'src/app/power-save';
 
 type SubmissionEntityReference = string | SubmissionEntity;
 
@@ -62,7 +63,9 @@ export class SubmissionService {
     @Inject(forwardRef(() => AccountService))
     private readonly accountService,
     private readonly websiteProvider: WebsiteProvider,
-  ) {}
+  ) {
+    this.checkForQueuedOrScheduled();
+  }
 
   @Interval(60000)
   async queueScheduledSubmissions() {
@@ -79,6 +82,21 @@ export class SubmissionService {
         this.scheduleSubmission(p.submission._id, false);
         this.postService.queue(p.submission);
       });
+  }
+
+  @Interval(60000)
+  async checkForQueuedOrScheduled() {
+    this.logger.debug('Queued/Scheduled Check');
+    const submissions: Array<SubmissionPackage<any>> = await this.getAllAndValidate();
+    const hasScheduled = !!submissions.filter(p => p.submission.schedule.isScheduled).length;
+    const hasQueuedOrPosting =
+      this.postService.hasAnyQueued() || this.postService.isCurrentlyPostingToAny();
+
+    if (hasQueuedOrPosting || hasScheduled) {
+      preventSleep();
+    } else {
+      enableSleep();
+    }
   }
 
   async get(id: SubmissionEntityReference): Promise<SubmissionEntity> {

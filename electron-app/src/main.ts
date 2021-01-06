@@ -2,6 +2,7 @@
 const path = require('path');
 import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification } from 'electron';
 import * as WindowStateKeeper from 'electron-window-state';
+import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
 
 const hasLock = app.requestSingleInstanceLock();
@@ -78,6 +79,7 @@ app.on(
   },
 );
 app.on('quit', () => {
+  enableSleep()
   clearTimeout(backgroundAlertTimeout);
   global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });
