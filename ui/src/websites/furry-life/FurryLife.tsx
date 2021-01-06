@@ -26,6 +26,12 @@ export class FurryLife extends WebsiteImpl {
       key={props.part.accountId}
       {...props}
       hideThumbnailOptions={true}
+      tagOptions={{
+        show: true,
+        options: {
+          minTags: 2
+        }
+      }}
     />
   );
 
