@@ -27,4 +27,8 @@ export default class RemoteService {
         url
       )}&auth=${RemoteService.getAuthId()}`;
   }
+
+  static getBaseUrl(): string {
+    return axios.defaults.baseURL || '';
+  }
 }

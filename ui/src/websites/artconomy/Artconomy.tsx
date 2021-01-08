@@ -3,7 +3,8 @@ import {
   ArtconomyFileOptions,
   DefaultOptions,
   FileSubmission,
-  Submission
+  Submission,
+  SubmissionRating
 } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -24,19 +25,19 @@ export class Artconomy extends WebsiteImpl {
         show: true,
         ratings: [
           {
-            value: '0',
+            value: SubmissionRating.GENERAL,
             name: 'Clean/Safe'
           },
           {
-            value: '1',
+            value: SubmissionRating.MATURE,
             name: 'Risque'
           },
           {
-            value: '3',
+            value: SubmissionRating.ADULT,
             name: 'Adult Content'
           },
           {
-            value: '4',
+            value: SubmissionRating.EXTREME,
             name: 'Offensive/Disturbing'
           }
         ]

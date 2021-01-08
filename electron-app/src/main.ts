@@ -2,6 +2,7 @@
 const path = require('path');
 import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification } from 'electron';
 import * as WindowStateKeeper from 'electron-window-state';
+import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
 
 const hasLock = app.requestSingleInstanceLock();
@@ -14,7 +15,7 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 
 process.env.PORT = process.env.PORT || '9247';
-global.AUTH_SERVER_URL = 'https://postybirb.cleverapps.io';
+global.AUTH_SERVER_URL = 'https://postybirb-api.cleverapps.io';
 global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
@@ -23,6 +24,8 @@ global.CHILD_PROCESS_IDS = [];
 if (global.DEBUG_MODE) {
   console.log(`BASE: ${global.BASE_DIRECTORY}`);
   console.log(`APP: ${app.getPath('userData')}`);
+} else {
+  process.env.NODE_ENV = 'production';
 }
 
 require('./app/crash-handler');
@@ -78,6 +81,7 @@ app.on(
   },
 );
 app.on('quit', () => {
+  enableSleep()
   clearTimeout(backgroundAlertTimeout);
   global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });

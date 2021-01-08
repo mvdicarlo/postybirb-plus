@@ -86,7 +86,7 @@ export class DeviantArt extends Website {
     }
 
     const renew = await Http.post<ApiResponse<DeviantArtAccountData>>(
-      OAuthUtil.getURL('deviant-art/v1/refresh'),
+      OAuthUtil.getURL('deviant-art/v2/refresh'),
       undefined,
       {
         type: 'json',
@@ -227,9 +227,7 @@ export class DeviantArt extends Website {
       form.request_critique = 'yes';
     }
     form.allow_free_download = options.freeDownload ? 'yes' : 'no';
-    if (options.feature) {
-      form.feature = 'yes';
-    }
+    form.feature = options.feature ? 'yes' : 'no';
     if (options.displayResolution) {
       form.display_resolution = options.displayResolution;
     }

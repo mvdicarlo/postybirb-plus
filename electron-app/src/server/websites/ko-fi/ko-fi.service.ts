@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import * as cheerio from 'cheerio';
+import _ = require('lodash');
 import {
   DefaultFileOptions,
   DefaultOptions,
   FileRecord,
   FileSubmission,
+  Folder,
+  KoFiFileOptions,
   PostResponse,
   Submission,
   SubmissionPart,
@@ -19,6 +23,7 @@ import { PostData } from 'src/server/submission/post/interfaces/post-data.interf
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
@@ -35,9 +40,34 @@ export class KoFi extends Website {
       status.loggedIn = true;
       status.username = HtmlParserUtil.getInputValue(res.body, 'DisplayName');
       this.storeAccountInformation(data._id, 'id', res.body.match(/pageId:\s'(.*?)'/)[1]);
+      await this.getAlbums(res.body.match(/buttonId:\s'(.*?)'/)[1], data._id);
     }
 
     return status;
+  }
+
+  private async getAlbums(id: string, partition: string): Promise<void> {
+    const { body } = await Http.get<string>(`${this.BASE_URL}/${id}/gallery`, partition);
+
+    const albums: Folder[] = [];
+
+    const $ = cheerio.load(body);
+    $('.hz-album-each').each((i, el) => {
+      const $el = $(el);
+      const label = $el.text().trim();
+      if (label !== 'New') {
+        albums.push({
+          label,
+          value: $el
+            .children('a')
+            .attr('href')
+            .split('/')
+            .pop(),
+        });
+      }
+    });
+
+    this.storeAccountInformation(partition, GenericAccountProp.FOLDERS, albums);
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions | undefined {
@@ -61,7 +91,7 @@ export class KoFi extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<DefaultFileOptions>,
+    data: FilePostData<KoFiFileOptions>,
   ): Promise<PostResponse> {
     const form = {
       uniqueFilename: '',
@@ -92,12 +122,13 @@ export class KoFi extends Website {
 
     const id = this.getAccountInfo(data.part.accountId, 'id');
     const formUpdate: any = {
-      Album: '',
+      Album: data.options.album || '',
       Title: data.title,
       Description: data.description,
       PostToTwitter: 'false',
-      EnableHiRes: 'false',
+      EnableHiRes: data.options.hiRes ? 'true' : 'false',
       ImageUploadIds: [json[0].ExternalId],
+      Audience: data.options.audience || 'public',
     };
 
     this.checkCancelled(cancellationToken);
@@ -193,11 +224,22 @@ export class KoFi extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultFileOptions>,
+    submissionPart: SubmissionPart<KoFiFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
+
+    if (submissionPart.data.album) {
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(submissionPart.accountId),
+        GenericAccountProp.FOLDERS,
+        [],
+      );
+      if (!folders.find(f => f.value === submissionPart.data.album)) {
+        warnings.push(`Folder (${submissionPart.data.album}) not found.`);
+      }
+    }
 
     const rating: SubmissionRating | string = submissionPart.data.rating || defaultPart.data.rating;
     if (rating !== SubmissionRating.GENERAL) {

@@ -24,7 +24,10 @@ import { PostData } from 'src/server/submission/post/interfaces/post-data.interf
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
+import FormContent from 'src/server/utils/form-content.util';
+import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { profile } from 'winston';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
@@ -35,19 +38,20 @@ export class FurryLife extends Website {
   readonly BASE_URL = 'https://furrylife.online';
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'gif'];
   readonly acceptsAdditionalFiles = true;
+  readonly PROP_ACCOUNT_ID: string = 'accountId';
+  readonly SFW_ALBUM: string = 'general-sfw.712-sfw';
+  readonly NSFW_ALBUM: string = 'explicit-nsfw.714-nsfw';
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(`${this.BASE_URL}/user/home`, data._id);
-    if (res.body.includes('Sign Out')) {
+    const { body } = await Http.get<string>(this.BASE_URL, data._id);
+    if (!body.includes('Log in')) {
       status.loggedIn = true;
-      const $ = cheerio.load(res.body);
-      status.username = $('#elUserLink')
-        .text()
-        .trim();
-
+      const accountProfileId = body.match(/members\/(.*?)\.\d+/)[0];
+      status.username = accountProfileId.split(/(\.|\/)/)[2];
+      this.storeAccountInformation(data._id, this.PROP_ACCOUNT_ID, accountProfileId.split('/')[1]);
       try {
-        await this.loadAlbums(data._id, $('#cUserLink').children('a')[0].attribs.href);
+        await this.loadAlbums(data._id, accountProfileId.split('/')[1]);
       } catch {
         this.logger.error('Unable to load albums');
       }
@@ -55,32 +59,35 @@ export class FurryLife extends Website {
     return status;
   }
 
-  private async loadAlbums(profileId: string, url: string) {
-    const { body } = await Http.get<string>(`${url}?tab=node_gallery_gallery`, profileId);
+  private async loadAlbums(profileId: string, accountId: string) {
+    const { body } = await Http.get<string>(
+      `${this.BASE_URL}/media/albums/users/${accountId}`,
+      profileId,
+    );
     const $ = cheerio.load(body);
     const albumUrls: string[] = [];
     $('a').each((i: number, el: CheerioElement) => {
-      if (el.attribs.href && el.attribs.href.includes('album')) {
-        if (!albumUrls.includes(el.attribs.href)) {
-          albumUrls.push(el.attribs.href);
-        }
+      if (
+        el.attribs.href &&
+        el.attribs.href.includes('media/albums') &&
+        el.parentNode.attribs.class?.includes('itemList-item') &&
+        !albumUrls.includes(el.attribs.href)
+      ) {
+        albumUrls.push(el.attribs.href);
       }
     });
 
     const data = await Promise.all<Folder>(
       albumUrls.map(async albumUrl => {
-        const res = await Http.get<string>(albumUrl, profileId);
+        const res = await Http.get<string>(`${this.BASE_URL}${albumUrl}`, profileId);
         const $$ = cheerio.load(res.body);
         const urlParts = albumUrl.split('/');
         urlParts.pop();
-        const nsfw = !res.body.includes('1-general-sfw');
+        const nsfw = !res.body.includes('general-sfw-albums.1');
         return {
-          value: `${urlParts
-            .pop()
-            .split('-')
-            .shift()}-${nsfw ? 'nsfw' : 'sfw'}`,
+          value: `${urlParts.pop()}-${nsfw ? 'nsfw' : 'sfw'}`,
           nsfw,
-          label: $$('.ipsType_pageTitle')
+          label: $$('.p-title-value')
             .text()
             .trim(),
         };
@@ -92,25 +99,27 @@ export class FurryLife extends Website {
       label: 'SFW',
       children: [
         {
-          value: '0-sfw',
+          value: this.SFW_ALBUM,
           label: 'General (SFW)',
           nsfw: false,
         },
         ...data.filter(d => !d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
       ],
     };
+
     const nsfwFolder: Folder = {
       value: 'nsfw',
       label: 'NSFW',
       children: [
         {
-          value: '0-nsfw',
+          value: this.NSFW_ALBUM,
           label: 'General (NSFW)',
           nsfw: true,
         },
         ...data.filter(d => d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
       ],
     };
+
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, [sfwFolder, nsfwFolder]);
   }
 
@@ -122,149 +131,191 @@ export class FurryLife extends Website {
     return text;
   }
 
+  private async upload(
+    profileId: string,
+    token: string,
+    url: string,
+    file: PostFile,
+  ): Promise<any> {
+    const data = {
+      _xfToken: token,
+      _xfResponseType: 'json',
+      _xfWithData: '1',
+      flowChunkNumber: '1',
+      flowChunkSize: '4294967296',
+      flowCurrentChunkSize: file.value.length,
+      flowCTotalSize: file.value.length,
+      flowIdentifier: `${file.value.length}-${file.options.filename.replace('.', '')}`,
+      flowFilename: file.options.filename,
+      flowRelativePath: file.options.filename,
+      flowTotalChunks: '1',
+      upload: file,
+    };
+
+    const res = await Http.post<{ status: string; attachment: any; errors: any[] }>(
+      url,
+      profileId,
+      {
+        type: 'multipart',
+        data,
+        requestOptions: {
+          json: true,
+        },
+      },
+    );
+
+    this.verifyResponse(res, 'Upload verify');
+
+    if (res.body.status === 'ok') {
+      return res.body.attachment;
+    }
+
+    return Promise.reject(
+      this.createPostResponse({ message: Object.values(res.body.errors).join('\n') }),
+    );
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<FurryLifeFileOptions>,
   ): Promise<PostResponse> {
     const { options } = data;
 
-    // TODO maybe change so that -nsfw doesn't need to be in the id
     const albumParts = options.album.split('-');
-    const album = albumParts[0];
-    const category = albumParts[1].includes('nsfw') ? 2 : 1;
+    albumParts.pop();
+    const album = albumParts.join('-');
 
-    const files = [data.primary, ...data.additional];
-    const albumParam: string = `${album === '0' ? 'noAlbum=1' : 'album=' + album}`;
+    const isNotAlbum = options.album === this.SFW_ALBUM || options.album === this.NSFW_ALBUM;
 
-    const form: any = await BrowserWindowUtil.getFormData(
+    const files = [data.primary, ...data.additional].map(f => f.file);
+
+    await BrowserWindowUtil.getPage(
       data.part.accountId,
-      `${this.BASE_URL}/gallery/submit/?_pi=&category=${category}&${albumParam}`,
-      { id: 'elGallerySubmit' },
+      `${this.BASE_URL}/media/${isNotAlbum ? 'categories' : 'albums'}/${album}/add`,
+      false,
+    );
+
+    const { body } = await Http.get<string>(
+      `${this.BASE_URL}/media/${isNotAlbum ? 'categories' : 'albums'}/${album}/add`,
+      data.part.accountId,
+    );
+
+    const token = body.match(/data-csrf="(.*?)"/)[1];
+    const href = `${this.BASE_URL}${
+      body.match(/href="\/attachments\/upload\?type=(.*?)"/)[0].match(/"(.*?)"/)[1]
+    }`.replace(/&amp;/g, '&');
+    const hash = HtmlParserUtil.getInputValue(body, 'attachment_hash');
+    const hashCombined = HtmlParserUtil.getInputValue(body, 'attachment_hash_combined').replace(
+      /&quot;/g,
+      '"',
     );
 
     this.checkCancelled(cancellationToken);
     try {
       const uploads = await Promise.all(
-        files.map(file =>
-          this.uploadImage(data.part.accountId, form.images, albumParam, category, file.file),
-        ),
+        files.map(file => this.upload(data.part.accountId, token, href, file)),
       );
 
-      Object.assign(form, {
-        upload_images_submitted: '1',
-        credit_all: options.credit || '',
-        copyright_all: options.copyright || '',
-        tags_all: data.tags.join('\r\n') || '',
-        prefix_all: '',
-        images_order: uploads.map(u => u.id),
-        images_autofollow_all: '0',
-      });
+      const uploadData: any = {
+        attachment_hash: hash,
+        attachment_hash_combined: hashCombined,
+        _xfToken: token,
+        _xfRequestUri: `/media/${isNotAlbum ? 'categories' : 'albums'}/${album}/add`,
+        _xfWithData: '1',
+        _xfResponseType: 'json',
+      };
 
-      const images_info: any[] = [];
+      if (isNotAlbum) {
+        uploadData.category_id = album.split('.').pop();
+      } else {
+        uploadData.album_id = album.split('.').pop();
+      }
+
       uploads.forEach(u => {
-        images_info.push({ name: `image_title_${u.id}`, value: data.title });
-        images_info.push({ name: `filedata__image_description_${u.id}`, value: data.description });
-        images_info.push({ name: `image_textarea_${u.id}`, value: '' });
-        images_info.push({ name: `image_tags_${u.id}_original`, value: '' });
-        images_info.push({ name: `image_tags_${u.id}`, value: '' });
-        images_info.push({ name: `image_credit_info_${u.id}`, value: '' });
-        images_info.push({ name: `image_copyright_${u.id}`, value: '' });
-        images_info.push({ name: `image_gps_show_${u.id}`, value: '0' });
-
-        form[`images_existing[o_${u.id}]`] = u.id;
-        form[`images_keep[o_${u.id}]`] = '1';
+        const mediaId = `media[${u.temp_media_id}]`;
+        uploadData[`${mediaId}[title]`] = data.title;
+        uploadData[`${mediaId}[description]`] = '';
+        uploadData[`${mediaId}[tags]`] = this.formatTags(data.tags).join(', ');
+        uploadData[`${mediaId}[temp_media_id]`] = u.temp_media_id;
+        uploadData[`${mediaId}[media_hash]`] = u.media_hash;
+        uploadData[`${mediaId}[media_type]`] = u.type_grouping;
+        uploadData[`${mediaId}[attachment_id]`] = u.attachment_id;
+        uploadData[`${mediaId}[custom_fields][caption_html]`] = data.description;
+        uploadData[`${mediaId}[custom_fields][artist]`] = data.options.credit || '';
+        uploadData[`${mediaId}[custom_fields][artist_url]`] = '';
+        uploadData[`${mediaId}[custom_fields][characters]`] = '';
       });
 
-      form.images_info = JSON.stringify(images_info);
-
-      this.checkCancelled(cancellationToken);
-      const post = await Http.post(
-        `${this.BASE_URL}/gallery/submit/?_pi=&category=${category}&${albumParam}&noWrapper=1`,
+      const { body } = await Http.post<{ status: string; errors: any[]; redirect: string }>(
+        `${this.BASE_URL}/media/save-media`,
         data.part.accountId,
         {
           type: 'multipart',
-          data: form,
-          headers: {
-            referer: 'https://furrylife.online',
-            origin: 'https://furrylife.online',
+          data: uploadData,
+          requestOptions: {
+            json: true,
           },
         },
       );
 
-      this.verifyResponse(post, 'Post verify');
-      for (let i = 0; i < uploads.length; i++) {
-        let url: string = `${this.BASE_URL}/gallery/submit/?_pi=&category=${category}&${albumParam}&totalImages=${uploads.length}&do=saveImages&mr=${i}&csrfKey=${form.csrfKey}`;
-        if (i === 0) {
-          url += '&_mrReset=1';
-        }
-        await Http.get(url, data.part.accountId);
-        // MAJOR NOTE: I HAVE NO CLUE HOW TO VALIDATE A TRUE SUCCESS WENT THROUGH
+      if (body.status === 'ok') {
+        return this.createPostResponse({ source: body.redirect });
+      } else {
+        return Promise.reject(
+          this.createPostResponse({ error: Object.values(body.errors).join('\n') }),
+        );
       }
-      return this.createPostResponse({});
     } catch (err) {
       return Promise.reject(this.createPostResponse({ additionalInfo: err }));
     }
-  }
-
-  private async uploadImage(
-    profileId: string,
-    uploadKey: any,
-    albumParam: string,
-    category: number,
-    file: PostFile,
-  ) {
-    const data = {
-      title: file.options.filename,
-      images: file,
-      chunk: '0',
-      chunks: '1',
-    };
-
-    const upload = await Http.post<{ id: string }>(
-      `${this.BASE_URL}/gallery/submit/?_pi=&category=${category}&${albumParam}`,
-      profileId,
-      {
-        type: 'multipart',
-        data,
-        requestOptions: { json: true },
-        headers: {
-          referer: 'https://furrylife.online',
-          origin: 'https://furrylife.online',
-          'x-plupload': uploadKey,
-        },
-      },
-    );
-
-    if (upload.body.id) {
-      return upload.body;
-    }
-    return Promise.reject(this.createPostResponse({ additionalInfo: upload.body }));
   }
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
-    const form: any = await BrowserWindowUtil.getFormData(
+    await BrowserWindowUtil.getPage(data.part.accountId, this.BASE_URL, false);
+
+    const { body } = await Http.get<string>(
+      `${this.BASE_URL}/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}`,
       data.part.accountId,
-      `${this.BASE_URL}/index.php?app=core&module=status&controller=ajaxcreate`,
-      { id: 'elStatusSubmit' },
     );
-    form.status_content_ajax = data.description;
+
+    const hash = HtmlParserUtil.getInputValue(body, 'attachment_hash');
+    const hashCombined = HtmlParserUtil.getInputValue(body, 'attachment_hash_combined').replace(
+      /&quot;/g,
+      '"',
+    );
+
+    const form = {
+      _xfToken: body.match(/data-csrf="(.*?)"/)[1],
+      message_html: data.description,
+      _xfWithData: '1',
+      _xfResponseType: 'json',
+      _xfRequestUri: `/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}`,
+      attachment_hash: hash,
+      attachment_hash_combined: hashCombined
+    };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(
-      `${this.BASE_URL}/index.php?app=core&module=status&controller=ajaxcreate&ajaxValidate=1`,
+    const post = await Http.post<{ status: string; errors: any[] }>(
+      `${this.BASE_URL}/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}/post`,
       data.part.accountId,
       {
         type: 'multipart',
         data: form,
+        requestOptions: {
+          json: true,
+        },
       },
     );
 
-    this.verifyResponse(post, 'Verify post');
-    if (post.returnUrl.includes('profile')) {
+    if (post.body.status === 'ok') {
       return this.createPostResponse({});
+    } else {
+      return Promise.reject(
+        this.createPostResponse({ error: Object.values(post.body.errors).join('\n') }),
+      );
     }
 
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
@@ -281,7 +332,7 @@ export class FurryLife extends Website {
 
     const folder = submissionPart.data.album;
     const rating = submissionPart.data.rating || defaultPart.data.rating;
-    if (folder.includes('nsfw') && rating === SubmissionRating.GENERAL) {
+    if (folder.endsWith('nsfw') && rating === SubmissionRating.GENERAL) {
       warnings.push('Potentially uploading NSFW to SFW Album');
     }
 
@@ -292,6 +343,10 @@ export class FurryLife extends Website {
       )
     ) {
       warnings.push(`Album (${folder}) not found.`);
+    }
+
+    if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 2) {
+      problems.push('Requires at least 2 tags.');
     }
 
     const files = [
