@@ -12,7 +12,7 @@ export class NewgroundsFileOptionsEntity extends DefaultFileOptionsEntity
   implements NewgroundsFileOptions {
   @Expose()
   @IsBoolean()
-  @DefaultValue(true)
+  @DefaultValue(false)
   creativeCommons!: boolean;
 
   @Expose()

@@ -227,9 +227,7 @@ export class DeviantArt extends Website {
       form.request_critique = 'yes';
     }
     form.allow_free_download = options.freeDownload ? 'yes' : 'no';
-    if (options.feature) {
-      form.feature = 'yes';
-    }
+    form.feature = options.feature ? 'yes' : 'no';
     if (options.displayResolution) {
       form.display_resolution = options.displayResolution;
     }
