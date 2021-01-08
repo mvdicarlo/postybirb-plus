@@ -1,13 +1,11 @@
-import { Checkbox, Form, Input, Select } from 'antd';
+import { Checkbox, Form, Select } from 'antd';
 import _ from 'lodash';
 import {
-  DefaultFileOptions,
   DefaultOptions,
   FileSubmission,
   Folder,
   KoFiFileOptions,
-  Submission,
-  SubmissionPart
+  Submission
 } from 'postybirb-commons';
 import React from 'react';
 import WebsiteService from '../../services/website.service';
