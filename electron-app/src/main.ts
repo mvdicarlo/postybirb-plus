@@ -24,6 +24,8 @@ global.CHILD_PROCESS_IDS = [];
 if (global.DEBUG_MODE) {
   console.log(`BASE: ${global.BASE_DIRECTORY}`);
   console.log(`APP: ${app.getPath('userData')}`);
+} else {
+  process.env.NODE_ENV = 'production';
 }
 
 require('./app/crash-handler');
