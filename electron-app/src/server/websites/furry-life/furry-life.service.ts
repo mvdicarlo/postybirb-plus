@@ -274,26 +274,48 @@ export class FurryLife extends Website {
     cancellationToken: CancellationToken,
     data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
-    const form: any = await BrowserWindowUtil.getFormData(
+    await BrowserWindowUtil.getPage(data.part.accountId, this.BASE_URL, false);
+
+    const { body } = await Http.get<string>(
+      `${this.BASE_URL}/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}`,
       data.part.accountId,
-      `${this.BASE_URL}/index.php?app=core&module=status&controller=ajaxcreate`,
-      { id: 'elStatusSubmit' },
     );
-    form.status_content_ajax = data.description;
+
+    const hash = HtmlParserUtil.getInputValue(body, 'attachment_hash');
+    const hashCombined = HtmlParserUtil.getInputValue(body, 'attachment_hash_combined').replace(
+      /&quot;/g,
+      '"',
+    );
+
+    const form = {
+      _xfToken: body.match(/data-csrf="(.*?)"/)[1],
+      message_html: data.description,
+      _xfWithData: '1',
+      _xfResponseType: 'json',
+      _xfRequestUri: `/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}`,
+      attachment_hash: hash,
+      attachment_hash_combined: hashCombined
+    };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(
-      `${this.BASE_URL}/index.php?app=core&module=status&controller=ajaxcreate&ajaxValidate=1`,
+    const post = await Http.post<{ status: string; errors: any[] }>(
+      `${this.BASE_URL}/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}/post`,
       data.part.accountId,
       {
         type: 'multipart',
         data: form,
+        requestOptions: {
+          json: true,
+        },
       },
     );
 
-    this.verifyResponse(post, 'Verify post');
-    if (post.returnUrl.includes('profile')) {
+    if (post.body.status === 'ok') {
       return this.createPostResponse({});
+    } else {
+      return Promise.reject(
+        this.createPostResponse({ error: Object.values(post.body.errors).join('\n') }),
+      );
     }
 
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
