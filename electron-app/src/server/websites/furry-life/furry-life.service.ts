@@ -66,7 +66,7 @@ export class FurryLife extends Website {
     );
     const $ = cheerio.load(body);
     const albumUrls: string[] = [];
-    $('a').each((i: number, el: CheerioElement) => {
+    $('a').each((i: number, el: any) => {
       if (
         el.attribs.href &&
         el.attribs.href.includes('media/albums') &&

@@ -76,13 +76,13 @@ export class FurAffinity extends Website {
     return status;
   }
 
-  private getFolders(profileId: string, $: CheerioStatic) {
+  private getFolders(profileId: string, $: cheerio.Root) {
     const folders: Folder[] = [];
     const flatFolders: Folder[] = [];
 
     $('select[name=assign_folder_id]')
       .children()
-      .each((i, el) => {
+      .each((i, el: any) => {
         const $el = $(el);
         if (el.name === 'option') {
           if ($el.attr('value') === '0') {

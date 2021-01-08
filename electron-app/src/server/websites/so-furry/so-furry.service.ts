@@ -60,7 +60,7 @@ export class SoFurry extends Website {
     return status;
   }
 
-  private getFolders(profileId: string, $: CheerioStatic) {
+  private getFolders(profileId: string, $: cheerio.Root) {
     const folders: Folder[] = [];
     $('#UploadForm_folderId')
       .children()

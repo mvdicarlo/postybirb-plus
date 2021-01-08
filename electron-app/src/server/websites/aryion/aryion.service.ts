@@ -67,7 +67,7 @@ export class Aryion extends Website {
     return status;
   }
 
-  private getFolders(profileId: string, $: CheerioStatic) {
+  private getFolders(profileId: string, $: cheerio.Root) {
     const folders: Folder[] = [];
     $('.treeview')
       .children()
@@ -80,14 +80,14 @@ export class Aryion extends Website {
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
 
-  private searchFolderTree($: CheerioStatic, el: CheerioElement, parent: Folder[]) {
+  private searchFolderTree($: cheerio.Root, el: cheerio.Element, parent: Folder[]) {
     const me: Folder = {
       value: undefined,
       label: '',
     };
     $(el)
       .children()
-      .each((i, n) => {
+      .each((i, n: any) => {
         const node = $(n);
         if (n.name === 'span') {
           me.value = node.attr('data-tid');
