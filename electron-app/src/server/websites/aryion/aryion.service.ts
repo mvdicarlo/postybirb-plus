@@ -187,14 +187,14 @@ export class Aryion extends Website {
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
         problems.push(
-          `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
         );
         problems.push('A fallback file is required.');
       } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
         warnings.push('The fallback text will be used.');
       } else {
         problems.push(
-          `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
         );
       }
     }
