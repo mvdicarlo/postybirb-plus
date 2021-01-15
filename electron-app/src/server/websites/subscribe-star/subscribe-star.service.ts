@@ -75,6 +75,15 @@ export class SubscribeStar extends Website {
         value: $el.attr('data-id'),
       });
     });
+
+    // Fill with automatic subscriber subscription when no custom tier is created
+    if (tiers.length === 1) {
+      tiers.push({
+        label: 'Subscribers Only',
+        value: 'basic',
+      });
+    }
+
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
   }
 
