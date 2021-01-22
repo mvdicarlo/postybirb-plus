@@ -20,5 +20,6 @@ export * from './pillowfort/pillowfort.options';
 export * from './pixiv/pixiv.options';
 export * from './so-furry/so-furry.options';
 export * from './subscribe-star/subscribe-star.options';
+export * from './telegram/telegram.options';
 export * from './tumblr/tumblr.options';
 export * from './weasyl/weasyl.options';

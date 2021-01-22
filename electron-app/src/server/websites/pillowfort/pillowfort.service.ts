@@ -4,6 +4,7 @@ import {
   DefaultOptions,
   FileRecord,
   FileSubmission,
+  FileSubmissionType,
   PillowfortFileOptions,
   PillowfortNotificationOptions,
   PostResponse,
@@ -12,6 +13,7 @@ import {
   SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
@@ -21,9 +23,11 @@ import {
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
+import FileSize from 'src/server/utils/filesize.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
 @Injectable()
@@ -53,8 +57,8 @@ export class Pillowfort extends Website {
     return text;
   }
 
-  getScalingOptions(file: FileRecord) {
-    return undefined;
+  getScalingOptions(file: FileRecord): ScalingOptions {
+    return { maxSize: FileSize.MBtoBytes(10) };
   }
 
   private async uploadImage(
@@ -162,7 +166,7 @@ export class Pillowfort extends Website {
     if (data.options.allowReblogging) {
       form.rebloggable = 'on';
     }
-    if (!data.options.allowComments) {
+    if (data.options.allowComments) {
       form.commentable = 'on';
     }
     if (data.rating !== SubmissionRating.GENERAL) {
@@ -197,9 +201,21 @@ export class Pillowfort extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
+    }
+
+    const { type, size, name } = submission.primary;
+    const maxMB: number = 10;
+    if (FileSize.MBtoBytes(maxMB) < size) {
+      if (
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        ImageManipulator.isMimeType(submission.primary.mimetype)
+      ) {
+        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+      } else {
+        problems.push(`Pillowfort limits ${submission.primary.mimetype} to ${maxMB}MB`);
+      }
     }
 
     return { problems, warnings };

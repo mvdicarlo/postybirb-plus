@@ -289,7 +289,7 @@ export class Newgrounds extends Website {
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       problems.push(
-        `Does not support file format: (${submission.primary.name}) ${submission.primary.mimetype}.`,
+        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
       );
     }
 

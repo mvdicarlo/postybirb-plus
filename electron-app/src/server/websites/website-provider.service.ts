@@ -26,6 +26,7 @@ import { DeviantArt } from './deviant-art/deviant-art.service';
 import { Mastodon } from './mastodon/mastodon.service';
 import { Twitter } from './twitter/twitter.service';
 import { Pillowfort } from './pillowfort/pillowfort.service';
+import { Telegram } from './telegram/telegram.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -59,6 +60,7 @@ export class WebsiteProvider {
     readonly mastodon: Mastodon,
     readonly twitter: Twitter,
     readonly pillowfort: Pillowfort,
+    readonly telegram: Telegram,
   ) {
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(

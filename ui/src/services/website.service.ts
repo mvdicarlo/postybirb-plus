@@ -16,6 +16,10 @@ export default class WebsiteService {
   static getUsernameShortcuts() {
     return axios.get('/websites/username-shortcuts').then(({ data }) => data);
   }
+
+  static postCustomRoute<T>(website: string, route: string, form: any): Promise<T> {
+    return axios.post<T>(`/${website.toLowerCase()}/${route}`, form).then(({ data }) => data);
+  }
 }
 
 WebsiteService.getUsernameShortcuts().then(

@@ -8,6 +8,7 @@ export interface WebsiteSectionProps<T extends Submission, K extends DefaultOpti
   extends SubmissionSectionProps<T, K> {
   hideTitle?: boolean;
   hideThumbnailOptions?: boolean;
+  hideAutoscaleOptions?: boolean;
   descriptionOptions?: {
     show: boolean;
     options?: {
