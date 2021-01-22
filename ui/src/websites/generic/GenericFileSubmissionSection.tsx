@@ -12,17 +12,23 @@ export default class GenericFileSubmissionSection<
   }
 
   renderLeftForm(data: T): JSX.Element[] {
+    const elements: JSX.Element[] = [];
+
+    const hideAutoscaleOptions = !!this.props.hideAutoscaleOptions;
+    if (!hideAutoscaleOptions) {
+      elements.push(
+        <div>
+          <Checkbox
+            checked={data.autoScale}
+            onChange={this.handleCheckedChange.bind(this, 'autoScale')}
+          >
+            Downscale images to fit size limit
+          </Checkbox>
+        </div>
+      );
+    }
+
     const hideThumbnailOptions = !!this.props.hideThumbnailOptions;
-    const elements = [
-      <div>
-        <Checkbox
-          checked={data.autoScale}
-          onChange={this.handleCheckedChange.bind(this, 'autoScale')}
-        >
-          Downscale images to fit size limit
-        </Checkbox>
-      </div>
-    ];
     if (!hideThumbnailOptions) {
       elements.push(
         <div>

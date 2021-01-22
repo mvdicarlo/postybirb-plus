@@ -25,6 +25,7 @@ import { DeviantArt } from './deviant-art/DeviantArt';
 import { Mastodon } from './mastodon/Mastodon';
 import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
+import { Telegram } from './telegram/Telegram';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -50,6 +51,7 @@ export class WebsiteRegistry {
     Pixiv: new Pixiv(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
+    Telegram: new Telegram(),
     Tumblr: new Tumblr(),
     Twitter: new Twitter(),
     Weasyl: new Weasyl(),

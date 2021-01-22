@@ -28,6 +28,7 @@ import { DeviantArtModule } from './deviant-art/deviant-art.module';
 import { MastodonModule } from './mastodon/mastodon.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { PillowfortModule } from './pillowfort/pillowfort.module';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -60,6 +61,7 @@ import { PillowfortModule } from './pillowfort/pillowfort.module';
     MastodonModule,
     TwitterModule,
     PillowfortModule,
+    TelegramModule,
   ],
 })
 export class WebsitesModule {}
