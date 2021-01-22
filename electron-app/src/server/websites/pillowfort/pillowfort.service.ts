@@ -166,7 +166,7 @@ export class Pillowfort extends Website {
     if (data.options.allowReblogging) {
       form.rebloggable = 'on';
     }
-    if (!data.options.allowComments) {
+    if (data.options.allowComments) {
       form.commentable = 'on';
     }
     if (data.rating !== SubmissionRating.GENERAL) {
@@ -201,9 +201,7 @@ export class Pillowfort extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     const { type, size, name } = submission.primary;
