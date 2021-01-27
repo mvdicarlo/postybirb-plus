@@ -30,6 +30,9 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
 import _ = require('lodash');
+import { FallbackInformation } from '../interfaces/fallback-information.interface';
+import HtmlParser from 'src/server/description-parsing/html-node/parser';
+import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
 
 @Injectable()
 export class SoFurry extends Website {
@@ -77,10 +80,7 @@ export class SoFurry extends Website {
   }
 
   parseDescription(text: string) {
-    return text
-      .replace(/<p/gm, '<div')
-      .replace(/<\/p>/gm, '</div>')
-      .replace(/<\/div>\n<br>/g, '</div>\n<div><br></div>');
+    return HTMLFormatParser.parse(text).replace(/\n/g, '');
   }
 
   private getSubmissionType(type: FileSubmissionType): string {
@@ -159,6 +159,12 @@ export class SoFurry extends Website {
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
   }
 
+  fallbackFileParser(html: string): FallbackInformation {
+    const t = HTMLFormatParser.parse(html);
+    console.log(t);
+    return { text: this.parseDescription(html), type: 'text/plain', extension: 'txt' };
+  }
+
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, SoFurryFileOptions>,
@@ -229,16 +235,12 @@ export class SoFurry extends Website {
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
         problems.push('A fallback file is required.');
       } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
         warnings.push('The fallback text will be used.');
       } else {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
       }
     }
 
