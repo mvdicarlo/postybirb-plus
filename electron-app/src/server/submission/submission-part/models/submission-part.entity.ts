@@ -7,6 +7,7 @@ import { Expose } from 'class-transformer';
 export default class SubmissionPartEntity<T extends DefaultOptions> extends Entity
   implements SubmissionPart<T> {
   @Expose()
+  // @ts-ignore
   get _id(): string {
     return `${this.submissionId}-${this.accountId}`; // generatated id
   }
