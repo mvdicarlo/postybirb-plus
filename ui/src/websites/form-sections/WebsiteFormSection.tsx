@@ -84,6 +84,7 @@ export default abstract class WebsiteFormSection<
               defaultTags={this.props.defaultData!.tags}
               label="Tags"
               tagOptions={_.get(this.props.tagOptions, 'options')}
+              searchProvider={this.props.tagOptions?.searchProvider}
             />
           ) : null}
           {showDescription ? (

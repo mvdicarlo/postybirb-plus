@@ -19,6 +19,7 @@ export interface WebsiteSectionProps<T extends Submission, K extends DefaultOpti
   tagOptions?: {
     show: boolean;
     options?: TagOptions;
+    searchProvider?: (value: string) => Promise<string[]>;
   };
   ratingOptions?: {
     show: boolean;
