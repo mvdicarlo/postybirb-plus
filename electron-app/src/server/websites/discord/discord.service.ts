@@ -117,8 +117,8 @@ export class Discord extends Website {
     }
 
     const formData = {
-      username: 'PostyBirb',
-      avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
+      // username: 'PostyBirb',
+      // avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
     };
 
     let error = null;
