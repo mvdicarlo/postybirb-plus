@@ -1,4 +1,5 @@
 import { Form, Input } from 'antd';
+import Axios from 'axios';
 import _ from 'lodash';
 import { e621FileOptions, FileSubmission, SubmissionPart } from 'postybirb-commons';
 import React from 'react';
@@ -18,7 +19,24 @@ export class e621 extends WebsiteImpl {
   LoginDialog = (props: LoginDialogProps) => <E621Login {...props} />;
 
   FileSubmissionForm = (props: SubmissionSectionProps<FileSubmission, e621FileOptions>) => (
-    <E621FileSubmissionForm hideThumbnailOptions={true} key={props.part.accountId} {...props} />
+    <E621FileSubmissionForm
+      hideThumbnailOptions={true}
+      tagOptions={{
+        show: true,
+        searchProvider: (value: string) => {
+          return Axios.get('https://e621.net/tags/autocomplete.json?', {
+            params: {
+              expiry: '7',
+              'search[name_matches]': value
+            }
+          })
+            .then(({ data }) => data.map(d => d.name))
+            .catch(console.error);
+        }
+      }}
+      key={props.part.accountId}
+      {...props}
+    />
   );
 }
 

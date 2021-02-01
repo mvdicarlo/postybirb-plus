@@ -1,26 +1,20 @@
-import * as _ from 'lodash';
 import { EventEmitter } from 'events';
-import { AccountService } from '../../account/account.service';
-import { PostData } from './interfaces/post-data.interface';
+import * as _ from 'lodash';
 import {
-  DefaultOptions,
-  DefaultFileOptions,
+  DefaultFileOptions, DefaultOptions,
   PostResponse,
-  Submission,
-  PostStatus,
+  PostStatus, Submission
 } from 'postybirb-commons';
-import { Website } from 'src/server/websites/website.base';
 import { SettingsService } from 'src/server/settings/settings.service';
-
+import { Website } from 'src/server/websites/website.base';
+import { AccountService } from '../../account/account.service';
 import SubmissionEntity from '../models/submission.entity';
-
-import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
-
 import { ParserService } from '../parser/parser.service';
-import { FilePostData } from './interfaces/file-post-data.interface';
+import SubmissionPartEntity from '../submission-part/models/submission-part.entity';
 import { CancellationToken } from './cancellation/cancellation-token';
 import { CancellationException } from './cancellation/cancellation.exception';
-import { HttpException, RequestTimeoutException } from '@nestjs/common';
+import { FilePostData } from './interfaces/file-post-data.interface';
+import { PostData } from './interfaces/post-data.interface';
 
 export interface Poster {
   on(
@@ -177,10 +171,7 @@ export class Poster extends EventEmitter {
         website: this.part.website,
         time: new Date().toLocaleString(),
       };
-      if (error instanceof HttpException) {
-        errorMsg.stack = error.message.stack;
-        errorMsg.error = error.message.message;
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         errorMsg.stack = error.stack;
         errorMsg.error = error.message;
       } else {
@@ -199,18 +190,18 @@ export class Poster extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       let totalTries = this.retries + 1;
       let error = null;
-      // Timeout after 7 minutes
+      // Timeout after 15 minutes
       const timeoutTimer = setTimeout(() => {
         if (!this.isDone) {
           this.cancel();
           totalTries = 0;
           reject(
-            new RequestTimeoutException(
+            new Error(
               `PostyBirb timed out when posting. Please check ${this.website.constructor.name} to see if it actually completed.`,
             ),
           );
         }
-      }, 700000);
+      }, 15 * 60000);
       while (totalTries > 0) {
         try {
           totalTries--;

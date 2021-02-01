@@ -49,7 +49,7 @@ export abstract class Website {
 
   readonly defaultDescriptionParser = HTMLFormatParser.parse;
 
-  abstract async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
+  abstract checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse>;
 
   protected checkCancelled(ct: CancellationToken) {
     if (ct.isCancelled()) {
@@ -95,7 +95,7 @@ export abstract class Website {
 
   abstract getScalingOptions(file: FileRecord): ScalingOptions | undefined;
 
-  abstract async postFileSubmission(
+  abstract postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<DefaultFileOptions>,
     accountData: any,

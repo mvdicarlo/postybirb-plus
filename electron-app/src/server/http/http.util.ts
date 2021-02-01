@@ -86,7 +86,7 @@ export default class Http {
       {
         headers,
         followAllRedirects: true,
-        timeout: 120_000,
+        timeout: 480_000,
       },
       requestOptions,
     );

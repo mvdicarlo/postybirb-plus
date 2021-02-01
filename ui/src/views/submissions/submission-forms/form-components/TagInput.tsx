@@ -1,8 +1,8 @@
 import { Dropdown, Form, Icon, Input, Menu, Select, Switch, Tag, Tooltip, Typography } from 'antd';
 import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
-import React from 'react';
 import { TagData } from 'postybirb-commons';
+import React from 'react';
 import { TagGroupStore } from '../../../../stores/tag-group.store';
 
 const { Text } = Typography;
@@ -23,9 +23,20 @@ interface Props {
   hideExtra?: boolean;
   hideTagGroup?: boolean;
   tagOptions?: TagOptions;
+  searchProvider?: (value: string) => Promise<string[]>;
 }
 
-export default class TagInput extends React.Component<Props> {
+interface State {
+  suggestions: string[];
+  loading: boolean;
+}
+
+export default class TagInput extends React.Component<Props, State> {
+  state: State = {
+    suggestions: [],
+    loading: false
+  };
+
   private data: TagData = {
     extendDefault: true,
     value: []
@@ -86,6 +97,17 @@ export default class TagInput extends React.Component<Props> {
     }
   };
 
+  onSearch = _.debounce((value: string) => {
+    const searchTerm = value?.trim();
+    if (this.props.searchProvider && searchTerm && searchTerm.length > 2) {
+      this.setState({ loading: true });
+      this.props
+        .searchProvider(searchTerm)
+        .then(suggestions => this.setState({ suggestions }))
+        .finally(() => this.setState({ loading: false }));
+    }
+  }, 200);
+
   render() {
     this.data = this.props.defaultValue;
     const tagSwitch = this.props.hideExtend ? null : (
@@ -101,6 +123,13 @@ export default class TagInput extends React.Component<Props> {
       </div>
     );
 
+    const selectOptions = _.uniq([...this.state.suggestions, ...this.props.defaultValue.value]).map(
+      tag => (
+        <Select.Option key={tag} value={tag}>
+          {tag}
+        </Select.Option>
+      )
+    );
     return (
       <Form.Item label={this.props.label} required={!!this.options.minTags}>
         {tagSwitch}
@@ -110,21 +139,17 @@ export default class TagInput extends React.Component<Props> {
             style={{ flex: 10 }}
             tokenSeparators={[',']}
             onChange={this.handleTagChange}
-            value={this.props.defaultValue.value}
+            defaultValue={this.props.defaultValue.value}
             placeholder="Separate tags with ,"
-            allowClear={true}
+            allowClear
             onInputKeyDown={this.onKeyDown}
+            onSearch={this.onSearch}
+            loading={this.state.loading}
           >
-            {this.props.defaultValue.value.map(tag => (
-              <Select.Option key={tag} value={tag}>
-                {tag}
-              </Select.Option>
-            ))}
+            {selectOptions}
           </Select>
           <div className="m-auto">
-            <Typography.Text
-              copyable={{ text: this.props.defaultValue.value.join(', ') }}
-            ></Typography.Text>
+            <Typography.Text copyable={{ text: this.props.defaultValue.value.join(', ') }} />
           </div>
         </div>
 
@@ -155,7 +180,7 @@ interface HelpProps {
 
 const Help: React.SFC<HelpProps> = props => {
   const { options, defaultTags, defaultValue } = props;
-  let tags = [...defaultValue.value];
+  const tags = [...defaultValue.value];
   if (defaultTags && defaultValue.extendDefault) {
     tags.push(...defaultTags.value);
   }
@@ -176,7 +201,7 @@ const Help: React.SFC<HelpProps> = props => {
       </div>
       <div className="text-right">
         <Text type={count > max ? 'danger' : 'secondary'}>
-          {count} / {max}
+          {count} /{max}
         </Text>
       </div>
     </div>
@@ -198,6 +223,7 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps, TagGroupSelect
   state: TagGroupSelectState = {
     filter: ''
   };
+
   render() {
     const menu = (
       <Menu style={{ maxHeight: '33vh', overflow: 'auto', padding: '0' }}>
@@ -231,18 +257,15 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps, TagGroupSelect
                   </div>
                 }
               >
-                {
-                  // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                  <a
-                    onClick={e => {
-                      this.props.onSelect(g.tags);
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    {g.alias}
-                  </a>
-                }
+                <a
+                  onClick={e => {
+                    this.props.onSelect(g.tags);
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  {g.alias}
+                </a>
               </Tooltip>
             </Menu.Item>
           ))}
