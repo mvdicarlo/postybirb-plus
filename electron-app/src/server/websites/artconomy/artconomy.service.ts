@@ -61,8 +61,10 @@ export class Artconomy extends Website {
     if (authCheck.response.statusCode === 200 && authCheck.response.body.username !== '_') {
       this.storeAccountInformation(data._id, 'id', authCheck.response.body.id);
       this.storeAccountInformation(data._id, 'username', authCheck.response.body.username);
-      this.storeAccountInformation(data._id, 'authToken', authCheck.response.body.authtoken);
-      this.storeAccountInformation(data._id, 'csrfToken', authCheck.response.body.csrftoken);
+      const token = (await Http.getWebsiteCookies(data._id, this.BASE_URL))
+        .filter((c) => c.name === 'csrftoken')
+        .shift().value;
+      this.storeAccountInformation(data._id, 'csrfToken', token);
       status.username = authCheck.response.body.username;
       status.loggedIn = true;
     }
@@ -113,25 +115,31 @@ export class Artconomy extends Website {
     const thumbnailAssetForm = {
       'files[]': data.thumbnail,
     };
-    const requestOptions = this.requestOptions(data);
+    const options = this.requestOptions(data);
     this.checkCancelled(cancellationToken);
-    let upload = await Http.post<{ id: string }>(`${this.BASE_URL}/api/lib/v1/asset/`, undefined, {
-      requestOptions,
-      type: 'multipart',
-      skipCookies: true,
-      data: primaryAssetForm,
-    });
+    let upload = await Http.post<{ id: string }>(
+      `${this.BASE_URL}/api/lib/v1/asset/`,
+      data.part.accountId,
+      {
+        ...options,
+        type: 'multipart',
+        data: primaryAssetForm,
+      },
+    );
     await this.checkAssetUpload(upload);
 
     const primaryAsset = upload.body.id;
     let thumbnailAsset: null | string = null;
     if (data.thumbnail) {
-      upload = await Http.post<{ id: string }>(`${this.BASE_URL}/api/lib/v1/asset/`, undefined, {
-        requestOptions,
-        type: 'multipart',
-        skipCookies: true,
-        data: thumbnailAssetForm,
-      });
+      upload = await Http.post<{ id: string }>(
+        `${this.BASE_URL}/api/lib/v1/asset/`,
+        data.part.accountId,
+        {
+          ...options,
+          type: 'multipart',
+          data: thumbnailAssetForm,
+        },
+      );
       await this.checkAssetUpload(upload);
       thumbnailAsset = upload.body.id;
     }
@@ -154,12 +162,11 @@ export class Artconomy extends Website {
     this.checkCancelled(cancellationToken);
     const post = await Http.post<any>(
       `${this.BASE_URL}/api/profiles/v1/account/${username}/submissions/`,
-      undefined,
+      data.part.accountId,
       {
+        ...options,
         type: 'json',
         data: editForm,
-        requestOptions,
-        skipCookies: true,
       },
     );
     await this.checkAssetUpload(post);
@@ -167,13 +174,14 @@ export class Artconomy extends Website {
   }
 
   requestOptions(data: PostData<Submission, DefaultOptions> | FilePostData<ArtconomyFileOptions>) {
-    const authToken = this.getAccountInfo(data.part.accountId, 'authToken');
     const csrfToken = this.getAccountInfo(data.part.accountId, 'csrfToken');
     return {
-      json: true,
       headers: {
-        Authorization: `Token ${authToken}`,
-        'X-CSRFToken': `${csrfToken}`,
+        'X-CSRFTOKEN': `${csrfToken}`,
+        Referer: this.BASE_URL,
+      },
+      requestOptions: {
+        json: true,
       },
     };
   }
@@ -183,8 +191,7 @@ export class Artconomy extends Website {
     data: PostData<Submission, DefaultOptions>,
   ): Promise<PostResponse> {
     const username = this.getAccountInfo(data.part.accountId, 'username');
-
-    const requestOptions = this.requestOptions(data);
+    const options = this.requestOptions(data);
 
     const journal = {
       subject: data.title,
@@ -196,7 +203,7 @@ export class Artconomy extends Website {
       `${this.BASE_URL}/api/profiles/v1/account/${username}/journals/`,
       data.part.accountId,
       {
-        requestOptions,
+        ...options,
         data: journal,
       },
     );
