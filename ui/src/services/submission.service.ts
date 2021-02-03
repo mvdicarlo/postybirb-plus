@@ -26,6 +26,7 @@ export default class SubmissionService {
   static createFromClipboard() {
     const formData: FormData = new FormData();
     formData.set('file', window.electron.clipboard.read());
+    formData.set('type', 'FILE');
     return axios.post('/submission/create/', formData);
   }
 
