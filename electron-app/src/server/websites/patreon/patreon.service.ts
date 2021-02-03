@@ -106,8 +106,8 @@ export class Patreon extends Website {
       const tiers: Folder[] = [];
 
       tierJson.included
-        .filter(t => t.type === 'access-rule' || t.type === 'reward')
-        .filter(t => {
+        .filter((t) => t.type === 'access-rule' || t.type === 'reward')
+        .filter((t) => {
           if (
             t.attributes.access_rule_type === 'public' ||
             t.attributes.access_rule_type === 'patrons'
@@ -118,10 +118,10 @@ export class Patreon extends Website {
           }
           return false;
         })
-        .forEach(t => {
+        .forEach((t) => {
           let value = t.id;
           if (t.type === 'reward') {
-            const found = tierJson.included.find(relation => {
+            const found = tierJson.included.find((relation) => {
               if (relation.attributes.access_rule_type === 'tier') {
                 const relationship = _.get(relation, 'relationships.tier.data.id', null);
                 if (value === relationship) {
@@ -173,7 +173,7 @@ export class Patreon extends Website {
       return '';
     }
     // encode html
-    text = text.replace(/[\u00A0-\u9999<>&](?!#)/gim, i => {
+    text = text.replace(/[\u00A0-\u9999<>&](?!#)/gim, (i) => {
       return '&#' + i.charCodeAt(0) + ';';
     });
 
@@ -264,6 +264,11 @@ export class Patreon extends Website {
     );
   }
 
+  private toUTCISO(date: Date | string): string {
+    let d: Date = typeof date === 'string' ? new Date(date) : date;
+    return d.toISOString().split('.').shift();
+  }
+
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, PatreonNotificationOptions>,
@@ -283,7 +288,7 @@ export class Patreon extends Website {
 
     // Tags
     const formattedTags = this.formatTags(data.tags);
-    const relationshipTags = formattedTags.map(tag => {
+    const relationshipTags = formattedTags.map((tag) => {
       return {
         id: tag.id,
         type: tag.type,
@@ -291,7 +296,7 @@ export class Patreon extends Website {
     });
 
     const { options } = data;
-    const accessRules: any[] = options.tiers.map(tier => {
+    const accessRules: any[] = options.tiers.map((tier) => {
       return { type: 'access-rule', id: tier };
     });
 
@@ -304,6 +309,11 @@ export class Patreon extends Website {
       post_metadata: {},
       tags: { publish: true },
     };
+
+    if (options.schedule) {
+      attributes.scheduled_for = this.toUTCISO(options.schedule);
+      attributes.tags.publish = false;
+    }
 
     const relationships = {
       post_tag: {
@@ -329,7 +339,7 @@ export class Patreon extends Website {
       included: formattedTags,
     };
 
-    accessRules.forEach(rule => form.included.push(rule));
+    accessRules.forEach((rule) => form.included.push(rule));
 
     this.checkCancelled(cancellationToken);
     const post = await this.finalizePost(data.part.accountId, link, csrf, form);
@@ -361,9 +371,9 @@ export class Patreon extends Website {
     const link = create.data.id;
 
     // Files
-    [data.primary.file, data.thumbnail, ...data.additional.map(f => f.file)]
-      .filter(f => f)
-      .forEach(f => (f.options.filename = f.options.filename.replace(/'/g, '')));
+    [data.primary.file, data.thumbnail, ...data.additional.map((f) => f.file)]
+      .filter((f) => f)
+      .forEach((f) => (f.options.filename = f.options.filename.replace(/'/g, '')));
 
     let uploadType = 'main';
     let shouldUploadThumbnail: boolean = false;
@@ -428,7 +438,7 @@ export class Patreon extends Website {
 
     // Tags
     const formattedTags = this.formatTags(data.tags);
-    const relationshipTags = formattedTags.map(tag => {
+    const relationshipTags = formattedTags.map((tag) => {
       return {
         id: tag.id,
         type: tag.type,
@@ -436,7 +446,7 @@ export class Patreon extends Website {
     });
 
     const { options } = data;
-    const accessRules: any[] = options.tiers.map(tier => {
+    const accessRules: any[] = options.tiers.map((tier) => {
       return { type: 'access-rule', id: tier };
     });
 
@@ -449,6 +459,11 @@ export class Patreon extends Website {
       post_metadata: {},
       tags: { publish: true },
     };
+
+    if (options.schedule) {
+      attributes.scheduled_for = this.toUTCISO(options.schedule);
+      attributes.tags.publish = false;
+    }
 
     const relationships = {
       post_tag: {
@@ -472,7 +487,7 @@ export class Patreon extends Website {
     ) {
       image_order = [
         thumbnailFileUpload ? thumbnailFileUpload.body.data.id : primaryFileUpload.body.data.id,
-        ...additionalImageUploads.map(img => img.body.data.id),
+        ...additionalImageUploads.map((img) => img.body.data.id),
       ];
     }
 
@@ -488,7 +503,7 @@ export class Patreon extends Website {
       },
     };
 
-    accessRules.forEach(rule => form.included.push(rule));
+    accessRules.forEach((rule) => form.included.push(rule));
 
     this.checkCancelled(cancellationToken);
     const post = await this.finalizePost(data.part.accountId, link, csrf, form);
@@ -598,9 +613,9 @@ export class Patreon extends Website {
   }
 
   formatTags(tags: string[]): any {
-    tags = tags.filter(tag => tag.length <= 25);
+    tags = tags.filter((tag) => tag.length <= 25);
     return tags
-      .map(tag => {
+      .map((tag) => {
         return {
           type: 'post_tag',
           id: `user_defined;${tag}`,
@@ -625,7 +640,7 @@ export class Patreon extends Website {
     const options = submissionPart.data;
     if (options.tiers && options.tiers.length) {
       const folders = this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS);
-      options.tiers.forEach(tier => {
+      options.tiers.forEach((tier) => {
         if (!WebsiteValidator.folderIdExists(tier, folders)) {
           problems.push(`Access Tier (${tier}) could not be found.`);
         }
@@ -637,11 +652,11 @@ export class Patreon extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       const maxMB = 200;
       if (FileSize.MBtoBytes(maxMB) < size) {
@@ -671,7 +686,7 @@ export class Patreon extends Website {
     const options = submissionPart.data;
     if (options.tiers && options.tiers.length) {
       const folders = this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS);
-      options.tiers.forEach(tier => {
+      options.tiers.forEach((tier) => {
         if (!WebsiteValidator.folderIdExists(tier, folders)) {
           problems.push(`Access Tier (${tier}) could not be found.`);
         }
