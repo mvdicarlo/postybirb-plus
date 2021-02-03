@@ -139,7 +139,7 @@ export default class TagInput extends React.Component<Props, State> {
             style={{ flex: 10 }}
             tokenSeparators={[',']}
             onChange={this.handleTagChange}
-            defaultValue={this.props.defaultValue.value}
+            value={this.props.defaultValue.value}
             placeholder="Separate tags with ,"
             allowClear
             onInputKeyDown={this.onKeyDown}
