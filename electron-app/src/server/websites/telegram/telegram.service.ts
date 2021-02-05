@@ -48,28 +48,52 @@ export class Telegram extends Website {
         phone_code_hash: this.authData[data.appId].phone_code_hash,
       })
       .then(() => true)
-      .catch(err => {
+      .catch((err) => {
         this.logger.error(err);
         return false;
       });
   }
 
   public async startAuthentication(data: TelegramAccountData) {
-    await this.createInstance(data);
-    const authData: { phone_code_hash: string } = (await this.instances[data.appId].call(
-      'auth.sendCode',
-      {
-        phone_number: data.phoneNumber,
-        settings: {
-          _: 'codeSettings',
+    this.logger.log('Starting Authentication');
+    try {
+      await this.createInstance(data);
+      const authData: { phone_code_hash: string } = (await this.instances[data.appId].call(
+        'auth.sendCode',
+        {
+          phone_number: data.phoneNumber,
+          settings: {
+            _: 'codeSettings',
+          },
         },
-      },
-    )) as any;
+      )) as any;
 
-    this.authData[data.appId] = {
-      phone_code_hash: authData.phone_code_hash,
-      phone_number: data.phoneNumber,
-    };
+      this.authData[data.appId] = {
+        phone_code_hash: authData.phone_code_hash,
+        phone_number: data.phoneNumber,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err.error_message.includes('PHONE_MIGRATE')) {
+        await this.instances[data.appId].setDefaultDc(Number(err.error_message.split('_').pop()));
+        const authData: { phone_code_hash: string } = (await this.instances[data.appId].call(
+          'auth.sendCode',
+          {
+            phone_number: data.phoneNumber,
+            settings: {
+              _: 'codeSettings',
+            },
+          },
+        )) as any;
+
+        this.authData[data.appId] = {
+          phone_code_hash: authData.phone_code_hash,
+          phone_number: data.phoneNumber,
+        };
+      } else {
+        throw err;
+      }
+    }
   }
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
@@ -96,11 +120,12 @@ export class Telegram extends Website {
           customLocalStorage: new TelegramStorage(appId),
         });
 
-        this.instances[appId].setDefaultDc(
-          await this.instances[appId]
-            .call('help.getNearestDc', undefined)
-            .then((result: { nearest_dc: number }) => result.nearest_dc),
-        );
+        // COMMENTED OUT SINCE IT MIGHT BE BETTER TO CATCH THIS AND SET DURING AUTH TIME
+        // this.instances[appId].setDefaultDc(
+        //   await this.instances[appId]
+        //     .call('help.getNearestDc', undefined)
+        //     .then((result: { nearest_dc: number }) => result.nearest_dc),
+        // );
       }
     } else {
       throw new Error('Incomplete Telegram account data');
@@ -114,8 +139,8 @@ export class Telegram extends Website {
     })) as { chats: { access_hash: string; title: string; id: number; _: string }[] };
 
     const channels: Folder[] = chats
-      .filter(c => c._ === 'channel')
-      .map(c => ({ label: c.title, value: `${c.id}-${c.access_hash}` }));
+      .filter((c) => c._ === 'channel')
+      .map((c) => ({ label: c.title, value: `${c.id}-${c.access_hash}` }));
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
   }
@@ -285,7 +310,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach(f => {
+      submissionPart.data.channels.forEach((f) => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Folder (${f}) not found.`);
         }
@@ -297,12 +322,12 @@ export class Telegram extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
     let hasAddedProblem = false;
-    files.forEach(file => {
+    files.forEach((file) => {
       if (hasAddedProblem) {
         return;
       }
@@ -329,7 +354,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach(f => {
+      submissionPart.data.channels.forEach((f) => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Folder (${f}) not found.`);
         }

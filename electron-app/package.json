@@ -127,7 +127,8 @@
       "icon": "icons/icon.icns",
       "gatekeeperAssess": false,
       "target": [
-        "dmg"
+        "dmg",
+        "zip"
       ]
     },
     "linux": {
