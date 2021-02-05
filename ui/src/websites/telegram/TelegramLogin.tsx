@@ -167,6 +167,7 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
           <Form layout="vertical">
             <Form.Item label="Code" required>
               <Input
+                autoFocus
                 className="w-full"
                 value={this.state.code}
                 onChange={({ target }) => this.setState({ code: target.value })}

@@ -21,8 +21,21 @@ export class CustomLogger extends Logger {
   });
 
   error(message: any, trace?: string, context?: string) {
-    super.error(message, trace, context);
-    CustomLogger.logger.error(`[${context || this.context}] ${message}\n${trace}`);
+    if (message instanceof Error) {
+      super.error(message.message, message.stack, context);
+      CustomLogger.logger.error(
+        `[${context || this.context}] ${message.message} ${trace || message.stack}`,
+      );
+    } else {
+      super.error(message, trace, context);
+      if (typeof message === 'object') {
+        CustomLogger.logger.error(
+          `[${context || this.context}] ${JSON.stringify(message)} ${trace}`,
+        );
+      } else {
+        CustomLogger.logger.error(`[${context || this.context}] ${message} ${trace}`);
+      }
+    }
   }
 
   log(message: string, context?: string) {

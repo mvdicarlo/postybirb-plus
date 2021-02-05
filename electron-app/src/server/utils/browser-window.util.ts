@@ -21,7 +21,7 @@ export default class BrowserWindowUtil {
       if (wait) {
         await WaitUtil.wait(wait);
       }
-      return await bw.webContents.executeJavaScript('localStorage');
+      return await bw.webContents.executeJavaScript('JSON.parse(JSON.stringify(localStorage))');
     } catch (err) {
       throw err;
     } finally {

@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.0.23",
+  "version": "3.0.24",
   "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
   "main": "index.js",
   "scripts": {

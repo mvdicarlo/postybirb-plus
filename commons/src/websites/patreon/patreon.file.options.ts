@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsArray, IsBoolean } from 'class-validator';
+import { IsArray, IsBoolean, IsDateString, IsOptional } from 'class-validator';
 import { DefaultFileOptions } from '../../interfaces/submission/default-options.interface';
 import { PatreonFileOptions } from '../../interfaces/websites/patreon/patreon.file.options.interface';
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
@@ -16,6 +16,11 @@ export class PatreonFileOptionsEntity extends DefaultFileOptionsEntity
   @IsBoolean()
   @DefaultValue(false)
   charge!: boolean;
+
+  @Expose()
+  @IsOptional()
+  @IsDateString()
+  schedule?: string;
 
   constructor(entity?: Partial<PatreonFileOptions>) {
     super(entity as DefaultFileOptions);

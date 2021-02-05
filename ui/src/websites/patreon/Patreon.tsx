@@ -1,5 +1,6 @@
-import { Checkbox, Form, Select } from 'antd';
+import { Checkbox, DatePicker, Form, Select } from 'antd';
 import _ from 'lodash';
+import moment from 'moment';
 import {
   FileSubmission,
   Folder,
@@ -126,6 +127,17 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
             )
           )}
         </Select>
+      </Form.Item>,
+      <Form.Item label="Schedule">
+        <DatePicker
+          defaultValue={data.schedule ? moment(data.schedule) : undefined}
+          format="YYYY-MM-DD HH:mm:ss"
+          showTime={{ format: 'HH:mm:ss', use12Hours: true }}
+          placeholder="Unscheduled"
+          onChange={value =>
+            this.setValue('schedule', value ? value.toDate().toString() : undefined)
+          }
+        />
       </Form.Item>
     );
     return elements;
@@ -193,6 +205,17 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
             )
           )}
         </Select>
+      </Form.Item>,
+      <Form.Item label="Schedule">
+        <DatePicker
+          defaultValue={data.schedule ? moment(data.schedule) : undefined}
+          format="YYYY-MM-DD HH:mm:ss"
+          showTime={{ format: 'HH:mm:ss', use12Hours: true }}
+          placeholder="Unscheduled"
+          onChange={value =>
+            this.setValue('schedule', value ? value.toDate().toString() : undefined)
+          }
+        />
       </Form.Item>
     );
     return elements;
