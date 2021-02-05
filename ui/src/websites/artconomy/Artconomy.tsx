@@ -15,7 +15,7 @@ import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 export class Artconomy extends WebsiteImpl {
   internalName: string = 'Artconomy';
   name: string = 'Artconomy';
-  supportsAdditionalFiles: boolean = true;
+  supportsAdditionalFiles: boolean = false;
   supportsTags: boolean = true;
   loginUrl: string = 'https://artconomy.com/auth/login';
 
