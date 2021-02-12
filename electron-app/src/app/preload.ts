@@ -27,7 +27,7 @@ process.once('loaded', () => {
       const ni = clipboard.readImage();
       const arr = new Uint8Array(ni.toPNG());
       const blob = new Blob([arr], { type: 'image/png' });
-      return new File([blob], 'Clipboard Image', { lastModified: Date.now(), type: 'image/png' });
+      return new File([blob], 'Clipboard Image.png', { lastModified: Date.now(), type: 'image/png' });
     },
   },
   session: {
