@@ -28,6 +28,11 @@ export default class RemoteService {
       )}&auth=${RemoteService.getAuthId()}`;
   }
 
+  static getUrl(url: string): string {
+    if (!RemoteService.isRemote()) return url;
+    else return `${this.getRemoteURI()}${url}?auth=${RemoteService.getAuthId()}`;
+  }
+
   static getBaseUrl(): string {
     return axios.defaults.baseURL || '';
   }
