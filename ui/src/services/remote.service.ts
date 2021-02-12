@@ -29,7 +29,7 @@ export default class RemoteService {
   }
 
   static getUrl(url: string): string {
-    if (!RemoteService.isRemote()) return url;
+    if (!RemoteService.isRemote()) return `${this.getBaseUrl()}${url}`;
     else return `${this.getRemoteURI()}${url}?auth=${RemoteService.getAuthId()}`;
   }
 
