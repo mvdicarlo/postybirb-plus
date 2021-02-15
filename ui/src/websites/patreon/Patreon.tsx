@@ -131,11 +131,19 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
       <Form.Item label="Schedule">
         <DatePicker
           defaultValue={data.schedule ? moment(data.schedule) : undefined}
-          format="YYYY-MM-DD HH:mm:ss"
-          showTime={{ format: 'HH:mm:ss', use12Hours: true }}
+          format="YYYY-MM-DD HH:mm"
+          showTime={{ format: 'HH:mm', use12Hours: true }}
           placeholder="Unscheduled"
           onChange={value =>
-            this.setValue('schedule', value ? value.toDate().toString() : undefined)
+            this.setValue(
+              'schedule',
+              value
+                ? value
+                    .seconds(0)
+                    .toDate()
+                    .toString()
+                : undefined
+            )
           }
         />
       </Form.Item>
@@ -209,11 +217,19 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
       <Form.Item label="Schedule">
         <DatePicker
           defaultValue={data.schedule ? moment(data.schedule) : undefined}
-          format="YYYY-MM-DD HH:mm:ss"
-          showTime={{ format: 'HH:mm:ss', use12Hours: true }}
+          format="YYYY-MM-DD HH:mm"
+          showTime={{ format: 'HH:mm', use12Hours: true }}
           placeholder="Unscheduled"
           onChange={value =>
-            this.setValue('schedule', value ? value.toDate().toString() : undefined)
+            this.setValue(
+              'schedule',
+              value
+                ? value
+                    .seconds(0)
+                    .toDate()
+                    .toString()
+                : undefined
+            )
           }
         />
       </Form.Item>

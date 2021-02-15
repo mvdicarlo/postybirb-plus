@@ -741,7 +741,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                   format="YYYY-MM-DD HH:mm"
                   showTime={{ format: 'HH:mm', use12Hours: true }}
                   placeholder="Unscheduled"
-                  onChange={value => this.setState({ postAt: value ? value.valueOf() : undefined })}
+                  onChange={value =>
+                    this.setState({ postAt: value ? value.seconds(0).valueOf() : undefined })
+                  }
                 />
               </Form.Item>
 

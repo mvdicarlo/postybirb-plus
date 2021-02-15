@@ -231,7 +231,9 @@ export class EditableSubmissions extends React.Component<Props, State> {
                                   format="YYYY-MM-DD HH:mm"
                                   showTime={{ format: 'HH:mm', use12Hours: true }}
                                   onChange={value =>
-                                    (this.scheduleManyPeriod.time = value ? value : moment())
+                                    (this.scheduleManyPeriod.time = value
+                                      ? value
+                                      : moment().seconds(0))
                                   }
                                 />
                               </Form.Item>
