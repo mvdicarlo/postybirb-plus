@@ -738,12 +738,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 </Typography.Title>
                 <DatePicker
                   value={this.state.postAt ? moment(this.state.postAt) : undefined}
-                  format="YYYY-MM-DD HH:mm"
-                  showTime={{ format: 'HH:mm', use12Hours: true }}
+                  format="YYYY-MM-DD HH:mm:ss"
+                  showTime={{ format: 'HH:mm:ss', use12Hours: true }}
                   placeholder="Unscheduled"
-                  onChange={value =>
-                    this.setState({ postAt: value ? value.seconds(0).valueOf() : undefined })
-                  }
+                  onChange={value => this.setState({ postAt: value ? value.valueOf() : undefined })}
                 />
               </Form.Item>
 

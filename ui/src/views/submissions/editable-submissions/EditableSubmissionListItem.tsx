@@ -314,10 +314,10 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
                       ? moment(this.state.postAt)
                       : undefined
                   }
-                  format="YYYY-MM-DD HH:mm"
-                  showTime={{ format: 'HH:mm', use12Hours: true }}
+                  format="YYYY-MM-DD HH:mm:ss"
+                  showTime={{ format: 'HH:mm:ss', use12Hours: true }}
                   placeholder="Unscheduled"
-                  onChange={value => (this.postAt = value ? value.seconds(0).valueOf() : undefined)}
+                  onChange={value => (this.postAt = value ? value.valueOf() : undefined)}
                 />
               </Modal>
             </List.Item>
