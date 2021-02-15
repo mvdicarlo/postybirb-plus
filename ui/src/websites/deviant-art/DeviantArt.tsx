@@ -78,6 +78,7 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
     elements.push(
       <Form.Item label="Folders">
         <Select
+          disabled={data.scraps}
           {...GenericSelectProps}
           mode="multiple"
           className="w-full"
