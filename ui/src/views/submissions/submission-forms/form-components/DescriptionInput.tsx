@@ -151,13 +151,35 @@ export default class DescriptionInput extends React.Component<Props, State> {
           (!this.data.overwriteDefault && !this.props.hideOverwrite) ? null : (
             <div>
               <Popover
+                title="Standard Shortcuts"
+                onVisibleChange={visible => this.setState({ shortcutsHovered: visible })}
+                content={
+                  <div className="overflow-auto" style={{ maxHeight: '50vh' }}>
+                    <div>Helpful shortcuts that are built into the description parser:</div>
+                    <ul>
+                      <li>
+                        <code>{'{default}'}</code>
+                        <span className="mx-1">-</span>
+                        <span>
+                          Inserts the default description text at the location of this tag.
+                          <br />
+                          Best used when overriding the default description for specific websites.
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                }
+              >
+                <Button size="small">Standard Shortcuts</Button>
+              </Popover>
+              <Popover
                 title="Username Shortcuts"
                 onVisibleChange={visible => this.setState({ shortcutsHovered: visible })}
                 content={
                   <div className="overflow-auto" style={{ maxHeight: '50vh' }}>
                     <em>
-                      Example: {'{tw:minnownade}'} -&gt; https://twitter.com/minnownade (would appear
-                      as @minnownade on Twitter)
+                      Example: {'{tw:minnownade}'} -&gt; https://twitter.com/minnownade (would
+                      appear as @minnownade on Twitter)
                     </em>
                     {Object.entries(WebsiteService.usernameShortcuts)
                       .sort((a, b) => a[0].localeCompare(b[0]))
@@ -205,6 +227,38 @@ export default class DescriptionInput extends React.Component<Props, State> {
                 }
               >
                 <Button size="small">Custom Shortcuts</Button>
+              </Popover>
+              <Popover
+                className="ml-1"
+                title="Shortcut Modifiers"
+                content={
+                  <div className="overflow-auto" style={{ maxHeight: '50vh' }}>
+                    <div>
+                      A shortcut modifier goes before a shortcut tag and is used to change how the
+                      description is parsed.
+                      <br />
+                      Format: <code>{'{[modifier=value]<tag>:<dynamic-content>}'}</code>
+                    </div>
+                    <ul>
+                      <li>
+                        <code>only</code>
+                        <span className="mx-1">-</span>
+                        <span>
+                          A tag with the <code>only</code> modifier will only have that shortcut
+                          used when sent to the specified website(s).
+                        </span>
+                        <div>
+                          <em>
+                            Example: {'{[only=twitter,discord]tw:minnownade}'} would result in only
+                            Twitter and Discord receiving the {'{tw:minnownade}'} shortcut.
+                          </em>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                }
+              >
+                <Button size="small">Shortcut Modifiers</Button>
               </Popover>
             </div>
           )
