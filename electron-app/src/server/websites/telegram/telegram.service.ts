@@ -43,13 +43,14 @@ export class Telegram extends Website {
   private lastCall: number;
 
   private async callApi<T>(appId: string, protocol: string, data: any): Promise<T> {
-    this.logger.debug(`Calling: ${protocol}`);
     if (this.lastCall) {
       const now = Date.now();
       if (now - this.lastCall <= 2000) {
-        await WaitUtil.wait(Math.max(now - this.lastCall, 1000));
+        await WaitUtil.wait(Math.max(2000 - (now - this.lastCall), 1000));
       }
     }
+
+    this.logger.debug(`Calling: ${protocol}`);
 
     let res: any;
     let resErr: any;
@@ -62,14 +63,14 @@ export class Telegram extends Website {
         if (wait > 60) {
           // Too long of a wait
           this.logger.error('Telegram wait period exceeded limit.');
-          this.logger.error(err);
+          this.logger.error(err, undefined, `TelegramAPIWaited:${protocol}`);
           resErr = err;
         } else {
           try {
             await WaitUtil.wait(1000 * (wait + 1)); // Wait timeout + 1 second
             res = (await (this.instances[appId].call(protocol, data) as unknown)) as T;
           } catch (waitErr) {
-            this.logger.error(waitErr, 'TelegramAPIWaited');
+            this.logger.error(waitErr, undefined, `TelegramAPIWaited:${protocol}`);
             resErr = waitErr;
           }
         }
@@ -98,8 +99,8 @@ export class Telegram extends Website {
   public async startAuthentication(data: TelegramAccountData) {
     this.logger.log('Starting Authentication');
     try {
-      await this.callApi(data.appId, 'auth.logOut', undefined);
       await this.createInstance(data);
+      await this.callApi(data.appId, 'auth.logOut', undefined);
       const authData = await this.callApi<{ phone_code_hash: string }>(
         data.appId,
         'auth.sendCode',
@@ -178,7 +179,6 @@ export class Telegram extends Website {
   }
 
   private async loadChannels(profileId: string, appId: string) {
-    await WaitUtil.wait(1000);
     const { chats } = await this.callApi<{
       chats: { access_hash: string; title: string; id: number; _: string }[];
     }>(appId, 'messages.getAllChats', {
@@ -296,11 +296,11 @@ export class Telegram extends Website {
             peer,
             silent: data.options.silent,
           });
-          await WaitUtil.wait(2000);
+          await WaitUtil.wait(1000);
         }
       }
 
-      WaitUtil.wait(2000);
+      WaitUtil.wait(1000);
     }
 
     return this.createPostResponse({});
