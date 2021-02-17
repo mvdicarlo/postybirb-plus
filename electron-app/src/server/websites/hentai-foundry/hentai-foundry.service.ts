@@ -41,11 +41,19 @@ export class HentaiFoundry extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<string>(this.BASE_URL, data._id);
-    if (res.body.includes('Logout')) {
+    if (res.body?.includes('Logout')) {
       status.loggedIn = true;
       status.username = res.body.match(/class=.navlink. href=.\/user\/(.*?)\//)[1];
       Http.saveSessionCookies(this.BASE_URL, data._id);
     }
+
+    // Debugging for a user
+    if (!res.body) {
+      this.logger.log(
+        `HentaiFoundry returned empty body: ${res.response.statusCode}: ${res.response.statusMessage} - ${res.error}`,
+      );
+    }
+
     return status;
   }
 
@@ -139,7 +147,7 @@ export class HentaiFoundry extends Website {
       ? tagString
           .substring(0, maxLength)
           .split(' ')
-          .filter(tag => tag.length >= 3)
+          .filter((tag) => tag.length >= 3)
           .join(' ')
       : tagString;
   }
@@ -158,9 +166,7 @@ export class HentaiFoundry extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     const { type, size, name } = submission.primary;

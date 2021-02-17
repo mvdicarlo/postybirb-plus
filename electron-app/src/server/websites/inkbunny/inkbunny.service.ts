@@ -63,9 +63,16 @@ export class Inkbunny extends Website {
           limit: 5,
         },
       });
-      if (!authCheck.body.error_code) {
+      if (!authCheck.body?.error_code) {
         status.username = accountData.username;
         status.loggedIn = true;
+      }
+
+      // Debugging for a user
+      if (!authCheck.body) {
+        this.logger.log(
+          `Inkbunny returned empty body: ${authCheck.response.statusCode}: ${authCheck.response.statusMessage} - ${authCheck.error}`,
+        );
       }
     }
 
@@ -204,19 +211,13 @@ export class Inkbunny extends Website {
   }
 
   parseTags(tags: string[]) {
-    return tags.map(tag => {
-      return tag
-        .trim()
-        .replace(/\s/gm, '_')
-        .replace(/\\/gm, '/');
+    return tags.map((tag) => {
+      return tag.trim().replace(/\s/gm, '_').replace(/\\/gm, '/');
     });
   }
 
   formatTags(tags: string[]) {
-    return super
-      .formatTags(tags)
-      .join(',')
-      .trim();
+    return super.formatTags(tags).join(',').trim();
   }
 
   transformAccountData(data: InkbunnyAccountData) {
@@ -239,12 +240,12 @@ export class Inkbunny extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
     const maxMB: number = 200;
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);

@@ -235,9 +235,12 @@ export class DeviantArt extends Website {
       form.catpath = 'scraps';
     }
 
-    options.folders.forEach((folder, i) => {
-      form[`galleryids[${i}]`] = folder;
-    });
+    // Do not send to folders when scraps is true
+    if (!options.scraps) {
+      options.folders.forEach((folder, i) => {
+        form[`galleryids[${i}]`] = folder;
+      });
+    }
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<any>(`${this.BASE_URL}/api/v1/oauth2/stash/publish`, undefined, {

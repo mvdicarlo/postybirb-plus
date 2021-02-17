@@ -37,9 +37,9 @@ export default class BrowserWindowUtil {
     const bw = await BrowserWindowUtil.createWindow(partition, url);
     try {
       return await bw.webContents.executeJavaScript(
-        `Array.from(new FormData(${
+        `JSON.parse(JSON.stringify(Array.from(new FormData(${
           selector.id ? `document.getElementById('${selector.id}')` : selector.custom
-        })).reduce((obj, [k, v]) => ({...obj, [k]: v}), {})`,
+        })).reduce((obj, [k, v]) => ({...obj, [k]: v}), {})))`,
       );
     } catch (err) {
       throw err;

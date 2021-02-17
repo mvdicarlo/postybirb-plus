@@ -38,15 +38,57 @@ export class Telegram extends Website {
   readonly acceptsFiles: string[] = ['jpg', 'gif', 'png']; // TODO expand functionality here
   private readonly instances: Record<string, MTProto> = {};
   private authData: Record<string, { phone_code_hash: string; phone_number: string }> = {};
-  acceptsAdditionalFiles = true;
+  public acceptsAdditionalFiles = true;
+  public waitBetweenPostsInterval = 30_000;
+  private lastCall: number;
+
+  private async callApi<T>(appId: string, protocol: string, data: any): Promise<T> {
+    if (this.lastCall) {
+      const now = Date.now();
+      if (now - this.lastCall <= 2000) {
+        await WaitUtil.wait(Math.max(2000 - (now - this.lastCall), 1000));
+      }
+    }
+
+    this.logger.debug(`Calling: ${protocol}`);
+
+    let res: any;
+    let resErr: any;
+    try {
+      this.lastCall = Date.now(); // Cautious set in case anything unexpected happens
+      res = await this.instances[appId].call(protocol, data);
+    } catch (err) {
+      if (err.error_message.startsWith('FLOOD_WAIT')) {
+        const wait = Number(err.error_message.split('_').pop());
+        if (wait > 60) {
+          // Too long of a wait
+          this.logger.error('Telegram wait period exceeded limit.');
+          this.logger.error(err, undefined, `TelegramAPIWaited:${protocol}`);
+          resErr = err;
+        } else {
+          try {
+            await WaitUtil.wait(1000 * (wait + 1)); // Wait timeout + 1 second
+            res = (await (this.instances[appId].call(protocol, data) as unknown)) as T;
+          } catch (waitErr) {
+            this.logger.error(waitErr, undefined, `TelegramAPIWaited:${protocol}`);
+            resErr = waitErr;
+          }
+        }
+      } else {
+        resErr = err;
+      }
+    }
+
+    this.lastCall = Date.now();
+    return resErr ? Promise.reject(resErr) : (res as T);
+  }
 
   public authenticate(data: { appId: string; code: string }) {
-    return this.instances[data.appId]
-      .call('auth.signIn', {
-        phone_number: this.authData[data.appId].phone_number,
-        phone_code: data.code,
-        phone_code_hash: this.authData[data.appId].phone_code_hash,
-      })
+    return this.callApi(data.appId, 'auth.signIn', {
+      phone_number: this.authData[data.appId].phone_number,
+      phone_code: data.code,
+      phone_code_hash: this.authData[data.appId].phone_code_hash,
+    })
       .then(() => true)
       .catch((err) => {
         this.logger.error(err);
@@ -58,7 +100,9 @@ export class Telegram extends Website {
     this.logger.log('Starting Authentication');
     try {
       await this.createInstance(data);
-      const authData: { phone_code_hash: string } = (await this.instances[data.appId].call(
+      await this.callApi(data.appId, 'auth.logOut', undefined);
+      const authData = await this.callApi<{ phone_code_hash: string }>(
+        data.appId,
         'auth.sendCode',
         {
           phone_number: data.phoneNumber,
@@ -66,7 +110,7 @@ export class Telegram extends Website {
             _: 'codeSettings',
           },
         },
-      )) as any;
+      );
 
       this.authData[data.appId] = {
         phone_code_hash: authData.phone_code_hash,
@@ -75,8 +119,10 @@ export class Telegram extends Website {
     } catch (err) {
       this.logger.error(err);
       if (err.error_message.includes('PHONE_MIGRATE')) {
+        WaitUtil.wait(1000);
         await this.instances[data.appId].setDefaultDc(Number(err.error_message.split('_').pop()));
-        const authData: { phone_code_hash: string } = (await this.instances[data.appId].call(
+        const authData = await this.callApi<{ phone_code_hash: string }>(
+          data.appId,
           'auth.sendCode',
           {
             phone_number: data.phoneNumber,
@@ -84,7 +130,7 @@ export class Telegram extends Website {
               _: 'codeSettings',
             },
           },
-        )) as any;
+        );
 
         this.authData[data.appId] = {
           phone_code_hash: authData.phone_code_hash,
@@ -133,10 +179,11 @@ export class Telegram extends Website {
   }
 
   private async loadChannels(profileId: string, appId: string) {
-    await WaitUtil.wait(1000);
-    const { chats } = (await this.instances[appId].call('messages.getAllChats', {
+    const { chats } = await this.callApi<{
+      chats: { access_hash: string; title: string; id: number; _: string }[];
+    }>(appId, 'messages.getAllChats', {
       except_ids: [],
-    })) as { chats: { access_hash: string; title: string; id: number; _: string }[] };
+    });
 
     const channels: Folder[] = chats
       .filter((c) => c._ === 'channel')
@@ -153,13 +200,13 @@ export class Telegram extends Website {
     return undefined;
   }
 
-  private async upload(client: MTProto, file: PostFileRecord) {
+  private async upload(appId: string, file: PostFileRecord) {
     const parts = _.chunk(file.file.value, 512000); // 512KB
     const file_id = Date.now();
     if (file.file.value.length >= FileSize.MBtoBytes(10)) {
       // Big file path
       for (let i = 0; i < parts.length; i++) {
-        await client.call('upload.saveBigFilePart', {
+        await this.callApi(appId, 'upload.saveBigFilePart', {
           file_id,
           file_part: i,
           file_total_parts: parts.length,
@@ -180,7 +227,7 @@ export class Telegram extends Website {
       };
     } else {
       for (let i = 0; i < parts.length; i++) {
-        await client.call('upload.saveFilePart', {
+        await this.callApi(appId, 'upload.saveFilePart', {
           file_id,
           file_part: i,
           bytes: parts[i],
@@ -206,7 +253,7 @@ export class Telegram extends Website {
     data: FilePostData<TelegramFileOptions>,
     accountData: TelegramAccountData,
   ): Promise<PostResponse> {
-    const client = this.instances[accountData.appId];
+    const appId = accountData.appId;
     const files = [data.primary, ...data.additional];
     const fileData: {
       _: string;
@@ -219,7 +266,7 @@ export class Telegram extends Website {
     }[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      fileData.push(await this.upload(client, file));
+      fileData.push(await this.upload(appId, file));
     }
 
     for (const channel of data.options.channels) {
@@ -231,7 +278,7 @@ export class Telegram extends Website {
         access_hash,
       };
       if (files.length === 1) {
-        await client.call('messages.sendMedia', {
+        await this.callApi(appId, 'messages.sendMedia', {
           random_id: Date.now(),
           media: fileData[0],
           message: data.description,
@@ -242,30 +289,18 @@ export class Telegram extends Website {
         // multimedia send
         const id = Date.now();
         for (let i = 0; i < fileData.length; i++) {
-          await client.call('messages.sendMedia', {
+          await this.callApi(appId, 'messages.sendMedia', {
             random_id: id + i,
             media: fileData[i],
             message: i === 0 ? data.description : '',
             peer,
             silent: data.options.silent,
           });
-          await WaitUtil.wait(2000);
+          await WaitUtil.wait(1000);
         }
-        // await client.call('messages.sendMultiMedia', {
-        //   peer,
-        //   silent: data.options.silent,
-        //   multi_media: [
-        //     {
-        //       _: 'inputSingleMedia',
-        //       random_id: Date.now(),
-        //       message: data.description,
-        //       media: fileData[0],
-        //     },
-        //   ],
-        // });
       }
 
-      WaitUtil.wait(2000);
+      WaitUtil.wait(1000);
     }
 
     return this.createPostResponse({});
@@ -276,11 +311,10 @@ export class Telegram extends Website {
     data: PostData<Submission, TelegramNotificationOptions>,
     accountData: TelegramAccountData,
   ) {
-    const client = this.instances[accountData.appId];
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
       const [channel_id, access_hash] = channel.split('-');
-      await client.call('messages.sendMessage', {
+      await this.callApi(accountData.appId, 'messages.sendMessage', {
         random_id: Date.now(),
         message: data.description,
         peer: {

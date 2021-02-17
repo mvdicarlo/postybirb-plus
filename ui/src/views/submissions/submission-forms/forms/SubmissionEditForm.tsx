@@ -378,13 +378,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   };
 
   primaryFileChangeAction = (file: RcFile) =>
-    `${RemoteService.getBaseUrl()}/submission/change/primary/${this.state.submission!._id}`;
+    RemoteService.getUrl(`/submission/change/primary/${this.state.submission!._id}`);
 
   thumbnailFileChangeAction = (file: RcFile) =>
-    `${RemoteService.getBaseUrl()}/submission/change/thumbnail/${this.state.submission!._id}`;
+    RemoteService.getUrl(`/submission/change/thumbnail/${this.state.submission!._id}`);
 
   additionalFileChangeAction = (file: RcFile) =>
-    `${RemoteService.getBaseUrl()}/submission/add/additional/${this.state.submission!._id}`;
+    RemoteService.getUrl(`/submission/add/additional/${this.state.submission!._id}`);
 
   fileUploadChange = (info: UploadChangeParam<UploadFile<any>>) => {
     const { status } = info.file;
@@ -738,8 +738,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                 </Typography.Title>
                 <DatePicker
                   value={this.state.postAt ? moment(this.state.postAt) : undefined}
-                  format="YYYY-MM-DD HH:mm"
-                  showTime={{ format: 'HH:mm', use12Hours: true }}
+                  format="YYYY-MM-DD HH:mm:ss"
+                  showTime={{ format: 'HH:mm:ss', use12Hours: true }}
                   placeholder="Unscheduled"
                   onChange={value => this.setState({ postAt: value ? value.valueOf() : undefined })}
                 />
