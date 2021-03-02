@@ -1,4 +1,4 @@
-import { Checkbox, DatePicker, Form, Select } from 'antd';
+import { Checkbox, DatePicker, Form, Input, Select } from 'antd';
 import _ from 'lodash';
 import moment from 'moment';
 import {
@@ -71,6 +71,9 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
     folders: []
   };
 
+  patronsOnlyId: string = '';
+  publicId: string = '';
+
   constructor(props: WebsiteSectionProps<FileSubmission, PatreonNotificationOptions>) {
     super(props);
     this.state = {
@@ -81,6 +84,15 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
       ({ data }) => {
         if (data) {
           if (!_.isEqual(this.state.folders, data)) {
+            data.forEach(tier => {
+              if (tier.label === 'Patrons Only') {
+                this.patronsOnlyId = tier.value!;
+              }
+
+              if (tier.label === 'Public') {
+                this.publicId = tier.value!;
+              }
+            });
             this.setState({ folders: data });
           }
         }
@@ -112,7 +124,19 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
           className="w-full"
           value={data.tiers}
           mode="multiple"
-          onChange={this.setValue.bind(this, 'tiers')}
+          onChange={(value: string[] | undefined) => {
+            if (value) {
+              let val = [...value];
+              if (val.includes(this.patronsOnlyId)) {
+                val = [this.patronsOnlyId];
+              } else if (val.includes(this.publicId)) {
+                val = [this.publicId];
+              }
+              this.setValue('tiers', val);
+            } else {
+              this.setState('tiers', value);
+            }
+          }}
           allowClear
         >
           {this.state.folders.map(f =>
@@ -138,6 +162,13 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
             this.setValue('schedule', value ? value.toDate().toString() : undefined)
           }
         />
+      </Form.Item>,
+      <Form.Item label="Teaser Text">
+        <Input.TextArea
+          value={data.teaser}
+          rows={3}
+          onChange={this.handleValueChange.bind(this, 'teaser')}
+        />
       </Form.Item>
     );
     return elements;
@@ -149,6 +180,9 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
     folders: []
   };
 
+  patronsOnlyId: string = '';
+  publicId: string = '';
+
   constructor(props: WebsiteSectionProps<FileSubmission, PatreonFileOptions>) {
     super(props);
     this.state = {
@@ -159,6 +193,15 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
       ({ data }) => {
         if (data) {
           if (!_.isEqual(this.state.folders, data)) {
+            data.forEach(tier => {
+              if (tier.label === 'Patrons Only') {
+                this.patronsOnlyId = tier.value!;
+              }
+
+              if (tier.label === 'Public') {
+                this.publicId = tier.value!;
+              }
+            });
             this.setState({ folders: data });
           }
         }
@@ -176,6 +219,17 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
             (Patrons will be charged their pledge amount for this post on the first of next month.)
           </small>
         </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.allAsAttachment}
+          onChange={this.handleCheckedChange.bind(this, 'allAsAttachment')}
+        >
+          Additional images as attachments{' '}
+          <small>
+            (Additional images will be posted as file attachments.)
+          </small>
+        </Checkbox>
       </div>
     );
     return elements;
@@ -190,7 +244,19 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
           className="w-full"
           value={data.tiers}
           mode="multiple"
-          onChange={this.setValue.bind(this, 'tiers')}
+          onChange={(value: string[] | undefined) => {
+            if (value) {
+              let val = [...value];
+              if (val.includes(this.patronsOnlyId)) {
+                val = [this.patronsOnlyId];
+              } else if (val.includes(this.publicId)) {
+                val = [this.publicId];
+              }
+              this.setValue('tiers', val);
+            } else {
+              this.setState('tiers', value);
+            }
+          }}
           allowClear
         >
           {this.state.folders.map(f =>
@@ -215,6 +281,13 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
           onChange={value =>
             this.setValue('schedule', value ? value.toDate().toString() : undefined)
           }
+        />
+      </Form.Item>,
+      <Form.Item label="Teaser Text">
+        <Input.TextArea
+          value={data.teaser}
+          rows={3}
+          onChange={this.handleValueChange.bind(this, 'teaser')}
         />
       </Form.Item>
     );

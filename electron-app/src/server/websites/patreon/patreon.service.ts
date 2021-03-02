@@ -305,7 +305,7 @@ export class Patreon extends Website {
       post_type: createData.data.type,
       is_paid: options.charge ? 'true' : 'false',
       title: data.title,
-      teaser_text: '',
+      teaser_text: options.teaser || '',
       post_metadata: {},
       tags: { publish: true },
     };
@@ -417,7 +417,8 @@ export class Patreon extends Website {
       for (const file of data.additional) {
         if (
           data.primary.type === FileSubmissionType.IMAGE &&
-          file.type === FileSubmissionType.IMAGE
+          file.type === FileSubmissionType.IMAGE &&
+          !data.options.allAsAttachment
         ) {
           const upload = await this.uploadFile(
             link,
@@ -455,7 +456,7 @@ export class Patreon extends Website {
       post_type: createData.data.type,
       is_paid: options.charge ? 'true' : 'false',
       title: data.title,
-      teaser_text: '',
+      teaser_text: options.teaser || '',
       post_metadata: {},
       tags: { publish: true },
     };
