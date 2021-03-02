@@ -226,10 +226,6 @@ export class PostService {
             this.accountPostTimeMap[`${data.part.accountId}-${data.part.website}`] = Date.now();
           }
 
-          // if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-          //   this.emptyQueue(submission.type);
-          // }
-
           // Save part and then check/notify
           this.partService
             .createOrUpdateSubmissionPart(
@@ -262,9 +258,9 @@ export class PostService {
     this.postingParts[type].forEach(poster => {
       poster.addSource(source);
       // Start poster that was waiting for a source
-      if (poster.waitForExternalStart) {
-        poster.doPost();
-      }
+      // if (poster.waitForExternalStart) {
+      //   poster.doPost();
+      // }
     });
   }
 
@@ -276,7 +272,7 @@ export class PostService {
       const waitingForExternal = incomplete.filter(poster => poster.waitForExternalStart);
 
       if (waitingForExternal.length === incomplete.length) {
-        // Force post start as no source was found
+        // Start posts that were awaiting external sources, even if they haven't gotten a source.
         waitingForExternal.forEach(poster => poster.doPost());
       }
     } else {
