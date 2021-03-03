@@ -41,6 +41,7 @@ export * from './interfaces/websites/artconomy/artconomy.file.options.interface'
 export * from './interfaces/websites/aryion/aryion.file.options.interface';
 export * from './interfaces/websites/custom/custom.account.interface';
 export * from './interfaces/websites/derpibooru/derpibooru.file.options.interface';
+export * from './interfaces/websites/furbooru/furbooru.file.options.interface';
 export * from './interfaces/websites/deviant-art/deviant-art.account.interface';
 export * from './interfaces/websites/deviant-art/deviant-art.file.options.interface';
 export * from './interfaces/websites/discord/discord.file.options.interface';

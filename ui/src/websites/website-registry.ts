@@ -26,6 +26,7 @@ import { Mastodon } from './mastodon/Mastodon';
 import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
 import { Telegram } from './telegram/Telegram';
+import { Furbooru } from './furbooru/Furbooru';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -36,6 +37,7 @@ export class WebsiteRegistry {
     DeviantArt: new DeviantArt(),
     Discord: new Discord(),
     FurAffinity: new FurAffinity(),
+    Furbooru: new Furbooru(),
     Furiffic: new Furiffic(),
     FurryLife: new FurryLife(),
     FurryNetwork: new FurryNetwork(),
