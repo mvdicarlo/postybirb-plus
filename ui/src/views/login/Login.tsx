@@ -30,7 +30,7 @@ export class Login extends React.Component<Props> {
         if (aLoggedIn === bLoggedIn) {
           return a[1].name.localeCompare(b[1].name);
         } else {
-          if (aLoggedIn && !bLoggedIn) return -1;
+          if (!aLoggedIn && bLoggedIn) return -1;
           else return 1;
         }
       });

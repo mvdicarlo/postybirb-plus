@@ -20,7 +20,7 @@ export default class UpdateService {
       .get('http://postybirb.com/version.html')
       .then(res => res.data)
       .then(html => {
-        const value = html.match(/name="updates" value="(.*?)"/)[1];
+        const value = html.match(/name="updates-v3" value="(.*?)"/)[1];
         if (value) {
           notification.info({
             message: 'Notice',
