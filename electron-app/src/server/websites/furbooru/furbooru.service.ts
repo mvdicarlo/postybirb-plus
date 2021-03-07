@@ -159,7 +159,7 @@ export class Furbooru extends Website {
   }
 
   formatTags(tags: string[]) {
-    return super.formatTags(tags).join(', ').trim();
+    return tags.join(', ').trim();
   }
 
   validateFileSubmission(

@@ -159,8 +159,7 @@ export class Derpibooru extends Website {
   }
 
   formatTags(tags: string[]) {
-    return super
-      .formatTags(tags)
+    return tags
       .join(', ')
       .trim();
   }
