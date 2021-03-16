@@ -22,11 +22,15 @@ export default class UpdateService {
       .then(html => {
         const value = html.match(/name="updates-v3" value="(.*?)"/)[1];
         if (value) {
-          notification.info({
-            message: 'Notice',
-            description: value,
-            duration: 10
-          });
+          // Don't post duplicate messages
+          if (localStorage.get('update-notification') !== value) {
+            localStorage.set('update-notification', value);
+            notification.info({
+              message: 'Notice',
+              description: value,
+              duration: 10
+            });
+          }
         }
       })
       .catch(() => {
