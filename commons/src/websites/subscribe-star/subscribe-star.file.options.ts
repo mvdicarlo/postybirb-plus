@@ -10,7 +10,8 @@ export class SubscribeStarFileOptionsEntity extends DefaultFileOptionsEntity
   @Expose()
   @IsOptional()
   @IsString()
-  tier?: string;
+  @DefaultValue([])
+  tiers!: string[];
 
   @Expose()
   @IsBoolean()

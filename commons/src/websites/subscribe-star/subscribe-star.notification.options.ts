@@ -10,7 +10,8 @@ export class SubscribeStarNotificationOptionsEntity extends DefaultOptionsEntity
   @Expose()
   @IsOptional()
   @IsString()
-  tier?: string;
+  @DefaultValue([])
+  tiers!: string[];
 
   @Expose()
   @IsBoolean()

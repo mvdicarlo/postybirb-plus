@@ -5,7 +5,7 @@
   "main": "lib/index",
   "types": "lib/index",
   "scripts": {
-    "build": "npm run prebuild && tsc",
+    "build": "tsc",
     "prebuild": "rimraf lib",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
