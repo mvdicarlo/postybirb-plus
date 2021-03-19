@@ -1,18 +1,16 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { detect } from 'chardet';
+import { app, nativeImage } from 'electron';
 import * as fs from 'fs-extra';
-import * as shortid from 'shortid';
+import { decode } from 'iconv-lite';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { FileRecord, FileSubmission, UploadedFile } from 'postybirb-commons';
-
-import { Injectable, Logger } from '@nestjs/common';
+import * as shortid from 'shortid';
 import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/server/directories';
-
-import { app, nativeImage } from 'electron';
-import * as gifFrames from 'gif-frames';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import { decode } from 'iconv-lite';
-import { detect } from 'chardet';
 import { ImageManipulationPoolService } from 'src/server/file-manipulation/pools/image-manipulation-pool.service';
+import { GifManipulator } from '../file-manipulation/manipulators/gif.manipulator';
 
 @Injectable()
 export class FileManagerService {
@@ -44,17 +42,13 @@ export class FileManagerService {
     if (file.mimetype.includes('image')) {
       if (file.mimetype === 'image/gif') {
         await fs.outputFile(submissionFilePath, file.buffer);
-        const [frame0] = await gifFrames({ url: file.buffer, frames: 0 });
+
+        const frame0 = await GifManipulator.getFrame(file.buffer);
         const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
-          frame0.getImage().read(),
+          frame0,
           'image/jpeg',
         );
-        thumbnail = (
-          await im
-            .resize(300)
-            .setQuality(99)
-            .getData()
-        ).buffer;
+        thumbnail = (await im.resize(300).setQuality(99).getData()).buffer;
       } else if (ImageManipulator.isMimeType(file.mimetype)) {
         const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
           file.buffer,
@@ -75,10 +69,7 @@ export class FileManagerService {
             ext: `.${ImageManipulator.getExtension(data.type)}`,
           });
 
-          const thumbnailData = await im
-            .resize(300)
-            .setQuality(99)
-            .getData();
+          const thumbnailData = await im.resize(300).setQuality(99).getData();
           thumbnail = thumbnailData.buffer;
           thumbnailFilePath = `${THUMBNAIL_FILE_DIRECTORY}/${fileId}.${ImageManipulator.getExtension(
             thumbnailData.type,
@@ -129,7 +120,7 @@ export class FileManagerService {
       submission.fallback,
       ...(submission.additional || []),
     ];
-    await Promise.all(files.filter(f => !!f).map(f => this.removeSubmissionFile(f)));
+    await Promise.all(files.filter((f) => !!f).map((f) => this.removeSubmissionFile(f)));
   }
 
   scaleImage(file: UploadedFile, scalePx: number): UploadedFile {
