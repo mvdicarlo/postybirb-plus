@@ -36,4 +36,14 @@ export default class RemoteService {
   static getBaseUrl(): string {
     return axios.defaults.baseURL || '';
   }
+
+  static testConnection() {
+    return fetch(`${localStorage.getItem('REMOTE_URI') as string}/remote/ping`, {
+      headers: {
+        Authorization: localStorage.getItem('REMOTE_AUTH') as string
+      }
+    }).then(response => {
+      return response.ok ? Promise.resolve() : Promise.reject();
+    });
+  }
 }
