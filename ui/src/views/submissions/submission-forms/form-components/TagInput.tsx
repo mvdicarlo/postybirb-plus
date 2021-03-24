@@ -71,7 +71,7 @@ export default class TagInput extends React.Component<Props, State> {
 
   filterTags(tags: string[]) {
     let filteredTags = tags.map(tag =>
-      tag.trim().replace(/("|;|\\|\[|\]|\{|\}|\||!|@|\$|%|\^|&|\*|\+|=|<|>||`|~)/g, '')
+      tag.trim().replace(/("|;|\\|\[|\]|\{|\}|\||!|@|\$|%|\^|\*|\+|=|<|>||`|~)/g, '')
     );
 
     const filter = this.props.defaultTags ? this.props.defaultTags.value : [];
@@ -90,7 +90,7 @@ export default class TagInput extends React.Component<Props, State> {
   }
 
   onKeyDown = (e: React.KeyboardEvent) => {
-    const illegalKeys: string = '";|\\[]{}=*&^%$!`~<>+';
+    const illegalKeys: string = '";|\\[]{}=*^%$!`~<>+';
     if (illegalKeys.includes(e.key)) {
       e.stopPropagation();
       e.preventDefault();
