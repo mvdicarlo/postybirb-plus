@@ -100,12 +100,12 @@ export class ParserService {
     if (tags.length) {
       const conversionMap = {};
       (await this.tagConverter.getTagConvertersForWebsite(website.constructor.name)).forEach(
-        converter => {
+        (converter) => {
           conversionMap[converter.tag] = converter.getTagForWebsite(website.constructor.name);
         },
       );
 
-      tags = tags.map(tag => conversionMap[tag] || tag);
+      tags = tags.map((tag) => conversionMap[tag] || tag).filter((tag) => !!tag.trim().length);
     }
 
     return tags;
@@ -157,11 +157,11 @@ export class ParserService {
 
     if (website.acceptsAdditionalFiles) {
       const additionalFiles = (submission.additional || []).filter(
-        record => !record.ignoredAccounts!.includes(websitePart.accountId),
+        (record) => !record.ignoredAccounts!.includes(websitePart.accountId),
       );
 
       data.additional = await Promise.all(
-        additionalFiles.map(file => this.attemptFileScale(website, file, canScale)),
+        additionalFiles.map((file) => this.attemptFileScale(website, file, canScale)),
       );
     } else {
       data.additional = [];

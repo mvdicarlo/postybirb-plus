@@ -163,11 +163,12 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
           }
         />
       </Form.Item>,
-      <Form.Item label="Teaser Text">
+      <Form.Item label="Teaser Text" help={`${(data.teaser || '').length} / 140`}>
         <Input.TextArea
           value={data.teaser}
           rows={3}
           onChange={this.handleValueChange.bind(this, 'teaser')}
+          maxLength={140}
         />
       </Form.Item>
     );
@@ -226,9 +227,7 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
           onChange={this.handleCheckedChange.bind(this, 'allAsAttachment')}
         >
           Additional images as attachments{' '}
-          <small>
-            (Additional images will be posted as file attachments.)
-          </small>
+          <small>(Additional images will be posted as file attachments.)</small>
         </Checkbox>
       </div>
     );
@@ -283,11 +282,15 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
           }
         />
       </Form.Item>,
-      <Form.Item label="Teaser Text">
+      <Form.Item
+        label="Teaser Text"
+        help={`${(data.teaser || '').length} / 140`}
+      >
         <Input.TextArea
           value={data.teaser}
           rows={3}
           onChange={this.handleValueChange.bind(this, 'teaser')}
+          maxLength={140}
         />
       </Form.Item>
     );
