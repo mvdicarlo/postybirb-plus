@@ -305,7 +305,7 @@ export class Patreon extends Website {
       post_type: createData.data.type,
       is_paid: options.charge ? 'true' : 'false',
       title: data.title,
-      teaser_text: options.teaser || '',
+      teaser_text: (options.teaser || '').slice(0, 140),
       post_metadata: {},
       tags: { publish: true },
     };
@@ -456,7 +456,7 @@ export class Patreon extends Website {
       post_type: createData.data.type,
       is_paid: options.charge ? 'true' : 'false',
       title: data.title,
-      teaser_text: options.teaser || '',
+      teaser_text: (options.teaser || '').slice(0, 140),
       post_metadata: {},
       tags: { publish: true },
     };

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
 import { nativeImage } from 'electron';
-import * as gifFrames from 'gif-frames';
 import {
   DefaultOptions,
   FileRecord,
@@ -13,6 +12,7 @@ import {
   SubmissionPart,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import { GifManipulator } from 'src/server/file-manipulation/manipulators/gif.manipulator';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -158,12 +158,12 @@ export class Newgrounds extends Website {
 
     let thumbfile = data.thumbnail ? data.thumbnail : data.primary.file;
     if (!data.thumbnail && data.primary.file.options.contentType === 'image/gif') {
-      const [frame0] = await gifFrames({ url: data.primary.file.value, frames: 0 });
+      const frame0 = await GifManipulator.getFrame(data.primary.file.value);
       thumbfile = {
-        value: frame0.getImage().read(),
+        value: frame0,
         options: {
-          filename: 'thumbnail.jpg',
-          contentType: 'image/jpg',
+          filename: 'thumbnail.png',
+          contentType: 'image/png',
         },
       };
     }

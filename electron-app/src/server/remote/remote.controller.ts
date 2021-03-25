@@ -19,4 +19,9 @@ export class RemoteController {
     }
     res.sendFile(query.uri);
   }
+
+  @Get('ping')
+  ping() {
+    return 'pong';
+  }
 }

@@ -114,7 +114,7 @@ export class SubscribeStar extends Website {
       }</div>`,
       pinned_uploads: '[]',
       new_editor: 'true',
-      'tier_ids[]': data.options.tier === 'free' ? undefined : data.options.tier,
+      'tier_ids[]': data.options.tiers.includes('free') ? undefined : data.options.tiers,
       'tags[]': data.tags,
     };
 
@@ -158,7 +158,7 @@ export class SubscribeStar extends Website {
     page.body = page.body.replace(/\&quot;/g, '"');
     const csrf = page.body.match(/<meta name="csrf-token" content="(.*?)"/)[1];
 
-    const files = [data.primary, ...data.additional].map(f => f.file);
+    const files = [data.primary, ...data.additional].map((f) => f.file);
     const postKey = page.body.match(/data-s3-upload-path=\\"(.*?)\\"/)[1];
     const uploadURL = page.body.match(/data-s3-url="(.*?)"/)[1];
     this.checkCancelled(cancellationToken);
@@ -217,7 +217,7 @@ export class SubscribeStar extends Website {
     if (files.length > 1) {
       const order = processData.imgs_and_videos
         .sort((a, b) => a.id - b.id)
-        .map(record => record.id);
+        .map((record) => record.id);
 
       const reorder = await Http.post<{ error: any; html: string }>(
         `${this.BASE_URL}/post_uploads/reorder`,
@@ -245,7 +245,7 @@ export class SubscribeStar extends Website {
       }</div>`,
       pinned_uploads: '[]',
       new_editor: 'true',
-      'tier_ids[]': data.options.tier === 'free' ? undefined : data.options.tier,
+      'tier_ids[]': data.options.tiers.includes('free') ? undefined : data.options.tiers,
       'tags[]': data.tags,
     };
 
@@ -287,29 +287,31 @@ export class SubscribeStar extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (!submissionPart.data.tier) {
-      problems.push('No access tier selected.');
+    if (!submissionPart.data.tiers) {
+      problems.push('No access tiers selected.');
     }
 
-    if (submissionPart.data.tier) {
+    if (submissionPart.data.tiers && submissionPart.data.tiers.length) {
       const folders: Folder[] = _.get(
         this.accountInformation.get(submissionPart.accountId),
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find(f => f.value === submissionPart.data.tier)) {
-        warnings.push(`Access Tier (${submissionPart.data.tier}) not found.`);
-      }
+      submissionPart.data.tiers.forEach((tier) => {
+        if (!folders.find((f) => f.value === tier)) {
+          warnings.push(`Access Tier (${tier}) not found.`);
+        }
+      });
     }
 
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       let maxMB = 5;
       if (type === FileSubmissionType.AUDIO) {
@@ -344,20 +346,23 @@ export class SubscribeStar extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    if (!submissionPart.data.tier) {
-      problems.push('No access tier selected.');
+    if (!submissionPart.data.tiers) {
+      problems.push('No access tiers selected.');
     }
 
-    if (submissionPart.data.tier) {
+    if (submissionPart.data.tiers && submissionPart.data.tiers.length) {
       const folders: Folder[] = _.get(
         this.accountInformation.get(submissionPart.accountId),
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find(f => f.value === submissionPart.data.tier)) {
-        warnings.push(`Access Tier (${submissionPart.data.tier}) not found.`);
-      }
+      submissionPart.data.tiers.forEach((tier) => {
+        if (!folders.find((f) => f.value === tier)) {
+          warnings.push(`Access Tier (${tier}) not found.`);
+        }
+      });
     }
+
     return { problems, warnings };
   }
 }

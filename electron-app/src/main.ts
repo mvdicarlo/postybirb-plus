@@ -16,8 +16,8 @@ app.commandLine.appendSwitch('disable-background-timer-throttling');
 
 process.env.PORT = process.env.PORT || '9247';
 global.AUTH_SERVER_URL = 'https://postybirb-api.cleverapps.io';
-global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
-global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
+global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
+global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
 global.CHILD_PROCESS_IDS = [];
 
@@ -40,6 +40,7 @@ let initializedOnce: boolean = false;
 let mainWindowState: WindowStateKeeper.State = null;
 let mainWindow: BrowserWindow = null;
 let backgroundAlertTimeout = null;
+let hasNotifiedAboutBackground = false;
 const icon: string = path.join(__dirname, '../build/assets/icons/minnowicon.png');
 
 // Enable windows 10 notifications
@@ -82,9 +83,9 @@ app.on(
   },
 );
 app.on('quit', () => {
-  enableSleep()
+  enableSleep();
   clearTimeout(backgroundAlertTimeout);
-  global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
+  global.CHILD_PROCESS_IDS.forEach((id) => process.kill(id));
 });
 
 async function initialize() {
@@ -153,20 +154,23 @@ function createWindow() {
     mainWindowState.manage(mainWindow);
   }
 
-  mainWindow.webContents.on('new-window', event => event.preventDefault());
+  mainWindow.webContents.on('new-window', (event) => event.preventDefault());
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (global.tray && util.isWindows()) {
       clearTimeout(backgroundAlertTimeout);
-      backgroundAlertTimeout = setTimeout(() => {
-        const notification = new Notification({
-          title: 'PostyBirb',
-          icon,
-          body: 'PostyBirb will continue in the background.',
-          silent: true,
-        });
-        notification.show();
-      }, 750);
+      if (!hasNotifiedAboutBackground) {
+        backgroundAlertTimeout = setTimeout(() => {
+          hasNotifiedAboutBackground = true;
+          const notification = new Notification({
+            title: 'PostyBirb',
+            icon,
+            body: 'PostyBirb will continue in the background.',
+            silent: true,
+          });
+          notification.show();
+        }, 750);
+      }
     }
   });
 

@@ -68,6 +68,12 @@ export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSe
       ({ data }) => {
         if (data) {
           this.setState({ tiers: data });
+          if (!this.props.part.data.tiers.length) {
+            this.setValue(
+              'tiers',
+              data.filter(tier => tier.value !== 'free').map(tier => tier.value)
+            );
+          }
         }
       }
     );
@@ -84,12 +90,14 @@ export class SubscribeStarNotificationSubmissionForm extends GenericSubmissionSe
           Use Title
         </Checkbox>
       </div>,
-      <Form.Item label="Access Tier">
+      <Form.Item label="Access Tiers">
         <Select
           {...GenericSelectProps}
           className="w-full"
-          value={data.tier}
-          onSelect={this.setValue.bind(this, 'tier')}
+          value={data.tiers}
+          onChange={this.setValue.bind(this, 'tiers')}
+          mode="multiple"
+          allowClear={true}
         >
           {this.state.tiers.map(tier => (
             <Select.Option value={tier.value}>{tier.label}</Select.Option>
@@ -118,6 +126,12 @@ export class SubscribeStarFileSubmissionForm extends GenericFileSubmissionSectio
       ({ data }) => {
         if (data) {
           this.setState({ tiers: data });
+          if (!this.props.part.data.tiers.length) {
+            this.setValue(
+              'tiers',
+              data.filter(tier => tier.value !== 'free').map(tier => tier.value)
+            );
+          }
         }
       }
     );
@@ -134,12 +148,14 @@ export class SubscribeStarFileSubmissionForm extends GenericFileSubmissionSectio
           Use Title
         </Checkbox>
       </div>,
-      <Form.Item label="Access Tier">
+      <Form.Item label="Access Tiers">
         <Select
           {...GenericSelectProps}
           className="w-full"
-          value={data.tier}
-          onSelect={this.setValue.bind(this, 'tier')}
+          value={data.tiers}
+          onChange={this.setValue.bind(this, 'tiers')}
+          mode="multiple"
+          allowClear={true}
         >
           {this.state.tiers.map(tier => (
             <Select.Option value={tier.value}>{tier.label}</Select.Option>

@@ -193,7 +193,27 @@ export class Weasyl extends Website {
       data: form,
     });
 
-    const { body } = postResponse;
+    let { body } = postResponse;
+    if (body.includes('manage_thumbnail')) {
+      const thumbnailPost = await Http.post<string>(
+        `${this.BASE_URL}/manage/thumbnail`,
+        data.part.accountId,
+        {
+          type: 'multipart',
+          data: {
+            x1: '0',
+            x2: '0',
+            y1: '0',
+            y2: '0',
+            thumbfile: '',
+            submitid: HtmlParserUtil.getInputValue(body, 'submitid'),
+            token: HtmlParserUtil.getInputValue(body, 'token'),
+          },
+        },
+      );
+      body = thumbnailPost.body;
+    }
+
     if (body.includes('You have already made a submission with this submission file')) {
       return this.createPostResponse({
         message: 'You have already made a submission with this submission file',
@@ -254,7 +274,7 @@ export class Weasyl extends Website {
     const convertedFolders: Folder[] = [];
 
     const folders = res.body.folders || [];
-    folders.forEach(f => {
+    folders.forEach((f) => {
       const folder: Folder = {
         label: f.title,
         value: f.folder_id,
@@ -263,7 +283,7 @@ export class Weasyl extends Website {
       convertedFolders.push(folder);
 
       if (f.subfolders) {
-        f.subfolders.forEach(sf => {
+        f.subfolders.forEach((sf) => {
           const subfolder: Folder = {
             label: `${folder.label} / ${sf.title}`,
             value: sf.folder_id,
@@ -296,7 +316,7 @@ export class Weasyl extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find(f => f.value === submissionPart.data.folder)) {
+      if (!folders.find((f) => f.value === submissionPart.data.folder)) {
         warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
     }
@@ -307,16 +327,12 @@ export class Weasyl extends Website {
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
         problems.push('A fallback file is required.');
       } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
         warnings.push('The fallback text will be used.');
       } else {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
       }
     }
 

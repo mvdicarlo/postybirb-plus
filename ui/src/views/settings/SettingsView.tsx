@@ -12,10 +12,12 @@ import {
   Radio,
   Input,
   Typography,
-  Button
+  Button,
+  message
 } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 import UpdateService from '../../services/update.service';
+import RemoteService from '../../services/remote.service';
 
 interface Props {
   settingsStore?: SettingsStore;
@@ -212,7 +214,7 @@ export default class SettingsView extends React.Component<Props> {
           </Collapse.Panel>
           <Collapse.Panel header="Remote" key="remote">
             <p>
-              Connect to a PostyBirb client over the internet.
+              Connect to a PostyBirb client over the internet/LAN.
               <br />
               <strong>
                 Any changes to these settings will require you to refresh the application (ctrl+r or
@@ -222,19 +224,55 @@ export default class SettingsView extends React.Component<Props> {
             <Typography.Paragraph copyable={{ text: window.AUTH_ID }}>
               My Authorization Code: <em>{window.AUTH_ID}</em>
             </Typography.Paragraph>
-            <Form.Item label="URL">
+            <Form.Item label="URL" help={`<IP Address>:<Port (default is 9247)>`}>
               <Input
-                placeholder={`https://localhost:${window.PORT}`}
-                defaultValue={localStorage.getItem('REMOTE_URI') || ''}
-                onBlur={({ target }) => localStorage.setItem('REMOTE_URI', target.value)}
+                addonBefore="https://"
+                placeholder={`localhost:${window.PORT}`}
+                defaultValue={(localStorage.getItem('REMOTE_URI') || '').replace(
+                  /http(s){0,1}:\/\//,
+                  ''
+                )}
+                onBlur={({ target }) => {
+                  localStorage.setItem(
+                    'REMOTE_URI',
+                    target.value.trim()
+                      ? `https://${target.value.replace(/http(s){0,1}:\/\//, '')}`
+                      : ''
+                  );
+                  this.setState({});
+                }}
               />
             </Form.Item>
-            <Form.Item label="Authorization (You will need to get this from the other PostyBirb instance)">
+            <Form.Item
+              label="Authorization Code"
+              help="Authorization code can be found on the settings page of the client you are connecting to."
+            >
               <Input
                 placeholder={window.AUTH_ID}
                 defaultValue={localStorage.getItem('REMOTE_AUTH') || ''}
-                onBlur={({ target }) => localStorage.setItem('REMOTE_AUTH', target.value)}
+                onBlur={({ target }) => {
+                  localStorage.setItem('REMOTE_AUTH', target.value);
+                  this.setState({});
+                }}
               />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                disabled={
+                  !(!!localStorage.getItem('REMOTE_URI') && !!localStorage.getItem('REMOTE_AUTH'))
+                }
+                onClick={() =>
+                  RemoteService.testConnection()
+                    .then(() => {
+                      message.success('Test successful.');
+                    })
+                    .catch(() => {
+                      message.error('Test failed.');
+                    })
+                }
+              >
+                Test Connection
+              </Button>
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Updates" key="updates">
