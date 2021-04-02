@@ -30,6 +30,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
+import FormContent from 'src/server/utils/form-content.util';
 
 @Injectable()
 export class Telegram extends Website {
@@ -269,6 +270,8 @@ export class Telegram extends Website {
       fileData.push(await this.upload(appId, file));
     }
 
+    const description = data.description.slice(0, 4096).trim();
+
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
       const [channel_id, access_hash] = channel.split('-');
@@ -278,21 +281,48 @@ export class Telegram extends Website {
         access_hash,
       };
       if (files.length === 1) {
+        let messagePosted = false;
+        if (description.length > 1024) {
+          messagePosted = true;
+          await this.callApi(accountData.appId, 'messages.sendMessage', {
+            random_id: Date.now(),
+            message: data.description.slice(0, 4096).trim(),
+            peer: {
+              _: 'inputPeerChannel',
+              channel_id,
+              access_hash,
+            },
+          });
+        }
         await this.callApi(appId, 'messages.sendMedia', {
           random_id: Date.now(),
           media: fileData[0],
-          message: data.description,
+          message: messagePosted ? '' : data.description,
           peer,
           silent: data.options.silent,
         });
       } else {
+        let messagePosted = false;
+        if (description.length > 1024) {
+          messagePosted = true;
+          await this.callApi(accountData.appId, 'messages.sendMessage', {
+            random_id: Date.now(),
+            message: data.description.slice(0, 4096).trim(),
+            peer: {
+              _: 'inputPeerChannel',
+              channel_id,
+              access_hash,
+            },
+          });
+        }
+
         // multimedia send
         const id = Date.now();
         for (let i = 0; i < fileData.length; i++) {
           await this.callApi(appId, 'messages.sendMedia', {
             random_id: id + i,
             media: fileData[i],
-            message: i === 0 ? data.description : '',
+            message: messagePosted ? '' : i === 0 ? data.description : '',
             peer,
             silent: data.options.silent,
           });
@@ -316,7 +346,7 @@ export class Telegram extends Website {
       const [channel_id, access_hash] = channel.split('-');
       await this.callApi(accountData.appId, 'messages.sendMessage', {
         random_id: Date.now(),
-        message: data.description,
+        message: data.description.slice(0, 4096).trim(),
         peer: {
           _: 'inputPeerChannel',
           channel_id,
@@ -371,6 +401,14 @@ export class Telegram extends Website {
       }
     });
 
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    );
+
+    if (description.length > 4096) {
+      warnings.push('Max description length allowed is 4,096 characters.');
+    }
+
     return { problems, warnings };
   }
 
@@ -395,6 +433,14 @@ export class Telegram extends Website {
       });
     } else {
       problems.push('No channel(s) selected.');
+    }
+
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    );
+
+    if (description.length > 4096) {
+      warnings.push('Max description length allowed is 4,096 characters.');
     }
 
     return { problems, warnings };
