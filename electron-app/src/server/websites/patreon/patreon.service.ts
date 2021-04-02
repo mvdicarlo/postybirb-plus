@@ -466,6 +466,10 @@ export class Patreon extends Website {
       attributes.tags.publish = false;
     }
 
+    if (options.earlyAccess) {
+      attributes.change_visibility_at = this.toUTCISO(options.earlyAccess);
+    }
+
     const relationships = {
       post_tag: {
         data: relationshipTags.length > 0 ? relationshipTags[0] : {},

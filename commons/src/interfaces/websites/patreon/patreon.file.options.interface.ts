@@ -6,4 +6,5 @@ export interface PatreonFileOptions extends DefaultFileOptions {
   schedule?: string; // as date string
   teaser?: string;
   allAsAttachment: boolean;
+  earlyAccess?: Date;
 }

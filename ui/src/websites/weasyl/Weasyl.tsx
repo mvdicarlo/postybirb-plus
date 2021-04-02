@@ -130,6 +130,7 @@ export class WeasylFileSubmissionForm extends GenericFileSubmissionSection<Weasy
           value={data.folder}
           onSelect={this.setValue.bind(this, 'folder')}
         >
+          <Select.Option value={undefined}>None</Select.Option>
           {this.state.folders.map(f => (
             <Select.Option value={f.value}>{f.label}</Select.Option>
           ))}
