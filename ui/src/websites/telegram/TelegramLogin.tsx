@@ -1,4 +1,4 @@
-import { Button, Form, Input, message, Modal } from 'antd';
+import { Button, Form, Icon, Input, message, Modal } from 'antd';
 import { TelegramAccountData } from 'postybirb-commons';
 import React from 'react';
 import BrowserLink from '../../components/BrowserLink';
@@ -80,7 +80,7 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
             extra={
               <div>
                 <BrowserLink url="https://core.telegram.org/myapp">
-                  You must create you own app configuration.
+                  You must create you own app configuration <Icon type="link" />
                 </BrowserLink>
               </div>
             }
@@ -97,7 +97,7 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
             extra={
               <div>
                 <BrowserLink url="https://core.telegram.org/myapp">
-                  You must create you own app configuration.
+                  You must create you own app configuration <Icon type="link" />
                 </BrowserLink>
               </div>
             }
@@ -115,7 +115,7 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
             extra={
               <div>
                 <BrowserLink url="https://developers.omnisend.com/guides/e164-phone-number-formatting">
-                  Phone number must be in international format.
+                  Phone number must be in international format <Icon type="link" />
                 </BrowserLink>
               </div>
             }
