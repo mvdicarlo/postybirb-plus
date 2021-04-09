@@ -97,7 +97,7 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
             extra={
               <div>
                 <BrowserLink url="https://core.telegram.org/myapp">
-                  You must create you own app configuration <Icon type="link" />
+                  You must create your own app configuration <Icon type="link" />
                 </BrowserLink>
               </div>
             }
@@ -147,16 +147,20 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
               return;
             }
 
-            WebsiteService.postCustomRoute<boolean>(this.props.account.website, 'authenticate', {
-              appId: this.state.appId,
-              code: this.state.code
-            })
-              .then(success => {
-                if (success) {
+            WebsiteService.postCustomRoute<{ result: boolean; message?: string }>(
+              this.props.account.website,
+              'authenticate',
+              {
+                appId: this.state.appId,
+                code: this.state.code
+              }
+            )
+              .then(res => {
+                if (res.result) {
                   message.success('Telegram authenticated.');
                   this.setState({ displayCodeDialog: false });
                 } else {
-                  message.error('Failed to authenticate Telegram.');
+                  message.error(res.message || 'Failed to authenticate Telegram.');
                 }
               })
               .catch(() => {

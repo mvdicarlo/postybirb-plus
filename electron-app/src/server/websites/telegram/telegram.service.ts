@@ -90,10 +90,12 @@ export class Telegram extends Website {
       phone_code: data.code,
       phone_code_hash: this.authData[data.appId].phone_code_hash,
     })
-      .then(() => true)
+      .then(() => {
+        result: true;
+      })
       .catch((err) => {
         this.logger.error(err);
-        return false;
+        return { result: false, message: err.error_message };
       });
   }
 
