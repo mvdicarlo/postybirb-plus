@@ -30,6 +30,7 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import * as _ from 'lodash';
 
 @Injectable()
 export class Mastodon extends Website {
@@ -81,7 +82,7 @@ export class Mastodon extends Website {
     return { maxSize: FileSize.MBtoBytes(300) };
   }
 
-  private async uploadMedia(data: MastodonAccountData, file: PostFile): Promise<string> {
+  private async uploadMedia(data: MastodonAccountData, file: PostFile): Promise<{ id: string }> {
     const upload = await Http.post<{ id: string; errors: any }>(
       `${data.website}/api/v1/media`,
       undefined,
@@ -106,7 +107,7 @@ export class Mastodon extends Website {
       );
     }
 
-    return upload.body.id;
+    return { id: upload.body.id };
   }
 
   async postFileSubmission(
@@ -116,29 +117,47 @@ export class Mastodon extends Website {
   ): Promise<PostResponse> {
     const M = this.getMastodonInstance(accountData);
 
-    const files = [data.primary, ...data.additional].slice(0, 4);
+    const files = [data.primary, ...data.additional];
     this.checkCancelled(cancellationToken);
-    const uploadIds = await Promise.all(
-      files.map(file => this.uploadMedia(accountData, file.file)),
-    );
+    const uploadedMedias: {
+      id: string;
+    }[] = [];
+    for (const file of files) {
+      uploadedMedias.push(await this.uploadMedia(accountData, file.file));
+    }
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-
     const { options } = data;
-    const form: any = {
-      status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${
-        data.description
-      }`.substring(0, 500),
-      sensitive: isSensitive,
-      media_ids: uploadIds,
-    };
+    const chunks = _.chunk(uploadedMedias, 4);
+    let lastId = undefined;
+    for (let i = 0; i < chunks.length; i++) {
+      let form = undefined;
+      if (i === 0) {
+        form = {
+          status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${
+            data.description
+          }`.substring(0, 500),
+          sensitive: isSensitive,
+          media_ids: chunks[i].map((media) => media.id),
+        };
+      } else {
+        form = {
+          sensitive: isSensitive,
+          media_ids: chunks[i].map((media) => media.id),
+          in_reply_to_id: lastId,
+        };
+      }
 
-    if (options.spoilerText) {
-      form.spoiler_text = options.spoilerText;
+      if (options.spoilerText) {
+        form.spoiler_text = options.spoilerText;
+      }
+
+      const post = await M.post('statuses', form);
+      lastId = post.data.id;
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await M.post('statuses', form);
+
     return this.createPostResponse({});
   }
 
@@ -188,12 +207,12 @@ export class Mastodon extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
     const maxMB: number = 300;
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
