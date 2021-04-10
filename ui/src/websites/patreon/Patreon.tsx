@@ -282,10 +282,18 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
           }
         />
       </Form.Item>,
-      <Form.Item
-        label="Teaser Text"
-        help={`${(data.teaser || '').length} / 140`}
-      >
+      <Form.Item label="Early Access">
+        <DatePicker
+          defaultValue={data.earlyAccess ? moment(data.earlyAccess) : undefined}
+          format="YYYY-MM-DD HH:mm:ss"
+          showTime={{ format: 'HH:mm:ss', use12Hours: true }}
+          placeholder="Unscheduled"
+          onChange={value =>
+            this.setValue('earlyAccess', value ? value.toDate().toString() : undefined)
+          }
+        />
+      </Form.Item>,
+      <Form.Item label="Teaser Text" help={`${(data.teaser || '').length} / 140`}>
         <Input.TextArea
           value={data.teaser}
           rows={3}

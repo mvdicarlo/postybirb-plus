@@ -203,7 +203,7 @@ export class Newgrounds extends Website {
     }
 
     const newCookies: any = {};
-    parkFile.response.headers['set-cookie'].forEach(cookie => {
+    parkFile.response.headers['set-cookie'].forEach((cookie) => {
       const cookieParts = cookie.split(';')[0].split('=');
       return (newCookies[cookieParts[0]] = cookieParts[1]);
     });
@@ -240,7 +240,14 @@ export class Newgrounds extends Website {
     } else {
       let message = '';
       try {
-        message = post.body.errors.join(' ');
+        message = post.body.errors
+          .map((err) => {
+            if (err.includes('You must agree to the terms of the submissions agreement.')) {
+              return 'You must first manually post to Newgrounds to accept the terms of the submissions agreement.';
+            }
+            return err;
+          })
+          .join(' ');
       } catch (err) {
         message = (cheerio.load(post.body.error) as any).text();
       }
@@ -256,7 +263,7 @@ export class Newgrounds extends Website {
   formatTags(tags: string[]): any {
     return super
       .formatTags(tags, { spaceReplacer: '-' })
-      .map(tag => {
+      .map((tag) => {
         return tag.replace(/(\(|\)|:|#|;|\]|\[|')/g, '').replace(/_/g, '-');
       })
       .slice(0, 12);
@@ -288,9 +295,7 @@ export class Newgrounds extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     const { type, size, name } = submission.primary;
