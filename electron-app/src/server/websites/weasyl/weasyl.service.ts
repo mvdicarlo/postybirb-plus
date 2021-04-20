@@ -178,7 +178,7 @@ export class Weasyl extends Website {
     }
 
     const { options } = data;
-    if (options.notify) {
+    if (!options.notify) {
       form.nonotification = 'on';
     }
     if (options.critique) {
