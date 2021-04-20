@@ -103,7 +103,7 @@ export default class TagInput extends React.Component<Props, State> {
       this.setState({ loading: true });
       this.props
         .searchProvider(searchTerm)
-        .then(suggestions => this.setState({ suggestions }))
+        .then(suggestions => this.setState({ suggestions: suggestions || [] }))
         .finally(() => this.setState({ loading: false }));
     }
   }, 200);
@@ -123,13 +123,14 @@ export default class TagInput extends React.Component<Props, State> {
       </div>
     );
 
-    const selectOptions = _.uniq([...this.state.suggestions, ...this.props.defaultValue.value]).map(
-      tag => (
-        <Select.Option key={tag} value={tag}>
-          {tag}
-        </Select.Option>
-      )
-    );
+    const selectOptions = _.uniq([
+      ...(this.state.suggestions || []),
+      ...(this.props.defaultValue.value || [])
+    ]).map(tag => (
+      <Select.Option key={tag} value={tag}>
+        {tag}
+      </Select.Option>
+    ));
     return (
       <Form.Item label={this.props.label} required={!!this.options.minTags}>
         {tagSwitch}

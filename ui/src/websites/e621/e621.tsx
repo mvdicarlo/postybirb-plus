@@ -30,8 +30,11 @@ export class e621 extends WebsiteImpl {
               'search[name_matches]': value
             }
           })
-            .then(({ data }) => data.map(d => d.name))
-            .catch(console.error);
+            .then(({ data }) => (data || []).map(d => d.name))
+            .catch(err => {
+              console.error(err);
+              return [];
+            });
         }
       }}
       key={props.part.accountId}
