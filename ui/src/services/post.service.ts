@@ -8,7 +8,7 @@ export default class PostService {
   }
 
   static cancelAll(type: SubmissionType) {
-    return axios.post(`post/cancellAll/${type}`);
+    return axios.post(`post/clearQueue/${type}`);
   }
 
   static getStatus() {

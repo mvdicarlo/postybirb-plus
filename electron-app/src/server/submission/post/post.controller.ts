@@ -38,8 +38,8 @@ export class PostController {
     return this.service.cancel((await this.submissionService.get(id)) as Submission);
   }
 
-  @Post('cancelAll/:type')
-  async cancelAll(@Param('type') type: SubmissionType) {
-    return this.service.emptyQueue(type);
+  @Post('clearQueue/:type')
+  async cancelAll(@Param('type') type: string) {
+    return this.service.emptyQueue(type as SubmissionType);
   }
 }
