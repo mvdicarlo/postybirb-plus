@@ -104,7 +104,7 @@ export class Pillowfort extends Website {
     if (data.options.allowReblogging) {
       form.rebloggable = 'on';
     }
-    if (!data.options.allowComments) {
+    if (data.options.allowComments) {
       form.commentable = 'on';
     }
     if (data.rating !== SubmissionRating.GENERAL) {
