@@ -15,6 +15,7 @@ import {
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
+import { GifManipulator } from 'src/server/file-manipulation/manipulators/gif.manipulator';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -44,6 +45,7 @@ export class DeviantArt extends Website {
     'swf',
     'tiff',
     'tif',
+    'gif',
   ];
   readonly refreshInterval = 10 * 60000;
   readonly usernameShortcuts = [
@@ -114,9 +116,9 @@ export class DeviantArt extends Website {
 
     const folders: Folder[] = [];
     const results = res.body.results || [];
-    results.forEach(folder => {
+    results.forEach((folder) => {
       const parent = folder.parent
-        ? results.find(f => f.folderid === folder.parent && f.name !== 'Featured')
+        ? results.find((f) => f.folderid === folder.parent && f.name !== 'Featured')
         : undefined;
       folders.push({
         value: folder.folderid,
@@ -141,10 +143,7 @@ export class DeviantArt extends Website {
       .replace(/style="text-align:right;"/g, 'align="right"');
 
     text = UsernameParser.replaceText(text, 'da', ':icon$1::dev$1:');
-    return text
-      .replace(/<p/gm, '<div')
-      .replace(/<\/p>/gm, '</div>')
-      .replace(/\n/g, '');
+    return text.replace(/<p/gm, '<div').replace(/<\/p>/gm, '</div>').replace(/\n/g, '');
   }
 
   private getDefaultCategoryType(type: FileSubmissionType): string {
@@ -172,10 +171,23 @@ export class DeviantArt extends Website {
     };
 
     this.parseTags(data.tags)
-      .map(t => t.replace(/\//g, '_'))
+      .map((t) => t.replace(/\//g, '_'))
       .forEach((t, i) => {
         uploadForm[`tags[${i}]`] = t;
       });
+
+    if (data.thumbnail) {
+      uploadForm.preview = data.thumbnail;
+    } else if (data.primary.file.options.contentType === 'image/gif') {
+      const frame0 = await GifManipulator.getFrame(data.primary.file.value);
+      uploadForm.preview = {
+        value: frame0,
+        options: {
+          filename: 'thumbnail.png',
+          contentType: 'image/png',
+        },
+      };
+    }
 
     this.checkCancelled(cancellationToken);
     const upload = await Http.post<{ itemid: string; error_description: string }>(
@@ -314,7 +326,7 @@ export class DeviantArt extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.folders.forEach(f => {
+      submissionPart.data.folders.forEach((f) => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Folder (${f}) not found.`);
         }
@@ -327,9 +339,7 @@ export class DeviantArt extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     const { type, size, name } = submission.primary;
