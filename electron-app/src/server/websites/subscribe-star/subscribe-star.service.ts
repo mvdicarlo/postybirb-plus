@@ -160,19 +160,33 @@ export class SubscribeStar extends Website {
 
     const files = [data.primary, ...data.additional].map((f) => f.file);
     const postKey = page.body.match(/data-s3-upload-path=\\"(.*?)\\"/)[1];
-    const uploadURL = page.body.match(/data-s3-url="(.*?)"/)[1];
+    const bucket = page.body.match(/data-s3-bucket="(.*?)"/)[1];
     this.checkCancelled(cancellationToken);
     let processData = null;
     for (const file of files) {
       const key = `${postKey}/${v1()}.${file.options.filename.split('.').pop()}`;
-      const postFile = await Http.post<string>(uploadURL, data.part.accountId, {
+
+      const presignUrl = `${
+        this.BASE_URL
+      }/presigned_url/upload?_=${Date.now()}&key=${encodeURIComponent(
+        key,
+      )}&file_name=${encodeURIComponent(file.options.filename)}&content_type=${encodeURIComponent(
+        file.options.contentType,
+      )}&bucket=${bucket}`;
+      const presign = await Http.get<{ url: string; fields?: object }>(
+        presignUrl,
+        data.part.accountId,
+        {
+          requestOptions: {
+            json: true,
+          },
+        },
+      );
+
+      const postFile = await Http.post<string>(presign.body.url, data.part.accountId, {
         type: 'multipart',
         data: {
-          key,
-          acl: 'public-read',
-          success_action_Status: '201',
-          'Content-Type': file.options.contentType,
-          'x-amz-meta-original-filename': file.options.filename,
+          ...presign.body.fields,
           file,
           authenticity_token: csrf,
         },
@@ -183,21 +197,21 @@ export class SubscribeStar extends Website {
       });
 
       this.verifyResponse(postFile, 'Uploading File');
-      const $ = cheerio.load(postFile.body);
       const record: any = {
-        path: $('Key').text(),
-        url: $('Location').text(),
+        path: key,
+        url: `${presign.body.url}/${key}`,
         original_filename: file.options.filename,
         content_type: file.options.contentType,
-        bucket: $('Bucket').text(),
-        etag: $('ETag').text(),
+        bucket,
         authenticity_token: csrf,
       };
+
       if (record.content_type.includes('image')) {
         const { width, height } = nativeImage.createFromBuffer(file.value).getSize();
         record.width = width;
         record.height = height;
       }
+
       const processFile = await Http.post(
         `${this.BASE_URL}/post_uploads/process_s3_attachments.json`,
         data.part.accountId,
