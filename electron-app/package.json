@@ -37,13 +37,13 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@mtproto/core": "^5.3.0",
     "@nestjs/common": "^7.6.7",
     "@nestjs/core": "^7.6.7",
     "@nestjs/platform-express": "^7.6.7",
     "@nestjs/platform-socket.io": "^7.6.7",
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/websockets": "^7.6.7",
-    "@mtproto/core": "^5.3.0",
     "chardet": "^0.8.0",
     "cheerio": "^1.0.0-rc.5",
     "class-transformer": "^0.3.1",
@@ -52,6 +52,7 @@
     "electron-context-menu": "^0.15.2",
     "electron-updater": "^4.3.5",
     "electron-window-state": "^5.0.3",
+    "form-data": "^4.0.0",
     "fs-extra": "^8.1.0",
     "iconv-lite": "^0.5.1",
     "image-decode": "^1.2.2",

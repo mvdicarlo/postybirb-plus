@@ -21,6 +21,7 @@ import { CancellationToken } from 'src/server/submission/post/cancellation/cance
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
+import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
@@ -35,12 +36,13 @@ export class KoFi extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(`${this.BASE_URL}/settings`, data._id);
-    if (!res.body.includes('btn-login')) {
+    // const res = await Http.get<string>(`${this.BASE_URL}`, data._id);
+    const body = await BrowserWindowUtil.getPage(data._id, `${this.BASE_URL}/settings`, true); //Bypass captcha check
+    if (!body.includes('btn-login')) {
       status.loggedIn = true;
-      status.username = HtmlParserUtil.getInputValue(res.body, 'DisplayName');
-      this.storeAccountInformation(data._id, 'id', res.body.match(/pageId:\s'(.*?)'/)[1]);
-      await this.getAlbums(res.body.match(/buttonId:\s'(.*?)'/)[1], data._id);
+      status.username = HtmlParserUtil.getInputValue(body, 'DisplayName');
+      this.storeAccountInformation(data._id, 'id', body.match(/pageId:\s'(.*?)'/)[1]);
+      await this.getAlbums(body.match(/buttonId:\s'(.*?)'/)[1], data._id);
     }
 
     return status;
@@ -58,11 +60,7 @@ export class KoFi extends Website {
       if (label !== 'New') {
         albums.push({
           label,
-          value: $el
-            .children('a')
-            .attr('href')
-            .split('/')
-            .pop(),
+          value: $el.children('a').attr('href').split('/').pop(),
         });
       }
     });
@@ -105,9 +103,6 @@ export class KoFi extends Website {
       {
         type: 'multipart',
         data: form,
-        headers: {
-          Referer: 'https://ko-fi.com/',
-        },
       },
     );
 
@@ -125,18 +120,20 @@ export class KoFi extends Website {
       Album: data.options.album || '',
       Title: data.title,
       Description: data.description,
-      PostToTwitter: 'false',
-      EnableHiRes: data.options.hiRes ? 'true' : 'false',
+      PostToTwitter: false,
+      EnableHiRes: data.options.hiRes ? true : false,
       ImageUploadIds: [json[0].ExternalId],
       Audience: data.options.audience || 'public',
     };
 
+
+    console.log(formUpdate)
     this.checkCancelled(cancellationToken);
     const postResponse = await Http.post(
       `${this.BASE_URL}/Feed/AddImageFeedItem`,
       data.part.accountId,
       {
-        type: 'multipart',
+        type: 'json',
         data: formUpdate,
         requestOptions: { gzip: true },
         headers: {
@@ -236,7 +233,7 @@ export class KoFi extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find(f => f.value === submissionPart.data.album)) {
+      if (!folders.find((f) => f.value === submissionPart.data.album)) {
         warnings.push(`Folder (${submissionPart.data.album}) not found.`);
       }
     }
@@ -247,9 +244,7 @@ export class KoFi extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     return { problems, warnings };
