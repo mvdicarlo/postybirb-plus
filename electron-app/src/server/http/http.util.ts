@@ -1,10 +1,12 @@
 import * as request from 'request';
-import { session } from 'electron';
+import { BrowserWindow, session } from 'electron';
 import 'url';
 import * as _ from 'lodash';
 import CookieConverter from 'src/server/utils/cookie-converter.util';
 import * as setCookie from 'set-cookie-parser';
 import { Logger } from '@nestjs/common';
+const FormData = require('form-data');
+
 interface GetOptions {
   headers?: any;
   updateCookies?: boolean;
@@ -189,7 +191,7 @@ export default class Http {
     }
 
     return new Promise((resolve) => {
-      const request = Http.Request[type](uri, opts, (error, response, body) => {
+      const request = Http.Request[type](uri, opts, async (error, response, body) => {
         const res: HttpResponse<T> = {
           error,
           response,
@@ -198,6 +200,96 @@ export default class Http {
         };
         if (error) {
           Http.logger.error(error, null, uri);
+        }
+        if (typeof body === 'string' && body.includes('resolve_captcha')) {
+          if (options.type === 'multipart') {
+            const win = new BrowserWindow({
+              show: true,
+              webPreferences: {
+                partition: `persist:${partitionId}`,
+                enableRemoteModule: false,
+              },
+            });
+
+            const form = new FormData();
+            Object.entries(options.data).forEach(([key, value]: [string, any]) => {
+              if (value.options && value.value) {
+                form.append(key, value.value, value.options);
+              } else if (Array.isArray(value)) {
+                form.append(key, JSON.stringify(value));
+              } else {
+                form.append(key, value);
+              }
+            });
+
+            const opts = {
+              postData: [
+                {
+                  type: 'rawData',
+                  bytes: form.getBuffer(),
+                },
+              ],
+              extraHeaders: [
+                `Content-Type: ${form.getHeaders()['content-type']}`,
+                ...Object.entries(options.headers || {}).map(([key, value]) => `${key}: ${value}`),
+              ].join('\n'),
+            };
+            try {
+              await win.loadURL(uri, opts);
+              const result = await win.webContents.executeJavaScript('document.body.innerText');
+              let data = null;
+              try {
+                data = options.requestOptions.json ? JSON.parse(result) : result;
+              } catch {
+                data = result;
+              }
+              res.body = data;
+              // Potential false completes?
+              res.response.statusCode = 200;
+            } catch (err) {
+              Http.logger.warn(err, `Cloudflare Skip: ${uri}`);
+            } finally {
+              win.destroy();
+            }
+          } else if (options.type === 'json') {
+            const win = new BrowserWindow({
+              show: true,
+              webPreferences: {
+                partition: `persist:${partitionId}`,
+                enableRemoteModule: false,
+              },
+            });
+
+            const opts = {
+              postData: [
+                {
+                  type: 'rawData',
+                  bytes: Buffer.from(JSON.stringify(options.data)),
+                },
+              ],
+              extraHeaders: [
+                `Content-Type: application/json`,
+                ...Object.entries(options.headers || {}).map(([key, value]) => `${key}: ${value}`),
+              ].join('\n'),
+            };
+            try {
+              await win.loadURL(uri, opts);
+              const result = await win.webContents.executeJavaScript('document.body.innerText');
+              let data = null;
+              try {
+                data = options.requestOptions.json ? JSON.parse(result) : result;
+              } catch {
+                data = result;
+              }
+              res.body = data;
+              // Potential false completes?
+              res.response.statusCode = 200;
+            } catch (err) {
+              Http.logger.warn(err, `Cloudflare Skip: ${uri}`);
+            } finally {
+              win.destroy();
+            }
+          }
         }
         resolve(res);
       });
