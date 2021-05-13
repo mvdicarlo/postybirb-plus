@@ -45,7 +45,6 @@ export class DeviantArt extends Website {
     'swf',
     'tiff',
     'tif',
-    'gif',
   ];
   readonly refreshInterval = 10 * 60000;
   readonly usernameShortcuts = [
@@ -175,19 +174,6 @@ export class DeviantArt extends Website {
       .forEach((t, i) => {
         uploadForm[`tags[${i}]`] = t;
       });
-
-    if (data.thumbnail) {
-      uploadForm.preview = data.thumbnail;
-    } else if (data.primary.file.options.contentType === 'image/gif') {
-      const frame0 = await GifManipulator.getFrame(data.primary.file.value);
-      uploadForm.preview = {
-        value: frame0,
-        options: {
-          filename: 'thumbnail.png',
-          contentType: 'image/png',
-        },
-      };
-    }
 
     this.checkCancelled(cancellationToken);
     const upload = await Http.post<{ itemid: string; error_description: string }>(
