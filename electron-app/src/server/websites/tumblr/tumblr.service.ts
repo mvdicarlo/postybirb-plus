@@ -186,7 +186,7 @@ export class Tumblr extends Website {
 
       let maxMB: number = 10;
       if (type === FileSubmissionType.IMAGE && mimetype === 'image/gif') {
-        maxMB = 1;
+        maxMB = 10;
       } else if (type === FileSubmissionType.VIDEO) {
         maxMB = 100;
       }
