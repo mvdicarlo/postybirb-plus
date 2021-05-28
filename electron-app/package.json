@@ -69,7 +69,7 @@
     "request": "^2.88.0",
     "rimraf": "^3.0.0",
     "rxjs": "^6.6.3",
-    "sanitize-html": "^1.27.5",
+    "sanitize-html": "^2.4.0",
     "set-cookie-parser": "^2.4.5",
     "shortid": "^2.2.16",
     "turndown": "^5.0.3",
@@ -78,7 +78,7 @@
     "winston-daily-rotate-file": "^4.4.2"
   },
   "devDependencies": {
-    "@jest-runner/electron": "^2.0.3",
+    "@jest-runner/electron": "^3.0.1",
     "@nestjs/cli": "^7.5.4",
     "@nestjs/schematics": "^7.2.7",
     "@nestjs/testing": "^7.6.7",
