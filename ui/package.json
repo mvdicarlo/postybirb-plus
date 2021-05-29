@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus-ui",
-  "version": "3.0.33",
+  "version": "3.0.34",
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
@@ -14,7 +14,7 @@
     "antd": "^3.26.20",
     "axios": "^0.21.1",
     "file-saver": "^2.0.5",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "mobx": "^5.15.7",
     "mobx-react": "^6.3.1",
     "postybirb-commons": "file:../commons",

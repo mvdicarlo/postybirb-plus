@@ -5,6 +5,7 @@ import SubmissionLogService from '../../services/submission-log.service';
 import { saveAs } from 'file-saver';
 import { List, Button, Icon, Typography, message, Modal } from 'antd';
 import SubmissionService from '../../services/submission.service';
+import BrowserLink from '../../components/BrowserLink';
 
 interface Props {
   type: SubmissionType;
@@ -105,8 +106,11 @@ export default class SubmissionLogs extends React.Component<Props, State> {
                             {p.part.postedTo ? (
                               <span>
                                 [
-                                <Typography.Text className="text-xs" copyable>
-                                  {p.part.postedTo}
+                                <Typography.Text
+                                  className="text-xs"
+                                  copyable={{ text: p.part.postedTo }}
+                                >
+                                  <BrowserLink url={p.part.postedTo}>{p.part.postedTo}</BrowserLink>
                                 </Typography.Text>
                                 ]
                               </span>

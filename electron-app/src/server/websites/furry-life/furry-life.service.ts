@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
 import {
   DefaultOptions,
@@ -27,7 +27,6 @@ import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { profile } from 'winston';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
@@ -44,14 +43,15 @@ export class FurryLife extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const { body } = await Http.get<string>(this.BASE_URL, data._id);
+    const { body } = await Http.get<string>(`${this.BASE_URL}/account`, data._id);
     if (!body.includes('Log in')) {
       status.loggedIn = true;
-      const accountProfileId = body.match(/members\/(.*?)\.\d+/)[0];
-      status.username = accountProfileId.split(/(\.|\/)/)[2];
-      this.storeAccountInformation(data._id, this.PROP_ACCOUNT_ID, accountProfileId.split('/')[1]);
+      const $ = cheerio.load(body);
+      status.username = $('.avatar').siblings('.p-navgroup-linkText').text();
+      const accountProfileId = `${status.username}.${$('.avatar').attr('data-user-id')}`;
+      this.storeAccountInformation(data._id, this.PROP_ACCOUNT_ID, accountProfileId);
       try {
-        await this.loadAlbums(data._id, accountProfileId.split('/')[1]);
+        await this.loadAlbums(data._id, accountProfileId);
       } catch {
         this.logger.error('Unable to load albums');
       }
@@ -78,7 +78,7 @@ export class FurryLife extends Website {
     });
 
     const data = await Promise.all<Folder>(
-      albumUrls.map(async albumUrl => {
+      albumUrls.map(async (albumUrl) => {
         const res = await Http.get<string>(`${this.BASE_URL}${albumUrl}`, profileId);
         const $$ = cheerio.load(res.body);
         const urlParts = albumUrl.split('/');
@@ -87,9 +87,7 @@ export class FurryLife extends Website {
         return {
           value: `${urlParts.pop()}-${nsfw ? 'nsfw' : 'sfw'}`,
           nsfw,
-          label: $$('.p-title-value')
-            .text()
-            .trim(),
+          label: $$('.p-title-value').text().trim(),
         };
       }),
     );
@@ -103,7 +101,7 @@ export class FurryLife extends Website {
           label: 'General (SFW)',
           nsfw: false,
         },
-        ...data.filter(d => !d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
+        ...data.filter((d) => !d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
       ],
     };
 
@@ -116,7 +114,7 @@ export class FurryLife extends Website {
           label: 'General (NSFW)',
           nsfw: true,
         },
-        ...data.filter(d => d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
+        ...data.filter((d) => d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
       ],
     };
 
@@ -187,7 +185,7 @@ export class FurryLife extends Website {
 
     const isNotAlbum = options.album === this.SFW_ALBUM || options.album === this.NSFW_ALBUM;
 
-    const files = [data.primary, ...data.additional].map(f => f.file);
+    const files = [data.primary, ...data.additional].map((f) => f.file);
 
     await BrowserWindowUtil.getPage(
       data.part.accountId,
@@ -213,7 +211,7 @@ export class FurryLife extends Website {
     this.checkCancelled(cancellationToken);
     try {
       const uploads = await Promise.all(
-        files.map(file => this.upload(data.part.accountId, token, href, file)),
+        files.map((file) => this.upload(data.part.accountId, token, href, file)),
       );
 
       const uploadData: any = {
@@ -231,7 +229,7 @@ export class FurryLife extends Website {
         uploadData.album_id = album.split('.').pop();
       }
 
-      uploads.forEach(u => {
+      uploads.forEach((u) => {
         const mediaId = `media[${u.temp_media_id}]`;
         uploadData[`${mediaId}[title]`] = data.title;
         uploadData[`${mediaId}[description]`] = '';
@@ -294,12 +292,15 @@ export class FurryLife extends Website {
       _xfResponseType: 'json',
       _xfRequestUri: `/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}`,
       attachment_hash: hash,
-      attachment_hash_combined: hashCombined
+      attachment_hash_combined: hashCombined,
     };
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<{ status: string; errors: any[] }>(
-      `${this.BASE_URL}/members/${this.getAccountInfo(data.part.accountId, this.PROP_ACCOUNT_ID)}/post`,
+      `${this.BASE_URL}/members/${this.getAccountInfo(
+        data.part.accountId,
+        this.PROP_ACCOUNT_ID,
+      )}/post`,
       data.part.accountId,
       {
         type: 'multipart',
@@ -352,12 +353,12 @@ export class FurryLife extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
     const maxMB: number = 1023;
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
