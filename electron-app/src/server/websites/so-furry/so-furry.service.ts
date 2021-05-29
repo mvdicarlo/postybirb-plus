@@ -33,6 +33,7 @@ import _ = require('lodash');
 import { FallbackInformation } from '../interfaces/fallback-information.interface';
 import HtmlParser from 'src/server/description-parsing/html-node/parser';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
+import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 
 @Injectable()
 export class SoFurry extends Website {
@@ -47,18 +48,15 @@ export class SoFurry extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
+    await BrowserWindowUtil.getPage(data._id, this.BASE_URL, true);
     const res = await Http.get<string>(`${this.BASE_URL}/upload/details?contentType=1`, data._id);
     if (res.body.includes('Logout')) {
       status.loggedIn = true;
 
       const $ = cheerio.load(res.body);
-      status.username = $('a[class=avatar]')
-        .attr('href')
-        .split('.')[0]
-        .split('/')
-        .pop();
+      status.username = $('a[class=avatar]').attr('href').split('.')[0].split('/').pop();
       this.getFolders(data._id, $);
-      Http.saveSessionCookies(this.BASE_URL, data._id);
+      // Http.saveSessionCookies(this.BASE_URL, data._id);
     }
     return status;
   }
@@ -68,7 +66,7 @@ export class SoFurry extends Website {
     $('#UploadForm_folderId')
       .children()
       .toArray()
-      .forEach(o => {
+      .forEach((o) => {
         folders.push({ value: $(o).attr('value'), label: $(o).text() });
       });
 
@@ -228,7 +226,7 @@ export class SoFurry extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find(f => f.value === submissionPart.data.folder)) {
+      if (!folders.find((f) => f.value === submissionPart.data.folder)) {
         warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
     }
