@@ -36,18 +36,20 @@ import FormContent from 'src/server/utils/form-content.util';
 export class Telegram extends Website {
   readonly BASE_URL: string;
   readonly defaultDescriptionParser = PlaintextParser.parse;
-  readonly acceptsFiles: string[] = ['jpg', 'gif', 'png']; // TODO expand functionality here
+  readonly acceptsFiles: string[] = [];
   private readonly instances: Record<string, MTProto> = {};
   private authData: Record<string, { phone_code_hash: string; phone_number: string }> = {};
   public acceptsAdditionalFiles = true;
   public waitBetweenPostsInterval = 30_000;
   private lastCall: number;
+  private DEFAULT_WAIT: number = 3000;
+  private usernameMap: Record<string, string> = {};
 
   private async callApi<T>(appId: string, protocol: string, data: any): Promise<T> {
     if (this.lastCall) {
       const now = Date.now();
-      if (now - this.lastCall <= 2000) {
-        await WaitUtil.wait(Math.max(2000 - (now - this.lastCall), 1000));
+      if (now - this.lastCall <= this.DEFAULT_WAIT) {
+        await WaitUtil.wait(Math.max(this.DEFAULT_WAIT - (now - this.lastCall), 1000));
       }
     }
 
@@ -59,7 +61,8 @@ export class Telegram extends Website {
       this.lastCall = Date.now(); // Cautious set in case anything unexpected happens
       res = await this.instances[appId].call(protocol, data);
     } catch (err) {
-      if (err.error_message.startsWith('FLOOD_WAIT')) {
+      this.logger.error(err);
+      if (err?.error_message?.startsWith('FLOOD_WAIT')) {
         const wait = Number(err.error_message.split('_').pop());
         if (wait > 60) {
           // Too long of a wait
@@ -84,19 +87,19 @@ export class Telegram extends Website {
     return resErr ? Promise.reject(resErr) : (res as T);
   }
 
-  public authenticate(data: { appId: string; code: string }) {
-    return this.callApi(data.appId, 'auth.signIn', {
-      phone_number: this.authData[data.appId].phone_number,
-      phone_code: data.code,
-      phone_code_hash: this.authData[data.appId].phone_code_hash,
-    })
-      .then(() => {
-        result: true;
-      })
-      .catch((err) => {
-        this.logger.error(err);
-        return { result: false, message: err.error_message };
+  public async authenticate(data: { appId: string; code: string }) {
+    try {
+      const signIn: any = await this.callApi(data.appId, 'auth.signIn', {
+        phone_number: this.authData[data.appId].phone_number,
+        phone_code: data.code,
+        phone_code_hash: this.authData[data.appId].phone_code_hash,
       });
+      this.usernameMap[data.appId] = signIn?.user?.username;
+      return { result: true };
+    } catch (err) {
+      this.logger.error(err);
+      return { result: false, message: err.error_message };
+    }
   }
 
   public async startAuthentication(data: TelegramAccountData) {
@@ -154,7 +157,13 @@ export class Telegram extends Website {
 
     await this.loadChannels(data._id, appId);
     status.loggedIn = true;
-    status.username = '<Your Telegram Account>';
+    status.username = data.data.username || this.usernameMap[appId] || '<Your Telegram Account>';
+    // Roundabout way to set username and save it after authentication
+    if (this.usernameMap[appId]) {
+      status.data = {
+        username: this.usernameMap[appId],
+      };
+    }
     return status;
   }
 
@@ -206,6 +215,28 @@ export class Telegram extends Website {
   private async upload(appId: string, file: PostFileRecord) {
     const parts = _.chunk(file.file.value, 512000); // 512KB
     const file_id = Date.now();
+    const props: {
+      _: 'inputMediaUploadedDocument' | 'inputMediaUploadedPhoto';
+      mime_type?: string;
+      nosound_video?: boolean;
+      attributes?: any[];
+    } = {
+      _: 'inputMediaUploadedDocument',
+    };
+    if (
+      file.file.options.contentType === 'image/png' ||
+      file.file.options.contentType === 'image/jpg' ||
+      file.file.options.contentType === 'image/jpeg'
+    ) {
+      props._ = 'inputMediaUploadedPhoto';
+    } else {
+      props.attributes = [];
+      props.mime_type = file.file.options.contentType;
+      if (props.mime_type === 'image/gif') {
+        props.nosound_video = true;
+      }
+    }
+
     if (file.file.value.length >= FileSize.MBtoBytes(10)) {
       // Big file path
       for (let i = 0; i < parts.length; i++) {
@@ -220,7 +251,7 @@ export class Telegram extends Website {
       }
 
       return {
-        _: 'inputMediaUploadedPhoto',
+        ...props,
         file: {
           _: 'inputFileBig',
           id: file_id,
@@ -240,7 +271,7 @@ export class Telegram extends Website {
       }
 
       return {
-        _: 'inputMediaUploadedPhoto',
+        ...props,
         file: {
           _: 'inputFile',
           id: file_id,
@@ -378,30 +409,12 @@ export class Telegram extends Website {
       );
       submissionPart.data.channels.forEach((f) => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(`Folder (${f}) not found.`);
+          problems.push(`Channel (${f}) not found.`);
         }
       });
     } else {
       problems.push('No channel(s) selected.');
     }
-
-    const files = [
-      submission.primary,
-      ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
-      ),
-    ];
-
-    let hasAddedProblem = false;
-    files.forEach((file) => {
-      if (hasAddedProblem) {
-        return;
-      }
-      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
-        hasAddedProblem = true;
-      }
-    });
 
     const description = this.defaultDescriptionParser(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
