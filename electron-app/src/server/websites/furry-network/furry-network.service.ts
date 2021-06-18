@@ -382,7 +382,7 @@ export class FurryNetwork extends Website {
       .formatTags(tags, { spaceReplacer: '-', maxLength: 30, minLength: 3 })
       .map(tag =>
         tag
-          .replace(/(\(|\)|:|#|;|\]|\[|')/g, '')
+          .replace(/(\(|\)|:|#|;|\]|\[|\.|')/g, '')
           .replace(/(\\|\/)/g, '-')
           .replace(/\?/g, 'unknown'),
       )

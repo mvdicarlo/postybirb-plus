@@ -30,6 +30,15 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
+interface DeviantArtFolder {
+  description: string;
+  folderid: string;
+  has_subfolders: boolean;
+  name: string;
+  parent?: string;
+  subfolders: DeviantArtFolder[];
+}
+
 @Injectable()
 export class DeviantArt extends Website {
   readonly BASE_URL = 'https://www.deviantart.com';
@@ -104,9 +113,24 @@ export class DeviantArt extends Website {
     return renewed;
   }
 
+  private flattenFolders(folder: DeviantArtFolder): DeviantArtFolder[] {
+    const folders = [folder];
+
+    if (!folder) {
+      return [];
+    }
+
+    if (!folder.has_subfolders) {
+      return folders;
+    }
+
+    folder.subfolders.forEach((sf) => folders.push(...this.flattenFolders(sf)));
+    return folders;
+  }
+
   private async getFolders(profileId: string, token: string) {
     const res = await Http.get<{
-      results: Array<{ folderid: string; name: string; parent: string }>;
+      results: Array<DeviantArtFolder>;
     }>(
       `${this.BASE_URL}/api/v1/oauth2/gallery/folders?calculate_size=false&limit=50&access_token=${token}`,
       undefined,
@@ -115,9 +139,14 @@ export class DeviantArt extends Website {
 
     const folders: Folder[] = [];
     const results = res.body.results || [];
-    results.forEach((folder) => {
+    const flattenedFolders: DeviantArtFolder[] = [];
+    results.forEach((r: DeviantArtFolder) =>
+      flattenedFolders.push(...this.flattenFolders(r)),
+    );
+
+    flattenedFolders.forEach((folder) => {
       const parent = folder.parent
-        ? results.find((f) => f.folderid === folder.parent && f.name !== 'Featured')
+        ? flattenedFolders.find((f) => f.folderid === folder.parent && f.name !== 'Featured')
         : undefined;
       folders.push({
         value: folder.folderid,
