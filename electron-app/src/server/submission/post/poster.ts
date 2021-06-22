@@ -190,7 +190,7 @@ export class Poster extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       let totalTries = this.retries + 1;
       let error = null;
-      // Timeout after 15 minutes
+      // Timeout after 20 minutes
       const timeoutTimer = setTimeout(() => {
         if (!this.isDone) {
           this.cancel();
@@ -201,8 +201,8 @@ export class Poster extends EventEmitter {
             ),
           );
         }
-      }, 15 * 60000);
-      while (totalTries > 0) {
+      }, 20 * 60000);
+      while (totalTries > 0 && !this.isCancelled()) {
         try {
           totalTries--;
           const accountData: any = (await this.accountService.get(this.part.accountId)).data;

@@ -123,7 +123,9 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
             <Input
               className="w-full"
               value={this.state.phoneNumber}
-              onChange={({ target }) => this.setState({ phoneNumber: target.value })}
+              onChange={({ target }) =>
+                this.setState({ phoneNumber: target.value.replace(/[^0-9+]/g, '') })
+              }
             />
           </Form.Item>
           <Form.Item>

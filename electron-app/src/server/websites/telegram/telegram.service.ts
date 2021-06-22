@@ -161,6 +161,7 @@ export class Telegram extends Website {
     // Roundabout way to set username and save it after authentication
     if (this.usernameMap[appId]) {
       status.data = {
+        ...data.data,
         username: this.usernameMap[appId],
       };
     }

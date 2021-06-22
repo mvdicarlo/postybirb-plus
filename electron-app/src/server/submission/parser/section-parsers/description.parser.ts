@@ -116,9 +116,11 @@ export class DescriptionParser {
   private parseShortcuts(description: string): ShortcutData[] {
     const matches = description.match(/\{([^\{]*?)\}/gms) || [];
     return matches.map((m) => {
-      const [originalText, modifiersText, mods, key, additionalText] = m.match(
-        /\{(\[([^\[\]]*)\])?(\w+):?(.*?)\}/s,
-      );
+      const matchInfo = m.match(/\{(\[([^\[\]]*)\])?(\w+):?(.*?)\}/s);
+      if (!matchInfo) {
+        throw new Error(`Invalid shortcut: ${m}`);
+      }
+      const [originalText, modifiersText, mods, key, additionalText] = matchInfo;
       const modifiers = {};
       if (mods) {
         mods
