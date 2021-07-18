@@ -113,7 +113,6 @@ export class Weasyl extends Website {
     this.verifyResponse(page);
 
     const form = {
-      token: HtmlParserUtil.getInputValue(page.body, 'token'),
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
@@ -127,6 +126,11 @@ export class Weasyl extends Website {
       {
         type: 'multipart',
         data: form,
+        headers: {
+          Referer: `${this.BASE_URL}/submit/journal`,
+          Origin: 'https://www.weasyl.com',
+          Host: 'www.weasyl.com',
+        },
       },
     );
     this.verifyResponse(postResponse);
@@ -152,7 +156,6 @@ export class Weasyl extends Website {
     }
 
     const form: any = {
-      token: HtmlParserUtil.getInputValue(page.body, 'token'),
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
@@ -191,6 +194,11 @@ export class Weasyl extends Website {
     const postResponse = await Http.post<string>(url, data.part.accountId, {
       type: 'multipart',
       data: form,
+      headers: {
+        Referer: url,
+        Origin: 'https://www.weasyl.com',
+        Host: 'www.weasyl.com',
+      },
     });
 
     let { body } = postResponse;
@@ -207,7 +215,11 @@ export class Weasyl extends Website {
             y2: '0',
             thumbfile: '',
             submitid: HtmlParserUtil.getInputValue(body, 'submitid'),
-            token: HtmlParserUtil.getInputValue(body, 'token'),
+          },
+          headers: {
+            Referer: url,
+            Origin: 'https://www.weasyl.com',
+            Host: 'www.weasyl.com',
           },
         },
       );
