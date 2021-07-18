@@ -51,7 +51,7 @@ export class SubscribeStar extends Website {
       this.storeAccountInformation(
         data._id,
         'username',
-        res.body.match(/class="top_bar-branding">(.*?)href="(.*?)"/ims)[2],
+        `/${status.username}`,
       );
       await this.getTiers(data._id);
     }
