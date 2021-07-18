@@ -45,7 +45,7 @@ export default class MastodonLogin extends React.Component<LoginDialogProps, Sta
   }
 
   private getAuthURL(website?: string): string {
-    return `${window.AUTH_SERVER_URL}/mastodon/v2/authorize/${encodeURIComponent(
+    return `${window.AUTH_SERVER_URL}/mastodon/v2/authorize?website=${encodeURIComponent(
       this.getWebsiteURL(website)
     )}`;
   }

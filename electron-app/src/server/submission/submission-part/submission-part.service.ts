@@ -36,7 +36,7 @@ export class SubmissionPartService {
     if (existing) {
       this.logger.log(`${copy.submissionId}: ${copy.accountId}`, 'Update Submission Part');
       Object.assign(websiteOptions, {
-        ...existing.data,
+        // ...existing.data, Causes issues if something was removed but still existed in old model
         ...copy.data,
       });
       await websiteOptions.validate();
