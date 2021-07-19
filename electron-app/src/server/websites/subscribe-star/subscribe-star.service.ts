@@ -26,6 +26,7 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { app } from 'electron';
 
 import _ = require('lodash');
 
@@ -48,11 +49,14 @@ export class SubscribeStar extends Website {
     if (res.body.includes('top_bar-user_name')) {
       status.loggedIn = true;
       status.username = res.body.match(/<div class="top_bar-user_name">(.*?)<\/div>/)[1];
-      this.storeAccountInformation(
-        data._id,
-        'username',
-        `/${status.username}`,
-      );
+
+      let usernameLink = res.body.match(/class="top_bar-branding">(.*?)href="(.*?)"/ims)[2];
+      if (usernameLink && usernameLink.includes('/feed')) {
+        usernameLink = `/${status.username}`;
+      }
+
+      this.storeAccountInformation(data._id, 'username', usernameLink);
+
       await this.getTiers(data._id);
     }
     return status;
