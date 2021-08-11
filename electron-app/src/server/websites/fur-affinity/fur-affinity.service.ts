@@ -212,12 +212,7 @@ export class FurAffinity extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<FurAffinityFileOptions>,
   ): Promise<PostResponse> {
-    const part1 = await Http.post<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
-      type: 'form',
-      data: {
-        part: '2',
-        submission_type: this.getContentType(data.primary.type),
-      },
+    const part1 = await Http.get<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
       headers: {
         Host: 'www.furaffinity.net',
         Referer: 'https://www.furaffinity.net/submit/',
@@ -236,8 +231,7 @@ export class FurAffinity extends Website {
     }
 
     const part2Form = {
-      key: HtmlParserUtil.getInputValue(part1.body.split('action="/submit/"').pop(), 'key'),
-      part: '3',
+      key: HtmlParserUtil.getInputValue(part1.body.split('upload_form').pop(), 'key'),
       submission: data.primary.file,
       thumbnail: data.thumbnail,
       submission_type: this.getContentType(data.primary.type),
@@ -250,12 +244,12 @@ export class FurAffinity extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-    const part2 = await Http.post<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
+    const part2 = await Http.post<string>(`${this.BASE_URL}/submit/upload`, data.part.accountId, {
       type: 'multipart',
       data: part2Form,
       headers: {
         Host: 'www.furaffinity.net',
-        Referer: 'https://www.furaffinity.net/submit/',
+        Referer: 'https://www.furaffinity.net/submit',
       },
     });
 
@@ -275,12 +269,10 @@ export class FurAffinity extends Website {
 
     const { options } = data;
     const form: any = {
-      part: '5',
-      key: HtmlParserUtil.getInputValue(part2.body.split('action="/submit/"').pop(), 'key'),
+      key: HtmlParserUtil.getInputValue(part2.body.split('"submit-finalize"').pop(), 'key'),
       title: data.title,
       keywords: this.formatTags(data.tags),
       message: data.description,
-      submission_type: this.getContentType(data.primary.type),
       rating: this.getRating(data.rating),
       cat_duplicate: '',
       create_folder_name: '',
@@ -307,7 +299,7 @@ export class FurAffinity extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
+    const post = await Http.post<string>(`${this.BASE_URL}/submit/finalize`, data.part.accountId, {
       type: 'multipart',
       data: form,
       requestOptions: { qsStringifyOptions: { arrayFormat: 'repeat' } },
@@ -317,20 +309,22 @@ export class FurAffinity extends Website {
 
     const { body } = post;
 
-    if (body.includes('CAPTCHA verification error')) {
-      return Promise.reject(
-        this.createPostResponse({ message: 'You must have 10+ posts on your account first' }),
-      );
-    }
+    if (!post.returnUrl.includes('?upload-successful')) {
+      if (body.includes('CAPTCHA verification error')) {
+        return Promise.reject(
+          this.createPostResponse({ message: 'You must have 10+ posts on your account first' }),
+        );
+      }
 
-    if (body.includes('pageid-submit-finalize')) {
-      return Promise.reject(this.createPostResponse({ additionalInfo: body }));
-    }
+      if (body.includes('pageid-submit-finalize')) {
+        return Promise.reject(this.createPostResponse({ additionalInfo: body }));
+      }
 
-    if (post.returnUrl.includes('/submit')) {
-      return Promise.reject(
-        this.createPostResponse({ message: 'Something went wrong', additionalInfo: body }),
-      );
+      if (post.returnUrl.includes('/submit')) {
+        return Promise.reject(
+          this.createPostResponse({ message: 'Something went wrong', additionalInfo: body }),
+        );
+      }
     }
 
     try {
@@ -352,17 +346,17 @@ export class FurAffinity extends Website {
       this.logger.error('File Reupload Failure', e);
     }
 
-    return this.createPostResponse({ source: post.returnUrl });
+    return this.createPostResponse({ source: post.returnUrl.replace('?upload-successful', '') });
   }
 
   formatTags(tags: string[]): string {
     const maxLength = 250;
-    tags = super.parseTags(tags).map(tag => tag.replace(/(\/|\\)/gm, '_'));
-    const filteredTags = tags.filter(tag => tag.length >= 3);
+    tags = super.parseTags(tags).map((tag) => tag.replace(/(\/|\\)/gm, '_'));
+    const filteredTags = tags.filter((tag) => tag.length >= 3);
     let tagString = filteredTags.join(' ').trim();
     if (tagString.length > maxLength) {
       const fitTags = [];
-      filteredTags.forEach(tag => {
+      filteredTags.forEach((tag) => {
         if (fitTags.join(' ').length + 1 + tag.length < maxLength) {
           fitTags.push(tag);
         }
@@ -394,8 +388,8 @@ export class FurAffinity extends Website {
         'flat_folders',
         [],
       );
-      submissionPart.data.folders.forEach(folder => {
-        if (!folders.find(f => f.value === folder)) {
+      submissionPart.data.folders.forEach((folder) => {
+        if (!folders.find((f) => f.value === folder)) {
           warnings.push(`Folder (${folder}) not found.`);
         }
       });
@@ -403,16 +397,12 @@ export class FurAffinity extends Website {
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
         problems.push('A fallback file is required.');
       } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
         warnings.push('The fallback text will be used.');
       } else {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
       }
     }
 
