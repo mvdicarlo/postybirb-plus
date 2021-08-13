@@ -208,6 +208,16 @@ export class FurAffinity extends Website {
     }
   }
 
+  private processForError(body: string): string | undefined {
+    if (body.includes('redirect-message')) {
+      const $ = cheerio.load(body);
+      const msg = $('.redirect-message').first().text();
+      return msg;
+    }
+
+    return undefined;
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<FurAffinityFileOptions>,
@@ -221,13 +231,10 @@ export class FurAffinity extends Website {
 
     this.checkCancelled(cancellationToken);
     this.verifyResponse(part1, 'Part 1');
-    if (part1.body.includes('Flood protection')) {
-      return Promise.reject(
-        this.createPostResponse({
-          additionalInfo: part1.body,
-          message: 'Encountered Flood Protection',
-        }),
-      );
+
+    let err = this.processForError(part1.body);
+    if (err) {
+      return Promise.reject(this.createPostResponse({ message: err, additionalInfo: part1.body }));
     }
 
     const part2Form = {
@@ -254,17 +261,9 @@ export class FurAffinity extends Website {
     });
 
     this.verifyResponse(part2, 'Part 2');
-    if (part2.body.includes('Flood protection')) {
-      return Promise.reject(
-        this.createPostResponse({
-          additionalInfo: part2.body,
-          message: 'Encountered Flood Protection',
-        }),
-      );
-    }
-
-    if (part2.body.includes('pageid-error') || !part2.body.includes('pageid-submit-finalize')) {
-      return Promise.reject(this.createPostResponse({ additionalInfo: part2.body }));
+    err = this.processForError(part2.body);
+    if (err) {
+      return Promise.reject(this.createPostResponse({ message: err, additionalInfo: part2.body }));
     }
 
     const { options } = data;
@@ -274,7 +273,6 @@ export class FurAffinity extends Website {
       keywords: this.formatTags(data.tags),
       message: data.description,
       rating: this.getRating(data.rating),
-      cat_duplicate: '',
       create_folder_name: '',
       cat: options.category,
       atype: options.theme,
@@ -283,8 +281,7 @@ export class FurAffinity extends Website {
     };
 
     if (data.primary.type !== FileSubmissionType.IMAGE) {
-      delete form.cat;
-      form.cat_duplicate = this.getContentCategory(data.primary.type);
+      form.cat = this.getContentCategory(data.primary.type);
     }
 
     if (options.disableComments) {
@@ -310,21 +307,12 @@ export class FurAffinity extends Website {
     const { body } = post;
 
     if (!post.returnUrl.includes('?upload-successful')) {
-      if (body.includes('CAPTCHA verification error')) {
-        return Promise.reject(
-          this.createPostResponse({ message: 'You must have 10+ posts on your account first' }),
-        );
+      err = this.processForError(body);
+      if (err) {
+        return Promise.reject(this.createPostResponse({ message: err, additionalInfo: body }));
       }
 
-      if (body.includes('pageid-submit-finalize')) {
-        return Promise.reject(this.createPostResponse({ additionalInfo: body }));
-      }
-
-      if (post.returnUrl.includes('/submit')) {
-        return Promise.reject(
-          this.createPostResponse({ message: 'Something went wrong', additionalInfo: body }),
-        );
-      }
+      return Promise.reject(this.createPostResponse({ message: 'Something went wrong', additionalInfo: body }));
     }
 
     try {
