@@ -1,5 +1,5 @@
 import * as request from 'request';
-import { BrowserWindow, session } from 'electron';
+import { BrowserWindow, LoadURLOptions, session } from 'electron';
 import 'url';
 import * as _ from 'lodash';
 import CookieConverter from 'src/server/utils/cookie-converter.util';
@@ -133,7 +133,7 @@ export default class Http {
           future = new Date(future.setMonth(future.getMonth() + 2));
           for (const c of cookies) {
             c.domain = c.domain || response.request.host;
-            const cc = CookieConverter.convertCookie(c);
+            const cc = CookieConverter.convertCookie(c as Electron.Cookie);
             cc.expirationDate = future.valueOf() / 1000;
             await ses.cookies.set(cc);
           }
@@ -222,7 +222,7 @@ export default class Http {
               }
             });
 
-            const opts = {
+            const opts: LoadURLOptions = {
               postData: [
                 {
                   type: 'rawData',
@@ -260,7 +260,7 @@ export default class Http {
               },
             });
 
-            const opts = {
+            const opts: LoadURLOptions = {
               postData: [
                 {
                   type: 'rawData',

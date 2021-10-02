@@ -7,7 +7,7 @@ setTimeout(() => {
 }, 60000 * 30);
 
 let manipulator = null; // JIMP
-process.on('message', async msg => {
+process.on('message', async (msg: any) => {
   let hasChanges = false;
   try {
     let { convertOnAlpha, location, quality, type, resizePx, originalType, scalePercent } = msg;

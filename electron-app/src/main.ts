@@ -143,6 +143,7 @@ function createWindow() {
       contextIsolation: false,
       spellcheck: true,
       backgroundThrottling: false,
+      enableRemoteModule: true
     },
   });
 
