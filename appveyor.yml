@@ -18,7 +18,7 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - cmd: powershell Install-Product node 12 x64
+  - cmd: powershell Install-Product node 14 x64
   - sh: nvm install 14.18.0
   - sh: nvm use 14.18.0
   - yarn
