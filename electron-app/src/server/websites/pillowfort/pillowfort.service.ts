@@ -58,7 +58,7 @@ export class Pillowfort extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(10) };
+    return { maxSize: FileSize.MBtoBytes(2) };
   }
 
   private async uploadImage(
