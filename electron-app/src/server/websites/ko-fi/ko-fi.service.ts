@@ -32,7 +32,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class KoFi extends Website {
   readonly BASE_URL: string = 'https://ko-fi.com';
-  readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png'];
+  readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif'];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
