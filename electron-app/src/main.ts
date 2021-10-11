@@ -13,6 +13,7 @@ if (!hasLock) {
 
 app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
 process.env.PORT = process.env.PORT || '9247';
 global.AUTH_SERVER_URL = 'https://postybirb-auth.azurewebsites.net';
@@ -143,9 +144,10 @@ function createWindow() {
       contextIsolation: false,
       spellcheck: true,
       backgroundThrottling: false,
-      enableRemoteModule: true
+      enableRemoteModule: true,
     },
   });
+
 
   (mainWindow as any).PORT = process.env.PORT;
   (mainWindow as any).AUTH_ID = global.AUTH_ID;
