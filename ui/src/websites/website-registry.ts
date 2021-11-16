@@ -39,7 +39,7 @@ export class WebsiteRegistry {
     FurAffinity: new FurAffinity(),
     Furbooru: new Furbooru(),
     Furiffic: new Furiffic(),
-    FurryLife: new FurryLife(),
+    // FurryLife: new FurryLife(),
     FurryNetwork: new FurryNetwork(),
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
