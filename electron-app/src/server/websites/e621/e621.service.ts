@@ -44,7 +44,7 @@ export class e621 extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: e621AccountData = data.data;
-    if (accountData && accountData.username && accountData.username) {
+    if (accountData?.username) {
       status.username = accountData.username;
       status.loggedIn = true;
     }
@@ -97,7 +97,7 @@ export class e621 extends Website {
       'upload[description]': data.description,
       'upload[parent_id]': data.options.parentId || '',
       'upload[source]': [...data.options.sources, ...data.sources]
-        .filter(s => s)
+        .filter((s) => s)
         .slice(0, 5)
         .join('%0A'),
     };
@@ -144,15 +144,12 @@ export class e621 extends Website {
   }
 
   formatTags(tags: string[]) {
-    return super
-      .formatTags(tags)
-      .join(' ')
-      .trim();
+    return super.formatTags(tags).join(' ').trim();
   }
 
   transformAccountData(data: e621AccountData) {
     return {
-      username: data.username,
+      username: data?.username,
     };
   }
 
@@ -170,9 +167,7 @@ export class e621 extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     const { type, size, name } = submission.primary;
