@@ -211,7 +211,13 @@ export class FurAffinity extends Website {
   private processForError(body: string): string | undefined {
     if (body.includes('redirect-message')) {
       const $ = cheerio.load(body);
-      const msg = $('.redirect-message').first().text();
+      let msg = $('.redirect-message').first().text();
+
+      if (msg?.includes('CAPTCHA')) {
+        msg =
+          'You need at least 11+ posts on your account before you can use PostyBirb with Fur Affinity.';
+      }
+
       return msg;
     }
 
@@ -312,7 +318,9 @@ export class FurAffinity extends Website {
         return Promise.reject(this.createPostResponse({ message: err, additionalInfo: body }));
       }
 
-      return Promise.reject(this.createPostResponse({ message: 'Something went wrong', additionalInfo: body }));
+      return Promise.reject(
+        this.createPostResponse({ message: 'Something went wrong', additionalInfo: body }),
+      );
     }
 
     try {
