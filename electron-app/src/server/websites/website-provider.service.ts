@@ -53,7 +53,7 @@ export class WebsiteProvider {
     readonly newgrounds: Newgrounds,
     readonly pixiv: Pixiv,
     readonly newTumbl: NewTumbl,
-    readonly furryLife: FurryLife,
+    // readonly furryLife: FurryLife,
     readonly furryNetwork: FurryNetwork,
     readonly patreon: Patreon,
     readonly tumblr: Tumblr,
