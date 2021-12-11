@@ -43,7 +43,7 @@ export class Artconomy extends Website {
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'ac',
-      url: 'https://artconomy.com/$1',
+      url: 'https://artconomy.com/profile/$1/about',
     },
   ];
 
