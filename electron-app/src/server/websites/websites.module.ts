@@ -30,6 +30,7 @@ import { TwitterModule } from './twitter/twitter.module';
 import { PillowfortModule } from './pillowfort/pillowfort.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { FurbooruModule } from './furbooru/furbooru.module';
+import { ItakuModule } from './itaku/itaku.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -64,6 +65,7 @@ import { FurbooruModule } from './furbooru/furbooru.module';
     TumblrModule,
     TwitterModule,
     WeasylModule,
+    ItakuModule,
   ],
 })
 export class WebsitesModule {}
