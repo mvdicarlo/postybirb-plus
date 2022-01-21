@@ -11,7 +11,13 @@ export default class BrowserWindowUtil {
       },
     });
 
-    await bw.loadURL(url);
+    try {
+      await bw.loadURL(url);
+    } catch (err) {
+      bw.destroy();
+      throw err;
+    }
+
     return bw;
   }
 
@@ -23,9 +29,12 @@ export default class BrowserWindowUtil {
       }
       return await bw.webContents.executeJavaScript('JSON.parse(JSON.stringify(localStorage))');
     } catch (err) {
+      bw.destroy();
       throw err;
     } finally {
-      bw.destroy();
+      if (!bw.isDestroyed()) {
+        bw.destroy();
+      }
     }
   }
 
@@ -42,9 +51,12 @@ export default class BrowserWindowUtil {
         })).reduce((obj, [k, v]) => ({...obj, [k]: v}), {})))`,
       );
     } catch (err) {
+      bw.destroy();
       throw err;
     } finally {
-      bw.destroy();
+      if (!bw.isDestroyed()) {
+        bw.destroy();
+      }
     }
   }
 
@@ -76,9 +88,12 @@ export default class BrowserWindowUtil {
       const page = await bw.webContents.executeJavaScript(script);
       return page;
     } catch (err) {
+      bw.destroy();
       throw err;
     } finally {
-      bw.destroy();
+      if (!bw.isDestroyed()) {
+        bw.destroy();
+      }
     }
   }
 
@@ -103,9 +118,12 @@ export default class BrowserWindowUtil {
       });
       return await bw.webContents.executeJavaScript('document.body.innerText');
     } catch (err) {
+      bw.destroy();
       throw err;
     } finally {
-      bw.destroy();
+      if (!bw.isDestroyed()) {
+        bw.destroy();
+      }
     }
   }
 }

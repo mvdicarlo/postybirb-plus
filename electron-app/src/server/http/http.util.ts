@@ -204,37 +204,40 @@ export default class Http {
         if (typeof body === 'string' && body.includes('resolve_captcha')) {
           if (options.type === 'multipart') {
             const win = new BrowserWindow({
-              show: true,
+              show: false,
               webPreferences: {
                 partition: `persist:${partitionId}`,
                 enableRemoteModule: false,
               },
             });
 
-            const form = new FormData();
-            Object.entries(options.data).forEach(([key, value]: [string, any]) => {
-              if (value.options && value.value) {
-                form.append(key, value.value, value.options);
-              } else if (Array.isArray(value)) {
-                form.append(key, JSON.stringify(value));
-              } else {
-                form.append(key, value);
-              }
-            });
-
-            const opts: LoadURLOptions = {
-              postData: [
-                {
-                  type: 'rawData',
-                  bytes: form.getBuffer(),
-                },
-              ],
-              extraHeaders: [
-                `Content-Type: ${form.getHeaders()['content-type']}`,
-                ...Object.entries(options.headers || {}).map(([key, value]) => `${key}: ${value}`),
-              ].join('\n'),
-            };
             try {
+              const form = new FormData();
+              Object.entries(options.data).forEach(([key, value]: [string, any]) => {
+                if (value.options && value.value) {
+                  form.append(key, value.value, value.options);
+                } else if (Array.isArray(value)) {
+                  form.append(key, JSON.stringify(value));
+                } else {
+                  form.append(key, value);
+                }
+              });
+
+              const opts: LoadURLOptions = {
+                postData: [
+                  {
+                    type: 'rawData',
+                    bytes: form.getBuffer(),
+                  },
+                ],
+                extraHeaders: [
+                  `Content-Type: ${form.getHeaders()['content-type']}`,
+                  ...Object.entries(options.headers || {}).map(
+                    ([key, value]) => `${key}: ${value}`,
+                  ),
+                ].join('\n'),
+              };
+
               await win.loadURL(uri, opts);
               const result = await win.webContents.executeJavaScript('document.body.innerText');
               let data = null;
@@ -253,26 +256,29 @@ export default class Http {
             }
           } else if (options.type === 'json') {
             const win = new BrowserWindow({
-              show: true,
+              show: false,
               webPreferences: {
                 partition: `persist:${partitionId}`,
                 enableRemoteModule: false,
               },
             });
 
-            const opts: LoadURLOptions = {
-              postData: [
-                {
-                  type: 'rawData',
-                  bytes: Buffer.from(JSON.stringify(options.data)),
-                },
-              ],
-              extraHeaders: [
-                `Content-Type: application/json`,
-                ...Object.entries(options.headers || {}).map(([key, value]) => `${key}: ${value}`),
-              ].join('\n'),
-            };
             try {
+              const opts: LoadURLOptions = {
+                postData: [
+                  {
+                    type: 'rawData',
+                    bytes: Buffer.from(JSON.stringify(options.data)),
+                  },
+                ],
+                extraHeaders: [
+                  `Content-Type: application/json`,
+                  ...Object.entries(options.headers || {}).map(
+                    ([key, value]) => `${key}: ${value}`,
+                  ),
+                ].join('\n'),
+              };
+
               await win.loadURL(uri, opts);
               const result = await win.webContents.executeJavaScript('document.body.innerText');
               let data = null;
