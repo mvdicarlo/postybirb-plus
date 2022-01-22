@@ -60,7 +60,7 @@
     "lodash": "^4.17.20",
     "lowdb": "^1.0.0",
     "mastodon-api": "^1.3.0",
-    "nanoid": "^2.1.8",
+    "nanoid": "^3.1.31",
     "nedb": "^1.8.0",
     "node-forge": "^0.10.0",
     "parse5": "^5.1.1",
