@@ -132,7 +132,7 @@ export class FurryNetworkNotificationSubmissionForm extends GenericSubmissionSec
     });
   }
 
-  renderRightForm(data: FurryNetworkFileOptions) {
+  renderRightForm(data: FurryNetworkNotificationOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Profile" required>
@@ -171,7 +171,7 @@ export class FurryNetworkNotificationSubmissionForm extends GenericSubmissionSec
     return elements;
   }
 
-  renderLeftForm(data: FurryNetworkFileOptions) {
+  renderLeftForm(data: FurryNetworkNotificationOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
       <div>
