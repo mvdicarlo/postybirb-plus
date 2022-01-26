@@ -23,3 +23,4 @@ export * from './subscribe-star/subscribe-star.options';
 export * from './telegram/telegram.options';
 export * from './tumblr/tumblr.options';
 export * from './weasyl/weasyl.options';
+export * from './itaku/itaku.options';

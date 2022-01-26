@@ -28,6 +28,7 @@ import { Twitter } from './twitter/twitter.service';
 import { Pillowfort } from './pillowfort/pillowfort.service';
 import { Telegram } from './telegram/telegram.service';
 import { Furbooru } from './furbooru/furbooru.service';
+import { Itaku } from './itaku/itaku.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -62,11 +63,12 @@ export class WebsiteProvider {
     readonly twitter: Twitter,
     readonly pillowfort: Pillowfort,
     readonly telegram: Telegram,
-    readonly furbooru: Furbooru
+    readonly furbooru: Furbooru,
+    readonly itaku: Itaku,
   ) {
-    this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
+    this.websiteModules = [...arguments].filter((arg) => arg instanceof Website);
     this.websiteModules.forEach(
-      website => (this.websiteModulesMap[website.constructor.name.toLowerCase()] = website),
+      (website) => (this.websiteModulesMap[website.constructor.name.toLowerCase()] = website),
     );
   }
 

@@ -27,6 +27,7 @@ import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
 import { Telegram } from './telegram/Telegram';
 import { Furbooru } from './furbooru/Furbooru';
+import { Itaku } from './itaku/Itaku';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -43,6 +44,7 @@ export class WebsiteRegistry {
     FurryNetwork: new FurryNetwork(),
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
+    Itaku: new Itaku(),
     KoFi: new KoFi(),
     Mastodon: new Mastodon(),
     NewTumbl: new NewTumbl(),
