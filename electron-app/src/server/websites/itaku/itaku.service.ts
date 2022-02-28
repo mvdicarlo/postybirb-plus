@@ -14,21 +14,20 @@ import {
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server/account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
+import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import _ = require('lodash');
-import { GenericAccountProp } from '../generic/generic-account-props.enum';
-import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 
 @Injectable()
 export class Itaku extends Website {
@@ -96,18 +95,17 @@ export class Itaku extends Website {
     }));
     this.storeAccountInformation(id, `POST-${GenericAccountProp.FOLDERS}`, postFolders);
 
-    const galleryFolderRes = await Http.get<{ id: string; num_images: number; title: string }[]>(
-      `${this.BASE_URL}/api/galleries/?owner=${ownerId}`,
-      id,
-      {
-        requestOptions: { json: true },
-        headers: {
-          Authorization: `Token ${this.getAccountInfo(id, 'token')}`,
-        },
+    const galleryFolderRes = await Http.get<{
+      count: number;
+      results: { id: string; num_images: number; title: string }[];
+    }>(`${this.BASE_URL}/api/galleries/?owner=${ownerId}&page_size=300`, id, {
+      requestOptions: { json: true },
+      headers: {
+        Authorization: `Token ${this.getAccountInfo(id, 'token')}`,
       },
-    );
+    });
 
-    const galleryFolders: Folder[] = galleryFolderRes.body.map((f) => ({
+    const galleryFolders: Folder[] = galleryFolderRes.body.results.map((f) => ({
       value: f.title,
       label: f.title,
     }));
