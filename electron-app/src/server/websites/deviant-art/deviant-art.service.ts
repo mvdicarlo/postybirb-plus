@@ -174,18 +174,6 @@ export class DeviantArt extends Website {
     return text.replace(/<p/gm, '<div').replace(/<\/p>/gm, '</div>').replace(/\n/g, '');
   }
 
-  private getDefaultCategoryType(type: FileSubmissionType): string {
-    switch (type) {
-      case FileSubmissionType.VIDEO:
-        return 'flash/animations';
-      case FileSubmissionType.TEXT:
-        return 'literature/prose/fiction/general/shortstory';
-      case FileSubmissionType.IMAGE:
-      default:
-        return 'digitalart/paintings/other';
-    }
-  }
-
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<DeviantArtFileOptions>,
@@ -231,7 +219,6 @@ export class DeviantArt extends Website {
       agree_tos: '1',
       agree_submission: '1',
       is_mature: data.rating !== SubmissionRating.GENERAL ? 'true' : 'false',
-      catpath: this.getDefaultCategoryType(data.primary.type),
       display_resolution: options.displayResolution || '0',
     };
 
