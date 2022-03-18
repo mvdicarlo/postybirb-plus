@@ -29,6 +29,7 @@ import { Pillowfort } from './pillowfort/pillowfort.service';
 import { Telegram } from './telegram/telegram.service';
 import { Furbooru } from './furbooru/furbooru.service';
 import { Itaku } from './itaku/itaku.service';
+import { Picarto } from './picarto/picarto.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -64,6 +65,7 @@ export class WebsiteProvider {
     readonly telegram: Telegram,
     readonly furbooru: Furbooru,
     readonly itaku: Itaku,
+    readonly picarto: Picarto,
   ) {
     this.websiteModules = [...arguments].filter((arg) => arg instanceof Website);
     this.websiteModules.forEach(
