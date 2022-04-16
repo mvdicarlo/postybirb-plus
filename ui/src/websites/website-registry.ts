@@ -22,6 +22,7 @@ import { FurryNetwork } from './furry-network/FurryNetwork';
 import { Patreon } from './patreon/Patreon';
 import { Tumblr } from './tumblr/Tumblr';
 import { DeviantArt } from './deviant-art/DeviantArt';
+import { Manebooru } from './manebooru/Manebooru';
 import { Mastodon } from './mastodon/Mastodon';
 import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
@@ -46,6 +47,7 @@ export class WebsiteRegistry {
     Inkbunny: new Inkbunny(),
     Itaku: new Itaku(),
     KoFi: new KoFi(),
+    Manebooru: new Manebooru(),
     Mastodon: new Mastodon(),
     NewTumbl: new NewTumbl(),
     Newgrounds: new Newgrounds(),

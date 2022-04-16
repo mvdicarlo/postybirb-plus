@@ -25,6 +25,7 @@ import { FurryNetworkModule } from './furry-network/furry-network.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { TumblrModule } from './tumblr/tumblr.module';
 import { DeviantArtModule } from './deviant-art/deviant-art.module';
+import { ManebooruModule } from './manebooru/manebooru.module';
 import { MastodonModule } from './mastodon/mastodon.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { PillowfortModule } from './pillowfort/pillowfort.module';
@@ -52,6 +53,7 @@ import { ItakuModule } from './itaku/itaku.module';
     HentaiFoundryModule,
     InkbunnyModule,
     KoFiModule,
+    ManebooruModule,
     MastodonModule,
     NewTumblModule,
     NewgroundsModule,

@@ -23,6 +23,7 @@ import { FurryNetwork } from './furry-network/furry-network.service';
 import { Patreon } from './patreon/patreon.service';
 import { Tumblr } from './tumblr/tumblr.service';
 import { DeviantArt } from './deviant-art/deviant-art.service';
+import { Manebooru } from './manebooru/manebooru.service';
 import { Mastodon } from './mastodon/mastodon.service';
 import { Twitter } from './twitter/twitter.service';
 import { Pillowfort } from './pillowfort/pillowfort.service';
@@ -59,6 +60,7 @@ export class WebsiteProvider {
     readonly patreon: Patreon,
     readonly tumblr: Tumblr,
     readonly deviantArt: DeviantArt,
+    readonly manebooru: Manebooru,
     readonly mastodon: Mastodon,
     readonly twitter: Twitter,
     readonly pillowfort: Pillowfort,

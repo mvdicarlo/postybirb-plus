@@ -57,6 +57,7 @@ export * from './interfaces/websites/furry-network/furry-network.notification.op
 export * from './interfaces/websites/hentai-foundry/hentai-foundry.file.options.interface';
 export * from './interfaces/websites/inkbunny/inkbunny.file.options.interface';
 export * from './interfaces/websites/ko-fi/ko-fi.file.options.interface';
+export * from './interfaces/websites/manebooru/manebooru.file.options.interface';
 export * from './interfaces/websites/mastodon/mastodon.account.interface';
 export * from './interfaces/websites/mastodon/mastodon.file.options.interface';
 export * from './interfaces/websites/mastodon/mastodon.notification.options.interface';
