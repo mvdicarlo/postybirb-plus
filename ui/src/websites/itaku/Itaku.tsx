@@ -82,7 +82,7 @@ export class Itaku extends WebsiteImpl {
           },
           {
             value: SubmissionRating.EXTREME,
-            name: 'NSFL'
+            name: 'Extreme'
           }
         ]
       }}
