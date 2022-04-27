@@ -1,17 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   DefaultOptions,
-  ManebooruFileOptions,
   FileRecord,
   FileSubmission,
   FileSubmissionType,
+  ManebooruFileOptions,
   PostResponse,
   SubmissionPart,
   SubmissionRating,
   UsernameShortcut,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -31,7 +31,7 @@ export class Manebooru extends Website {
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'svg', 'gif', 'webm'];
   acceptsSourceUrls: boolean = true;
   enableAdvertisement: boolean = false;
-  defaultDescriptionParser = PlaintextParser.parse;
+  defaultDescriptionParser = MarkdownParser.parse;
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'mb',
@@ -54,27 +54,6 @@ export class Manebooru extends Website {
     return { maxSize: FileSize.MBtoBytes(100) };
   }
 
-  preparseDescription(text: string) {
-    // NOTE: Has a weird format issue when inlines are nested e.g. italic within a bold
-    return text
-      .replace(/<b>/gi, '*')
-      .replace(/<i>/gi, '_')
-      .replace(/<u>/gi, '+')
-      .replace(/<s>/gi, '-')
-      .replace(/<\/b>/gi, '*')
-      .replace(/<\/i>/gi, '_')
-      .replace(/<\/u>/gi, '+')
-      .replace(/<\/s>/gi, '-')
-      .replace(/<em>/gi, '_')
-      .replace(/<\/em>/gi, '_')
-      .replace(/<strong>/gi, '*')
-      .replace(/<\/strong>/gi, '*')
-      .replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '"$4":$2');
-  }
-
-  parseDescription(text: string) {
-    return super.parseDescription(text.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '"$4":$2'));
-  }
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
@@ -121,7 +100,7 @@ export class Manebooru extends Website {
       'grimdark',
       'grotesque',
     ];
-    const lowerCaseTags = tags.map(t => t.toLowerCase());
+    const lowerCaseTags = tags.map((t) => t.toLowerCase());
     if (!lowerCaseTags.includes(ratingTag)) {
       let add = true;
 
@@ -159,9 +138,7 @@ export class Manebooru extends Website {
   }
 
   formatTags(tags: string[]) {
-    return tags
-      .join(', ')
-      .trim();
+    return tags.join(', ').trim();
   }
 
   validateFileSubmission(
@@ -178,9 +155,7 @@ export class Manebooru extends Website {
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(
-        `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-      );
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
     const { type, size, name } = submission.primary;
