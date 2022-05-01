@@ -11,7 +11,7 @@ import {
   UsernameShortcut,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -31,7 +31,7 @@ export class Furbooru extends Website {
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'svg', 'gif', 'webm'];
   acceptsSourceUrls: boolean = true;
   enableAdvertisement: boolean = false;
-  defaultDescriptionParser = PlaintextParser.parse;
+  defaultDescriptionParser = MarkdownParser.parse;
   usernameShortcuts: UsernameShortcut[] = [
     {
       key: 'furb',
@@ -52,28 +52,6 @@ export class Furbooru extends Website {
 
   getScalingOptions(file: FileRecord): ScalingOptions {
     return { maxSize: FileSize.MBtoBytes(100) };
-  }
-
-  preparseDescription(text: string) {
-    // NOTE: Has a weird format issue when inlines are nested e.g. italic within a bold
-    return text
-      .replace(/<b>/gi, '*')
-      .replace(/<i>/gi, '_')
-      .replace(/<u>/gi, '+')
-      .replace(/<s>/gi, '-')
-      .replace(/<\/b>/gi, '*')
-      .replace(/<\/i>/gi, '_')
-      .replace(/<\/u>/gi, '+')
-      .replace(/<\/s>/gi, '-')
-      .replace(/<em>/gi, '_')
-      .replace(/<\/em>/gi, '_')
-      .replace(/<strong>/gi, '*')
-      .replace(/<\/strong>/gi, '*')
-      .replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '"$4":$2');
-  }
-
-  parseDescription(text: string) {
-    return super.parseDescription(text.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '"$4":$2'));
   }
 
   async postFileSubmission(
