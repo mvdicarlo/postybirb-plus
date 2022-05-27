@@ -171,7 +171,7 @@ export class Mastodon extends Website {
     const M = this.getMastodonInstance(accountData);
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-      
+    
     const { options } = data;
     const form: any = {
       status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`,
