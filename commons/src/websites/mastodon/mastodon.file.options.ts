@@ -19,7 +19,7 @@ export class MastodonFileOptionsEntity extends DefaultFileOptionsEntity
   
   @Expose()
   @IsArray()
-  @DefaultValue([])
+  @DefaultValue(['public'])
   visibility!: string[];
 
   constructor(entity?: Partial<MastodonFileOptions>) {
