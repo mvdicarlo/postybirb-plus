@@ -76,6 +76,19 @@ class MastodonNotificationSubmissionForm extends GenericSubmissionSection<
           value={data.spoilerText}
           onChange={this.handleValueChange.bind(this, 'spoilerText')}
         />
+      </Form.Item>,
+      <Form.Item label="Post Visibility">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.visibility}
+          onSelect={this.setValue.bind(this, 'visibility')}
+        >
+          <Select.Option value="public">Public</Select.Option>
+          <Select.Option value="unlisted">Unlisted</Select.Option>
+          <Select.Option value="private">Followers Only</Select.Option>
+          <Select.Option value="direct">Mentioned Users Only</Select.Option>
+        </Select>
       </Form.Item>
     );
     return elements;
@@ -99,6 +112,19 @@ export class MastodonFileSubmissionForm extends GenericFileSubmissionSection<Mas
           value={data.spoilerText}
           onChange={this.handleValueChange.bind(this, 'spoilerText')}
         />
+      </Form.Item>,
+      <Form.Item label="Post Visibility">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.visibility}
+          onSelect={this.setValue.bind(this, 'visibility')}
+        >
+          <Select.Option value="public">Public</Select.Option>
+          <Select.Option value="unlisted">Unlisted</Select.Option>
+          <Select.Option value="private">Followers Only</Select.Option>
+          <Select.Option value="direct">Mentioned Users Only</Select.Option>
+        </Select>
       </Form.Item>
     );
     return elements;
