@@ -138,11 +138,13 @@ export class Mastodon extends Website {
             data.description
           }`.substring(0, 500),
           sensitive: isSensitive,
+          visibility: data.visibility,
           media_ids: chunks[i].map((media) => media.id),
         };
       } else {
         form = {
           sensitive: isSensitive,
+          visibility: data.visibility,
           media_ids: chunks[i].map((media) => media.id),
           in_reply_to_id: lastId,
         };
@@ -174,6 +176,7 @@ export class Mastodon extends Website {
     const form: any = {
       status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`,
       sensitive: isSensitive,
+      visibility: data.visibility,
     };
 
     if (options.spoilerText) {
