@@ -17,6 +17,11 @@ export class MastodonNotificationOptionsEntity extends DefaultOptionsEntity
   @IsString()
   spoilerText?: string;
 
+  @Expose()
+  @IsString()
+  @DefaultValue('public')
+  visibility!: string;
+
   constructor(entity?: Partial<MastodonNotificationOptions>) {
     super(entity as DefaultOptions);
   }
