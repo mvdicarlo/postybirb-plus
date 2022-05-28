@@ -15,7 +15,7 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
-process.env.PORT = process.env.PORT || '9247';
+process.env.PORT = process.argv.find((arg) => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
 global.AUTH_SERVER_URL = 'https://postybirb-auth.azurewebsites.net';
 global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');

@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsArray } from 'class-validator';
 import { DefaultFileOptions } from '../../interfaces/submission/default-options.interface';
 import { MastodonFileOptions } from '../../interfaces/websites/mastodon/mastodon.file.options.interface';
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
