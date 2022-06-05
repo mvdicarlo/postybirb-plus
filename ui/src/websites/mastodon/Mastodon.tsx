@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input } from 'antd';
+import { Checkbox, Form, Input, Select } from 'antd';
 import {
   FileSubmission,
   MastodonFileOptions,
@@ -9,6 +9,7 @@ import {
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
+import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
@@ -76,6 +77,19 @@ class MastodonNotificationSubmissionForm extends GenericSubmissionSection<
           value={data.spoilerText}
           onChange={this.handleValueChange.bind(this, 'spoilerText')}
         />
+      </Form.Item>,
+      <Form.Item label="Post Visibility">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.visibility}
+          onSelect={this.setValue.bind(this, 'visibility')}
+        >
+          <Select.Option value="public">Public</Select.Option>
+          <Select.Option value="unlisted">Unlisted</Select.Option>
+          <Select.Option value="private">Followers Only</Select.Option>
+          <Select.Option value="direct">Mentioned Users Only</Select.Option>
+        </Select>
       </Form.Item>
     );
     return elements;
@@ -99,6 +113,19 @@ export class MastodonFileSubmissionForm extends GenericFileSubmissionSection<Mas
           value={data.spoilerText}
           onChange={this.handleValueChange.bind(this, 'spoilerText')}
         />
+      </Form.Item>,
+      <Form.Item label="Post Visibility">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.visibility}
+          onSelect={this.setValue.bind(this, 'visibility')}
+        >
+          <Select.Option value="public">Public</Select.Option>
+          <Select.Option value="unlisted">Unlisted</Select.Option>
+          <Select.Option value="private">Followers Only</Select.Option>
+          <Select.Option value="direct">Mentioned Users Only</Select.Option>
+        </Select>
       </Form.Item>
     );
     return elements;
