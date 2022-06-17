@@ -95,7 +95,7 @@ export class HentaiFoundry extends Website {
       'Pictures[fileupload]': data.primary.file,
       'Pictures[submissionPolicyAgree]': '1',
       yt0: 'Create',
-      'Pictures[keywords]': this.formatTags(data.tags),
+      'Pictures[edit_tags]': this.formatTags(data.tags),
       'Pictures[is_scrap]': options.scraps ? '1' : '0',
       'Pictures[comments_type]': options.disableComments ? '-1' : '0',
       'Pictures[categoryHier]': options.category || '',
