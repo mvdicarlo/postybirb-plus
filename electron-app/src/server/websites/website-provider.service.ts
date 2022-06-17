@@ -3,7 +3,6 @@ import { Artconomy } from './artconomy/artconomy.service';
 import { Weasyl } from './weasyl/weasyl.service';
 import { Website } from './website.base';
 import { Discord } from './discord/discord.service';
-import { Furiffic } from './furiffic/furiffic.service';
 import { Piczel } from './piczel/piczel.service';
 import { Derpibooru } from './derpibooru/derpibooru.service';
 import { KoFi } from './ko-fi/ko-fi.service';
@@ -40,7 +39,6 @@ export class WebsiteProvider {
     readonly artconomy: Artconomy,
     readonly weasyl: Weasyl,
     readonly discord: Discord,
-    readonly furiffic: Furiffic,
     readonly piczel: Piczel,
     readonly derpibooru: Derpibooru,
     readonly kofi: KoFi,
@@ -55,7 +53,6 @@ export class WebsiteProvider {
     readonly newgrounds: Newgrounds,
     readonly pixiv: Pixiv,
     readonly newTumbl: NewTumbl,
-    // readonly furryLife: FurryLife,
     readonly furryNetwork: FurryNetwork,
     readonly patreon: Patreon,
     readonly tumblr: Tumblr,

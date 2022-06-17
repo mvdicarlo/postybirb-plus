@@ -2,7 +2,6 @@ import { Website } from './interfaces/website.interface';
 import { Artconomy } from './artconomy/Artconomy';
 import { Weasyl } from './weasyl/Weasyl';
 import { Discord } from './discord/Discord';
-import { Furiffic } from './furiffic/Furiffic';
 import { Piczel } from './piczel/Piczel';
 import { Derpibooru } from './derpibooru/Derpibooru';
 import { KoFi } from './kofi/KoFi';
@@ -40,7 +39,6 @@ export class WebsiteRegistry {
     Discord: new Discord(),
     FurAffinity: new FurAffinity(),
     Furbooru: new Furbooru(),
-    Furiffic: new Furiffic(),
     // FurryLife: new FurryLife(),
     FurryNetwork: new FurryNetwork(),
     HentaiFoundry: new HentaiFoundry(),

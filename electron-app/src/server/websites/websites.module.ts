@@ -4,7 +4,6 @@ import { WebsitesService } from './websites.service';
 import { ArtconomyModule } from './artconomy/artconomy.module';
 import { PiczelModule } from './piczel/piczel.module';
 import { WeasylModule } from './weasyl/weasyl.module';
-import { FurifficModule } from './furiffic/furiffic.module';
 import { DiscordModule } from './discord/discord.module';
 import { WebsitesController } from './websites.controller';
 import { DerpibooruModule } from './derpibooru/derpibooru.module';
@@ -47,7 +46,6 @@ import { ItakuModule } from './itaku/itaku.module';
     E621Module,
     FurAffinityModule,
     FurbooruModule,
-    FurifficModule,
     FurryLifeModule,
     FurryNetworkModule,
     HentaiFoundryModule,
