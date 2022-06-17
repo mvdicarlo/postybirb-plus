@@ -222,24 +222,41 @@ export class Patreon extends Website {
     csrf: string,
     data: object,
   ): Promise<{ data: any; link: any }> {
-    const create = await BrowserWindowUtil.post<string>(
+    const cmd = `
+    var data = ${JSON.stringify(data)};
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/posts?fields[post]=post_type%2Cpost_metadata&json-api-version=1.0&include=[]', false);
+    xhr.setRequestHeader('X-CSRF-Signature', '${csrf}');
+    xhr.setRequestHeader("Content-Type", "application/vnd.api+json");
+    xhr.send(JSON.stringify(data));
+    var body = xhr.response;
+    Object.assign({}, { body: body, status: xhr.status })`;
+    const create = await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
       profileId,
-      `${this.BASE_URL}/api/posts?fields[post]=post_type%2Cpost_metadata&json-api-version=1.0&include=[]`,
-      {
-        Accept: '*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-        'Content-Type': 'application/vnd.api+json',
-        Origin: 'https://www.patreon.com',
-        Pragma: 'no-cache',
-        Referer: 'https://www.patreon.com/posts/new',
-        'X-CSRF-Signature': csrf,
-      },
-      data,
+      `${this.BASE_URL}`,
+      cmd,
     );
 
-    return JSON.parse(create);
+
+    // const create = await BrowserWindowUtil.post<string>(
+    //   profileId,
+    //   `${this.BASE_URL}/api/posts?fields[post]=post_type%2Cpost_metadata&json-api-version=1.0&include=[]`,
+    //   {
+    //     Accept: '*/*',
+    //     'Accept-Language': 'en-US,en;q=0.9',
+    //     'Cache-Control': 'no-cache',
+    //     Connection: 'keep-alive',
+    //     'Content-Type': 'application/vnd.api+json',
+    //     Origin: 'https://www.patreon.com',
+    //     Pragma: 'no-cache',
+    //     Referer: 'https://www.patreon.com/posts/new',
+    //     'X-CSRF-Signature': csrf,
+    //   },
+    //   data,
+    // );
+
+    console.log(create)
+    return JSON.parse(create.body);
   }
 
   private async finalizePost(
