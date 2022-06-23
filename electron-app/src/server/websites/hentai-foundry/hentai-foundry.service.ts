@@ -139,16 +139,16 @@ export class HentaiFoundry extends Website {
   }
 
   formatTags(tags: string[]) {
-    const maxLength = 75;
+    const maxLength = 500;
     const t = super.formatTags(tags);
-    let tagString = t.join(' ').trim();
+    let tagString = t.join(', ').trim();
 
     return tagString.length > maxLength
       ? tagString
           .substring(0, maxLength)
-          .split(' ')
+          .split(', ')
           .filter((tag) => tag.length >= 3)
-          .join(' ')
+          .join(', ')
       : tagString;
   }
 
