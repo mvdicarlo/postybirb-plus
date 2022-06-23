@@ -29,7 +29,7 @@ export class HentaiFoundry extends WebsiteImpl {
       tagOptions={{
         show: true,
         options: {
-          maxLength: 75,
+          maxLength: 500,
           mode: 'length'
         }
       }}
