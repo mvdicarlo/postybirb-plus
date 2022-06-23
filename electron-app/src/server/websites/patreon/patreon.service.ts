@@ -255,7 +255,6 @@ export class Patreon extends Website {
     //   data,
     // );
 
-    console.log(create)
     return JSON.parse(create.body);
   }
 
