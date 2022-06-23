@@ -4,6 +4,7 @@ import {
   DefaultOptions,
   FileRecord,
   FileSubmission,
+  FileSubmissionType,
   Folder,
   PostResponse,
   Submission,
@@ -31,6 +32,7 @@ import { Website } from '../website.base';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
 import FormContent from 'src/server/utils/form-content.util';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 
 @Injectable()
 export class Telegram extends Website {
@@ -210,7 +212,7 @@ export class Telegram extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return undefined;
+    return { maxSize: FileSize.MBtoBytes(10) };
   }
 
   private async upload(appId: string, file: PostFileRecord) {
@@ -401,6 +403,7 @@ export class Telegram extends Website {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
+    const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (submissionPart.data.channels?.length) {
       const folders: Folder[] = _.get(
@@ -424,6 +427,22 @@ export class Telegram extends Website {
     if (description.length > 4096) {
       warnings.push('Max description length allowed is 4,096 characters.');
     }
+
+    const { type, size, name } = submission.primary;
+    const maxMB: number = 10;
+    if (FileSize.MBtoBytes(maxMB) < size) {
+      if (
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        ImageManipulator.isMimeType(submission.primary.mimetype)
+      ) {
+        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+      } else {
+        problems.push(`Telegram limits ${submission.primary.mimetype} to ${maxMB}MB`);
+      }
+    }
+
+    return { problems, warnings };
 
     return { problems, warnings };
   }

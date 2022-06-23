@@ -39,7 +39,6 @@ export class Telegram extends WebsiteImpl {
       tagOptions={{ show: false }}
       hideTitle={true}
       hideThumbnailOptions={true}
-      hideAutoscaleOptions={true}
     />
   );
 
