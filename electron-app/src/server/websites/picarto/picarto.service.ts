@@ -3,6 +3,7 @@ import {
   DefaultOptions,
   FileRecord,
   FileSubmission,
+  FileSubmissionType,
   Folder,
   PicartoFileOptions,
   PostResponse,
@@ -10,11 +11,14 @@ import {
 } from 'postybirb-commons';
 import userAccountEntity from 'src/server/account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
+import FileSize from 'src/server/utils/filesize.util';
+import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
@@ -84,15 +88,44 @@ export class Picarto extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    throw new Error('Method not implemented.');
+    return { maxSize: FileSize.MBtoBytes(15) };
   }
 
-  postFileSubmission(
+  async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<PicartoFileOptions>,
     accountData: any,
   ): Promise<PostResponse> {
-    throw new Error('Method not implemented.');
+    const authToken = this.getAccountInfo(data.part.accountId, 'auth_token');
+    const channelId: string = 'TODO';
+
+    this.checkCancelled(cancellationToken);
+
+    const uploadRes = await Http.post<string>(
+      `${this.BASE_URL}/images/_upload`,
+      data.part.accountId,
+      {
+        type: 'multipart',
+        data: {
+          file_name: data.primary.file,
+          channel_id: channelId,
+        },
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      },
+    );
+
+    this.verifyResponse(uploadRes, 'File upload');
+
+    return null;
+  }
+
+  formatTags(tags: string[]) {
+    return super
+      .formatTags(tags, { spaceReplacer: '_', maxLength: 30, minLength: 1 })
+      .filter((tag) => tag.length >= 1)
+      .slice(0, 30);
   }
 
   validateFileSubmission(
@@ -100,6 +133,27 @@ export class Picarto extends Website {
     submissionPart: SubmissionPart<PicartoFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
-    throw new Error('Method not implemented.');
+    const problems: string[] = [];
+    const warnings: string[] = [];
+    const isAutoscaling: boolean = submissionPart.data.autoScale;
+
+    if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
+    }
+
+    const { type, size, name } = submission.primary;
+    if (FileSize.MBtoBytes(15) < size) {
+      if (
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        ImageManipulator.isMimeType(submission.primary.mimetype)
+      ) {
+        warnings.push(`${name} will be scaled down to ${15}MB`);
+      } else {
+        problems.push(`Picarto limits ${submission.primary.mimetype} to ${15}MB`);
+      }
+    }
+
+    return { problems, warnings };
   }
 }

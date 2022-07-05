@@ -24,7 +24,7 @@ export class PicartoFileOptionsEntity extends DefaultFileOptionsEntity
 
   @Expose()
   @IsString()
-  @DefaultValue('')
+  @DefaultValue('Creative')
   category!: string;
 
   @Expose()
