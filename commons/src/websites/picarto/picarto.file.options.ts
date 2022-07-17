@@ -9,8 +9,7 @@ export class PicartoFileOptionsEntity extends DefaultFileOptionsEntity
   implements PicartoFileOptions {
   @Expose()
   @IsArray()
-  @DefaultValue([])
-  folders!: string[];
+  folder!: string;
 
   @Expose()
   @IsString()

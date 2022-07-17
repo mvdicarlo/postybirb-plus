@@ -76,8 +76,8 @@ export class PicartoFileSubmissionForm extends GenericFileSubmissionSection<Pica
         <Select
           {...GenericSelectProps}
           className="w-full"
-          value={data.folders ?? null}
-          onChange={this.setValue.bind(this, 'folders')}
+          value={data.folder ?? null}
+          onChange={this.setValue.bind(this, 'folder')}
         >
           {this.state.folders.map(f => (
             <Select.Option value={f.value}>{f.label}</Select.Option>

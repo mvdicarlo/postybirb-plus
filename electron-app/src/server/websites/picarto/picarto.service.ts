@@ -8,6 +8,7 @@ import {
   PicartoFileOptions,
   PostResponse,
   SubmissionPart,
+  SubmissionRating,
 } from 'postybirb-commons';
 import userAccountEntity from 'src/server/account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
@@ -28,7 +29,7 @@ import { Website } from '../website.base';
 export class Picarto extends Website {
   BASE_URL: string = 'https://picarto.tv';
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif'];
-  acceptsAdditionalFiles: boolean = false;
+  acceptsAdditionalFiles: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly usernameShortcuts = [
     {
@@ -45,9 +46,13 @@ export class Picarto extends Website {
       return status;
     }
 
-    const auth: { access_token: string; user: { username: string } } = JSON.parse(ls.auth);
+    const auth: { access_token: string; user: { username: string; id: number } } = JSON.parse(
+      ls.auth,
+    );
 
     this.storeAccountInformation(data._id, 'auth_token', auth.access_token);
+    this.storeAccountInformation(data._id, 'channelId', auth.user.id);
+    this.storeAccountInformation(data._id, 'username', auth.user.username);
     status.loggedIn = true;
     status.username = auth.user.username;
 
@@ -91,34 +96,148 @@ export class Picarto extends Website {
     return { maxSize: FileSize.MBtoBytes(15) };
   }
 
+  private getRating(rating: SubmissionRating): string {
+    switch (rating) {
+      case SubmissionRating.GENERAL:
+        return 'SFW';
+      case SubmissionRating.MATURE:
+        return 'ECCHI';
+      case SubmissionRating.ADULT:
+      case SubmissionRating.EXTREME:
+        return 'NSFW';
+    }
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<PicartoFileOptions>,
     accountData: any,
   ): Promise<PostResponse> {
     const authToken = this.getAccountInfo(data.part.accountId, 'auth_token');
-    const channelId: string = 'TODO';
+    const channelId: string = this.getAccountInfo(data.part.accountId, 'channelId');
+    const username: string = this.getAccountInfo(data.part.accountId, 'username');
 
+    const authRes = await Http.post<{ data: { generateJwtToken: { key: string } } }>(
+      'https://ptvintern.picarto.tv/ptvapi',
+      undefined,
+      {
+        type: 'json',
+        data: {
+          query:
+            'query ($name: String) {\n  me {\n    id\n    is_admin\n    invalid_email\n    channel {\n      id\n      account_type\n      avatar_url\n      name\n      chips\n      secret\n      commission_request_count\n      livestream_tour_done\n      subscribers_count\n      subscriptions_count\n      gifted_subscriber_count\n      __typename\n    }\n    __typename\n  }\n  getLoadBalancerUrl(channel_name: $name) {\n    url\n    origin\n    __typename\n  }\n  generateJwtToken(channel_name: $name) {\n    key\n    __typename\n  }\n}',
+          variables: {
+            name: username,
+          },
+        },
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        requestOptions: {
+          json: true,
+        },
+      },
+    );
+
+    this.verifyResponse(authRes, 'Auth get');
     this.checkCancelled(cancellationToken);
 
-    const uploadRes = await Http.post<string>(
-      `${this.BASE_URL}/images/_upload`,
-      data.part.accountId,
+    const uploadRes = await Http.post<{ message: string; error: string; data: { uid: string } }>(
+      `https://picarto.tv/images/_upload`,
+      undefined,
       {
         type: 'multipart',
         data: {
           file_name: data.primary.file,
-          channel_id: channelId,
+          channel_id: channelId.toString(),
         },
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${authRes.body.data.generateJwtToken.key}`,
+        },
+        requestOptions: {
+          json: true,
         },
       },
     );
 
     this.verifyResponse(uploadRes, 'File upload');
 
-    return null;
+    const variations = (
+      await Promise.all(
+        data.additional.slice(0, 4).map(({ file }) => {
+          return Http.post<{ message: string; error: string; data: { uid: string } }>(
+            `https://picarto.tv/images/_upload`,
+            undefined,
+            {
+              type: 'multipart',
+              data: {
+                file_name: file,
+                channel_id: channelId.toString(),
+              },
+              headers: {
+                Authorization: `Bearer ${authRes.body.data.generateJwtToken.key}`,
+              },
+              requestOptions: {
+                json: true,
+              },
+            },
+          );
+        }),
+      )
+    ).map((res) => res.body.data.uid);
+
+    this.checkCancelled(cancellationToken);
+
+    const finishPost = await Http.post<{
+      errors: any[];
+      data: {
+        createArtwork: {
+          status: 'error';
+          message: string;
+          data: null;
+        };
+      };
+    }>(`https://ptvintern.picarto.tv/ptvapi`, undefined, {
+      type: 'json',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+      requestOptions: {
+        json: true,
+      },
+      data: {
+        query:
+          'mutation ($input: CreateArtworkInput) {\n  createArtwork(input: $input) {\n    status\n    message\n    data\n    __typename\n  }\n}',
+        variables: {
+          input: {
+            album_id: data.options.folder || null,
+            category: data.options.category || 'Creative',
+            comment_setting: data.options.comments,
+            description: Buffer.from(data.description).toString('base64'),
+            download_original: data.options.downloadSource,
+            main_image: uploadRes.body.data.uid,
+            rating: this.getRating(data.rating),
+            schedule_publishing_date: '',
+            schedule_publishing_time: '',
+            schedule_publishing_timezone: '',
+            software: data.options.softwares.join(','),
+            tags: this.formatTags(data.tags).join(','),
+            title: data.title,
+            variations: variations.join(','),
+            visibility: data.options.visibility,
+          },
+        },
+      },
+    });
+
+    this.verifyResponse(finishPost, 'Finish upload');
+    if (
+      finishPost.body?.data?.createArtwork?.status === 'error' ||
+      finishPost.body.errors?.length
+    ) {
+      return Promise.reject(this.createPostResponse({ additionalInfo: finishPost.body }));
+    }
+
+    return this.createPostResponse({});
   }
 
   formatTags(tags: string[]) {
