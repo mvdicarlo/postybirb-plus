@@ -28,6 +28,7 @@ import { Pillowfort } from './pillowfort/Pillowfort';
 import { Telegram } from './telegram/Telegram';
 import { Furbooru } from './furbooru/Furbooru';
 import { Itaku } from './itaku/Itaku';
+import { Picarto } from './picarto/Picarto';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -50,6 +51,7 @@ export class WebsiteRegistry {
     NewTumbl: new NewTumbl(),
     Newgrounds: new Newgrounds(),
     Patreon: new Patreon(),
+    Picarto: new Picarto(),
     Piczel: new Piczel(),
     Pillowfort: new Pillowfort(),
     Pixiv: new Pixiv(),

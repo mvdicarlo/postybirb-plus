@@ -16,6 +16,7 @@ export * from './mastodon/mastodon.options';
 export * from './new-tumbl/new-tumbl.options';
 export * from './newgrounds/newgrounds.options';
 export * from './patreon/patreon.options';
+export * from './picarto/picarto.options';
 export * from './piczel/piczel.options';
 export * from './pillowfort/pillowfort.options';
 export * from './pixiv/pixiv.options';

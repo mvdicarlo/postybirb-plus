@@ -67,6 +67,7 @@ export * from './interfaces/websites/new-tumbl/new-tumbl.notification.options.in
 export * from './interfaces/websites/newgrounds/newgrounds.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.notification.options.interface';
+export * from './interfaces/websites/picarto/picarto.file.options.interface';
 export * from './interfaces/websites/piczel/piczel.file.options.interface';
 export * from './interfaces/websites/pillowfort/pillowfort.file.options.interface';
 export * from './interfaces/websites/pillowfort/pillowfort.notification.options.interface';
