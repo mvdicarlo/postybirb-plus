@@ -230,7 +230,7 @@ class TagGroupSelect extends React.Component<TagGroupSelectProps, TagGroupSelect
       <Menu style={{ maxHeight: '33vh', overflow: 'auto', padding: '0' }}>
         <div
           className="sticky top-0 z-10"
-          style={{ background: 'inherit' }}
+          style={{ background: 'inherit', minWidth: 300 }}
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
