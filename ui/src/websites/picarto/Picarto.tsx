@@ -87,7 +87,7 @@ export class PicartoFileSubmissionForm extends GenericFileSubmissionSection<Pica
       <Form.Item label="Category">
         <Select
           {...GenericSelectProps}
-          value={data.softwares}
+          value={data.category}
           onChange={this.setValue.bind(this, 'category')}
         >
           {PicartoCategories.map(s => (
