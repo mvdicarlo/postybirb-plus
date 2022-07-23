@@ -43,7 +43,7 @@ export abstract class Website {
   readonly accountInformation: Map<string, any> = new Map();
   readonly enableAdvertisement: boolean = true;
   readonly refreshBeforePost: boolean = false;
-  readonly refreshInterval: number = 120_0000;
+  readonly refreshInterval: number = 60_000 * 10;
   readonly usernameShortcuts: UsernameShortcut[] = [];
   readonly waitBetweenPostsInterval: number = 4000;
 

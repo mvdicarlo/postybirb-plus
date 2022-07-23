@@ -134,14 +134,16 @@ export class Poster extends EventEmitter {
     }
 
     try {
-      // const loginStatus = await this.accountService.checkLogin(this.part.accountId);
+      if (this.website.refreshBeforePost) {
+        const loginStatus = await this.accountService.checkLogin(this.part.accountId);
+        if (!loginStatus.loggedIn) {
+          throw new Error('Not logged in');
+        }
+      }
+      
       if (this.isCancelled()) {
         return;
       }
-
-      // if (!loginStatus.loggedIn) {
-      //   throw new Error('Not logged in');
-      // }
 
       const data: PostData<Submission, DefaultOptions> = await this.parser.parse(
         this.website,

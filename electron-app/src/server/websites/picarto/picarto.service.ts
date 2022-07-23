@@ -30,6 +30,7 @@ export class Picarto extends Website {
   BASE_URL: string = 'https://picarto.tv';
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif'];
   acceptsAdditionalFiles: boolean = true;
+  refreshBeforePost: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly usernameShortcuts = [
     {

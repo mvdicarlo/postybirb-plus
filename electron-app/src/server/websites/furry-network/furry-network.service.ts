@@ -35,6 +35,7 @@ import _ = require('lodash');
 @Injectable()
 export class FurryNetwork extends Website {
   readonly BASE_URL: string = 'https://furrynetwork.com';
+  readonly refreshBeforePost: boolean = true;
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',
