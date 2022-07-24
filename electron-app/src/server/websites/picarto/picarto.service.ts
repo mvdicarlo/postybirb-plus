@@ -124,10 +124,10 @@ export class Picarto extends Website {
       {
         type: 'json',
         data: {
-          query:
-            'query ($name: String) {\n  me {\n    id\n    is_admin\n    invalid_email\n    channel {\n      id\n      account_type\n      avatar_url\n      name\n      chips\n      secret\n      commission_request_count\n      livestream_tour_done\n      subscribers_count\n      subscriptions_count\n      gifted_subscriber_count\n      __typename\n    }\n    __typename\n  }\n  getLoadBalancerUrl(channel_name: $name) {\n    url\n    origin\n    __typename\n  }\n  generateJwtToken(channel_name: $name) {\n    key\n    __typename\n  }\n}',
+          operationName: "generateToken",
+          query: "query generateToken($channelId: Int, $channelName: String, $userId: Int) {\n  generateJwtToken(\n    channel_id: $channelId\n    channel_name: $channelName\n    user_id: $userId\n  ) {\n    key\n    __typename\n  }\n}",
           variables: {
-            name: username,
+            channelId: channelId,
           },
         },
         headers: {
