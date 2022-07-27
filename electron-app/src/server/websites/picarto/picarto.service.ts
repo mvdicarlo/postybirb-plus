@@ -41,18 +41,23 @@ export class Picarto extends Website {
 
   async checkLoginStatus(data: userAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const ls: { auth: string } = await BrowserWindowUtil.getLocalStorage(data._id, this.BASE_URL);
+    const ls: { auth: string } = await BrowserWindowUtil.getLocalStorage(
+      data._id,
+      this.BASE_URL,
+      3000,
+    );
 
     if (!ls.auth) {
       return status;
     }
 
-    const auth: { access_token: string; user: { username: string; id: number } } = JSON.parse(
-      ls.auth,
-    );
+    const auth: {
+      access_token: string;
+      user: { username: string; id: number; channel: { id: string } };
+    } = JSON.parse(ls.auth);
 
     this.storeAccountInformation(data._id, 'auth_token', auth.access_token);
-    this.storeAccountInformation(data._id, 'channelId', auth.user.id);
+    this.storeAccountInformation(data._id, 'channelId', auth.user.channel.id);
     this.storeAccountInformation(data._id, 'username', auth.user.username);
     status.loggedIn = true;
     status.username = auth.user.username;
@@ -116,7 +121,6 @@ export class Picarto extends Website {
   ): Promise<PostResponse> {
     const authToken = this.getAccountInfo(data.part.accountId, 'auth_token');
     const channelId: string = this.getAccountInfo(data.part.accountId, 'channelId');
-    const username: string = this.getAccountInfo(data.part.accountId, 'username');
 
     const authRes = await Http.post<{ data: { generateJwtToken: { key: string } } }>(
       'https://ptvintern.picarto.tv/ptvapi',
@@ -124,8 +128,9 @@ export class Picarto extends Website {
       {
         type: 'json',
         data: {
-          operationName: "generateToken",
-          query: "query generateToken($channelId: Int, $channelName: String, $userId: Int) {\n  generateJwtToken(\n    channel_id: $channelId\n    channel_name: $channelName\n    user_id: $userId\n  ) {\n    key\n    __typename\n  }\n}",
+          operationName: 'generateToken',
+          query:
+            'query generateToken($channelId: Int, $channelName: String, $userId: Int) {\n  generateJwtToken(\n    channel_id: $channelId\n    channel_name: $channelName\n    user_id: $userId\n  ) {\n    key\n    __typename\n  }\n}',
           variables: {
             channelId: channelId,
           },
