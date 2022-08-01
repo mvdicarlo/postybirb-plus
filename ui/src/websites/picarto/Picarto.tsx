@@ -72,6 +72,19 @@ export class PicartoFileSubmissionForm extends GenericFileSubmissionSection<Pica
   renderRightForm(data: PicartoFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
+      <Form.Item label="Visibility">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.visibility ?? null}
+          onChange={this.setValue.bind(this, 'visibility')}
+        >
+            <Select.Option value="PUBLIC">Public</Select.Option>
+            <Select.Option value="PRIVATE">Private</Select.Option>
+            <Select.Option value="FOLLOWER_SUBSCRIBER">Followers only</Select.Option>
+            <Select.Option value="SUBSCRIBER">Subscribers only</Select.Option>
+        </Select>
+      </Form.Item>,
       <Form.Item label="Folders">
         <Select
           {...GenericSelectProps}

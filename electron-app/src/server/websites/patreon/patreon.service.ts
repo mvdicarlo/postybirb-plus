@@ -42,6 +42,7 @@ export class Patreon extends Website {
   readonly BASE_URL = 'https://www.patreon.com';
   readonly acceptsAdditionalFiles = true;
   readonly refreshBeforePost: boolean = true;
+  readonly waitBetweenPostsInterval = 60_000;
   readonly usernameShortcuts = [
     {
       key: 'pa',
