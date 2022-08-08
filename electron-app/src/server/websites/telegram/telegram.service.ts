@@ -1,4 +1,5 @@
-import { MTProto } from '@mtproto/core';
+const MTProtoClass = require('@mtproto/core');
+import { MTProto } from '@mtproto/core'
 import { Injectable } from '@nestjs/common';
 import {
   DefaultOptions,
@@ -175,10 +176,12 @@ export class Telegram extends Website {
 
     if (appId && appHash && phoneNumber) {
       if (!this.instances[appId]) {
-        this.instances[appId] = new MTProto({
+        this.instances[appId] = new MTProtoClass({
           api_id: Number(appId),
           api_hash: appHash,
-          customLocalStorage: new TelegramStorage(appId),
+          storageOptions: {
+            instance: new TelegramStorage(appId)
+          },
         });
 
         // COMMENTED OUT SINCE IT MIGHT BE BETTER TO CATCH THIS AND SET DURING AUTH TIME
