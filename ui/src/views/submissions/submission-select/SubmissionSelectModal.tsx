@@ -51,6 +51,7 @@ export default class SubmissionSelectModal extends React.Component<Props, State>
             selectAll={this.props.selectAll}
             submissionType={this.props.submissionType}
             validOnly={this.props.validOnly || false}
+            selected={this.state.selected.map(s => s.submission._id)}
           />
           {this.props.below ? <div className="mt-2">{this.props.below}</div> : null}
         </div>

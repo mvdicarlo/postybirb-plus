@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { SubmissionStore } from '../../../stores/submission.store';
 import { SubmissionPackage } from 'postybirb-commons';
-import { Select, Avatar } from 'antd';
+import { Select, Avatar, Button, Divider } from 'antd';
 import { SubmissionType } from 'postybirb-commons';
 import { FileSubmission } from 'postybirb-commons';
 import SubmissionUtil from '../../../utils/submission.util';
@@ -17,6 +17,7 @@ interface Props {
   multiple?: boolean;
   onSelect: (submissions: SubmissionPackage<any>[]) => void;
   selectAll?: boolean;
+  selected: string[];
   submissionStore?: SubmissionStore;
   submissionType: string;
   validOnly?: boolean;
@@ -64,26 +65,42 @@ export default class SubmissionSelect extends React.Component<Props> {
     const submissions = this.getSubmissions(this.props);
 
     return (
-      <Select
-        allowClear={this.props.multiple}
-        className={this.props.className}
-        defaultValue={this.props.selectAll ? submissions.map(s => s.submission._id) : []}
-        mode={this.props.multiple ? 'multiple' : 'default'}
-        onChange={this.onChange.bind(this)}
-      >
-        {submissions.map(s => (
-          <Select.Option value={s.submission._id}>
-            <span className="mr-2">
-              {this.props.submissionType === SubmissionType.FILE ? (
-                <Avatar src={(s.submission as FileSubmission).primary.preview} shape="square" />
-              ) : (
-                <Avatar icon="notification" shape="square" />
-              )}
-            </span>
-            {SubmissionUtil.getSubmissionTitle(s)}
-          </Select.Option>
-        ))}
-      </Select>
+      <>
+        <Select
+          allowClear={this.props.multiple}
+          className={this.props.className}
+          value={this.props.selected}
+          mode={this.props.multiple ? 'multiple' : 'default'}
+          onChange={this.onChange.bind(this)}
+        >
+          {submissions.map(s => (
+            <Select.Option value={s.submission._id}>
+              <span className="mr-2">
+                {this.props.submissionType === SubmissionType.FILE ? (
+                  <Avatar src={(s.submission as FileSubmission).primary.preview} shape="square" />
+                ) : (
+                  <Avatar icon="notification" shape="square" />
+                )}
+              </span>
+              {SubmissionUtil.getSubmissionTitle(s)}
+            </Select.Option>
+          ))}
+        </Select>
+        {this.props.multiple ? (
+          <>
+            <Button
+              type="link"
+              onClick={() => this.onChange(submissions.map(s => s.submission._id))}
+            >
+              Select All
+            </Button>
+            <Divider type="vertical" />
+            <Button type="link" color="w" onClick={() => this.onChange([])}>
+              Deselect All
+            </Button>
+          </>
+        ) : null}
+      </>
     );
   }
 }
