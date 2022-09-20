@@ -1,6 +1,5 @@
 /* tslint:disable: no-console no-var-requires variable-name */
-import { remote, clipboard, shell } from 'electron';
-const { app, session } = remote;
+import { clipboard, shell, session, app, getCurrentWindow } from '@electron/remote';
 
 // Authorizers
 const Tumblr = require('./authorizers/tumblr.auth');
@@ -15,10 +14,10 @@ process.once('loaded', () => {
   global.Buffer = _Buffer;
 });
 
-(window as any).PORT = (remote.getCurrentWindow() as any).PORT;
-(window as any).AUTH_ID = (remote.getCurrentWindow() as any).AUTH_ID;
-(window as any).IS_DARK_THEME = (remote.getCurrentWindow() as any).IS_DARK_THEME;
-(window as any).AUTH_SERVER_URL = (remote.getCurrentWindow() as any).AUTH_SERVER_URL;
+(window as any).PORT = (getCurrentWindow() as any).PORT;
+(window as any).AUTH_ID = (getCurrentWindow() as any).AUTH_ID;
+(window as any).IS_DARK_THEME = (getCurrentWindow() as any).IS_DARK_THEME;
+(window as any).AUTH_SERVER_URL = (getCurrentWindow() as any).AUTH_SERVER_URL;
 (window as any).appVersion = app.getVersion();
 (window as any).electron = {
   clipboard: {
@@ -27,7 +26,10 @@ process.once('loaded', () => {
       const ni = clipboard.readImage();
       const arr = new Uint8Array(ni.toPNG());
       const blob = new Blob([arr], { type: 'image/png' });
-      return new File([blob], 'Clipboard Image.png', { lastModified: Date.now(), type: 'image/png' });
+      return new File([blob], 'Clipboard Image.png', {
+        lastModified: Date.now(),
+        type: 'image/png',
+      });
     },
   },
   session: {

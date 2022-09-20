@@ -1,6 +1,6 @@
-import { remote } from 'electron';
-const PORT = Number((remote.getCurrentWindow() as any).PORT) + 1;
-const URL = (remote.getCurrentWindow() as any).AUTH_SERVER_URL;
+import { getCurrentWindow } from '@electron/remote';
+const PORT = Number((getCurrentWindow() as any).PORT) + 1;
+const URL = (getCurrentWindow() as any).AUTH_SERVER_URL;
 
 export function getURL(path): string {
   return `${URL}/${path}?port=${PORT}`;

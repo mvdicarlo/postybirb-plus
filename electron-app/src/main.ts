@@ -1,9 +1,21 @@
 /* tslint:disable: no-console no-var-requires */
 const path = require('path');
-import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  nativeImage,
+  nativeTheme,
+  Tray,
+  Notification,
+  webContents,
+} from 'electron';
 import * as WindowStateKeeper from 'electron-window-state';
 import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
+import { initialize as initializeRemote, enable as enableRemote } from '@electron/remote/main';
+
+initializeRemote();
 
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
@@ -15,7 +27,8 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
-process.env.PORT = process.argv.find((arg) => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
+process.env.PORT =
+  process.argv.find((arg) => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
 global.AUTH_SERVER_URL = 'https://postybirb-auth.azurewebsites.net';
 global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');
@@ -54,7 +67,7 @@ app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
-  app.allowRendererProcessReuse = false;
+  // app.allowRendererProcessReuse = false;
   app.userAgentFallback = app.userAgentFallback.replace(/Electron.*?\s/, ''); // EXPERIMENTAL: Attempt to get Google Sign-In working
   if (!global.SERVER_ONLY_MODE) {
     loader.show();
@@ -144,11 +157,11 @@ function createWindow() {
       contextIsolation: false,
       spellcheck: true,
       backgroundThrottling: false,
-      enableRemoteModule: true,
+      nativeWindowOpen: true,
     },
   });
 
-
+  enableRemote(mainWindow.webContents);
   (mainWindow as any).PORT = process.env.PORT;
   (mainWindow as any).AUTH_ID = global.AUTH_ID;
   (mainWindow as any).AUTH_SERVER_URL = global.AUTH_SERVER_URL;

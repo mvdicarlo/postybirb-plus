@@ -7,7 +7,6 @@ export default class BrowserWindowUtil {
       show: false,
       webPreferences: {
         partition: `persist:${partition}`,
-        enableRemoteModule: false,
       },
     });
 

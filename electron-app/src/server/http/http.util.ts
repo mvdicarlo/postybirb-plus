@@ -207,7 +207,6 @@ export default class Http {
               show: false,
               webPreferences: {
                 partition: `persist:${partitionId}`,
-                enableRemoteModule: false,
               },
             });
 
@@ -259,7 +258,6 @@ export default class Http {
               show: false,
               webPreferences: {
                 partition: `persist:${partitionId}`,
-                enableRemoteModule: false,
               },
             });
 

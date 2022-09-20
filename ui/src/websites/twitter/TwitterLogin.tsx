@@ -95,7 +95,7 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
           </Form>
         </div>
         <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
-          <webview className="webview h-full w-full" webpreferences="nativeWindowOpen=1" />
+          <webview className="webview h-full w-full" />
         </Spin>
       </div>
     );
