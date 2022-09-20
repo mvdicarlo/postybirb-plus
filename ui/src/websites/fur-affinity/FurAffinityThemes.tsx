@@ -30,6 +30,7 @@ export const FurAffinityThemes = [
     <Option value="106">Fursuit</Option>
     <Option value="119">Gore / Macabre Art</Option>
     <Option value="107">Hyper</Option>
+    <Option value="121">Hypnosis</Option>
     <Option value="108">Inflation</Option>
     <Option value="109">Macro / Micro</Option>
     <Option value="110">Muscle</Option>
