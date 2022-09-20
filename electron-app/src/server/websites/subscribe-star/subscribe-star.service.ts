@@ -34,6 +34,7 @@ import _ = require('lodash');
 export class SubscribeStar extends Website {
   readonly BASE_URL = 'https://www.subscribestar.com';
   readonly acceptsAdditionalFiles = true;
+  readonly enableAdvertisement: boolean = false;
   readonly usernameShortcuts = [
     {
       key: 'ss',
