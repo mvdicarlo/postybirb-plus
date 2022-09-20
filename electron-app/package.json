@@ -97,7 +97,7 @@
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.32.0",
-    "electron": "^15.5.7",
+    "electron": "^18.3.13",
     "electron-builder": "^23.3.3",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "7.2.0",

@@ -67,8 +67,6 @@ app.on('second-instance', show);
 app.on('activate', show);
 app.on('window-all-closed', () => {});
 app.on('ready', () => {
-  // app.allowRendererProcessReuse = false;
-  app.userAgentFallback = app.userAgentFallback.replace(/Electron.*?\s/, ''); // EXPERIMENTAL: Attempt to get Google Sign-In working
   if (!global.SERVER_ONLY_MODE) {
     loader.show();
   }
@@ -157,7 +155,6 @@ function createWindow() {
       contextIsolation: false,
       spellcheck: true,
       backgroundThrottling: false,
-      nativeWindowOpen: true,
     },
   });
 
