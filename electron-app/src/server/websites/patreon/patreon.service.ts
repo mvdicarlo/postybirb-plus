@@ -30,6 +30,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
 import _ = require('lodash');
+import Http from 'src/server/http/http.util';
 
 /*
  * Developer note:
@@ -42,7 +43,8 @@ export class Patreon extends Website {
   readonly BASE_URL = 'https://www.patreon.com';
   readonly acceptsAdditionalFiles = true;
   readonly refreshBeforePost: boolean = true;
-  readonly waitBetweenPostsInterval = 60_000;
+  readonly waitBetweenPostsInterval = 90_000;
+  readonly enableAdvertisement: boolean = false;
   readonly usernameShortcuts = [
     {
       key: 'pa',
@@ -70,95 +72,57 @@ export class Patreon extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const body = await BrowserWindowUtil.getPage(data._id, `${this.BASE_URL}/creator-home`, true);
-    const match = body.match(/"full_name": "(.*?)"/);
-    if (match) {
+    const { body } = await Http.get<{
+      data: {
+        id: string;
+        attributes: {
+          name: string;
+        };
+      }[];
+      included: {
+        attributes: any;
+        id: string;
+        relationships: any;
+        type: string;
+      }[];
+    }>(`${this.BASE_URL}/api/campaigns`, data._id, {
+      requestOptions: {
+        json: true,
+      },
+    });
+
+    if (body.data.length) {
       status.loggedIn = true;
-      status.username = match[1];
-      await this.loadTiers(data._id);
+      status.username = body.data[0].attributes.name;
+      this.loadTiers(
+        data._id,
+        body.included.filter((included) => included.type === 'reward'),
+      );
     }
     return status;
   }
 
-  private async loadTiers(profileId: string) {
-    const csrf = await this.getCSRF(profileId);
-    const createData = {
-      data: {
-        type: 'post',
-        attributes: {
-          post_type: 'image_file',
-        },
-      },
-    };
-
-    const json = (await this.createPost(profileId, csrf, createData)).data;
-    const accessTierPage = await BrowserWindowUtil.getPage(
-      profileId,
-      `${this.BASE_URL}/api/posts/${json.id}?include=access_rules.tier.null,attachments.null,campaign.access_rules.tier.null,campaign.earnings_visibility,campaign.is_nsfw,images.null,audio.null&fields[access_rule]=access_rule_type`,
-      false,
-    );
-
-    const tierJson = JSON.parse(accessTierPage);
-    if (tierJson.included) {
-      const customTiers: Folder = {
-        label: 'Tiers',
-        children: [],
+  private async loadTiers(
+    profileId: string,
+    rewardAttributes: {
+      attributes: {
+        title: string;
+        description: string;
       };
-
-      const tiers: Folder[] = [];
-
-      tierJson.included
-        .filter((t) => t.type === 'access-rule' || t.type === 'reward')
-        .filter((t) => {
-          if (
-            t.attributes.access_rule_type === 'public' ||
-            t.attributes.access_rule_type === 'patrons'
-          ) {
-            return true;
-          } else if (t.attributes.title) {
-            return true;
-          }
-          return false;
-        })
-        .forEach((t) => {
-          let value = t.id;
-          if (t.type === 'reward') {
-            const found = tierJson.included.find((relation) => {
-              if (relation.attributes.access_rule_type === 'tier') {
-                const relationship = _.get(relation, 'relationships.tier.data.id', null);
-                if (value === relationship) {
-                  return true;
-                }
-              }
-            });
-
-            if (found) {
-              value = found.id;
-            }
-          }
-          const tierObj: Folder = {
-            value,
-            label: t.attributes.title || t.attributes.access_rule_type,
-          };
-          if (t.type === 'access-rule') {
-            if (tierObj.label === 'patrons') {
-              tierObj.label = 'Patrons Only';
-            } else if (tierObj.label === 'public') {
-              tierObj.label = 'Public';
-            }
-            tiers.push(tierObj);
-          } else {
-            customTiers.children.push(tierObj);
-          }
-        });
-
-      tiers.push(customTiers);
-      this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
-    }
+      id: string;
+      relationships: any;
+      type: string;
+    }[],
+  ) {
+    const tiers: Folder[] = rewardAttributes.map((attr) => ({
+      label: attr.attributes.title || attr.attributes.description,
+      value: attr.id,
+    }));
+    this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
   }
 
   private async getCSRF(profileId: string): Promise<string> {
-    const page = await BrowserWindowUtil.getPage(profileId, `${this.BASE_URL}/post`, true);
+    const page = await BrowserWindowUtil.getPage(profileId, `${this.BASE_URL}`, true);
     const match = page.match(/csrfSignature = "(.*?)"/);
     if (!match) {
       throw new Error('No CSRF Token found.');
@@ -223,7 +187,7 @@ export class Patreon extends Website {
     profileId: string,
     csrf: string,
     data: object,
-  ): Promise<{ data: any; link: any }> {
+  ): Promise<{ data: { id: string; type: string; attributes: any }; links: { self: string } }> {
     const cmd = `
     var data = ${JSON.stringify(data)};
     var xhr = new XMLHttpRequest();
@@ -238,24 +202,6 @@ export class Patreon extends Website {
       `${this.BASE_URL}`,
       cmd,
     );
-
-
-    // const create = await BrowserWindowUtil.post<string>(
-    //   profileId,
-    //   `${this.BASE_URL}/api/posts?fields[post]=post_type%2Cpost_metadata&json-api-version=1.0&include=[]`,
-    //   {
-    //     Accept: '*/*',
-    //     'Accept-Language': 'en-US,en;q=0.9',
-    //     'Cache-Control': 'no-cache',
-    //     Connection: 'keep-alive',
-    //     'Content-Type': 'application/vnd.api+json',
-    //     Origin: 'https://www.patreon.com',
-    //     Pragma: 'no-cache',
-    //     Referer: 'https://www.patreon.com/posts/new',
-    //     'X-CSRF-Signature': csrf,
-    //   },
-    //   data,
-    // );
 
     return JSON.parse(create.body);
   }

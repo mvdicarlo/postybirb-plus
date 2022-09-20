@@ -89,11 +89,10 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
                 this.patronsOnlyId = tier.value!;
               }
 
-              if (tier.label === 'Public') {
+              if (tier.label === 'Everyone') {
                 this.publicId = tier.value!;
               }
             });
-            this.setState({ folders: data });
           }
         }
       }
@@ -199,7 +198,7 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
                 this.patronsOnlyId = tier.value!;
               }
 
-              if (tier.label === 'Public') {
+              if (tier.label === 'Everyone') {
                 this.publicId = tier.value!;
               }
             });

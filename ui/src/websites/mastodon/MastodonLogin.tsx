@@ -115,7 +115,7 @@ export default class MastodonLogin extends React.Component<LoginDialogProps, Sta
           </Form>
         </div>
         <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
-          <webview className="webview h-full w-full" webpreferences="nativeWindowOpen=1" />
+          <webview className="webview h-full w-full" />
         </Spin>
       </div>
     );

@@ -4,12 +4,7 @@ import SubmissionUtil from '../../../utils/submission.util';
 import moment from 'moment';
 import { Submission } from 'postybirb-commons';
 import { SubmissionPackage } from 'postybirb-commons';
-import {
-  Calendar,
-  Button,
-  List,
-  Badge,
-  message} from 'antd';
+import { Calendar, Button, List, Badge, message } from 'antd';
 import { ScheduledSubmissionListItem } from './ScheduledSubmissionListItem';
 
 interface Props {
@@ -44,7 +39,9 @@ export default class ScheduledSubmissions extends React.Component<Props> {
                   ).toLocaleTimeString()}]`}
                 >
                   <span className="mr-1">{SubmissionUtil.getSubmissionTitle(s)}</span>
-                  <span className="block">{new Date(s.submission.schedule.postAt!).toLocaleTimeString()}</span>
+                  <span className="block">
+                    {new Date(s.submission.schedule.postAt!).toLocaleTimeString()}
+                  </span>
                 </span>
               }
             />
@@ -94,8 +91,12 @@ export default class ScheduledSubmissions extends React.Component<Props> {
                 </Button>
               </div>
             }
-            dataSource={this.props.submissions}
-            renderItem={(item: SubmissionPackage<Submission>) => <ScheduledSubmissionListItem item={item} />}
+            dataSource={this.props.submissions.sort(
+              (a, b) => a.submission.schedule.postAt! - b.submission.schedule.postAt!
+            )}
+            renderItem={(item: SubmissionPackage<Submission>) => (
+              <ScheduledSubmissionListItem item={item} />
+            )}
           />
         </div>
 

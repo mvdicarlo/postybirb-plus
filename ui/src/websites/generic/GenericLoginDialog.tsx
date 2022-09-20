@@ -29,7 +29,7 @@ export class GenericLoginDialog extends React.Component<LoginDialogProps, State>
     return (
       <div className="h-full w-full">
         <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
-          <webview className="webview h-full w-full" webpreferences="nativeWindowOpen=1" />
+          <webview className="webview h-full w-full" />
         </Spin>
       </div>
     );

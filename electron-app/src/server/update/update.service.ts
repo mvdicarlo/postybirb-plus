@@ -1,4 +1,4 @@
-import { Injectable, Logger, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { autoUpdater } from 'electron-updater';
 import { BrowserWindow } from 'electron';
@@ -41,11 +41,14 @@ export class UpdateService {
 
     autoUpdater.on('checking-for-update', () => this.logger.log('Checking for update...'));
 
-    autoUpdater.on('update-available', info => {
+    autoUpdater.on('update-available', (info) => {
       this.updateAvailable.available = true;
-      this.updateAvailable.releaseNotes = info.releaseNotes.map(
-        note => `<h2>${note.version}</h2>${note.note}`,
-      );
+      if (Array.isArray(info.releaseNotes)) {
+        this.updateAvailable.releaseNotes = (info.releaseNotes as any[])
+          .map((note) => `<h2>${note.version}</h2>${note.note}`)
+          .join('\n');
+      }
+
       this.updateAvailable.version = info.version;
       this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
     });
@@ -55,10 +58,10 @@ export class UpdateService {
       this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
     });
 
-    autoUpdater.on('error', err => {
+    autoUpdater.on('error', (err) => {
       this.isUpdating = false;
       this.updateAvailable.isUpdating = false;
-      this.updateAvailable.error = err;
+      this.updateAvailable.error = err.toString();
       this.updateAvailable.percent = 0;
 
       this.logger.error(err);
@@ -73,7 +76,7 @@ export class UpdateService {
       this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
 
       if (!this.postService.isCurrentlyPostingToAny()) {
-        BrowserWindow.getAllWindows().forEach(w => {
+        BrowserWindow.getAllWindows().forEach((w) => {
           w.destroy();
         });
 
