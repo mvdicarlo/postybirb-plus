@@ -9,7 +9,7 @@ export class PatreonFileOptionsEntity extends DefaultFileOptionsEntity
   implements PatreonFileOptions {
   @Expose()
   @IsArray()
-  @DefaultValue([])
+  @DefaultValue(["0"])
   tiers!: string[];
 
   @Expose()

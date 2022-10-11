@@ -9,7 +9,7 @@ export class PatreonNotificationOptionsEntity extends DefaultOptionsEntity
   implements PatreonNotificationOptions {
   @Expose()
   @IsArray()
-  @DefaultValue([])
+  @DefaultValue(["0"])
   tiers!: string[];
 
   @Expose()

@@ -93,6 +93,7 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
                 this.publicId = tier.value!;
               }
             });
+            this.setState({ folders: data });
           }
         }
       }
