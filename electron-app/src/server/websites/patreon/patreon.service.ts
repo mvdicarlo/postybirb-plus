@@ -72,37 +72,35 @@ export class Patreon extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const { body } = await Http.get<{
+    const body = await BrowserWindowUtil.runScriptOnPage<{
       data: {
         id: string;
         attributes: {
           name: string;
         };
-      }[];
+      };
       included: {
         attributes: any;
         id: string;
         relationships: any;
         type: string;
       }[];
-    }>(`${this.BASE_URL}/api/campaigns`, data._id, {
-      requestOptions: {
-        json: true,
-      },
-    });
+    }>(data._id, `${this.BASE_URL}/membership`, 'window.patreon.bootstrap.creator', 1000);
 
-    if (body.data.length) {
+    if (body.data) {
       status.loggedIn = true;
-      status.username = body.data[0].attributes.name;
+      status.username = body.data.attributes.name;
       this.loadTiers(
         data._id,
-        body.included.filter((included) => included.type === 'reward'),
+        body.included.filter(
+          (included) => included.type === 'reward' || included.type === 'access-rule',
+        ),
       );
     }
     return status;
   }
 
-  private async loadTiers(
+  private loadTiers(
     profileId: string,
     rewardAttributes: {
       attributes: {
@@ -110,14 +108,28 @@ export class Patreon extends Website {
         description: string;
       };
       id: string;
-      relationships: any;
+      relationships: { tier: { data: { id: string; type: string } } };
       type: string;
     }[],
   ) {
-    const tiers: Folder[] = rewardAttributes.map((attr) => ({
-      label: attr.attributes.title || attr.attributes.description,
-      value: attr.id,
-    }));
+    const tiers: Folder[] = rewardAttributes
+      .filter(({ type }) => type === 'reward')
+      .map((attr) => ({
+        label: attr.attributes.title || attr.attributes.description,
+        value: attr.id,
+      }));
+
+    rewardAttributes
+      .filter(({ type }) => type === 'access-rule')
+      .forEach((rule) => {
+        if (rule.relationships?.tier?.data?.id) {
+          const matchingTier = tiers.find((t) => t.value === rule.relationships.tier.data.id);
+          if (matchingTier) {
+            matchingTier.value = rule.id;
+          }
+        }
+      });
+
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
   }
 
@@ -615,7 +627,7 @@ export class Patreon extends Website {
         }
       });
     } else {
-      warnings.push('Post will be made public to all.');
+      problems.push('Please pick an access tier.');
     }
 
     const files = [
@@ -661,7 +673,7 @@ export class Patreon extends Website {
         }
       });
     } else {
-      warnings.push('Post will be made public to all.');
+      problems.push('Please pick an access tier.');
     }
 
     return { problems, warnings };
