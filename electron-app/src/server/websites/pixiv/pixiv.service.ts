@@ -85,6 +85,7 @@ export class Pixiv extends Website {
       'quality[]': '',
       quality_text: '',
       qropen: '',
+      ai_type: data.options.aiGenerated ? '2' : '1',
       'files[]': files,
       'file_info[]': files.map(f =>
         JSON.stringify({
@@ -150,7 +151,7 @@ export class Pixiv extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<any>,
+    submissionPart: SubmissionPart<PixivFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -172,6 +173,10 @@ export class Pixiv extends Website {
         f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
+
+    if (submissionPart.data.aiGenerated === undefined) {
+      problems.push('Please specify if the art is AI Generated.');
+    }
 
     const maxMB: number = 32;
     files.forEach(file => {

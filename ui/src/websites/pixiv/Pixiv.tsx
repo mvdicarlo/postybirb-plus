@@ -81,6 +81,14 @@ export class PixivFileSubmissionForm extends GenericFileSubmissionSection<PixivF
         >
           Allow other users to edit tags
         </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.aiGenerated}
+          onChange={this.handleCheckedChange.bind(this, 'aiGenerated')}
+        >
+          AI-generated work
+        </Checkbox>
       </div>
     );
     return elements;

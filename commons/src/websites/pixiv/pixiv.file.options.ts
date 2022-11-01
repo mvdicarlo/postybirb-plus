@@ -31,6 +31,10 @@ export class PixivFileOptionsEntity extends DefaultFileOptionsEntity implements 
   @DefaultValue([])
   containsContent!: string[];
 
+  @Expose()
+  @DefaultValue(false)
+  aiGenerated!: boolean;
+
   constructor(entity?: Partial<PixivFileOptions>) {
     super(entity as DefaultFileOptions);
   }

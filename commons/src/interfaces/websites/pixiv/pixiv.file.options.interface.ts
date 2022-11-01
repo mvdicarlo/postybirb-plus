@@ -6,4 +6,5 @@ export interface PixivFileOptions extends DefaultFileOptions {
   original: boolean;
   sexual?: boolean;
   containsContent: string[];
+  aiGenerated: boolean;
 }
