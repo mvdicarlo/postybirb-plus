@@ -22,6 +22,12 @@ export class MastodonFileOptionsEntity extends DefaultFileOptionsEntity
   @DefaultValue('public')
   visibility!: string;
 
+  @Expose()
+  @IsOptional()
+  @IsString()
+  altText?: string;
+  
+
   constructor(entity?: Partial<MastodonFileOptions>) {
     super(entity as DefaultFileOptions);
   }

@@ -114,6 +114,12 @@ export class MastodonFileSubmissionForm extends GenericFileSubmissionSection<Mas
           onChange={this.handleValueChange.bind(this, 'spoilerText')}
         />
       </Form.Item>,
+      <Form.Item label="Alt Text">
+        <Input
+          value={data.altText}
+          onChange={this.handleValueChange.bind(this, 'altText')}
+        />
+      </Form.Item>,
       <Form.Item label="Post Visibility">
         <Select
           {...GenericSelectProps}

@@ -4,4 +4,5 @@ export interface MastodonFileOptions extends DefaultFileOptions {
   useTitle: boolean;
   spoilerText?: string;
   visibility: string;
+  altText?: string;
 }

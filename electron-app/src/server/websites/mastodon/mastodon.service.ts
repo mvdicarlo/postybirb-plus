@@ -82,7 +82,7 @@ export class Mastodon extends Website {
     return { maxSize: FileSize.MBtoBytes(300) };
   }
 
-  private async uploadMedia(data: MastodonAccountData, file: PostFile): Promise<{ id: string }> {
+  private async uploadMedia(data: MastodonAccountData, file: PostFile, altText: string): Promise<{ id: string }> {
     const upload = await Http.post<{ id: string; errors: any }>(
       `${data.website}/api/v1/media`,
       undefined,
@@ -90,6 +90,7 @@ export class Mastodon extends Website {
         type: 'multipart',
         data: {
           file,
+          description: altText
         },
         requestOptions: { json: true },
         headers: {
@@ -123,7 +124,7 @@ export class Mastodon extends Website {
       id: string;
     }[] = [];
     for (const file of files) {
-      uploadedMedias.push(await this.uploadMedia(accountData, file.file));
+      uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
     }
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
