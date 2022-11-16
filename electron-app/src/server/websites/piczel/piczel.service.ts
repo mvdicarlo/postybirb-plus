@@ -73,7 +73,7 @@ export class Piczel extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(30) };
+    return { maxSize: FileSize.MBtoBytes(10) };
   }
 
   parseDescription(text: string): string {
@@ -170,7 +170,7 @@ export class Piczel extends Website {
       ),
     ];
 
-    const maxMB: number = 30;
+    const maxMB: number = 10;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (FileSize.MBtoBytes(maxMB) < size) {
