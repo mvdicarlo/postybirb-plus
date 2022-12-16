@@ -106,6 +106,7 @@ export class Patreon extends Website {
       attributes: {
         title: string;
         description: string;
+        access_rule_type: string;
       };
       id: string;
       relationships: { tier: { data: { id: string; type: string } } };
@@ -127,6 +128,14 @@ export class Patreon extends Website {
           if (matchingTier) {
             matchingTier.value = rule.id;
           }
+        }
+      });
+
+    rewardAttributes
+      .filter(({ type }) => type === 'access-rule')
+      .forEach((rule) => {
+        if (rule.attributes.access_rule_type === 'public') {
+          tiers.find((t) => t.value === '-1').value = rule.id;
         }
       });
 
