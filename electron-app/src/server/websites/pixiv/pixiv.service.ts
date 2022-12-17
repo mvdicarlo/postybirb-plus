@@ -37,10 +37,10 @@ export class Pixiv extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<string>(this.BASE_URL, data._id);
-    const match = res.body.match(/"name":"(.*?)"/);
-    if (match && match[1]) {
+    const match = res.body.includes('signup-form');
+    if (!match) {
       status.loggedIn = true;
-      status.username = match[1];
+      status.username = 'Logged In';
     }
     return status;
   }
@@ -63,8 +63,8 @@ export class Pixiv extends Website {
     const page = await Http.get<string>(`${this.BASE_URL}/upload.php`, data.part.accountId);
     this.verifyResponse(page, 'Get page');
 
-    const files = [data.thumbnail, data.primary.file, ...data.additional.map(f => f.file)].filter(
-      f => f,
+    const files = [data.thumbnail, data.primary.file, ...data.additional.map((f) => f.file)].filter(
+      (f) => f,
     );
 
     const form: any = {
@@ -73,9 +73,7 @@ export class Pixiv extends Website {
       x_restrict_sexual: this.getContentRating(data.rating),
       sexual: '',
       title: data.title.substring(0, 32),
-      tag: this.formatTags(data.tags)
-        .slice(0, 10)
-        .join(' '),
+      tag: this.formatTags(data.tags).slice(0, 10).join(' '),
       comment: data.description,
       rating: '1',
       mode: 'upload',
@@ -87,7 +85,7 @@ export class Pixiv extends Website {
       qropen: '',
       ai_type: data.options.aiGenerated ? '2' : '1',
       'files[]': files,
-      'file_info[]': files.map(f =>
+      'file_info[]': files.map((f) =>
         JSON.stringify({
           name: f.options.filename,
           type: f.options.contentType,
@@ -105,12 +103,12 @@ export class Pixiv extends Website {
       if (options.sexual) form.sexual = 'implicit';
     } else {
       if (options.matureContent) {
-        options.matureContent.forEach(c => (form[c] = 'on'));
+        options.matureContent.forEach((c) => (form[c] = 'on'));
       }
     }
 
     if (options.containsContent) {
-      options.containsContent.forEach(c => (form[c] = 'on'));
+      options.containsContent.forEach((c) => (form[c] = 'on'));
     }
 
     this.checkCancelled(cancellationToken);
@@ -170,7 +168,7 @@ export class Pixiv extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
@@ -179,7 +177,7 @@ export class Pixiv extends Website {
     }
 
     const maxMB: number = 32;
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
