@@ -84,7 +84,7 @@ export class Mastodon extends Website {
 
   private async uploadMedia(data: MastodonAccountData, file: PostFile, altText: string): Promise<{ id: string }> {
     const upload = await Http.post<{ id: string; errors: any }>(
-      `${data.website}/api/v1/media`,
+      `${data.website}/api/v2/media`,
       undefined,
       {
         type: 'multipart',
