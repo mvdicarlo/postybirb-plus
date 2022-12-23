@@ -107,7 +107,7 @@ export class SubscribeStar extends Website {
 
   async postMessily(partition: string, data: Record<string, any>) {
     const cmd = `
-    const data = JSON.parse('${JSON.stringify(data)}');
+    const data = ${JSON.stringify(data)};
     var fd = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -122,6 +122,8 @@ export class SubscribeStar extends Website {
     xhr.send(fd);
     xhr.responseText
     `;
+
+    console.log(cmd)
 
     const upload = await BrowserWindowUtil.runScriptOnPage<string>(
       partition,
