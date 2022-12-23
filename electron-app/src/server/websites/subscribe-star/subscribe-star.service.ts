@@ -29,6 +29,7 @@ import { Website } from '../website.base';
 import { app } from 'electron';
 
 import _ = require('lodash');
+import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 
 @Injectable()
 export class SubscribeStar extends Website {
@@ -104,16 +105,88 @@ export class SubscribeStar extends Website {
       .replace(/\n/g, '');
   }
 
+  async postMessily(partition: string, data: Record<string, any>) {
+    const cmd = `
+    const data = JSON.parse('${JSON.stringify(data)}');
+    var fd = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => fd.append(key, v));
+      } else {
+        fd.append(key, value);
+      }
+    });
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/posts.json', false);
+    xhr.setRequestHeader("X-CSRF-Token", document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1]);
+    xhr.send(fd);
+    xhr.responseText
+    `;
+
+    const upload = await BrowserWindowUtil.runScriptOnPage<string>(
+      partition,
+      `${this.BASE_URL}`,
+      cmd,
+    );
+
+    if (!upload) {
+      throw this.createPostResponse({
+        message: `Failed to upload post`,
+        additionalInfo: 'Finalize',
+      });
+    }
+
+    return JSON.parse(upload) as { url: string; fields?: object; error: any; html: string };
+  }
+
+  async postFileMessily(partition: string, data: Record<string, any>, url) {
+    const cmd = `
+    const data = JSON.parse('${JSON.stringify(data)}');
+    var fd = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => fd.append(key, v));
+      } else {
+        fd.append(key, value);
+      }
+    });
+    fd.append('authenticity_token', document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1]);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '${url}', false);
+    xhr.setRequestHeader("X-CSRF-Token", document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1]);
+    xhr.send(fd);
+    xhr.responseText
+    `;
+
+    const upload = await BrowserWindowUtil.runScriptOnPage<string>(
+      partition,
+      `${this.BASE_URL}`,
+      cmd,
+    );
+
+    if (!upload) {
+      throw this.createPostResponse({
+        message: `Failed to upload post`,
+        additionalInfo: 'Finalize',
+      });
+    }
+
+    const res = JSON.parse(upload) as any;
+
+    if (res.redirect_path) {
+      throw this.createPostResponse({
+        message: `Failed to upload post`,
+        additionalInfo: 'Finalize',
+      });
+    }
+
+    return res;
+  }
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, SubscribeStarFileOptions>,
   ): Promise<PostResponse> {
-    const page = await Http.get<string>(this.BASE_URL, data.part.accountId);
-    this.verifyResponse(page, 'Get CSRF');
-    const csrf = page.body.match(/<meta name="csrf-token" content="(.*?)"/)[1];
-
-    const form = {
-      utf8: '✓',
+    const form: Record<string, any> = {
       html_content: `<div>${data.options.useTitle && data.title ? `<h1>${data.title}</h1>` : ''}${
         data.description
       }</div>`,
@@ -121,35 +194,23 @@ export class SubscribeStar extends Website {
       new_editor: 'true',
       'tier_ids[]': data.options.tiers.includes('free') ? undefined : data.options.tiers,
       'tags[]': data.tags,
+      is_draft: '',
+      has_poll: 'false',
+      finish_date: '',
+      finish_time: '',
+      posting_option: 'Publish Now',
     };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ error: any; html: string }>(
-      `${this.BASE_URL}/posts.json`,
-      data.part.accountId,
-      {
-        type: 'multipart',
-        data: form,
-        requestOptions: {
-          json: true,
-          qsStringifyOptions: { arrayFormat: 'repeat' },
-        },
-        headers: {
-          Referer: 'https://www.subscribestar.com/',
-          'X-CSRF-Token': csrf,
-        },
-      },
-    );
 
-    this.verifyResponse(post, 'Verify post');
-    if (post.body.error) {
-      return Promise.reject(
-        this.createPostResponse({ error: post.body.error, additionalInfo: post.body }),
-      );
+    const post = await this.postMessily(data.part.accountId, form);
+
+    if (post.error) {
+      return Promise.reject(this.createPostResponse({ error: post.error, additionalInfo: post }));
     }
 
     return this.createPostResponse({
-      source: `${this.BASE_URL}/posts/${post.body.html.match(/data-id="(.*?)"/)[1]}`,
+      source: `${this.BASE_URL}/posts/${post.html.match(/data-id="(.*?)"/)[1]}`,
     });
   }
 
@@ -158,14 +219,30 @@ export class SubscribeStar extends Website {
     data: FilePostData<SubscribeStarFileOptions>,
   ): Promise<PostResponse> {
     const usernameLink: string = this.getAccountInfo(data.part.accountId, 'username');
-    const page = await Http.get<string>(`${this.BASE_URL}${usernameLink}`, data.part.accountId);
-    this.verifyResponse(page, 'Get CSRF');
-    page.body = page.body.replace(/\&quot;/g, '"');
-    const csrf = page.body.match(/<meta name="csrf-token" content="(.*?)"/)[1];
+    let { csrf, cookies, postKey, bucket } = await BrowserWindowUtil.runScriptOnPage<{
+      csrf: string;
+      cookies: string;
+      postKey: string;
+      bucket: string;
+    }>(
+      data.part.accountId,
+      `${this.BASE_URL}${usernameLink}`,
+      `
+      async function getInfo() {
+        var csrf = document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1].trim();
+        var cookies = (await cookieStore.getAll()).reduce((a, b) => \`$\{a\} $\{b.name\}=$\{b.value\};\`, '').trim();
+        var postKey = document.body.parentElement.innerHTML.replace(/\&quot;/g, '"').match(/data-s3-upload-path=\\"(.*?)\\"/)[1].trim();
+        var bucket = document.body.parentElement.innerHTML.replace(/\&quot;/g, '"').match(/data-s3-bucket="(.*?)"/)[1].trim();
+        var out = { csrf, cookies, postKey, bucket }
+
+        return out;
+      }
+      
+      getInfo();
+    `,
+    );
 
     const files = [data.primary, ...data.additional].map((f) => f.file);
-    const postKey = page.body.match(/data-s3-upload-path=\\"(.*?)\\"/)[1];
-    const bucket = page.body.match(/data-s3-bucket="(.*?)"/)[1];
     this.checkCancelled(cancellationToken);
     let processData = null;
     for (const file of files) {
@@ -198,10 +275,12 @@ export class SubscribeStar extends Website {
         headers: {
           Referer: 'https://www.subscribestar.com/',
           Origin: 'https://www.subscribestar.com',
+          cookie: cookies,
         },
       });
 
       this.verifyResponse(postFile, 'Uploading File');
+
       const record: any = {
         path: key,
         url: `${presign.body.url}/${key}`,
@@ -217,20 +296,12 @@ export class SubscribeStar extends Website {
         record.height = height;
       }
 
-      const processFile = await Http.post(
-        `${this.BASE_URL}/post_uploads/process_s3_attachments.json`,
+      const processFile = await this.postFileMessily(
         data.part.accountId,
-        {
-          type: 'json',
-          data: record,
-          headers: {
-            Referer: `https://www.subscribestar.com/${usernameLink}`,
-            Origin: 'https://www.subscribestar.com',
-          },
-        },
+        record,
+        `${this.BASE_URL}/post_uploads/process_s3_attachments.json`,
       );
-      this.verifyResponse(processFile, 'Process File Upload');
-      processData = processFile.body;
+      processData = processFile;
     }
 
     if (files.length > 1) {
@@ -238,27 +309,16 @@ export class SubscribeStar extends Website {
         .sort((a, b) => a.id - b.id)
         .map((record) => record.id);
 
-      const reorder = await Http.post<{ error: any; html: string }>(
-        `${this.BASE_URL}/post_uploads/reorder`,
+      const reorder = await this.postFileMessily(
         data.part.accountId,
         {
-          type: 'json',
-          data: {
-            authenticity_token: csrf,
-            upload_ids: order,
-          },
-          headers: {
-            Referer: `https://www.subscribestar.com/${usernameLink}`,
-            Origin: 'https://www.subscribestar.com',
-          },
+          'upload_ids[]': order,
         },
+        `${this.BASE_URL}/post_uploads/reorder`,
       );
-
-      this.verifyResponse(reorder, 'Reorder Files');
     }
 
     const form = {
-      utf8: '✓',
       html_content: `<div>${data.options.useTitle && data.title ? `<h1>${data.title}</h1>` : ''}${
         data.description
       }</div>`,
@@ -266,34 +326,21 @@ export class SubscribeStar extends Website {
       new_editor: 'true',
       'tier_ids[]': data.options.tiers.includes('free') ? undefined : data.options.tiers,
       'tags[]': data.tags,
+      is_draft: '',
+      has_poll: 'false',
+      finish_date: '',
+      finish_time: '',
+      posting_option: 'Publish Now',
     };
 
-    const post = await Http.post<{ error: any; html: string }>(
-      `${this.BASE_URL}/posts.json`,
-      data.part.accountId,
-      {
-        type: 'multipart',
-        data: form,
-        requestOptions: {
-          json: true,
-          qsStringifyOptions: { arrayFormat: 'repeat' },
-        },
-        headers: {
-          Referer: 'https://www.subscribestar.com/',
-          'X-CSRF-Token': csrf,
-        },
-      },
-    );
+    const post = await this.postMessily(data.part.accountId, form);
 
-    this.verifyResponse(post, 'Verify post');
-    if (post.body.error) {
-      return Promise.reject(
-        this.createPostResponse({ error: post.body.error, additionalInfo: post.body }),
-      );
+    if (post.error) {
+      return Promise.reject(this.createPostResponse({ error: post.error, additionalInfo: post }));
     }
 
     return this.createPostResponse({
-      source: `${this.BASE_URL}/posts/${post.body.html.match(/data-id="(.*?)"/)[1]}`,
+      source: `${this.BASE_URL}/posts/${post.html.match(/data-id="(.*?)"/)[1]}`,
     });
   }
 
