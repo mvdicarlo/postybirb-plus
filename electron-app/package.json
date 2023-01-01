@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@jest-runner/electron": "^3.0.1",
-    "@nestjs/cli": "^7.6.0",
+    "@nestjs/cli": "^9.1.8",
     "@nestjs/schematics": "^7.3.1",
     "@nestjs/testing": "^7.6.18",
     "@types/cheerio": "^0.22.30",
@@ -108,7 +108,7 @@
     "ts-jest": "^26.5.6",
     "ts-loader": "^8.3.0",
     "ts-node": "^9.0.0",
-    "tsconfig-paths": "^3.11.0",
+    "tsconfig-paths": "^4.1.1",
     "tslint": "^5.20.0",
     "typescript": "^4.4.3"
   },
