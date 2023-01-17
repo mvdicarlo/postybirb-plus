@@ -31,6 +31,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import * as _ from 'lodash';
+import WaitUtil from 'src/server/utils/wait.util';
 
 @Injectable()
 export class Mastodon extends Website {
@@ -82,15 +83,19 @@ export class Mastodon extends Website {
     return { maxSize: FileSize.MBtoBytes(300) };
   }
 
-  private async uploadMedia(data: MastodonAccountData, file: PostFile, altText: string): Promise<{ id: string }> {
-    const upload = await Http.post<{ id: string; errors: any }>(
+  private async uploadMedia(
+    data: MastodonAccountData,
+    file: PostFile,
+    altText: string,
+  ): Promise<{ id: string }> {
+    const upload = await Http.post<{ id: string; errors: any; url: string }>(
       `${data.website}/api/v2/media`,
       undefined,
       {
         type: 'multipart',
         data: {
           file,
-          description: altText
+          description: altText,
         },
         requestOptions: { json: true },
         headers: {
@@ -102,6 +107,30 @@ export class Mastodon extends Website {
     );
 
     this.verifyResponse(upload, 'Verify upload');
+
+    // Processing
+    if (upload.response.statusCode === 202 || !upload.body.url) {
+      for (let i = 0; i < 10; i++) {
+        await WaitUtil.wait(4000);
+        const checkUpload = await Http.get<{ id: string; errors: any; url: string }>(
+          `${data.website}/api/v1/media/${upload.body.id}`,
+          undefined,
+          {
+            requestOptions: { json: true },
+            headers: {
+              Accept: '*/*',
+              'User-Agent': 'node-mastodon-client/PostyBirb',
+              Authorization: `Bearer ${data.token}`,
+            },
+          },
+        );
+
+        if (checkUpload.body.url) {
+          break;
+        }
+      }
+    }
+
     if (upload.body.errors) {
       return Promise.reject(
         this.createPostResponse({ additionalInfo: upload.body, message: upload.body.errors }),
