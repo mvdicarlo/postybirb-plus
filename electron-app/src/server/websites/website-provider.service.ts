@@ -30,6 +30,7 @@ import { Telegram } from './telegram/telegram.service';
 import { Furbooru } from './furbooru/furbooru.service';
 import { Itaku } from './itaku/itaku.service';
 import { Picarto } from './picarto/picarto.service';
+import { SubscribeStarAdult } from './subscribe-star-adult/subscribe-star-adult.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -48,6 +49,7 @@ export class WebsiteProvider {
     readonly e621: e621,
     readonly furaffinity: FurAffinity,
     readonly subscribestar: SubscribeStar,
+    readonly subscribestarAdult: SubscribeStarAdult,
     readonly hentaiFoundry: HentaiFoundry,
     readonly aryion: Aryion,
     readonly custom: Custom,

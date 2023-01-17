@@ -10,8 +10,10 @@ import {
   PostResponse,
   Submission,
   SubmissionPart,
+  SubmissionType,
   SubscribeStarFileOptions,
   SubscribeStarNotificationOptions,
+  WebsiteOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
@@ -31,27 +33,35 @@ import { Website } from '../website.base';
 import _ = require('lodash');
 
 @Injectable()
-export class SubscribeStar extends Website {
-  readonly BASE_URL = 'https://www.subscribestar.com';
+export class SubscribeStarAdult extends Website {
+  readonly BASE_URL = 'https://www.subscribestar.adult';
   readonly acceptsAdditionalFiles = true;
   readonly enableAdvertisement: boolean = false;
   readonly usernameShortcuts = [
-    {
-      key: 'ss',
-      url: 'https://www.subscribestar.com/$1',
-    },
+    // {
+    //   key: 'ss',
+    //   url: 'https://www.subscribestar.com/$1',
+    // },
   ];
 
   readonly acceptsFiles = [];
 
+  getDefaultOptions(submissionType: SubmissionType) {
+    if (submissionType === SubmissionType.FILE) {
+      return WebsiteOptions.SubscribeStar.FileOptions;
+    }
+
+    return WebsiteOptions.SubscribeStar.NotificationOptions;
+  }
+
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(this.BASE_URL, data._id, { updateCookies: true });
+    const res = await Http.get<string>(this.BASE_URL, data._id, { updateCookies: false });
     if (res.body.includes('top_bar-user_name')) {
       status.loggedIn = true;
       status.username = res.body.match(/<div class="top_bar-user_name">(.*?)<\/div>/)[1];
 
-      let usernameLink = res.body.match(/class="top_bar-branding">(.*?)href="(.*?)"/ims)[2];
+      let usernameLink = res.body.match(/class="top_bar-branding for-adult">(.*?)href="(.*?)"/ims)[2];
       if (usernameLink && usernameLink.includes('/feed')) {
         usernameLink = `/${status.username}`;
       }
@@ -121,8 +131,6 @@ export class SubscribeStar extends Website {
     xhr.send(fd);
     xhr.responseText
     `;
-
-    console.log(cmd);
 
     const upload = await BrowserWindowUtil.runScriptOnPage<string>(
       partition,
@@ -274,8 +282,8 @@ export class SubscribeStar extends Website {
           authenticity_token: csrf,
         },
         headers: {
-          Referer: 'https://www.subscribestar.com/',
-          Origin: 'https://www.subscribestar.com',
+          Referer: 'https://www.subscribestar.adult/',
+          Origin: 'https://www.subscribestar.adult',
           cookie: cookies,
         },
       });

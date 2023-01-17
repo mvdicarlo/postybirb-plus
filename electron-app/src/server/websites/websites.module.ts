@@ -32,6 +32,7 @@ import { TelegramModule } from './telegram/telegram.module';
 import { FurbooruModule } from './furbooru/furbooru.module';
 import { ItakuModule } from './itaku/itaku.module';
 import { PicartoModule } from './picarto/picarto.module';
+import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-adult.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -62,6 +63,7 @@ import { PicartoModule } from './picarto/picarto.module';
     PixivModule,
     SoFurryModule,
     SubscribeStarModule,
+    SubscribeStarAdultModule,
     TelegramModule,
     TumblrModule,
     TwitterModule,
