@@ -139,7 +139,7 @@ export class ParserService {
   ): Promise<void> {
     const options: DefaultFileOptions = data.options as DefaultFileOptions;
     const canScale = options.autoScale;
-    data.primary = await this.attemptFileScale(website, submission.primary, canScale);
+    data.primary = await this.attemptFileScale(websitePart.accountId, website, submission.primary, canScale);
 
     if (submission.thumbnail && options.useThumbnail) {
       data.thumbnail = this.fileRecordAsPostFileRecord(submission.thumbnail).file;
@@ -161,7 +161,7 @@ export class ParserService {
       );
 
       data.additional = await Promise.all(
-        additionalFiles.map((file) => this.attemptFileScale(website, file, canScale)),
+        additionalFiles.map((file) => this.attemptFileScale(websitePart.accountId, website, file, canScale)),
       );
     } else {
       data.additional = [];
@@ -182,13 +182,14 @@ export class ParserService {
   }
 
   private async attemptFileScale(
+    accountId: string,
     website: Website,
     file: FileRecord,
     canScale: boolean,
   ): Promise<PostFileRecord> {
     const record = this.fileRecordAsPostFileRecord(file);
     if (canScale && this.fileManipulator.canScale(file.mimetype)) {
-      const scaleOptions = website.getScalingOptions(file);
+      const scaleOptions = website.getScalingOptions(file, accountId);
       if (scaleOptions) {
         const { buffer, mimetype } = await this.fileManipulator.scale(
           file.buffer,
