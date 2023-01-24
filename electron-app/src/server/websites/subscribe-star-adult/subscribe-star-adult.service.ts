@@ -148,7 +148,7 @@ export class SubscribeStarAdult extends Website {
     return JSON.parse(upload) as { url: string; fields?: object; error: any; html: string };
   }
 
-  async postFileMessily(partition: string, data: Record<string, any>, url) {
+  async postFileMessily(partition: string, data: Record<string, any>, url: string) {
     const cmd = `
     const data = JSON.parse('${JSON.stringify(data)}');
     var fd = new FormData();
@@ -308,7 +308,7 @@ export class SubscribeStarAdult extends Website {
       const processFile = await this.postFileMessily(
         data.part.accountId,
         record,
-        `${this.BASE_URL}/post_uploads/process_s3_attachments.json`,
+        `/post_uploads/process_s3_attachments.json`,
       );
       processData = processFile;
     }
@@ -323,7 +323,7 @@ export class SubscribeStarAdult extends Website {
         {
           'upload_ids[]': order,
         },
-        `${this.BASE_URL}/post_uploads/reorder`,
+        `/post_uploads/reorder`,
       );
     }
 
