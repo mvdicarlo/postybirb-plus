@@ -1,9 +1,11 @@
+import { Form, Radio } from 'antd';
 import {
   DefaultFileOptions,
   DefaultOptions,
   FileSubmission,
   Submission,
-  SubmissionRating
+  SubmissionRating,
+  TwitterFileOptions
 } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -22,10 +24,14 @@ export class Twitter extends WebsiteImpl {
 
   LoginDialog = (props: LoginDialogProps) => <TwitterLogin {...props} />;
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DefaultFileOptions>) => (
-    <GenericFileSubmissionSection
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, TwitterFileOptions>) => (
+    <TwitterFileSubmissionForm
       key={props.part.accountId}
       {...props}
+      hideThumbnailOptions={true}
+      hideTitle={true}
+      tagOptions={{ show: false }}
+      descriptionOptions={{ show: true, options: { anchorLength: 23 } }}
       ratingOptions={{
         show: true,
         ratings: [
@@ -33,10 +39,6 @@ export class Twitter extends WebsiteImpl {
           { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
-      tagOptions={{ show: false }}
-      descriptionOptions={{ show: true, options: { anchorLength: 23 } }}
-      hideThumbnailOptions={true}
-      hideTitle={true}
     />
   );
 
@@ -56,4 +58,30 @@ export class Twitter extends WebsiteImpl {
       }}
     />
   );
+}
+
+export class TwitterFileSubmissionForm extends GenericFileSubmissionSection<TwitterFileOptions> {
+  renderLeftForm(data: TwitterFileOptions) {
+    const elements = super.renderLeftForm(data);
+    elements.push(
+      <Form.Item label="Content Blur">
+        <Radio.Group
+          onChange={this.handleValueChange.bind(this, 'contentBlur')}
+          value={data.contentBlur}
+          buttonStyle="solid"
+        >
+          <Radio.Button value={undefined}>None</Radio.Button>
+          <Radio.Button value="other">Other</Radio.Button>
+          <Radio.Button value="adult_content">Adult Content</Radio.Button>
+          <Radio.Button value="graphic_violence">Graphic Violence</Radio.Button>
+        </Radio.Group>
+      </Form.Item>
+    );
+    return elements;
+  }
+
+  renderRightForm(data: TwitterFileOptions) {
+    const elements = super.renderRightForm(data);
+    return elements;
+  }
 }

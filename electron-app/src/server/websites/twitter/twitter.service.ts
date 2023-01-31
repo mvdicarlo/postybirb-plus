@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { SubmissionRating } from 'postybirb-commons';
 import {
-  DefaultFileOptions,
   DefaultOptions,
   FileRecord,
   FileSubmission,
@@ -8,6 +8,7 @@ import {
   PostResponse,
   Submission,
   SubmissionPart,
+  TwitterFileOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
@@ -61,21 +62,28 @@ export class Twitter extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<DefaultFileOptions>,
+    data: FilePostData<TwitterFileOptions>,
     accountData: TwitterAccountData,
   ): Promise<PostResponse> {
+    let contentBlur = data?.options?.contentBlur;
+    if (!contentBlur && data.rating === SubmissionRating.ADULT) {
+      contentBlur = 'adult_content';
+    }
+
     const form: any = {
       token: accountData.oauth_token,
       secret: accountData.oauth_token_secret,
       title: '',
       description: data.description,
       tags: data.tags,
-      files: [data.primary, ...data.additional].map(f => ({
+      files: [data.primary, ...data.additional].map((f) => ({
         data: f.file.value.toString('base64'),
         ...f.file.options,
       })),
       rating: data.rating,
-      options: {},
+      options: {
+        contentBlur,
+      },
     };
 
     this.checkCancelled(cancellationToken);
@@ -135,7 +143,7 @@ export class Twitter extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DefaultFileOptions>,
+    submissionPart: SubmissionPart<TwitterFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -156,11 +164,11 @@ export class Twitter extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
@@ -188,7 +196,7 @@ export class Twitter extends Website {
 
   validateNotificationSubmission(
     submission: Submission,
-    submissionPart: SubmissionPart<DefaultOptions>,
+    submissionPart: SubmissionPart<TwitterFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const warnings = [];
