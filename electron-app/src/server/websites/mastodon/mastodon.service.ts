@@ -31,6 +31,23 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import * as _ from 'lodash';
+import WaitUtil from 'src/server/utils/wait.util';
+
+const INFO_KEY = 'INSTANCE INFO';
+
+type MastodonInstanceInfo = {
+  configuration: {
+    statuses: {
+      max_characters: number;
+      max_media_attachments: number;
+    };
+    media_attachments: {
+      supported_mime_types: string[];
+      image_size_limit: number;
+      video_size_limit: number;
+    };
+  };
+};
 
 @Injectable()
 export class Mastodon extends Website {
@@ -60,9 +77,21 @@ export class Mastodon extends Website {
       if (refresh) {
         status.loggedIn = true;
         status.username = accountData.username;
+        this.getInstanceInfo(data._id, accountData);
       }
     }
     return status;
+  }
+
+  private async getInstanceInfo(profileId: string, data: MastodonAccountData) {
+    const M = new MastodonInstance({
+      access_token: data.token,
+      api_url: `${data.website}/api/v2/`,
+    });
+
+    const instance = await M.get('instance');
+
+    this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
   // TBH not entirely sure why this is a thing, but its in the old code so... :shrug:
@@ -78,19 +107,31 @@ export class Mastodon extends Website {
     });
   }
 
-  getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(300) };
+  getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
+    return instanceInfo
+      ? {
+          maxSize:
+            file.type === FileSubmissionType.IMAGE
+              ? instanceInfo.configuration.media_attachments.image_size_limit
+              : instanceInfo.configuration.media_attachments.video_size_limit,
+        }
+      : { maxSize: FileSize.MBtoBytes(300) };
   }
 
-  private async uploadMedia(data: MastodonAccountData, file: PostFile, altText: string): Promise<{ id: string }> {
-    const upload = await Http.post<{ id: string; errors: any }>(
+  private async uploadMedia(
+    data: MastodonAccountData,
+    file: PostFile,
+    altText: string,
+  ): Promise<{ id: string }> {
+    const upload = await Http.post<{ id: string; errors: any; url: string }>(
       `${data.website}/api/v2/media`,
       undefined,
       {
         type: 'multipart',
         data: {
           file,
-          description: altText
+          description: altText,
         },
         requestOptions: { json: true },
         headers: {
@@ -102,6 +143,30 @@ export class Mastodon extends Website {
     );
 
     this.verifyResponse(upload, 'Verify upload');
+
+    // Processing
+    if (upload.response.statusCode === 202 || !upload.body.url) {
+      for (let i = 0; i < 10; i++) {
+        await WaitUtil.wait(4000);
+        const checkUpload = await Http.get<{ id: string; errors: any; url: string }>(
+          `${data.website}/api/v1/media/${upload.body.id}`,
+          undefined,
+          {
+            requestOptions: { json: true },
+            headers: {
+              Accept: '*/*',
+              'User-Agent': 'node-mastodon-client/PostyBirb',
+              Authorization: `Bearer ${data.token}`,
+            },
+          },
+        );
+
+        if (checkUpload.body.url) {
+          break;
+        }
+      }
+    }
+
     if (upload.body.errors) {
       return Promise.reject(
         this.createPostResponse({ additionalInfo: upload.body, message: upload.body.errors }),
@@ -127,9 +192,13 @@ export class Mastodon extends Website {
       uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
     }
 
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
+    const chunkCount = instanceInfo ? instanceInfo.configuration.statuses.max_media_attachments : 4;
+    const maxChars = instanceInfo ? instanceInfo.configuration.statuses.max_characters : 500;
+
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const { options } = data;
-    const chunks = _.chunk(uploadedMedias, 4);
+    const chunks = _.chunk(uploadedMedias, chunkCount);
     let lastId = undefined;
     for (let i = 0; i < chunks.length; i++) {
       let form = undefined;
@@ -137,7 +206,7 @@ export class Mastodon extends Website {
         form = {
           status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${
             data.description
-          }`.substring(0, 500),
+          }`.substring(0, maxChars),
           sensitive: isSensitive,
           visibility: options.visibility || 'public',
           media_ids: chunks[i].map((media) => media.id),
@@ -157,6 +226,12 @@ export class Mastodon extends Website {
 
       const post = await M.post('statuses', form);
       lastId = post.data.id;
+
+      if (!lastId || post.data.error) {
+        return Promise.reject(
+          this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
+        );
+      }
     }
 
     this.checkCancelled(cancellationToken);
@@ -186,6 +261,13 @@ export class Mastodon extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await M.post('statuses', form);
+
+    if (!post.data.id || post.data.error) {
+      return Promise.reject(
+        this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
+      );
+    }
+
     return this.createPostResponse({ source: post.data.url });
   }
 
@@ -202,9 +284,15 @@ export class Mastodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > 500) {
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(
+      submissionPart.accountId,
+      INFO_KEY,
+    );
+    const maxChars = instanceInfo ? instanceInfo.configuration.statuses.max_characters : 500;
+
+    if (description.length > maxChars) {
       warnings.push(
-        'Max description length allowed is 500 characters (for most Mastodon clients).',
+        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
       );
     }
 
@@ -215,22 +303,24 @@ export class Mastodon extends Website {
       ),
     ];
 
-    const maxMB: number = 300;
+    const maxImageSize = instanceInfo
+      ? instanceInfo.configuration.media_attachments.image_size_limit
+      : FileSize.MBtoBytes(50);
     files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
 
-      if (FileSize.MBtoBytes(maxMB) < size) {
+      if (maxImageSize < size) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
           ImageManipulator.isMimeType(mimetype)
         ) {
-          warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+          warnings.push(`${name} will be scaled down to ${FileSize.BytesToMB(maxImageSize)}MB`);
         } else {
-          problems.push(`Mastodon limits ${mimetype} to ${maxMB}MB`);
+          problems.push(`Mastodon limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
         }
       }
     });
@@ -248,11 +338,17 @@ export class Mastodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > 500) {
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(
+      submissionPart.accountId,
+      INFO_KEY,
+    );
+    const maxChars = instanceInfo ? instanceInfo.configuration.statuses.max_characters : 500;
+    if (description.length > maxChars) {
       warnings.push(
-        'Max description length allowed is 500 characters (for most Mastodon clients).',
+        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
       );
     }
+
     return { problems: [], warnings };
   }
 }

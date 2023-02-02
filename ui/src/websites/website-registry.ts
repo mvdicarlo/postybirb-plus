@@ -29,6 +29,7 @@ import { Telegram } from './telegram/Telegram';
 import { Furbooru } from './furbooru/Furbooru';
 import { Itaku } from './itaku/Itaku';
 import { Picarto } from './picarto/Picarto';
+import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -40,7 +41,6 @@ export class WebsiteRegistry {
     Discord: new Discord(),
     FurAffinity: new FurAffinity(),
     Furbooru: new Furbooru(),
-    // FurryLife: new FurryLife(),
     FurryNetwork: new FurryNetwork(),
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
@@ -57,6 +57,7 @@ export class WebsiteRegistry {
     Pixiv: new Pixiv(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
+    SubscribeStarAdult: new SubscribeStarAdult(),
     Telegram: new Telegram(),
     Tumblr: new Tumblr(),
     Twitter: new Twitter(),

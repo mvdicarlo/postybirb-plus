@@ -79,6 +79,7 @@ export * from './interfaces/websites/subscribe-star/subscribe-star.notification.
 export * from './interfaces/websites/tumblr/tumblr.account.interface';
 export * from './interfaces/websites/tumblr/tumblr.file.options.interface';
 export * from './interfaces/websites/tumblr/tumblr.notification.options.interface';
+export * from './interfaces/websites/twitter/twitter.file.options.interface';
 export * from './interfaces/websites/username-shortcut.interface';
 export * from './interfaces/websites/weasyl/weasyl.file.options.interface';
 export * from './interfaces/websites/itaku/itaku.file.options.interface';

@@ -93,7 +93,7 @@ export abstract class Website {
     }
   }
 
-  abstract getScalingOptions(file: FileRecord): ScalingOptions | undefined;
+  abstract getScalingOptions(file: FileRecord, accountId?: string): ScalingOptions | undefined;
 
   abstract postFileSubmission(
     cancellationToken: CancellationToken,
