@@ -109,7 +109,7 @@ export class Mastodon extends Website {
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
-    return instanceInfo
+    return instanceInfo?.configuration?.media_attachments
       ? {
           maxSize:
             file.type === FileSubmissionType.IMAGE
@@ -193,8 +193,8 @@ export class Mastodon extends Website {
     }
 
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo ? instanceInfo.configuration.statuses.max_media_attachments : 4;
-    const maxChars = instanceInfo ? instanceInfo.configuration.statuses.max_characters : 500;
+    const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const { options } = data;
@@ -288,7 +288,7 @@ export class Mastodon extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo ? instanceInfo.configuration.statuses.max_characters : 500;
+    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     if (description.length > maxChars) {
       warnings.push(
@@ -304,7 +304,7 @@ export class Mastodon extends Website {
     ];
 
     const maxImageSize = instanceInfo
-      ? instanceInfo.configuration.media_attachments.image_size_limit
+      ? instanceInfo?.configuration?.media_attachments?.image_size_limit
       : FileSize.MBtoBytes(50);
     files.forEach((file) => {
       const { type, size, name, mimetype } = file;
@@ -342,7 +342,7 @@ export class Mastodon extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo ? instanceInfo.configuration.statuses.max_characters : 500;
+    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
     if (description.length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
