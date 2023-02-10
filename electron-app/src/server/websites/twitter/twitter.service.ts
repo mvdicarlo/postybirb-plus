@@ -66,9 +66,6 @@ export class Twitter extends Website {
     accountData: TwitterAccountData,
   ): Promise<PostResponse> {
     let contentBlur = data?.options?.contentBlur;
-    if (!contentBlur && data.rating === SubmissionRating.ADULT) {
-      contentBlur = 'adult_content';
-    }
 
     const form: any = {
       token: accountData.oauth_token,
