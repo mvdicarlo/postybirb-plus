@@ -1,4 +1,7 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
+import * as cheerio from 'cheerio';
+const FormData = require('form-data');
+import { BrowserWindow, LoadURLOptions } from 'electron';
 import {
   DefaultOptions,
   FileRecord,
@@ -15,7 +18,10 @@ import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaint
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import {
+  FilePostData,
+  PostFile,
+} from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
@@ -30,7 +36,7 @@ import { Website } from '../website.base';
 export class Pixiv extends Website {
   readonly BASE_URL = 'https://www.pixiv.net';
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
-  readonly waitBetweenPostsInterval = 360000;
+  readonly waitBetweenPostsInterval = 60_000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsAdditionalFiles = true;
 
@@ -63,14 +69,151 @@ export class Pixiv extends Website {
     const page = await Http.get<string>(`${this.BASE_URL}/upload.php`, data.part.accountId);
     this.verifyResponse(page, 'Get page');
 
+    if (page.body.includes('__NEXT_DATA__')) {
+      return this.postFileSubmissionNew(page.body, cancellationToken, data);
+    }
+
+    return this.postFileSubmissionLegacy(page.body, cancellationToken, data);
+  }
+
+  private async postFileSubmissionNew(
+    body: string,
+    cancellationToken: CancellationToken,
+    data: FilePostData<PixivFileOptions>,
+  ): Promise<PostResponse> {
+    const $ = cheerio.load(body);
+    const accountInfo = JSON.parse($('#__NEXT_DATA__').contents().first().text());
+    const token = accountInfo.props.pageProps.token;
+    const files = [data.thumbnail, data.primary.file, ...data.additional.map((f) => f.file)].filter(
+      (f) => f,
+    );
+
+    const { options } = data;
+    const form: any = {
+      title: data.title.substring(0, 32),
+      caption: data.description,
+      'tags[]': this.formatTags(data.tags).slice(0, 10),
+      allowTagEdit: options.communityTags ? 'true' : 'false',
+      xRestrict: this.getContentRating(data.rating),
+      sexual: 'false', // No option support in app currently
+      aiType: options.aiGenerated ? 'aiGenerated' : 'notAiGenerated',
+      restrict: 'public',
+      responseAutoAccept: 'false',
+      'suggestedtags[]': '',
+      original: options.original ? 'true' : 'false',
+      'ratings[violent]': 'false',
+      'ratings[drug]': 'false',
+      'ratings[thoughts]': 'false',
+      'ratings[antisocial]': 'false',
+      'ratings[religion]': 'false',
+      'attributes[yuri]': 'false',
+      'attributes[bl]': 'false',
+      'attributes[furry]': 'false',
+      'attributes[lo]': 'false',
+      tweet: 'false',
+      allowComment: 'true',
+      'titleTranslations[en]': '',
+      'captionTranslations[en]': '',
+    };
+
+    const sexualType = form.xRestrict;
+    if (sexualType !== 'general') {
+      delete form.sexual;
+      if (options.matureContent) {
+        options.matureContent.forEach((c) => (form[`attributes[${c}]`] = 'true'));
+      }
+    }
+
+    if (options.containsContent) {
+      options.containsContent.forEach((c) => (form[`ratings[${c}]`] = 'true'));
+    }
+
+    this.checkCancelled(cancellationToken);
+
+    const post = await this.postSpecial(
+      data.part.accountId,
+      form,
+      { 'x-csrf-token': token },
+      files,
+    );
+
+    try {
+      const json = JSON.parse(post);
+      if (!json.error) {
+        return this.createPostResponse({});
+      } else {
+        return Promise.reject(
+          this.createPostResponse({
+            additionalInfo: post,
+            message: JSON.stringify(json),
+          }),
+        );
+      }
+    } catch {}
+    return Promise.reject(this.createPostResponse({ additionalInfo: post }));
+  }
+
+  private async postSpecial(partitionId: string, data: any, headers: any, files: PostFile[]) {
+    const win = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        partition: `persist:${partitionId}`,
+      },
+    });
+
+    try {
+      const form = new FormData();
+      Object.entries(data).forEach(([key, value]: [string, any]) => {
+        if (value.options && value.value) {
+          form.append(key, value.value, value.options);
+        } else if (Array.isArray(value)) {
+          value.forEach(v => {
+            form.append(key, v);
+          })
+        } else {
+          form.append(key, value);
+        }
+      });
+
+      files.forEach((file) => {
+        form.append('files[]', file.value, file.options);
+      });
+
+      await win.loadURL(this.BASE_URL);
+
+      const opts: LoadURLOptions = {
+        postData: [
+          {
+            type: 'rawData',
+            bytes: form.getBuffer(),
+          },
+        ],
+        extraHeaders: [
+          `Content-Type: ${form.getHeaders()['content-type']}`,
+          ...Object.entries(headers || {}).map(([key, value]) => `${key}: ${value}`),
+        ].join('\n'),
+      };
+
+      await win.loadURL(`${this.BASE_URL}/ajax/work/create/illust`, opts);
+      return await win.webContents.executeJavaScript('document.body.innerText');
+    } catch (err) {
+      return Promise.reject(this.createPostResponse({ additionalInfo: err }));
+    }
+  }
+
+  private async postFileSubmissionLegacy(
+    body: string,
+    cancellationToken: CancellationToken,
+    data: FilePostData<PixivFileOptions>,
+  ): Promise<PostResponse> {
     const files = [data.thumbnail, data.primary.file, ...data.additional.map((f) => f.file)].filter(
       (f) => f,
     );
 
     const form: any = {
-      tt: HtmlParserUtil.getInputValue(page.body, 'tt', 2),
+      tt: HtmlParserUtil.getInputValue(body, 'tt', 2),
       uptype: 'illust',
-      x_restrict_sexual: this.getContentRating(data.rating),
+      x_restrict_sexual: this.getContentRatingLegacy(data.rating),
       sexual: '',
       title: data.title.substring(0, 32),
       tag: this.formatTags(data.tags).slice(0, 10).join(' '),
@@ -135,6 +278,19 @@ export class Pixiv extends Website {
   }
 
   private getContentRating(rating: SubmissionRating) {
+    switch (rating) {
+      case SubmissionRating.ADULT:
+      case SubmissionRating.MATURE:
+        return 'r18';
+      case SubmissionRating.EXTREME:
+        return 'r18g';
+      case SubmissionRating.GENERAL:
+      default:
+        return 'general';
+    }
+  }
+
+  private getContentRatingLegacy(rating: SubmissionRating) {
     switch (rating) {
       case SubmissionRating.ADULT:
       case SubmissionRating.MATURE:

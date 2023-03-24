@@ -141,10 +141,10 @@ export class Inkbunny extends Website {
       },
     );
 
-    if (!(upload.body.sid && upload.body.submission_id)) {
+    if (!upload?.body?.sid) {
       return Promise.reject(
         this.createPostResponse({
-          message: upload.body.error_code,
+          message: upload?.body?.error_code ?? upload?.body,
           additionalInfo: JSON.stringify(upload.body),
         }),
       );
