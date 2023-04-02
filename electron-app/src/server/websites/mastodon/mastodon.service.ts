@@ -344,6 +344,13 @@ export class Mastodon extends Website {
       }
     });
 
+    if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
+      submissionPart.data.visibility != "public") {
+        warnings.push(
+              `Tags will not be usable on a post which is not set to public visibility`,
+            );
+    }
+
     return { problems, warnings };
   }
 
