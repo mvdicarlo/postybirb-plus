@@ -222,8 +222,14 @@ export class Mastodon extends Website {
 
       // Tags only should be posted on public entries - they can not be searched on other types
       if (options.visibility == 'public') {
+
         // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
         // these onto the post, *IF* there is character count available.
+
+        if (data.tags.length > 0) {
+          form.status += "\n\n";
+        }
+
         data.tags.forEach(tag => {
           let remain = maxChars - form.status.length;
           if (remain > (tag.length)) {
