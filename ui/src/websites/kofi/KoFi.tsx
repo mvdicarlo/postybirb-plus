@@ -19,7 +19,7 @@ import { WebsiteImpl } from '../website.base';
 export class KoFi extends WebsiteImpl {
   internalName: string = 'KoFi';
   name: string = 'Ko-fi';
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   loginUrl: string = 'https://ko-fi.com/account/login';
 
@@ -29,16 +29,6 @@ export class KoFi extends WebsiteImpl {
       ratingOptions={{ show: false }}
       tagOptions={{ show: false }}
       hideThumbnailOptions={true}
-    />
-  );
-
-  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
-    <GenericSubmissionSection
-      key={props.part.accountId}
-      {...props}
-      ratingOptions={{
-        show: false
-      }}
     />
   );
 }
@@ -105,7 +95,8 @@ export class KoFiFileSubmissionForm extends GenericFileSubmissionSection<KoFiFil
           onSelect={this.setValue.bind(this, 'audience')}
         >
           <Select.Option value="public">Public</Select.Option>
-          <Select.Option value="supporter">All Supporters (gold only)</Select.Option>
+          <Select.Option value="supporter">All Supporters (One-off & Monthly)</Select.Option>
+          <Select.Option value="recurringSupporter">All Monthly Supporters (Members)</Select.Option>
         </Select>
       </Form.Item>
     );
