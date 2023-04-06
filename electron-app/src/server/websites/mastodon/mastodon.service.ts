@@ -32,6 +32,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import * as _ from 'lodash';
 import WaitUtil from 'src/server/utils/wait.util';
+import { FileManagerService } from 'src/server/file-manager/file-manager.service';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -51,6 +52,10 @@ type MastodonInstanceInfo = {
 
 @Injectable()
 export class Mastodon extends Website {
+  constructor(private readonly fileRepository: FileManagerService) {
+    super();
+  }
+
   readonly BASE_URL = '';
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
@@ -343,6 +348,7 @@ export class Mastodon extends Website {
     const maxImageSize = instanceInfo
       ? instanceInfo?.configuration?.media_attachments?.image_size_limit
       : FileSize.MBtoBytes(50);
+
     files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
@@ -360,6 +366,15 @@ export class Mastodon extends Website {
           problems.push(`Mastodon limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
         }
       }
+
+      // Check the image dimensions are not over 4000 x 4000 - this is the Mastodon server max
+      if (
+        isAutoscaling && 
+        type === FileSubmissionType.IMAGE && 
+        (file.height > 4000 || file.width > 4000)) {
+          warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
+           aspect ratio`);
+        }
     });
 
     if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
