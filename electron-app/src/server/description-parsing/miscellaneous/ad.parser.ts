@@ -6,22 +6,22 @@ export class AdInsertParser {
   public static parse(html: string, parser: (html: string) => string): string {
     const appendNewLines: boolean = html.trim().length > 0;
     if (parser === PlaintextParser.parse) {
-      html += `${appendNewLines ? '\n\n' : ''}Posted using PostyBirb`;
+      html += `${appendNewLines ? '\n\n' : ''}Posted using PostyFox`;
     } else if (parser === BBCodeParser.parse) {
       html += `${
         appendNewLines ? '\n\n' : ''
-      }[url=http://www.postybirb.com]Posted using PostyBirb[/url]`;
+      }[url=http://www.postyfox.com]Posted using PostyFox[/url]`;
     } else if (parser === MarkdownParser.parse) {
       html += MarkdownParser.parse(
         `${
           appendNewLines ? '<br /><br />' : ''
-        }<p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>`,
+        }<p><a href="http://www.postyfox.com">Posted using PostyFox</a></p>`,
       );
     } else {
       // assume html
       html += `${
         appendNewLines ? '<br /><br />' : ''
-      }<p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>`;
+      }<p><a href="http://www.postyfox.com">Posted using PostyFox</a></p>`;
     }
 
     return html;

@@ -127,8 +127,9 @@ export default class AppLayout extends React.Component<Props, State> {
           <Tabs>
             <Tabs.TabPane tab="Terms of Use" key="tou">
               <p>
-                By using PostyBirb you agree to the Terms of Service and Rules of the websites that
-                you are posting to.
+                By using PostyFox / PostyBirb you agree to the Terms of Service and Rules of the websites that
+                you are posting to.  PostyFox is a fork of PostyBirb with additional features; any donations 
+                should go to PostyBirb.
               </p>
               <p>
                 <strong>You are responsible for everything you post.</strong>
@@ -160,7 +161,7 @@ export default class AppLayout extends React.Component<Props, State> {
                     backgroundImage: `url("${process.env.PUBLIC_URL}/assets/icons/minnowicon.png")`
                   }}
                 >
-                  PostyBirb
+                  PostyFox
                   <span className="text-xs">{window.appVersion}</span>
                 </div>
               </Link>
@@ -282,24 +283,6 @@ export default class AppLayout extends React.Component<Props, State> {
                   </Link>
                 </Menu.Item>
               </Menu.SubMenu>
-
-              <Menu.Item
-                key="discord"
-                onClick={() =>
-                  window.electron.shell.openInBrowser('https://discordapp.com/invite/jK5JQJF')
-                }
-              >
-                <Icon component={DiscordIcon} />
-                <span>Discord</span>
-              </Menu.Item>
-
-              <Menu.Item
-                key="donate"
-                onClick={() => window.electron.shell.openInBrowser('http://ko-fi.com/A81124JD')}
-              >
-                <Icon component={KofiIcon} />
-                <span>Donate</span>
-              </Menu.Item>
 
               <Menu.Item key="setting" onClick={() => this.setState({ settingsVisible: true })}>
                 <span>

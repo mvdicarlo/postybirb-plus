@@ -77,7 +77,7 @@ export class Discord extends Website {
           title: data.options.useTitle ? data.title : undefined,
           description,
           footer: {
-            text: 'Posted using PostyBirb',
+            text: 'Posted using PostyFox',
           },
         },
       ],

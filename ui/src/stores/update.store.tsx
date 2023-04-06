@@ -50,11 +50,11 @@ socket.on(Events.UpdateEvent.AVAILABLE, (data: UpdateState) => updateStore.updat
 socket.on(Events.UpdateEvent.ERROR, (err: any) => {
   updateStore.setError(err);
   notification.error({
-    message: 'PostyBirb Update Failed',
+    message: 'PostyFox Update Failed',
     description: (
       <div>
         <div className="mb-6">
-          PostyBirb Failed to Update.
+          PostyFox Failed to Update.
           <br />
           It is suggested that you go to the website and update using the latest download.
         </div>
@@ -66,7 +66,7 @@ socket.on(Events.UpdateEvent.ERROR, (err: any) => {
 
 socket.on(Events.UpdateEvent.BLOCKED, () => {
   notification.warning({
-    message: 'PostyBirb Update Stopped',
-    description: 'PostyBirb could not update because it is currently posting.'
+    message: 'PostyFox Update Stopped',
+    description: 'PostyFox could not update because it is currently posting.'
   });
 });
