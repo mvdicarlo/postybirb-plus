@@ -232,8 +232,12 @@ export class Mastodon extends Website {
 
         data.tags.forEach(tag => {
           let remain = maxChars - form.status.length;
-          if (remain > (tag.length)) {
-            form.status += ` ${tag}`
+          let tagToInsert = tag;
+          if (!tag.startsWith('#')) {
+            tagToInsert = `#${tagToInsert}`
+          }
+          if (remain > (tagToInsert.length)) {
+            form.status += ` ${tagToInsert}`
           }
           // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
         })
