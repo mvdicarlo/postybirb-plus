@@ -15,7 +15,7 @@ import CustomAccountInfo from './CustomAccountInfo';
 export class Custom extends WebsiteImpl {
   internalName: string = 'Custom';
   name: string = 'Custom';
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   loginUrl: string = '';
 
