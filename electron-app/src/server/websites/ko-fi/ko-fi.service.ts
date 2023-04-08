@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
-import _ = require('lodash');
 import {
-  DefaultFileOptions,
   DefaultOptions,
   FileRecord,
   FileSubmission,
   Folder,
   KoFiFileOptions,
   PostResponse,
-  Submission,
   SubmissionPart,
   SubmissionRating,
   SubmissionType,
@@ -19,7 +16,6 @@ import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaint
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
@@ -28,11 +24,13 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import _ = require('lodash');
 
 @Injectable()
 export class KoFi extends Website {
   readonly BASE_URL: string = 'https://ko-fi.com';
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif'];
+  readonly acceptsAdditionalFiles: boolean = true;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -91,50 +89,51 @@ export class KoFi extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<KoFiFileOptions>,
   ): Promise<PostResponse> {
-    const form = {
-      uniqueFilename: '',
-      file: data.primary.file,
-    };
-
     this.checkCancelled(cancellationToken);
-    const upload = await Http.post<string>(
-      `${this.BASE_URL}/api/media/gallery-item/upload`,
-      data.part.accountId,
-      {
-        type: 'multipart',
-        data: form,
-      },
-    );
 
-    this.verifyResponse(upload, 'After upload attempt');
-
-    let json = null;
+    const imageUploadIds = [];
+    let body = null;
     try {
-      json = JSON.parse(upload.body);
+      const filesToPost = [data.primary, ...data.additional].slice(0, 8);
+      for (const fileRecord of filesToPost) {
+        const upload = await Http.post<string>(
+          `${this.BASE_URL}/api/media/gallery-item/upload?throwOnError=true`,
+          data.part.accountId,
+          {
+            type: 'multipart',
+            data: {
+              filenames: fileRecord.file.options.filename,
+              'file[0]': fileRecord.file,
+            },
+          },
+        );
+
+        body = upload.body;
+        const json = JSON.parse(upload.body);
+        imageUploadIds.push(json[0].ExternalId);
+      }
     } catch (err) {
-      return Promise.reject(this.createPostResponse({ error: err, additionalInfo: upload.body }));
+      return Promise.reject(this.createPostResponse({ message: err, additionalInfo: body }));
     }
 
-    const id = this.getAccountInfo(data.part.accountId, 'id');
-    const formUpdate: any = {
-      Album: data.options.album || '',
-      Title: data.title,
-      Description: data.description,
-      PostToTwitter: false,
-      EnableHiRes: data.options.hiRes ? true : false,
-      ImageUploadIds: [json[0].ExternalId],
-      Audience: data.options.audience || 'public',
-    };
-
-
-    console.log(formUpdate)
     this.checkCancelled(cancellationToken);
-    const postResponse = await Http.post(
-      `${this.BASE_URL}/Feed/AddImageFeedItem`,
+    const post = await Http.post<{ success: boolean }>(
+      `${this.BASE_URL}/Gallery/AddGalleryItem`,
       data.part.accountId,
       {
         type: 'json',
-        data: formUpdate,
+        data: {
+          Album: data.options.album || '',
+          Audience: data.options.audience,
+          Description: data.description,
+          EnableHiRes: data.options.hiRes || false,
+          GalleryItemId: '',
+          ImageUploadIds: imageUploadIds,
+          PostToTwitter: false,
+          ScheduleEnabled: false,
+          Title: data.title,
+          UploadAsIndividualImages: false,
+        },
         requestOptions: { gzip: true },
         headers: {
           'Accept-Encoding': 'gzip, deflate, br',
@@ -147,70 +146,15 @@ export class KoFi extends Website {
       },
     );
 
-    this.verifyResponse(postResponse, 'Post Update');
-    return this.createPostResponse({});
-  }
-
-  async postNotificationSubmission(
-    cancellationToken: CancellationToken,
-    data: PostData<Submission, DefaultOptions>,
-  ): Promise<PostResponse> {
-    const form = {
-      type: '',
-      blogPostId: '',
-      blogPostTitle: data.title,
-      postBody: data.description,
-      featuredImage: '',
-      noFeaturedImage: 'false',
-      showFeaturedImageOnPost: 'true',
-      embedUrl: '',
-      tags: this.formatTags(data.tags),
-      postAudience: 'public',
-    };
-
-    this.checkCancelled(cancellationToken);
-    const postResponse = await Http.post<string>(
-      `${this.BASE_URL}/Blog/AddBlogPost`,
-      data.part.accountId,
-      {
-        type: 'multipart',
-        data: form,
-        headers: {
-          Accept: 'text/html,application/xhtml+xml,application/xml;',
-          Pragma: 'no-cache',
-          'Cache-Control': 'no-cache',
-          Referer: 'https://ko-fi.com/',
-          Connection: 'keep-alive',
-        },
-      },
-    );
-
-    this.verifyResponse(postResponse, 'AddBlogPost');
-
-    const postUrl = (postResponse.body.match(/\/Blog\/PublishPost\/\d+/) || [])[0];
-    if (!postUrl) {
+    let json = post.body || { success: false };
+    if (!json.success) {
       return Promise.reject(
         this.createPostResponse({
-          message: 'Unable to detect a posting Url',
-          additionalInfo: postResponse.body,
+          message: 'Unknown error when posting',
+          additionalInfo: post.body,
         }),
       );
     }
-
-    this.checkCancelled(cancellationToken);
-    const publish = await Http.post(`${this.BASE_URL}${postUrl}`, data.part.accountId, {
-      requestOptions: { gzip: true },
-      headers: {
-        'Accept-Encoding': 'gzip, deflate, br',
-        Accept: '*/*',
-        Pragma: 'no-cache',
-        'Cache-Control': 'no-cache',
-        Referer: 'https://ko-fi.com/',
-        Connection: 'keep-alive',
-      },
-    });
-
-    this.verifyResponse(publish, 'Validate Publish');
 
     return this.createPostResponse({});
   }
