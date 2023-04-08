@@ -114,7 +114,7 @@ export class e621 extends Website {
       skipCookies: true,
       requestOptions: { json: true },
       headers: {
-        'User-Agent': `PostyBirb/${app.getVersion()}`,
+        'User-Agent': `PostyFox/${app.getVersion()}`,
       },
     });
 

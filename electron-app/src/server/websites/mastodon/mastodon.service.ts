@@ -136,7 +136,7 @@ export class Mastodon extends Website {
         requestOptions: { json: true },
         headers: {
           Accept: '*/*',
-          'User-Agent': 'node-mastodon-client/PostyBirb',
+          'User-Agent': 'node-mastodon-client/PostyFox',
           Authorization: `Bearer ${data.token}`,
         },
       },
@@ -155,7 +155,7 @@ export class Mastodon extends Website {
             requestOptions: { json: true },
             headers: {
               Accept: '*/*',
-              'User-Agent': 'node-mastodon-client/PostyBirb',
+              'User-Agent': 'node-mastodon-client/PostyFox',
               Authorization: `Bearer ${data.token}`,
             },
           },

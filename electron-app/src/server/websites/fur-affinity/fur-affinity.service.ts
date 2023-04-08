@@ -215,7 +215,7 @@ export class FurAffinity extends Website {
 
       if (msg?.includes('CAPTCHA')) {
         msg =
-          'You need at least 11+ posts on your account before you can use PostyBirb with Fur Affinity.';
+          'You need at least 11+ posts on your account before you can use PostyFox with Fur Affinity.';
       }
 
       return msg;
