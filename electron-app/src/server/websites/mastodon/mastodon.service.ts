@@ -222,12 +222,22 @@ export class Mastodon extends Website {
 
       // Tags only should be posted on public entries - they can not be searched on other types
       if (options.visibility == 'public') {
+
         // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
         // these onto the post, *IF* there is character count available.
+
+        if (data.tags.length > 0) {
+          form.status += "\n\n";
+        }
+
         data.tags.forEach(tag => {
           let remain = maxChars - form.status.length;
-          if (remain > (tag.length)) {
-            form.status += ` ${tag}`
+          let tagToInsert = tag;
+          if (!tag.startsWith('#')) {
+            tagToInsert = `#${tagToInsert}`
+          }
+          if (remain > (tagToInsert.length)) {
+            form.status += ` ${tagToInsert}`
           }
           // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
         })
@@ -337,6 +347,13 @@ export class Mastodon extends Website {
         }
       }
     });
+
+    if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
+      submissionPart.data.visibility != "public") {
+        warnings.push(
+              `Tags will not be usable on a post which is not set to public visibility`,
+            );
+    }
 
     return { problems, warnings };
   }
