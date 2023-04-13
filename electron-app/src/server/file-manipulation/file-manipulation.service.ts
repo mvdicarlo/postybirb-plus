@@ -2,6 +2,7 @@ import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common
 import { SettingsService } from 'src/server/settings/settings.service';
 import ImageManipulator from './manipulators/image.manipulator';
 import { ImageManipulationPoolService } from './pools/image-manipulation-pool.service';
+import { ScalingOptions } from 'src/server/websites/interfaces/scaling-options.interface';
 
 // TODO test
 
@@ -17,46 +18,90 @@ export class FileManipulationService {
   async scale(
     buffer: Buffer,
     mimeType: string,
-    targetSize: number, // Assumed to be in bytes
+    scalingOptions: ScalingOptions,
     settings: {
       convertToJPEG?: boolean;
     },
   ): Promise<{ buffer: Buffer; mimetype: string }> {
+    let targetSize = scalingOptions.maxSize; // Assumed to be bytes
     let newBuffer: Buffer = buffer;
     let newMimeType: string = mimeType;
 
     if (ImageManipulator.isMimeType(mimeType)) {
-      const originalFileSize = buffer.length;
-      if (originalFileSize > targetSize) {
-        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
-          buffer,
-          mimeType,
-        );
-        if (settings.convertToJPEG) {
-          im.toJPEG();
+      const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+        buffer,
+        mimeType,
+      );
+
+      try {
+        let skipRescale = false;
+        // Is the file above the pixel dimension limits, if set ? 
+        if (scalingOptions.maxHeight || scalingOptions.maxWidth) {
+          let maxSize = 0;
+          if (scalingOptions.maxWidth) {
+            maxSize = scalingOptions.maxWidth;
+          }
+          if (scalingOptions.maxHeight) {
+            if (scalingOptions.maxHeight < maxSize) {
+              maxSize = scalingOptions.maxHeight;
+            }
+          }
+
+          if (maxSize < im.getHeight() || maxSize < im.getWidth()) {
+            this.logger.debug(`Image source width ${im.getWidth()}`);
+            this.logger.debug(`Image source height ${im.getHeight()}`);
+            this.logger.debug(`Resized image to maxsize of ${maxSize}px`);  
+            const scaled = await im.resize(maxSize).getData();
+            newBuffer = scaled.buffer;
+            const newIm = await this.imageManipulationPool.getImageManipulator(
+              newBuffer,
+              mimeType,
+            );
+            this.logger.debug(`Image result width ${newIm.getWidth()}`);
+            this.logger.debug(`Image result height ${newIm.getHeight()}`);  
+            newIm.destroy();    
+
+            if (newBuffer.length > targetSize) {
+              this.logger.debug(`newBuffer still in excess of the target size; will need to rescale by size not px`)
+            } else { 
+              skipRescale = true;
+            }
+          }
         }
 
-        const pngScaledBuffer = await this.scalePNG(im, originalFileSize, targetSize);
-        if (!pngScaledBuffer) {
-          const jpgScaledBuffer = await this.scaleJPEG(im, originalFileSize, targetSize);
-          if (!jpgScaledBuffer) {
-            im.destroy();
-            this.logger.warn(
-              `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
-            );
-            throw new InternalServerErrorException(
-              `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
-            );
-          } else {
-            im.destroy();
-            newMimeType = 'image/jpeg';
-            newBuffer = jpgScaledBuffer;
+        // THEN check for file size limit as before
+        if (!skipRescale) {
+          const originalFileSize = buffer.length;
+          this.logger.debug(`Size: ${originalFileSize} - Target Size: ${targetSize}`);
+          if (originalFileSize > targetSize) {
+
+            if (settings.convertToJPEG) {
+              im.toJPEG();
+            }
+
+            const pngScaledBuffer = await this.scalePNG(im, originalFileSize, targetSize);
+            if (!pngScaledBuffer) {
+              const jpgScaledBuffer = await this.scaleJPEG(im, originalFileSize, targetSize);
+              if (!jpgScaledBuffer) {
+                this.logger.warn(
+                  `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
+                );
+                throw new InternalServerErrorException(
+                  `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
+                );
+              } else {
+                newMimeType = 'image/jpeg';
+                newBuffer = jpgScaledBuffer;
+              }
+            } else {
+              newMimeType = 'image/png';
+              newBuffer = pngScaledBuffer;
+            }
           }
-        } else {
-          im.destroy();
-          newMimeType = 'image/png';
-          newBuffer = pngScaledBuffer;
         }
+      }
+      finally {
+        im.destroy();
       }
     }
 
