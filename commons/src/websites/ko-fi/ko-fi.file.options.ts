@@ -19,7 +19,7 @@ export class KoFiFileOptionsEntity extends DefaultFileOptionsEntity implements K
   @Expose()
   @IsString()
   @DefaultValue('public')
-  audience!: 'public' | 'supporter';
+  audience!: 'public' | 'supporter' | 'recurringSupporter';
 
   constructor(entity?: Partial<KoFiFileOptions>) {
     super(entity as DefaultFileOptions);
