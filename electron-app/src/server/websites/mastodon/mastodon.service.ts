@@ -13,6 +13,7 @@ import {
   SubmissionPart,
   SubmissionRating,
 } from 'postybirb-commons';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
@@ -28,7 +29,6 @@ import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import * as _ from 'lodash';
 import WaitUtil from 'src/server/utils/wait.util';
@@ -116,6 +116,8 @@ export class Mastodon extends Website {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
     return instanceInfo?.configuration?.media_attachments
       ? {
+          maxHeight: 4000,
+          maxWidth: 4000,
           maxSize:
             file.type === FileSubmissionType.IMAGE
               ? instanceInfo.configuration.media_attachments.image_size_limit
@@ -129,6 +131,7 @@ export class Mastodon extends Website {
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
+    this.logger.debug("Mastodon uploadMedia")
     const upload = await Http.post<{ id: string; errors: any; url: string }>(
       `${data.website}/api/v2/media`,
       undefined,
