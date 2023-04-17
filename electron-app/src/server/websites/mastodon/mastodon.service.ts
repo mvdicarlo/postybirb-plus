@@ -250,6 +250,18 @@ export class Mastodon extends Website {
           // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
         })
       }
+
+      data.tags.forEach(tag => {
+        let remain = maxChars - form.status.length;
+        let tagToInsert = tag;
+        if (!tag.startsWith('#')) {
+          tagToInsert = `#${tagToInsert}`
+        }
+        if (remain > (tagToInsert.length)) {
+          form.status += ` ${tagToInsert}`
+        }
+        // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      })
       
       if (options.spoilerText) {
         form.spoiler_text = options.spoilerText;
@@ -276,6 +288,7 @@ export class Mastodon extends Website {
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
     const M = this.getMastodonInstance(accountData);
+    const maxChars = M ? M?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
 
@@ -285,6 +298,24 @@ export class Mastodon extends Website {
       sensitive: isSensitive,
       visibility: options.visibility || 'public',
     };
+
+    // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+    // these onto the post, *IF* there is character count available.
+    if (data.tags.length > 0) {
+      form.status += "\n\n";
+    }
+
+    data.tags.forEach(tag => {
+      let remain = maxChars - form.status.length;
+      let tagToInsert = tag;
+      if (!tag.startsWith('#')) {
+        tagToInsert = `#${tagToInsert}`
+      }
+      if (remain > (tagToInsert.length)) {
+        form.status += ` ${tagToInsert}`
+      }
+      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+    })
 
     if (options.spoilerText) {
       form.spoiler_text = options.spoilerText;
@@ -369,7 +400,8 @@ export class Mastodon extends Website {
     if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
       submissionPart.data.visibility != "public") {
         warnings.push(
-              `Tags will not be usable on a post which is not set to public visibility`,
+              `This post won't be listed under any hashtag as it is not public. Only public posts 
+              can be searched by hashtag.`,
             );
     }
 
