@@ -32,7 +32,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm run build:clean && npm run build:style && react-scripts build && mv build ../electron-app",
+    "build": "npm run build:clean && npm run build:style && react-scripts build && shx mv build ../electron-app",
     "build:clean": "rimraf ../electron-app/build",
     "build:style": "npm run build:tailwind && npm run build:themes",
     "build:tailwind": "tailwind build src/styles/index.css -o public/styles/tailwind.css && npm run build:antd-tweaks",

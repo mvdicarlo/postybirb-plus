@@ -19,7 +19,7 @@ export class Mastodon extends WebsiteImpl {
   internalName: string = 'Mastodon';
   name: string = 'Mastodon Instance';
   supportsAdditionalFiles: boolean = true;
-  supportsTags: boolean = false;
+  supportsTags: boolean = true;
   loginUrl: string = '';
 
   LoginDialog = (props: LoginDialogProps) => <MastodonLogin {...props} />;
@@ -35,7 +35,7 @@ export class Mastodon extends WebsiteImpl {
           { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
-      tagOptions={{ show: false }}
+      tagOptions={{ show: true }}
       hideThumbnailOptions={true}
     />
   );
@@ -53,7 +53,7 @@ export class Mastodon extends WebsiteImpl {
           { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
-      tagOptions={{ show: false }}
+      tagOptions={{ show: true }}
     />
   );
 }
