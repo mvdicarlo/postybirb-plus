@@ -50,7 +50,7 @@ export class Artconomy extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const authCheck = await Http.get<any>(
-      `${this.BASE_URL}/api/profiles/v1/data/requester/`,
+      `${this.BASE_URL}/api/profiles/data/requester/`,
       data._id,
       {
         requestOptions: {
@@ -118,7 +118,7 @@ export class Artconomy extends Website {
     const options = this.requestOptions(data);
     this.checkCancelled(cancellationToken);
     let upload = await Http.post<{ id: string }>(
-      `${this.BASE_URL}/api/lib/v1/asset/`,
+      `${this.BASE_URL}/api/lib/asset/`,
       data.part.accountId,
       {
         ...options,
@@ -132,7 +132,7 @@ export class Artconomy extends Website {
     let thumbnailAsset: null | string = null;
     if (data.thumbnail) {
       upload = await Http.post<{ id: string }>(
-        `${this.BASE_URL}/api/lib/v1/asset/`,
+        `${this.BASE_URL}/api/lib/asset/`,
         data.part.accountId,
         {
           ...options,
@@ -161,7 +161,7 @@ export class Artconomy extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await Http.post<any>(
-      `${this.BASE_URL}/api/profiles/v1/account/${username}/submissions/`,
+      `${this.BASE_URL}/api/profiles/account/${username}/submissions/`,
       data.part.accountId,
       {
         ...options,
@@ -200,7 +200,7 @@ export class Artconomy extends Website {
 
     this.checkCancelled(cancellationToken);
     const postResponse = await Http.post<{id: number}>(
-      `${this.BASE_URL}/api/profiles/v1/account/${username}/journals/`,
+      `${this.BASE_URL}/api/profiles/account/${username}/journals/`,
       data.part.accountId,
       {
         ...options,
