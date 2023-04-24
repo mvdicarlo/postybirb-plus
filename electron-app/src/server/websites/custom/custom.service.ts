@@ -25,6 +25,7 @@ import { Website } from '../website.base';
 export class Custom extends Website {
   readonly BASE_URL: string = '';
   readonly acceptsFiles: string[] = []; // accepts all
+  readonly acceptsAdditionalFiles: boolean = true;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -88,7 +89,7 @@ export class Custom extends Website {
     };
 
     const headers: any = {};
-    accountData.headers.forEach(header => {
+    accountData.headers.forEach((header) => {
       headers[header.name] = header.value;
     });
 
@@ -120,12 +121,12 @@ export class Custom extends Website {
       [accountData.tagField || 'tags']: data.tags.join(','),
       [accountData.titleField || 'title']: data.title,
       [accountData.ratingField || 'rating']: data.rating,
-      [accountData.fileField || 'file']: data.primary.file,
+      [accountData.fileField || 'file']: [data.primary.file, ...data.additional.map((a) => a.file)],
       [accountData.thumbnaiField || 'thumbnail']: data.thumbnail,
     };
 
     const headers: any = {};
-    accountData.headers.forEach(header => {
+    accountData.headers.forEach((header) => {
       headers[header.name] = header.value;
     });
 
@@ -134,6 +135,7 @@ export class Custom extends Website {
       type: 'multipart',
       data: form,
       headers,
+      requestOptions: { qsStringifyOptions: { arrayFormat: 'repeat' } },
     });
 
     this.verifyResponse(post);
