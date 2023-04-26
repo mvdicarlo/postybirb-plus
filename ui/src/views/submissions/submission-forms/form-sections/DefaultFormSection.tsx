@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import { inject } from "mobx-react";
 import { SubmissionPart } from 'postybirb-commons';
 import { SubmissionSectionProps } from '../interfaces/submission-section.interface';
 import TagInput from '../form-components/TagInput';
@@ -9,7 +10,16 @@ import { Submission } from 'postybirb-commons';
 import { DefaultOptions } from 'postybirb-commons';
 import SectionProblems from './SectionProblems';
 import { SubmissionRating } from 'postybirb-commons';
+import { artconomyTagSearchProvider } from '../../../../websites/artconomy/providers';
+import { e621TagSearchProvider } from '../../../../websites/e621/providers';
 
+const SEARCH_PROVIDERS = {
+  none: undefined,
+  artconomy: artconomyTagSearchProvider,
+  e621: e621TagSearchProvider
+};
+
+@inject('settingsStore')
 export default class DefaultFormSection extends React.Component<
   SubmissionSectionProps<Submission, DefaultOptions>
 > {
@@ -33,6 +43,7 @@ export default class DefaultFormSection extends React.Component<
 
   render() {
     const { data } = this.props.part;
+    const settings = this.props.settingsStore!.settings
     return (
       <div>
         <SectionProblems problems={this.props.problems} />
@@ -55,6 +66,9 @@ export default class DefaultFormSection extends React.Component<
           onChange={this.handleTagChange.bind(this)}
           defaultValue={data.tags}
           label="Tags"
+          searchProvider={
+            SEARCH_PROVIDERS[settings.defaultTagSearchProvider || 'none']
+          }
           hideExtend={true}
         />
         <DescriptionInput
