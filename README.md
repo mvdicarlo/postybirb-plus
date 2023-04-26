@@ -11,6 +11,22 @@ This is where all posting magic happens.
 ## [UI](/ui)
 React code that handles UI of the application displayed in the desktop application.
 
+## Configuring for local development
+
+To set up a local copy of PostyBirb for development:
+
+1. clone this repository and `cd` into it.
+2. `npm install` to install the base requirements.
+3. For the `commons`, `ui`, and `electron-app` directories, cd into each and run `npm install`. Be sure to start with commons first.
+
+Then, from the base directory again, run:
+
+```bash
+npm run make && npm run start --prefix electron-app
+```
+
+This will build and run the application. After making changes, close out of the app and run the above command again to rebuild and run with your changes.
+
 ## Contribution Guide
 _Pending_
 
