@@ -11,6 +11,7 @@ import { WebsiteSectionProps } from '../form-sections/website-form-section.inter
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { WebsiteImpl } from '../website.base';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
+import { artconomyTagSearchProvider } from './providers';
 
 export class Artconomy extends WebsiteImpl {
   internalName: string = 'Artconomy';
@@ -21,6 +22,11 @@ export class Artconomy extends WebsiteImpl {
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ArtconomyFileOptions>) => (
     <ArtconomyFileSubmissionForm
+      tagOptions={{
+        show: true,
+        searchProvider: artconomyTagSearchProvider,
+        options: { minTags: 5, mode: 'count' }
+      }}
       ratingOptions={{
         show: true,
         ratings: [
@@ -50,7 +56,11 @@ export class Artconomy extends WebsiteImpl {
   NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
     <GenericSubmissionSection
       key={props.part.accountId}
-      tagOptions={{ show: false }}
+      tagOptions={{
+        show: true,
+        searchProvider: artconomyTagSearchProvider,
+        options: { minTags: 5, mode: 'count' }
+      }}
       ratingOptions={{ show: false }}
       {...props}
     />
