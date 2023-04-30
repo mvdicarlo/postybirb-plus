@@ -32,10 +32,6 @@ export class FileSubmissionService {
 
     const title = path.parse(file.originalname).name;
     const locations = await this.fileRepository.insertFile(submission._id, file, data.path);
-    const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
-      file.buffer,
-      file.mimetype,
-    );
 
     // file mimetype may be manipulated by insertFile
     const completedSubmission: FileSubmissionEntity = new FileSubmissionEntity({
@@ -49,10 +45,19 @@ export class FileSubmissionService {
         preview: locations.thumbnailLocation,
         size: file.buffer.length,
         type: getSubmissionType(file.mimetype, file.originalname),
-        height: im.getHeight(),
-        width: im.getWidth(),
       },
     });
+
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
+    {
+        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+        file.buffer,
+        file.mimetype,
+      );
+
+      completedSubmission.primary.height = im.getHeight();
+      completedSubmission.primary.width = im.getWidth();
+    }
 
     return completedSubmission;
   }
@@ -72,10 +77,7 @@ export class FileSubmissionService {
 
     await this.fileRepository.removeSubmissionFile(submission.primary);
     const locations = await this.fileRepository.insertFile(submission._id, file, path);
-    const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
-      file.buffer,
-      file.mimetype,
-    );
+
     submission.primary = {
       location: locations.submissionLocation,
       mimetype: file.mimetype,
@@ -84,9 +86,18 @@ export class FileSubmissionService {
       preview: locations.thumbnailLocation,
       size: file.buffer.length,
       type: getSubmissionType(file.mimetype, file.originalname),
-      height: im.getHeight(),
-      width: im.getWidth(),
     };
+
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
+    {
+      const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+        file.buffer,
+        file.mimetype,
+      );
+
+      submission.primary.height = im.getHeight();
+      submission.primary.width = im.getWidth();
+    }
 
     return submission;
   }
@@ -110,10 +121,7 @@ export class FileSubmissionService {
 
     const scaledUpload = this.fileRepository.scaleImage(file, 640);
     const locations = await this.fileRepository.insertFile(submission._id, file, path);
-    const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
-      scaledUpload.buffer,
-      scaledUpload.mimetype,
-    );    
+
     submission.thumbnail = {
       location: locations.submissionLocation,
       mimetype: scaledUpload.mimetype,
@@ -122,9 +130,18 @@ export class FileSubmissionService {
       preview: locations.thumbnailLocation,
       size: scaledUpload.buffer.length,
       type: getSubmissionType(scaledUpload.mimetype, scaledUpload.originalname),
-      height: im.getHeight(),
-      width: im.getWidth(),
     };
+
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
+    {
+      const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+        scaledUpload.buffer,
+        scaledUpload.mimetype,
+      );
+      
+      submission.thumbnail.width = im.getWidth();
+      submission.thumbnail.height = im.getHeight();
+    }
 
     return submission;
   }
@@ -182,11 +199,7 @@ export class FileSubmissionService {
     path: string,
   ): Promise<FileSubmissionEntity> {
     const locations = await this.fileRepository.insertFile(submission._id, file, path);
-    const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
-      file.buffer,
-      file.mimetype,
-    );    
-    submission.additional.push({
+    let additionalSub = {
       location: locations.submissionLocation,
       mimetype: file.mimetype,
       name: file.originalname,
@@ -195,9 +208,22 @@ export class FileSubmissionService {
       size: file.buffer.length,
       type: getSubmissionType(file.mimetype, file.originalname),
       ignoredAccounts: [],
-      height: im.getHeight(),
-      width: im.getWidth(),
-    });
+      height: 0,
+      width : 0
+    }
+
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
+    {
+      const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+        file.buffer,
+        file.mimetype,
+      );  
+      
+      additionalSub.height = im.getHeight();
+      additionalSub.width = im.getWidth();
+    }
+
+    submission.additional.push(additionalSub);
 
     return submission;
   }
