@@ -87,7 +87,7 @@ const template = [
       {
         label: 'Learn More',
         click() {
-          shell.openExternal('https://postybirb.com');
+          shell.openExternal('https://postyfox.com');
         },
       },
     ],

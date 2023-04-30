@@ -32,6 +32,11 @@ export class FileSubmissionService {
 
     const title = path.parse(file.originalname).name;
     const locations = await this.fileRepository.insertFile(submission._id, file, data.path);
+    
+    const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+      file.buffer,
+      file.mimetype,
+    );
 
     // file mimetype may be manipulated by insertFile
     const completedSubmission: FileSubmissionEntity = new FileSubmissionEntity({
@@ -45,6 +50,8 @@ export class FileSubmissionService {
         preview: locations.thumbnailLocation,
         size: file.buffer.length,
         type: getSubmissionType(file.mimetype, file.originalname),
+        height: im.getHeight(),
+        width: im.getWidth(),
       },
     });
 
@@ -86,6 +93,8 @@ export class FileSubmissionService {
       preview: locations.thumbnailLocation,
       size: file.buffer.length,
       type: getSubmissionType(file.mimetype, file.originalname),
+      height: im.getHeight(),
+      width: im.getWidth(),
     };
 
     if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
@@ -130,6 +139,8 @@ export class FileSubmissionService {
       preview: locations.thumbnailLocation,
       size: scaledUpload.buffer.length,
       type: getSubmissionType(scaledUpload.mimetype, scaledUpload.originalname),
+      height: im.getHeight(),
+      width: im.getWidth(),
     };
 
     if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
@@ -199,6 +210,7 @@ export class FileSubmissionService {
     path: string,
   ): Promise<FileSubmissionEntity> {
     const locations = await this.fileRepository.insertFile(submission._id, file, path);
+    
     let additionalSub = {
       location: locations.submissionLocation,
       mimetype: file.mimetype,

@@ -46,7 +46,7 @@ export class ImageManipulationPoolService {
             this.uiNotificationService.createUINotification(
               NotificationType.INFO,
               0,
-              'PostyBirb is currently processing many image files. This may affect the time it takes to create or post image based submissions.',
+              'PostyFox is currently processing many image files. This may affect the time it takes to create or post image based submissions.',
             );
           }
         }

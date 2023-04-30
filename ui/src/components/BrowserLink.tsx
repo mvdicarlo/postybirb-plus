@@ -11,7 +11,7 @@ const BrowserLink: React.FC<{ url: string }> = props => {
         window.electron.shell.openInBrowser(props.url).catch(() =>
           notification.error({
             message: 'Browser Failure',
-            description: `PostyBirb was unable to open ${props.url}`
+            description: `PostyFox was unable to open ${props.url}`
           })
         );
       }}

@@ -22,7 +22,7 @@ function show() {
       closable: false,
       width,
       height,
-      title: 'PostyBirb',
+      title: 'PostyFox',
       center: true,
     });
 

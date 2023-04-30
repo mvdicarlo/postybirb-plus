@@ -135,6 +135,7 @@ export class Mastodon extends Website {
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
+    this.logger.debug("Mastodon uploadMedia")
     const upload = await Http.post<{ id: string; errors: any; url: string }>(
       `${data.website}/api/v2/media`,
       undefined,
@@ -147,7 +148,7 @@ export class Mastodon extends Website {
         requestOptions: { json: true },
         headers: {
           Accept: '*/*',
-          'User-Agent': 'node-mastodon-client/PostyBirb',
+          'User-Agent': 'node-mastodon-client/PostyFox',
           Authorization: `Bearer ${data.token}`,
         },
       },
@@ -166,7 +167,7 @@ export class Mastodon extends Website {
             requestOptions: { json: true },
             headers: {
               Accept: '*/*',
-              'User-Agent': 'node-mastodon-client/PostyBirb',
+              'User-Agent': 'node-mastodon-client/PostyFox',
               Authorization: `Bearer ${data.token}`,
             },
           },

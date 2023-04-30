@@ -1,7 +1,7 @@
 import { crashReporter } from 'electron';
 
 crashReporter.start({
-  companyName: 'PostyBirb',
+  companyName: 'PostyFox',
   submitURL: '',
   uploadToServer: false,
 });

@@ -113,11 +113,11 @@
     "typescript": "^4.4.3"
   },
   "build": {
-    "appId": "com.lemonynade.postybirb.plus",
-    "productName": "PostyBirb+",
+    "appId": "com.neillans.postyfox",
+    "productName": "PostyFox",
     "publish": {
       "provider": "github",
-      "owner": "mvdicarlo",
+      "owner": "aneillans",
       "repo": "postybirb-plus"
     },
     "directories": {
@@ -150,7 +150,7 @@
     },
     "win": {
       "publisherName": [
-        "Michael DiCarlo"
+        "Andy Neillans"
       ],
       "icon": "icons/icon.ico",
       "target": [

@@ -78,8 +78,8 @@ export class KoFi extends Website {
     return type === SubmissionType.FILE
       ? PlaintextParser.parse(
           text.replace(
-            '<p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>',
-            'Posted using PostyBirb',
+            '<p><a href="http://www.postyfox.com">Posted using PostyFox</a></p>',
+            'Posted using PostyFox',
           ),
         )
       : text;

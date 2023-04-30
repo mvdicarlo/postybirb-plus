@@ -199,7 +199,7 @@ export class Poster extends EventEmitter {
           totalTries = 0;
           reject(
             new Error(
-              `PostyBirb timed out when posting. Please check ${this.website.constructor.name} to see if it actually completed.`,
+              `PostyFox timed out when posting. Please check ${this.website.constructor.name} to see if it actually completed.`,
             ),
           );
         }

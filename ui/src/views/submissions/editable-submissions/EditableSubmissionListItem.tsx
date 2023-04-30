@@ -81,7 +81,7 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
         message.success('Submission duplicated.');
       })
       .catch(() => {
-        message.error('PostyBirb was unable to duplicate the submission.');
+        message.error('PostyFox was unable to duplicate the submission.');
       })
       .finally(() => {
         this.setState({ disableActions: false });

@@ -49,10 +49,10 @@ export default class SettingsView extends React.Component<Props> {
       <Form layout="vertical">
         <Collapse bordered={false}>
           <Collapse.Panel header="Posting" key="posting">
-            <Form.Item label="Help Advertise Postybirb">
+            <Form.Item label="Help Advertise PostyFox">
               <Tooltip
                 title={
-                  'Adds "Posted using Postybirb" to the end of descriptions for most websites.'
+                  'Adds "Posted using PostyFox" to the end of descriptions for most websites.'
                 }
               >
                 <Switch
@@ -84,7 +84,7 @@ export default class SettingsView extends React.Component<Props> {
           </Collapse.Panel>
           <Collapse.Panel header="Autoscaling" key="autoscaling">
             <p>
-              <em>PostyBirb converts .bmp, .tiff to JPEG or PNG (if opacity is detected).</em>
+              <em>PostyFox converts .bmp, .tiff to JPEG or PNG (if opacity is detected).</em>
             </p>
             <Form.Item label="PNG">
               <p>
@@ -198,14 +198,14 @@ export default class SettingsView extends React.Component<Props> {
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Startup" key="startup">
-            <Form.Item label="Start PostyBirb on startup">
+            <Form.Item label="Start PostyFox on startup">
               <Switch
                 disabled={/Linux/.test(navigator.platform)}
                 checked={settings.openOnLogin}
                 onChange={value => this.updateSetting('openOnLogin', value)}
               />
             </Form.Item>
-            <Form.Item label="Show PostyBirb Window on application startup">
+            <Form.Item label="Show PostyFox Window on application startup">
               <Switch
                 checked={settings.openWindowOnStartup}
                 onChange={value => this.updateSetting('openWindowOnStartup', value)}
@@ -214,7 +214,7 @@ export default class SettingsView extends React.Component<Props> {
           </Collapse.Panel>
           <Collapse.Panel header="Remote" key="remote">
             <p>
-              Connect to a PostyBirb client over the internet/LAN.
+              Connect to a PostyFox client over the internet/LAN.
               <br />
               <strong>
                 Any changes to these settings will require you to refresh the application (ctrl+r or

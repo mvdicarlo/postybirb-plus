@@ -144,7 +144,7 @@ function createWindow() {
     minHeight: 500,
     autoHideMenuBar: true,
     icon,
-    title: 'PostyBirb',
+    title: 'PostyFox',
     darkTheme: nativeTheme.shouldUseDarkColors,
     webPreferences: {
       devTools: true,
@@ -176,9 +176,9 @@ function createWindow() {
         backgroundAlertTimeout = setTimeout(() => {
           hasNotifiedAboutBackground = true;
           const notification = new Notification({
-            title: 'PostyBirb',
+            title: 'PostyFox',
             icon,
-            body: 'PostyBirb will continue in the background.',
+            body: 'PostyFox will continue in the background.',
             silent: true,
           });
           notification.show();
@@ -241,7 +241,7 @@ function buildTray(image: Electron.NativeImage): Tray {
 
   const tray = new Tray(image);
   tray.setContextMenu(Menu.buildFromTemplate(trayItems));
-  tray.setToolTip('PostyBirb');
+  tray.setToolTip('PostyFox');
   tray.on('click', () => show());
   return tray;
 }

@@ -88,9 +88,44 @@ export class FileManipulationService {
             } else {
               newMimeType = 'image/png';
               newBuffer = pngScaledBuffer;
+
             }
           }
         }
+
+        // THEN check for file size limit as before
+        if (!skipRescale) {
+          const originalFileSize = buffer.length;
+          this.logger.debug(`Size: ${originalFileSize} - Target Size: ${targetSize}`);
+          if (originalFileSize > targetSize) {
+
+            if (settings.convertToJPEG) {
+              im.toJPEG();
+            }
+
+            const pngScaledBuffer = await this.scalePNG(im, originalFileSize, targetSize);
+            if (!pngScaledBuffer) {
+              const jpgScaledBuffer = await this.scaleJPEG(im, originalFileSize, targetSize);
+              if (!jpgScaledBuffer) {
+                this.logger.warn(
+                  `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
+                );
+                throw new InternalServerErrorException(
+                  `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
+                );
+              } else {
+                newMimeType = 'image/jpeg';
+                newBuffer = jpgScaledBuffer;
+              }
+            } else {
+              newMimeType = 'image/png';
+              newBuffer = pngScaledBuffer;
+            }
+          }
+        }
+      }
+      finally {
+        im.destroy();
       }
       finally {
         im.destroy();
