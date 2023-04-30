@@ -8,6 +8,8 @@ export interface FileRecord {
   originalPath?: string;
   preview: string;
   size: number;
+  height?: number;
+  width?: number;
   type: FileSubmissionType;
   ignoredAccounts?: string[];
   buffer?: Buffer;
