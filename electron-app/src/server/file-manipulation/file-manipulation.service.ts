@@ -41,24 +41,17 @@ export class FileManipulationService {
           if (scalingOptions.maxWidth) {
             maxSize = scalingOptions.maxWidth;
           }
-          if (scalingOptions.maxHeight) {
-            if (scalingOptions.maxHeight < maxSize) {
+          if (scalingOptions.maxHeight && scalingOptions.maxHeight < maxSize) {
               maxSize = scalingOptions.maxHeight;
-            }
           }
 
           if (maxSize < im.getHeight() || maxSize < im.getWidth()) {
-            this.logger.debug(`Image source width ${im.getWidth()}`);
-            this.logger.debug(`Image source height ${im.getHeight()}`);
-            this.logger.debug(`Resized image to maxsize of ${maxSize}px`);  
             const scaled = await im.resize(maxSize).getData();
             newBuffer = scaled.buffer;
             const newIm = await this.imageManipulationPool.getImageManipulator(
               newBuffer,
               mimeType,
-            );
-            this.logger.debug(`Image result width ${newIm.getWidth()}`);
-            this.logger.debug(`Image result height ${newIm.getHeight()}`);  
+            ); 
             newIm.destroy();    
 
             if (newBuffer.length > targetSize) {
@@ -72,7 +65,6 @@ export class FileManipulationService {
         // THEN check for file size limit as before
         if (!skipRescale) {
           const originalFileSize = buffer.length;
-          this.logger.debug(`Size: ${originalFileSize} - Target Size: ${targetSize}`);
           if (originalFileSize > targetSize) {
 
             if (settings.convertToJPEG) {

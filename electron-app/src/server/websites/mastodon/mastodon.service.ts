@@ -131,7 +131,6 @@ export class Mastodon extends Website {
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
-    this.logger.debug("Mastodon uploadMedia")
     const upload = await Http.post<{ id: string; errors: any; url: string }>(
       `${data.website}/api/v2/media`,
       undefined,
