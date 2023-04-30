@@ -228,6 +228,8 @@ export class Mastodon extends Website {
         };
       }
 
+      // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+      // these onto the post, *IF* there is character count available.
       if (data.tags.length > 0) {
         form.status += "\n\n";
       }
@@ -243,7 +245,7 @@ export class Mastodon extends Website {
         }
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
       })
-
+      
       if (options.spoilerText) {
         form.spoiler_text = options.spoilerText;
       }
