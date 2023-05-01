@@ -81,7 +81,7 @@ export class Pixelfed extends Website {
   private async getInstanceInfo(profileId: string, data: PixelfedAccountData) {
     const M = new PixelfedInstance({
       access_token: data.token,
-      api_url: `${data.website}/api/v2/`,
+      api_url: `${data.website}/api/v1/`,
     });
 
     const instance = await M.get('instance');
