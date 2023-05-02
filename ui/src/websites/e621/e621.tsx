@@ -1,5 +1,4 @@
 import { Form, Input } from 'antd';
-import Axios from 'axios';
 import _ from 'lodash';
 import { e621FileOptions, FileSubmission, SubmissionPart } from 'postybirb-commons';
 import React from 'react';
@@ -8,6 +7,7 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
 import E621Login from './e621Login';
+import { e621TagSearchProvider } from './providers';
 
 export class e621 extends WebsiteImpl {
   internalName: string = 'e621';
@@ -23,19 +23,7 @@ export class e621 extends WebsiteImpl {
       hideThumbnailOptions={true}
       tagOptions={{
         show: true,
-        searchProvider: (value: string) => {
-          return Axios.get('https://e621.net/tags/autocomplete.json?', {
-            params: {
-              expiry: '7',
-              'search[name_matches]': value
-            }
-          })
-            .then(({ data }) => (data || []).map(d => d.name))
-            .catch(err => {
-              console.error(err);
-              return [];
-            });
-        }
+        searchProvider: e621TagSearchProvider
       }}
       key={props.part.accountId}
       {...props}
