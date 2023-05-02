@@ -199,8 +199,10 @@ export class Telegram extends Website {
   private async loadChannels(profileId: string, appId: string) {
     const { chats } = await this.callApi<{
       chats: { access_hash: string; title: string; id: number; _: string }[];
-    }>(appId, 'messages.getAllChats', {
-      except_ids: [],
+    }>(appId, 'messages.getDialogs', {
+        offset_peer: {
+          _: 'inputPeerEmpty'
+      }      
     });
 
     const channels: Folder[] = chats
