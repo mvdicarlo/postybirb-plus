@@ -95,7 +95,7 @@ export class Pixiv extends Website {
       'tags[]': this.formatTags(data.tags).slice(0, 10),
       allowTagEdit: options.communityTags ? 'true' : 'false',
       xRestrict: this.getContentRating(data.rating),
-      sexual: 'false', // No option support in app currently
+      sexual: options.sexual ? 'true' : 'false',
       aiType: options.aiGenerated ? 'aiGenerated' : 'notAiGenerated',
       restrict: 'public',
       responseAutoAccept: 'false',
@@ -167,9 +167,9 @@ export class Pixiv extends Website {
         if (value.options && value.value) {
           form.append(key, value.value, value.options);
         } else if (Array.isArray(value)) {
-          value.forEach(v => {
+          value.forEach((v) => {
             form.append(key, v);
-          })
+          });
         } else {
           form.append(key, value);
         }

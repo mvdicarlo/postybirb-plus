@@ -15,6 +15,7 @@ import {
   FileSubmission,
   FileRecord,
 } from 'postybirb-commons';
+import { ScalingOptions } from 'src/server/websites/interfaces/scaling-options.interface';
 import { PostData } from '../post/interfaces/post-data.interface';
 import FormContent from 'src/server/utils/form-content.util';
 import { AdInsertParser } from 'src/server/description-parsing/miscellaneous/ad.parser';
@@ -194,7 +195,7 @@ export class ParserService {
         const { buffer, mimetype } = await this.fileManipulator.scale(
           file.buffer,
           file.mimetype,
-          scaleOptions.maxSize,
+          scaleOptions,
           { convertToJPEG: scaleOptions.converToJPEG },
         );
         if (mimetype !== file.mimetype) {

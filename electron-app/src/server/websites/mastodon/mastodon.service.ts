@@ -13,6 +13,7 @@ import {
   SubmissionPart,
   SubmissionRating,
 } from 'postybirb-commons';
+import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
@@ -28,10 +29,10 @@ import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
-import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import * as _ from 'lodash';
 import WaitUtil from 'src/server/utils/wait.util';
+import { FileManagerService } from 'src/server/file-manager/file-manager.service';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -51,6 +52,10 @@ type MastodonInstanceInfo = {
 
 @Injectable()
 export class Mastodon extends Website {
+  constructor(private readonly fileRepository: FileManagerService) {
+    super();
+  }
+
   readonly BASE_URL = '';
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
@@ -111,12 +116,18 @@ export class Mastodon extends Website {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
     return instanceInfo?.configuration?.media_attachments
       ? {
+          maxHeight: 4000,
+          maxWidth: 4000,
           maxSize:
             file.type === FileSubmissionType.IMAGE
               ? instanceInfo.configuration.media_attachments.image_size_limit
               : instanceInfo.configuration.media_attachments.video_size_limit,
         }
-      : { maxSize: FileSize.MBtoBytes(300) };
+      : {           
+          maxHeight: 4000,
+          maxWidth: 4000,
+          maxSize: FileSize.MBtoBytes(300) 
+      };
   }
 
   private async uploadMedia(
@@ -249,6 +260,8 @@ export class Mastodon extends Website {
         return Promise.reject(
           this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
         );
+      } else {
+        return this.createPostResponse({ source: post.data.url });
       }
     }
 
@@ -343,6 +356,7 @@ export class Mastodon extends Website {
     const maxImageSize = instanceInfo
       ? instanceInfo?.configuration?.media_attachments?.image_size_limit
       : FileSize.MBtoBytes(50);
+
     files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
@@ -360,6 +374,15 @@ export class Mastodon extends Website {
           problems.push(`Mastodon limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
         }
       }
+
+      // Check the image dimensions are not over 4000 x 4000 - this is the Mastodon server max
+      if (
+        isAutoscaling && 
+        type === FileSubmissionType.IMAGE && 
+        (file.height > 4000 || file.width > 4000)) {
+          warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
+           aspect ratio`);
+        }
     });
 
     if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
