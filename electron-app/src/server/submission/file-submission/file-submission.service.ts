@@ -57,6 +57,8 @@ export class FileSubmissionService {
 
       completedSubmission.primary.height = im.getHeight();
       completedSubmission.primary.width = im.getWidth();
+
+      im.destroy();
     }
 
     return completedSubmission;
@@ -97,6 +99,8 @@ export class FileSubmissionService {
 
       submission.primary.height = im.getHeight();
       submission.primary.width = im.getWidth();
+
+      im.destroy();
     }
 
     return submission;
@@ -141,6 +145,8 @@ export class FileSubmissionService {
       
       submission.thumbnail.width = im.getWidth();
       submission.thumbnail.height = im.getHeight();
+
+      im.destroy();
     }
 
     return submission;
@@ -221,6 +227,8 @@ export class FileSubmissionService {
       
       additionalSub.height = im.getHeight();
       additionalSub.width = im.getWidth();
+
+      im.destroy();
     }
 
     submission.additional.push(additionalSub);
