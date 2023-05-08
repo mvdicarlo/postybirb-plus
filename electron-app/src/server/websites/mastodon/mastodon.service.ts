@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import * as MastodonInstance from 'mastodon-api';
+import generator, { Entity, Response } from 'megalodon'
+
+//import * as MastodonInstance from 'mastodon-api';
+
 import {
   DefaultOptions,
   FileRecord,
@@ -55,8 +58,7 @@ export class Mastodon extends Website {
   constructor(private readonly fileRepository: FileManagerService) {
     super();
   }
-
-  readonly BASE_URL = '';
+  readonly BASE_URL: string;
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
@@ -88,14 +90,10 @@ export class Mastodon extends Website {
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: MastodonAccountData) {
-    const M = new MastodonInstance({
-      access_token: data.token,
-      api_url: `${data.website}/api/v2/`,
-    });
-
-    const instance = await M.get('instance');
-
+  private async getInstanceInfo(profileId: string, data: MastodonAccountData) {   
+    const client = generator('mastodon', data.website, data.token);
+    const instance = await client.getInstance();
+   
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
@@ -105,11 +103,12 @@ export class Mastodon extends Website {
     return true;
   }
 
-  private getMastodonInstance(data: MastodonAccountData) {
-    return new MastodonInstance({
-      access_token: data.token,
-      api_url: `${data.website}/api/v1/`,
+  private getMastodonInstance(data: MastodonAccountData) : Entity.Instance {
+    const client = generator('mastodon', data.website, data.token);
+    client.getInstance().then((res) => {
+      return res.data;
     });
+    return null;
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
@@ -192,7 +191,7 @@ export class Mastodon extends Website {
     data: FilePostData<MastodonFileOptions>,
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
-    const M = this.getMastodonInstance(accountData);
+    const M = generator('mastodon', accountData.website, accountData.token);
 
     const files = [data.primary, ...data.additional];
     this.checkCancelled(cancellationToken);
@@ -211,30 +210,42 @@ export class Mastodon extends Website {
     const { options } = data;
     const chunks = _.chunk(uploadedMedias, chunkCount);
     let lastId = undefined;
+
     for (let i = 0; i < chunks.length; i++) {
+      let statusOptions: any = {
+        status: '',
+        sensitive: isSensitive,
+        visibility: options.visibility || 'public',
+        spoiler_text: ''
+      };
+      let status = undefined;
+
       let form = undefined;
       if (i === 0) {
-        form = {
-          status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${
-            data.description
-          }`.substring(0, maxChars),
+        status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${
+          data.description
+        }`.substring(0, maxChars)
+
+        statusOptions = {
           sensitive: isSensitive,
           visibility: options.visibility || 'public',
-          media_ids: chunks[i].map((media) => media.id),
-        };
-      } else {
-        form = {
-          sensitive: isSensitive,
-          visibility: options.visibility || 'public',
-          media_ids: chunks[i].map((media) => media.id),
-          in_reply_to_id: lastId,
-        };
-      }
+          media_ids: chunks[i].map((media) => media.id), 
+          spoiler_text: "",
+        }
+     } else {
+      statusOptions = {
+        sensitive: isSensitive,
+        visibility: options.visibility || 'public',
+        media_ids: chunks[i].map((media) => media.id),
+        in_reply_to_id: lastId,  
+        spoiler_text: "",    
+      }      
+     }
 
       // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
       // these onto the post, *IF* there is character count available.
       if (data.tags.length > 0) {
-        form.status += "\n\n";
+        status += "\n\n";
       }
 
       data.tags.forEach(tag => {
@@ -244,25 +255,23 @@ export class Mastodon extends Website {
           tagToInsert = `#${tagToInsert}`
         }
         if (remain > (tagToInsert.length)) {
-          form.status += ` ${tagToInsert}`
+          status += ` ${tagToInsert}`
         }
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
       })
       
       if (options.spoilerText) {
-        form.spoiler_text = options.spoilerText;
+        statusOptions.spoiler_text = options.spoilerText;
       }
 
-      const post = await M.post('statuses', form);
-      lastId = post.data.id;
-
-      if (!lastId || post.data.error) {
+      M.postStatus(status, statusOptions).then((result) => {
+        lastId = result.data.id;
+        return this.createPostResponse({ source: result.data.url }); // TODO ? This is on the object, need to dig.
+      }).catch((err: Error) => {
         return Promise.reject(
-          this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
+          this.createPostResponse({ message: err.message }),
         );
-      } else {
-        return this.createPostResponse({ source: post.data.url });
-      }
+      })
     }
 
     this.checkCancelled(cancellationToken);
@@ -276,8 +285,8 @@ export class Mastodon extends Website {
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
     const M = this.getMastodonInstance(accountData);
-    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    
+    const maxChars = M ? M?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
 
