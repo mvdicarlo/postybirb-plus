@@ -146,6 +146,8 @@ export class Newgrounds extends Website {
       },
     });
 
+    console.log(parkFile.body);
+
     this.verifyResponse(parkFile, 'Verify park');
     if (!parkFile.body.success) {
       return Promise.reject(
@@ -168,7 +170,33 @@ export class Newgrounds extends Website {
       };
     }
 
-    const { height, width } = nativeImage.createFromBuffer(thumbfile.value).getSize();
+    const scalePx = 600;
+    let thumb = nativeImage.createFromBuffer(thumbfile.value);
+    let { height, width } = thumb.getSize();
+    const ar = thumb.getAspectRatio();
+    if (ar >= 1) {
+      if (width > scalePx) {
+        thumb = thumb.resize({
+          width: scalePx,
+          height: Math.floor(scalePx / ar),
+        });
+        width = scalePx;
+        height = Math.floor(scalePx / ar);
+      }
+    } else {
+      if (height > scalePx) {
+        thumb = thumb.resize({
+          width: Math.floor(scalePx * ar),
+          height: scalePx,
+        });
+        width = Math.floor(scalePx * ar);
+        height = scalePx;
+      }
+    }
+
+    thumbfile.value = thumb.toPNG();
+    thumbfile.options.filename = 'thumbnail.png';
+    thumbfile.options.contentType = 'image/png';
 
     const { options } = data;
     const form: any = {
@@ -193,6 +221,8 @@ export class Newgrounds extends Website {
       parked_id: parkFile.body.parked_id,
       parked_url: parkFile.body.parked_url,
     };
+
+    console.log(form);
 
     if (options.creativeCommons) {
       form.use_creative_commons = '1';
