@@ -266,7 +266,8 @@ export class Mastodon extends Website {
 
       M.postStatus(status, statusOptions).then((result) => {
         lastId = result.data.id;
-        return this.createPostResponse({ source: result.data.url }); // TODO ? This is on the object, need to dig.
+        let res = result.data as Entity.Status;
+        return this.createPostResponse({ source: res.url });
       }).catch((err: Error) => {
         return Promise.reject(
           this.createPostResponse({ message: err.message }),
@@ -284,51 +285,54 @@ export class Mastodon extends Website {
     data: PostData<Submission, MastodonNotificationOptions>,
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
-    const M = this.getMastodonInstance(accountData);
+    const mInstance = this.getMastodonInstance(accountData);
+    const M = generator('mastodon', accountData.website, accountData.token);
     
-    const maxChars = M ? M?.configuration?.statuses?.max_characters : 500;
+    const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
 
     const { options } = data;
-    const form: any = {
-      status: `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`,
+    let status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`;
+    const statusOptions: any = {
       sensitive: isSensitive,
       visibility: options.visibility || 'public',
+      spoiler_text: ""
     };
 
     // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
     // these onto the post, *IF* there is character count available.
     if (data.tags.length > 0) {
-      form.status += "\n\n";
+      status += "\n\n";
     }
 
     data.tags.forEach(tag => {
-      let remain = maxChars - form.status.length;
+      let remain = maxChars - status.length;
       let tagToInsert = tag;
       if (!tag.startsWith('#')) {
         tagToInsert = `#${tagToInsert}`
       }
       if (remain > (tagToInsert.length)) {
-        form.status += ` ${tagToInsert}`
+        status += ` ${tagToInsert}`
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
     })
 
     if (options.spoilerText) {
-      form.spoiler_text = options.spoilerText;
+      statusOptions.spoiler_text = options.spoilerText;
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await M.post('statuses', form);
 
-    if (!post.data.id || post.data.error) {
+    M.postStatus(status, statusOptions).then((result) => {
+      let res = result.data as Entity.Status;
+      return this.createPostResponse({ source: res.url });
+    }).catch((err: Error) => {
       return Promise.reject(
-        this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
+        this.createPostResponse({ message: err.message }),
       );
-    }
-
-    return this.createPostResponse({ source: post.data.url });
+    })
+    return this.createPostResponse({});
   }
 
   validateFileSubmission(
