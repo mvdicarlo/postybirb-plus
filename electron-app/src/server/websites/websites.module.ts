@@ -32,6 +32,7 @@ import { TelegramModule } from './telegram/telegram.module';
 import { FurbooruModule } from './furbooru/furbooru.module';
 import { ItakuModule } from './itaku/itaku.module';
 import { PicartoModule } from './picarto/picarto.module';
+import { PixelfedModule } from './pixelfed/pixelfed.module';
 import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-adult.module';
 
 @Module({
@@ -70,6 +71,7 @@ import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-
     WeasylModule,
     ItakuModule,
     PicartoModule,
+    PixelfedModule,
   ],
 })
 export class WebsitesModule {}
