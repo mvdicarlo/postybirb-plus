@@ -27,3 +27,4 @@ export * from './tumblr/tumblr.options';
 export * from './weasyl/weasyl.options';
 export * from './itaku/itaku.options';
 export * from './twitter/twitter.options';
+export * from './pixelfed/pixelfed.options';
