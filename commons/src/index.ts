@@ -62,6 +62,9 @@ export * from './interfaces/websites/manebooru/manebooru.file.options.interface'
 export * from './interfaces/websites/mastodon/mastodon.account.interface';
 export * from './interfaces/websites/mastodon/mastodon.file.options.interface';
 export * from './interfaces/websites/mastodon/mastodon.notification.options.interface';
+export * from './interfaces/websites/misskey/misskey.account.interface';
+export * from './interfaces/websites/misskey/misskey.file.options.interface';
+export * from './interfaces/websites/misskey/misskey.notification.options.interface';
 export * from './interfaces/websites/newgrounds/newgrounds.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.notification.options.interface';
