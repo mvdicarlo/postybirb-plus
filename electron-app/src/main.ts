@@ -10,7 +10,7 @@ import {
   Notification,
   webContents,
 } from 'electron';
-import * as WindowStateKeeper from 'electron-window-state';
+import WindowStateKeeper from 'electron-window-state';
 import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
 import { initialize as initializeRemote, enable as enableRemote } from '@electron/remote/main';
