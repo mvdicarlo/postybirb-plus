@@ -4,7 +4,7 @@ import { SubmissionType } from 'postybirb-commons';
 import { Button, Input, message, Form, Modal, Checkbox } from 'antd';
 import SubmissionTemplateSelect from '../submission-template-select/SubmissionTemplateSelect';
 import { SubmissionPart } from 'postybirb-commons';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 interface NotificationSubmissionCreateState {
   keepTemplateTitle: boolean;

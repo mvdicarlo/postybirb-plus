@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 import {
   DefaultOptions,
   FileRecord,
@@ -29,7 +29,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
-import _ = require('lodash');
+import _ from 'lodash';
 import { FallbackInformation } from '../interfaces/fallback-information.interface';
 import HtmlParser from 'src/server/description-parsing/html-node/parser';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';

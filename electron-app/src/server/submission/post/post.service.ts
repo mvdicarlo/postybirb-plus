@@ -1,6 +1,6 @@
 import { Injectable, Logger, Inject, forwardRef, BadRequestException } from '@nestjs/common';
-import * as fs from 'fs-extra';
-import * as _ from 'lodash';
+import fs from 'fs-extra';
+import _ from 'lodash';
 import { SubmissionService } from '../submission.service';
 import { Submission, DefaultOptions, FileRecord, PostStatuses, PostInfo } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';

@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { session } from 'electron';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { SubmissionPartService } from 'src/server/submission/submission-part/submission-part.service';
 import { SubmissionTemplateService } from 'src/server/submission/submission-template/submission-template.service';

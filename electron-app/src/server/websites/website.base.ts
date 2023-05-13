@@ -1,5 +1,5 @@
 import { Logger, NotImplementedException, UnprocessableEntityException } from '@nestjs/common';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {
   DefaultFileOptions,
   DefaultFileOptionsEntity,
