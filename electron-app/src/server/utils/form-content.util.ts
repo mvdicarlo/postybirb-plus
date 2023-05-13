@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { DescriptionData, TagData } from 'postybirb-commons';
 
 export default class FormContent {

@@ -1,5 +1,5 @@
 import React from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import SubmissionLogs from './SubmissionLogs';
 import { EditableSubmissions } from './editable-submissions/EditableSubmissions';
 import { headerStore } from '../../stores/header.store';

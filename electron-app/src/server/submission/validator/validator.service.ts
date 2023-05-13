@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { SubmissionPart, Submission, Problems, DefaultOptions } from 'postybirb-commons';
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { SubmissionType } from 'postybirb-commons';
 

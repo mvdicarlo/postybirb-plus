@@ -1,8 +1,8 @@
-import * as Jimp from 'jimp';
-import * as fs from 'fs-extra';
-import * as shortid from 'shortid';
-import * as ChildProcess from 'child_process';
-import * as decode from 'image-decode';
+import Jimp from 'jimp';
+import fs from 'fs-extra';
+import shortid from 'shortid';
+import ChildProcess from 'child_process';
+import decode from 'image-decode';
 import { TEMP_FILE_DIRECTORY } from '../../directories';
 
 type MimeType = 'image/jpeg' | 'image/jpeg' | 'image/png' | 'image/tiff' | 'image/bmp';

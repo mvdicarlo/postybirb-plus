@@ -1,6 +1,6 @@
 import { app } from 'electron';
 import { Injectable, Logger } from '@nestjs/common';
-import * as lowdb from 'lowdb';
+import lowdb from 'lowdb';
 import { Events } from 'postybirb-commons';
 import { Settings } from 'postybirb-commons';
 import { EventsGateway } from 'src/server/events/events.gateway';
