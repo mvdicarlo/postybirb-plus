@@ -23,6 +23,7 @@ import { Tumblr } from './tumblr/Tumblr';
 import { DeviantArt } from './deviant-art/DeviantArt';
 import { Manebooru } from './manebooru/Manebooru';
 import { Mastodon } from './mastodon/Mastodon';
+import { MissKey } from './misskey/MissKey';
 import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
 import { Telegram } from './telegram/Telegram';
@@ -49,6 +50,7 @@ export class WebsiteRegistry {
     KoFi: new KoFi(),
     Manebooru: new Manebooru(),
     Mastodon: new Mastodon(),
+    MissKey: new MissKey(),
     NewTumbl: new NewTumbl(),
     Newgrounds: new Newgrounds(),
     Patreon: new Patreon(),
