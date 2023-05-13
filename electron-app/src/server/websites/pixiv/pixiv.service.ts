@@ -1,5 +1,6 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
-import * as cheerio from 'cheerio';
+import _ from 'lodash';
+import cheerio from 'cheerio';
 const FormData = require('form-data');
 import { BrowserWindow, LoadURLOptions } from 'electron';
 import {

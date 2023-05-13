@@ -1,5 +1,5 @@
 import React from 'react';
-import * as sanitize from 'sanitize-html';
+import sanitize from 'sanitize-html';
 import { uiStore } from '../../../../stores/ui.store';
 import SubmissionService from '../../../../services/submission.service';
 import { FileSubmission } from 'postybirb-commons';

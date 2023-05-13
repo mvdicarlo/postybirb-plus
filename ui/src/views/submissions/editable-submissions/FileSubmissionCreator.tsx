@@ -1,5 +1,5 @@
 import React from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import SubmissionService from '../../../services/submission.service';
 import { SubmissionType } from 'postybirb-commons';
 import { Button, Input, message, Icon, Upload } from 'antd';

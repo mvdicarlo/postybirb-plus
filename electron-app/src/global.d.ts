@@ -1,4 +1,4 @@
-import * as lowdb from 'lowdb';
+import lowdb from 'lowdb';
 
 declare global {
   namespace NodeJS {

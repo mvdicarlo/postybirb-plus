@@ -1,5 +1,5 @@
 import React from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { PostStatusStore } from '../../stores/post-status.store';
 import { List, Avatar, message, Button, Typography, Card, Empty, Descriptions, Badge } from 'antd';

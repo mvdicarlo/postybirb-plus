@@ -1,5 +1,5 @@
-import * as sanitize from 'sanitize-html';
-import * as parse5 from 'parse5';
+import sanitize from 'sanitize-html';
+import parse5 from 'parse5';
 
 export class HTMLFormatParser {
   static readonly BLOCKS: string[] = ['div', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];

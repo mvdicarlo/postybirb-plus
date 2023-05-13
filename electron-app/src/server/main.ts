@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { HttpExceptionFilter } from './http-exception.filter';
 import { SSL } from './ssl';
-import * as compression from 'compression';
+import compression from 'compression';
 import { AuthGuard } from './auth.guard';
 import { CustomLogger } from './custom.logger';
 import { ensure } from './directories';

@@ -1,7 +1,7 @@
 import { EntityIntf } from 'postybirb-commons';
 import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
-import * as _ from 'lodash';
-import * as uuid from 'uuid/v1';
+import _ from 'lodash';
+import uuid from 'uuid/v1';
 import { classToPlain } from 'class-transformer';
 
 export default class Entity implements EntityIntf {

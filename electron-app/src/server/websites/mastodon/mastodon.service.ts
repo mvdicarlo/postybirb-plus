@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import generator, { Entity, Response } from 'megalodon'
-
-//import * as MastodonInstance from 'mastodon-api';
-
 import {
   DefaultOptions,
   FileRecord,
@@ -33,7 +30,7 @@ import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { Website } from '../website.base';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import WaitUtil from 'src/server/utils/wait.util';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
 

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as os from 'os';
+import os from 'os';
 import ImageManipulator from '../manipulators/image.manipulator';
 import { UiNotificationService } from 'src/server/notification/ui-notification/ui-notification.service';
 import { NotificationType } from 'src/server/notification/enums/notification-type.enum';

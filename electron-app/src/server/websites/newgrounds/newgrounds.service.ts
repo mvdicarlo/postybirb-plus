@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 import { nativeImage } from 'electron';
 import {
   DefaultOptions,
