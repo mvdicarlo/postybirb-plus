@@ -7,7 +7,7 @@ import {
   Inject,
   InternalServerErrorException,
 } from '@nestjs/common';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import { EventsGateway } from 'src/server/events/events.gateway';
 import { FileSubmissionService } from './file-submission/file-submission.service';
 import {

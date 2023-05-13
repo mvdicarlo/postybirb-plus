@@ -1,5 +1,5 @@
 import { Button, Form, Input, message, Radio } from 'antd';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import React from 'react';
 import { CustomAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';

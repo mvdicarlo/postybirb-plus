@@ -1,5 +1,5 @@
 import React from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { inject, observer } from 'mobx-react';
 import { DescriptionTemplateStore } from '../../stores/description-template.store';
 import DescriptionTemplateService from '../../services/description-template.service';

@@ -1,5 +1,5 @@
-import * as _ from 'lodash';
-import * as cheerio from 'cheerio';
+import _ from 'lodash';
+import cheerio from 'cheerio';
 
 export class PlaintextParser {
   public static parse(html: string, linkLength?: number): string {
