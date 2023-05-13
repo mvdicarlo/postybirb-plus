@@ -1,6 +1,6 @@
-import * as express from 'express';
+import express from 'express';
 import { getURL } from './common.auth';
-import * as Request from 'request';
+import Request from 'request';
 import { Server } from 'http';
 
 const app = express();
