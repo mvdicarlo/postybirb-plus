@@ -198,16 +198,52 @@ export class Telegram extends Website {
 
   private async loadChannels(profileId: string, appId: string) {
     const { chats } = await this.callApi<{
-      chats: { access_hash: string; title: string; id: number; _: string }[];
+      chats: {
+        _: string;
+        creator: boolean;
+        access_hash: string;
+        title: string;
+        id: number;
+        left: boolean;
+        deactivated: boolean;
+        /**
+         * Reverted default user rights.
+         */
+        default_banned_rights: {
+          /**
+           * So false means that the user
+           * actually can send the media
+           */
+          send_media: boolean;
+        };
+        admin_rights: {
+          post_messages: boolean;
+        };
+      }[];
     }>(appId, 'messages.getDialogs', {
-        offset_peer: {
-          _: 'inputPeerEmpty'
-      }      
+      offset_peer: {
+        _: 'inputPeerEmpty',
+      },
+      limit: 100,
     });
 
     const channels: Folder[] = chats
-      .filter((c) => c._ === 'channel')
-      .map((c) => ({ label: c.title, value: `${c.id}-${c.access_hash}` }));
+      .filter((c) => {
+        // Skip forbidden chats
+        if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
+
+        if (
+          c.creator ||
+          c.admin_rights?.post_messages ||
+          // Reverted means that user can send media
+          c.default_banned_rights?.send_media === false
+        )
+          return true;
+      })
+      .map((c) => ({
+        label: c.title,
+        value: `${c.id}-${c.access_hash}`,
+      }));
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
   }
