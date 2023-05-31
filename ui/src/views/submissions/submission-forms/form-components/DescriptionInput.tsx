@@ -1,14 +1,14 @@
+import { Editor } from '@tinymce/tinymce-react';
+import { Button, Form, Popover, Switch, Typography } from 'antd';
+import { inject, observer } from 'mobx-react';
+import { DescriptionData } from 'postybirb-commons';
 import React from 'react';
 import * as sanitize from 'sanitize-html';
-import { inject, observer } from 'mobx-react';
-import { Editor } from '@tinymce/tinymce-react';
-import { Form, Switch, Button, Popover, Typography } from 'antd';
-import { DescriptionTemplateStore } from '../../../../stores/description-template.store';
-import { DescriptionData } from 'postybirb-commons';
 import WebsiteService from '../../../../services/website.service';
-import { WebsiteRegistry } from '../../../../websites/website-registry';
-import { uiStore } from '../../../../stores/ui.store';
 import { CustomShortcutStore } from '../../../../stores/custom-shortcut.store';
+import { DescriptionTemplateStore } from '../../../../stores/description-template.store';
+import { uiStore } from '../../../../stores/ui.store';
+import { WebsiteRegistry } from '../../../../websites/website-registry';
 
 interface Props {
   customShortcutStore?: CustomShortcutStore;
@@ -161,23 +161,9 @@ export default class DescriptionInput extends React.Component<Props, State> {
                         <code>{'{default}'}</code>
                         <span className="mx-1">-</span>
                         <span>
-                          Inserts the website description or the default description text at the location of this tag.
+                          Inserts the the default description text at the location of this tag.
                           <br />
                           Best used when overriding the default description for specific websites.
-                        </span>
-                      </li>
-                      <li>
-                        <code>{'{title}'}</code>
-                        <span className="mx-1">-</span>
-                        <span>
-                          Inserts the website title or the default title
-                        </span>
-                      </li>
-                      <li>
-                        <code>{'{tags}'}</code>
-                        <span className="mx-1">-</span>
-                        <span>
-                          Inserts the website tags or the default tags separated by ' #'
                         </span>
                       </li>
                     </ul>

@@ -40,26 +40,10 @@ export class DescriptionParser {
       defaultPart.data.description,
       websitePart.data.description,
     ).trim();
-
+    const defaultDescription = defaultPart.data.description;
     if (description.length) {
-      // Insert {default}, {title}, {tags} shortcuts
-      description = this.insertDefaultShortcuts(description, [
-        {
-          name: 'default',
-          content: defaultPart.data.description.value ?? websitePart.data.description.value ?? '',
-        },
-        {
-          name: 'title',
-          content: defaultPart.data.title ?? websitePart.data.title ?? '',
-        },
-        {
-          name: 'tags',
-          content:
-            defaultPart.data.tags.value.map((t) => '#' + t).join(' ') ??
-            websitePart.data.tags.value.map((t) => '#' + t).join(' ') ??
-            '',
-        },
-      ]);
+       // Overwrite {defualt} tag
+      description = this.insertDefaultDescription(description, defaultDescription.value);
 
       // Parse all potential shortcut data
       const shortcutInfo: ShortcutData[] = this.parseShortcuts(description);
@@ -195,14 +179,7 @@ export class DescriptionParser {
     return description;
   }
 
-  private insertDefaultShortcuts(
-    description: string,
-    shortcuts: { name: string; content: string }[],
-  ): string {
-    for (const { name, content } of shortcuts) {
-      description = description.replace(new RegExp(`{${name}}`, 'gm'), content);
-    }
-
-    return description;
+  private insertDefaultDescription(description: string, defaultDescription: string): string {
+    return description.replace(/{default}/, defaultDescription || '');
   }
 }
