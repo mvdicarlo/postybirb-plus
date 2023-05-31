@@ -18,8 +18,6 @@ import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
 import TelegramLogin from './TelegramLogin';
 
-// TODO chat option
-
 export class Telegram extends WebsiteImpl {
   internalName: string = 'Telegram';
   name: string = 'Telegram';
