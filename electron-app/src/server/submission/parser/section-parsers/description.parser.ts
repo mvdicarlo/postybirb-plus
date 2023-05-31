@@ -36,15 +36,30 @@ export class DescriptionParser {
     websitePart: SubmissionPartEntity<DefaultOptions>,
     type: SubmissionType,
   ): Promise<string> {
-    const defaultDescription = defaultPart.data.description;
     let description = FormContent.getDescription(
       defaultPart.data.description,
       websitePart.data.description,
     ).trim();
 
     if (description.length) {
-      // Overwrite {defualt} tag
-      description = this.insertDefaultDescription(description, defaultDescription.value);
+      // Insert {default}, {title}, {tags} shortcuts
+      description = this.insertDefaultShortcuts(description, [
+        {
+          name: 'default',
+          content: defaultPart.data.description.value ?? websitePart.data.description.value ?? '',
+        },
+        {
+          name: 'title',
+          content: defaultPart.data.title ?? websitePart.data.title ?? '',
+        },
+        {
+          name: 'tags',
+          content:
+            defaultPart.data.tags.value.map((t) => '#' + t).join(' ') ??
+            websitePart.data.tags.value.map((t) => '#' + t).join(' ') ??
+            '',
+        },
+      ]);
 
       // Parse all potential shortcut data
       const shortcutInfo: ShortcutData[] = this.parseShortcuts(description);
@@ -180,7 +195,14 @@ export class DescriptionParser {
     return description;
   }
 
-  private insertDefaultDescription(description: string, defaultDescription: string): string {
-    return description.replace(/{default}/, defaultDescription || '');
+  private insertDefaultShortcuts(
+    description: string,
+    shortcuts: { name: string; content: string }[],
+  ): string {
+    for (const { name, content } of shortcuts) {
+      description = description.replace(new RegExp(`{${name}}`, 'gm'), content);
+    }
+
+    return description;
   }
 }
