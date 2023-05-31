@@ -28,7 +28,12 @@ interface Props {
 @observer
 export default class SettingsView extends React.Component<Props> {
   private updateSetting(key: keyof Settings, value: any) {
-    if (value === undefined || value === '' || value === null) return;
+    if (
+      value === undefined ||
+      (value === '' && key !== 'defaultTagSearchProvider') ||
+      value === null
+    )
+      return;
     if (value === this.props.settingsStore!.settings[key]) return;
     SettingsService.updateSetting(key, value);
   }
@@ -79,6 +84,20 @@ export default class SettingsView extends React.Component<Props> {
                     this.updateSetting('postRetries', Math.min(2, Math.max(0, Number(value))))
                   }
                 />
+              </Tooltip>
+            </Form.Item>
+            <Form.Item label="Default tagging search provider">
+              <Tooltip title="When creating a new post, autocomplete tags from this provider.">
+                <Radio.Group
+                  value={settings.defaultTagSearchProvider}
+                  onChange={event =>
+                    this.updateSetting('defaultTagSearchProvider', event.target.value)
+                  }
+                >
+                  <Radio.Button value="none">Do not autocomplete</Radio.Button>
+                  <Radio.Button value="artconomy">Artconomy</Radio.Button>
+                  <Radio.Button value="e621">e621</Radio.Button>
+                </Radio.Group>
               </Tooltip>
             </Form.Item>
           </Collapse.Panel>
