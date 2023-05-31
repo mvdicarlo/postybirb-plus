@@ -161,9 +161,23 @@ export default class DescriptionInput extends React.Component<Props, State> {
                         <code>{'{default}'}</code>
                         <span className="mx-1">-</span>
                         <span>
-                          Inserts the default description text at the location of this tag.
+                          Inserts the website description or the default description text at the location of this tag.
                           <br />
                           Best used when overriding the default description for specific websites.
+                        </span>
+                      </li>
+                      <li>
+                        <code>{'{title}'}</code>
+                        <span className="mx-1">-</span>
+                        <span>
+                          Inserts the website title or the default title
+                        </span>
+                      </li>
+                      <li>
+                        <code>{'{tags}'}</code>
+                        <span className="mx-1">-</span>
+                        <span>
+                          Inserts the website tags or the default tags separated by ' #'
                         </span>
                       </li>
                     </ul>
