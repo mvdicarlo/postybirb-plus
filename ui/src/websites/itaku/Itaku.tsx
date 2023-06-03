@@ -1,4 +1,4 @@
-import { Form, Select, Checkbox } from 'antd';
+import { Form, Select, Checkbox, Input } from 'antd';
 import {
   FileSubmission,
   SubmissionRating,
@@ -198,7 +198,14 @@ export class ItakuFileSubmissionForm extends GenericFileSubmissionSection<ItakuF
         >
           Share on feed
         </Checkbox>
-      </div>
+      </div>,
+      <Form.Item label="Content Warning">
+        <Input
+          value={data.spoilerText}
+          onChange={this.handleValueChange.bind(this, 'spoilerText')}
+          maxLength={30}
+        />
+      </Form.Item>
     );
     return elements;
   }

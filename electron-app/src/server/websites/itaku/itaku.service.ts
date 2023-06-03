@@ -141,6 +141,10 @@ export class Itaku extends Website {
       add_to_feed: `${data.options.shareOnFeed}`,
     };
 
+    if (data.options.spoilerText) {
+      postData.content_warning = data.options.spoilerText;
+    }
+
     if (data.primary.type === FileSubmissionType.IMAGE) {
       postData.image = data.primary.file;
     } else {
@@ -180,7 +184,7 @@ export class Itaku extends Website {
     data: PostData<Submission, ItakuNotificationOptions>,
     accountData: any,
   ): Promise<PostResponse> {
-    const postData = {
+    const postData: any = {
       title: data.title,
       content: data.description,
       folders: data.options.folders,
@@ -189,6 +193,10 @@ export class Itaku extends Website {
       tags: data.tags.map((tag) => ({ name: tag })),
       visibility: data.options.visibility,
     };
+
+    if (data.options.spoilerText) {
+      postData.content_warning = data.options.spoilerText;
+    }
 
     this.checkCancelled(cancellationToken);
 
