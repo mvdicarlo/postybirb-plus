@@ -45,10 +45,6 @@ export class Itaku extends WebsiteImpl {
           {
             value: SubmissionRating.ADULT,
             name: 'NSFW'
-          },
-          {
-            value: SubmissionRating.EXTREME,
-            name: 'NSFL'
           }
         ]
       }}
@@ -79,10 +75,6 @@ export class Itaku extends WebsiteImpl {
           {
             value: SubmissionRating.ADULT,
             name: 'NSFW'
-          },
-          {
-            value: SubmissionRating.EXTREME,
-            name: 'Extreme'
           }
         ]
       }}

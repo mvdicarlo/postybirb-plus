@@ -119,9 +119,8 @@ export class Itaku extends Website {
       case SubmissionRating.MATURE:
         return 'Questionable';
       case SubmissionRating.ADULT:
-        return 'NSFW';
       case SubmissionRating.EXTREME:
-        return 'Extreme';
+        return 'NSFW';
     }
   }
 
