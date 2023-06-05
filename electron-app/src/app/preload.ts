@@ -1,5 +1,5 @@
 /* tslint:disable: no-console no-var-requires variable-name */
-import { clipboard, shell, session, app, getCurrentWindow } from '@electron/remote';
+import { clipboard, dialog, shell, session, app, getCurrentWindow } from '@electron/remote';
 
 // Authorizers
 const Tumblr = require('./authorizers/tumblr.auth');
@@ -30,6 +30,11 @@ process.once('loaded', () => {
         lastModified: Date.now(),
         type: 'image/png',
       });
+    },
+  },
+  dialog: {
+    showOpenDialog(options) {
+      return dialog.showOpenDialog(getCurrentWindow(), options || {});
     },
   },
   session: {

@@ -7,11 +7,24 @@ import './styles/submission.css';
 import { Authorizer } from './websites/interfaces/authorizer.interface';
 
 declare global {
+  interface ElectronOpenDialogOptions {
+    title?: string;
+    properties?: Array<'openFile' | 'openDirectory'>;
+  }
+
+  interface ElectronOpenDialogReturnValue {
+    canceled: boolean;
+    filePaths: string[];
+  }
+
   interface Window {
     electron: {
       clipboard: {
         availableFormats: () => string[];
         read: () => File;
+      };
+      dialog: {
+        showOpenDialog(options?: ElectronOpenDialogOptions): Promise<ElectronOpenDialogReturnValue>;
       };
       session: {
         getCookies(accountId: string): Promise<any[]>;
