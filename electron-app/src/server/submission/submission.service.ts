@@ -552,7 +552,7 @@ export class SubmissionService {
 
     const allParts = await this.partService.getPartsForSubmission(submission._id, false);
     const keepIds = submissionOverwrite.parts.map((p) => p.accountId);
-    const removeParts = allParts.filter((p) => !keepIds.includes(p.accountId));
+    const removeParts = allParts.filter((p) => !keepIds.includes(p.accountId) && !p.isDefault);
 
     await Promise.all(submissionOverwrite.parts.map((part) => this.setPart(submission, part)));
     await Promise.all(removeParts.map((p) => this.partService.removeSubmissionPart(p._id)));
