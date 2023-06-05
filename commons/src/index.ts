@@ -25,6 +25,7 @@ export * from './interfaces/submission/post-response.interface';
 export * from './interfaces/submission/post-status.interface';
 export * from './interfaces/submission/problems.interface';
 export * from './interfaces/submission/submission-create.interface';
+export * from './interfaces/submission/submission-import.interface';
 export * from './interfaces/submission/submission-log.interface';
 export * from './interfaces/submission/submission-overwrite.interface';
 export * from './interfaces/submission/submission-package.interface';
