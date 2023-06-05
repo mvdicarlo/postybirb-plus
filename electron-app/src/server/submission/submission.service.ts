@@ -179,6 +179,20 @@ export class SubmissionService {
       throw new InternalServerErrorException(err.message);
     }
 
+    const { thumbnailFile, thumbnailPath } = createDto;
+    if (completedSubmission.primary && thumbnailFile && thumbnailPath) {
+      try {
+        await this.fileSubmissionService.changeThumbnailFile(
+          completedSubmission,
+          thumbnailFile,
+          thumbnailPath,
+        );
+      } catch (err) {
+        // Failure to set a thumbnail is not fatal, just keep going
+        this.logger.error(err.message, err.stack, 'Create Thumbnail Failure');
+      }
+    }
+
     try {
       const submission = await this.repository.save(completedSubmission);
       await this.partService.createDefaultPart(completedSubmission);
