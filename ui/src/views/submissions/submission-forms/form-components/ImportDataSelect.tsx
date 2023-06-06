@@ -102,21 +102,19 @@ export default class ImportDataSelect extends React.Component<Props, State> {
     return [];
   };
 
-  shouldSelectPart = (part: SubmissionPart<any>): boolean => {
-    // Don't pre-select the default section when it's empty. The user probably
-    // doesn't want their defaults clobbered with nothingness.
+  static isEmptyDefaultPart(part: SubmissionPart<any>): boolean {
     if (part.isDefault) {
       const defaultOptions: DefaultOptions = part.data;
-      return !!(
+      return !(
         defaultOptions.title?.trim() ||
         defaultOptions.tags?.value?.length ||
         defaultOptions.description?.value?.trim() ||
         !_.isNil(defaultOptions.rating)
       );
     } else {
-      return true;
+      return false;
     }
-  };
+  }
 
   render() {
     const title = this.props.label || 'Import';
@@ -146,7 +144,9 @@ export default class ImportDataSelect extends React.Component<Props, State> {
                   selected: parts,
                   selectedFields: parts
                     ? Object.values(parts)
-                        .filter(this.shouldSelectPart)
+                        // Don't pre-select the default section when it's empty. The user
+                        // probably doesn't want their defaults clobbered with nothingness.
+                        .filter(_.negate(ImportDataSelect.isEmptyDefaultPart))
                         .map(p => p.accountId)
                     : []
                 });

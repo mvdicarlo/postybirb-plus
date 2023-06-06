@@ -125,6 +125,17 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
   };
 
   importData(parts: Array<SubmissionPart<any>>) {
+    // Set the keep default option to a reasonable state. If there's anything
+    // written into the defaults in this form or if there's explicitly a default
+    // given by the template, we want to use that default part. Otherwise we
+    // want to keep it, since clobbering stuff with blank defaults is useless.
+    // If the user has unusual desires, they can (un)check it again themselves.
+    const existingDefaultPart = Object.values(this.state.parts).find(part => part.isDefault);
+    const haveExistingDefault =
+      existingDefaultPart && !ImportDataSelect.isEmptyDefaultPart(existingDefaultPart);
+    const haveDefaultInTemplate = !!parts.find(part => part.isDefault);
+    this.setState({ keepDefault: !haveExistingDefault && !haveDefaultInTemplate });
+
     parts.forEach(p => {
       const existing = Object.values(this.state.parts).find(part => part.accountId === p.accountId);
       p.submissionId = 'multi';
