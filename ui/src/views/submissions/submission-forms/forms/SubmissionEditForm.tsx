@@ -45,6 +45,7 @@ import {
   Tooltip
 } from 'antd';
 import { Problem } from 'postybirb-commons';
+import { scrollSubmissionStore } from '../../../../stores/scroll-submission.store';
 
 interface Props {
   match: Match;
@@ -116,6 +117,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       .catch(() => {
         props.history.push('/home');
       });
+  }
+
+  componentDidMount() {
+    scrollSubmissionStore.set(this.id);
   }
 
   onUpdate = (updatePart: SubmissionPart<any> | Array<SubmissionPart<any>>) => {

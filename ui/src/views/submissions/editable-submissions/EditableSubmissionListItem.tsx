@@ -23,6 +23,7 @@ import { SubmissionType } from 'postybirb-commons';
 import SubmissionUtil from '../../../utils/submission.util';
 import { WebsiteRegistry } from '../../../websites/website-registry';
 import { IssueState } from './IssueState';
+import { scrollSubmissionStore } from '../../../stores/scroll-submission.store';
 
 interface ListItemProps {
   item: SubmissionPackage<Submission>;
@@ -167,6 +168,13 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
     }
     return null;
   }
+
+  scrollTo = (elem: HTMLElement | null): void => {
+    if (scrollSubmissionStore.check(this.props.item.submission._id) && elem) {
+      elem.scrollIntoView();
+    }
+  };
+
   render() {
     const { item } = this.props;
     const problems: Problems = item.problems;
@@ -247,7 +255,7 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
             >
               <List.Item.Meta
                 avatar={
-                  <div>
+                  <div ref={this.scrollTo}>
                     {item.submission.type === SubmissionType.FILE ? (
                       <div className="cursor-zoom-in" onClick={this.showPreview.bind(this)}>
                         <Avatar
