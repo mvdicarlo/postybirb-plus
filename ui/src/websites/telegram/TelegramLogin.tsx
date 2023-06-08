@@ -1,4 +1,5 @@
 import { Button, Form, Icon, Input, message, Modal } from 'antd';
+import Password from 'antd/lib/input/Password';
 import { TelegramAccountData } from 'postybirb-commons';
 import React from 'react';
 import BrowserLink from '../../components/BrowserLink';
@@ -10,6 +11,8 @@ interface State extends TelegramAccountData {
   code: string;
   sending: boolean;
   displayCodeDialog: boolean;
+  password: string;
+  passwordRequired: boolean;
 }
 
 export default class TelegramLogin extends React.Component<LoginDialogProps, State> {
@@ -19,7 +22,9 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
     appId: '',
     code: '',
     sending: false,
-    displayCodeDialog: false
+    displayCodeDialog: false,
+    password: '',
+    passwordRequired: false
   };
 
   constructor(props: LoginDialogProps) {
@@ -142,26 +147,32 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
         <Modal
           visible={this.state.displayCodeDialog}
           title="Authentication Code"
-          onCancel={() => this.setState({ displayCodeDialog: false })}
+          onCancel={() => this.setState({ displayCodeDialog: false, code: '' })}
           onOk={() => {
             if (!this.state.code) {
               message.error('Please provide authentication code from Telegram.');
               return;
             }
 
-            WebsiteService.postCustomRoute<{ result: boolean; message?: string }>(
-              this.props.account.website,
-              'authenticate',
-              {
-                appId: this.state.appId,
-                code: this.state.code
-              }
-            )
+            WebsiteService.postCustomRoute<{
+              result: boolean;
+              message?: string;
+              passwordRequired: boolean;
+            }>(this.props.account.website, 'authenticate', {
+              appId: this.state.appId,
+              code: this.state.code,
+              password: this.state.password
+            })
               .then(res => {
                 if (res.result) {
                   message.success('Telegram authenticated.');
-                  this.setState({ displayCodeDialog: false });
+                  this.setState({ displayCodeDialog: false, code: '' });
                 } else {
+                  if (res.passwordRequired) {
+                    this.setState({ code: '', passwordRequired: true });
+                    // Send new code without closing dialog
+                    this.submit();
+                  }
                   message.error(res.message || 'Failed to authenticate Telegram.');
                 }
               })
@@ -178,6 +189,18 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
                 value={this.state.code}
                 onChange={({ target }) => this.setState({ code: target.value })}
               />
+            </Form.Item>
+          </Form>
+          <Form layout="vertical">
+            <Form.Item label="Password" required={this.state.passwordRequired}>
+              <Password
+                className="w-full"
+                value={this.state.password}
+                onChange={({ target }) => this.setState({ password: target.value })}
+              />
+              {this.state.passwordRequired
+                ? "2FA enabled. We won't store your password."
+                : 'Required if 2FA is enabled.'}
             </Form.Item>
           </Form>
         </Modal>

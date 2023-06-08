@@ -1,5 +1,5 @@
 const MTProtoClass = require('@mtproto/core');
-import { MTProto } from '@mtproto/core'
+import { MTProto } from '@mtproto/core';
 import { Injectable } from '@nestjs/common';
 import {
   DefaultOptions,
@@ -16,6 +16,7 @@ import {
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server/account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
@@ -24,6 +25,7 @@ import {
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
+import FormContent from 'src/server/utils/form-content.util';
 import WaitUtil from 'src/server/utils/wait.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
@@ -32,8 +34,6 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
-import FormContent from 'src/server/utils/form-content.util';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 
 @Injectable()
 export class Telegram extends Website {
@@ -90,7 +90,7 @@ export class Telegram extends Website {
     return resErr ? Promise.reject(resErr) : (res as T);
   }
 
-  public async authenticate(data: { appId: string; code: string }) {
+  public async authenticate(data: { appId: string; code: string; password: string }) {
     try {
       const signIn: any = await this.callApi(data.appId, 'auth.signIn', {
         phone_number: this.authData[data.appId].phone_number,
@@ -101,6 +101,49 @@ export class Telegram extends Website {
       return { result: true };
     } catch (err) {
       this.logger.error(err);
+      if (err.error_message.includes('SESSION_PASSWORD_NEEDED')) {
+        if (!data.password)
+          return {
+            result: false,
+            message: '2FA enabled, password required',
+            passwordRequired: true,
+          };
+
+        const {
+          srp_id,
+          current_algo: { g, p, salt1, salt2 },
+          srp_B,
+        } = await this.callApi<{
+          srp_id: string;
+          current_algo: any;
+          srp_B: string;
+        }>(data.appId, 'account.getPassword', {});
+
+        const { A, M1 } = (await this.instances[data.appId] as any).crypto.getSRPParams({
+          g,
+          p,
+          salt1,
+          salt2,
+          gB: srp_B,
+          password: data.password,
+        });
+
+        const signIn = await this.callApi<{ user?: { username?: string } }>(
+          data.appId,
+          'auth.checkPassword',
+          {
+            password: {
+              _: 'inputCheckPasswordSRP',
+              srp_id,
+              A,
+              M1,
+            },
+          },
+        );
+
+        this.usernameMap[data.appId] = signIn?.user?.username;
+        return { result: true };
+      }
       return { result: false, message: err.error_message };
     }
   }
@@ -128,7 +171,7 @@ export class Telegram extends Website {
     } catch (err) {
       this.logger.error(err);
       if (err.error_message.includes('PHONE_MIGRATE')) {
-        WaitUtil.wait(1000);
+        await WaitUtil.wait(1000);
         await this.instances[data.appId].setDefaultDc(Number(err.error_message.split('_').pop()));
         const authData = await this.callApi<{ phone_code_hash: string }>(
           data.appId,
@@ -198,16 +241,52 @@ export class Telegram extends Website {
 
   private async loadChannels(profileId: string, appId: string) {
     const { chats } = await this.callApi<{
-      chats: { access_hash: string; title: string; id: number; _: string }[];
+      chats: {
+        _: string;
+        creator: boolean;
+        access_hash: string;
+        title: string;
+        id: number;
+        left: boolean;
+        deactivated: boolean;
+        /**
+         * Reverted default user rights.
+         */
+        default_banned_rights: {
+          /**
+           * So false means that the user
+           * actually can send the media
+           */
+          send_media: boolean;
+        };
+        admin_rights: {
+          post_messages: boolean;
+        };
+      }[];
     }>(appId, 'messages.getDialogs', {
-        offset_peer: {
-          _: 'inputPeerEmpty'
-      }      
+      offset_peer: {
+        _: 'inputPeerEmpty',
+      },
+      limit: 100,
     });
 
     const channels: Folder[] = chats
-      .filter((c) => c._ === 'channel')
-      .map((c) => ({ label: c.title, value: `${c.id}-${c.access_hash}` }));
+      .filter((c) => {
+        // Skip forbidden chats
+        if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
+
+        if (
+          c.creator ||
+          c.admin_rights?.post_messages ||
+          // Reverted means that user can send media
+          c.default_banned_rights?.send_media === false
+        )
+          return true;
+      })
+      .map((c) => ({
+        label: c.title,
+        value: `${c.id}-${c.access_hash}`,
+      }));
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
   }
@@ -446,8 +525,6 @@ export class Telegram extends Website {
         problems.push(`Telegram limits ${submission.primary.mimetype} to ${maxMB}MB`);
       }
     }
-
-    return { problems, warnings };
 
     return { problems, warnings };
   }
