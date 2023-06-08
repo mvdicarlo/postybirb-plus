@@ -90,6 +90,8 @@ export * from './interfaces/websites/itaku/itaku.notification.options.interface'
 export * from './interfaces/websites/telegram/telegram.account.interface';
 export * from './interfaces/websites/telegram/telegram.file.options.interface';
 export * from './interfaces/websites/telegram/telegram.notification.options.interface';
+export * from './interfaces/websites/pixelfed/pixelfed.account.interface';
+export * from './interfaces/websites/pixelfed/pixelfed.file.options.interface';
 
 // Models/Entities
 export * from './models/default-options.entity';

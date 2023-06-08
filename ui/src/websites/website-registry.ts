@@ -31,6 +31,7 @@ import { Furbooru } from './furbooru/Furbooru';
 import { Itaku } from './itaku/Itaku';
 import { Picarto } from './picarto/Picarto';
 import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
+import { Pixelfed } from './pixelfed/Pixelfed';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -56,6 +57,7 @@ export class WebsiteRegistry {
     Picarto: new Picarto(),
     Piczel: new Piczel(),
     Pillowfort: new Pillowfort(),
+    Pixelfed: new Pixelfed(),
     Pixiv: new Pixiv(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
