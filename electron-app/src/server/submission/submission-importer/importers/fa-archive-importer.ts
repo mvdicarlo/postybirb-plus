@@ -18,6 +18,7 @@ interface FaArchiveImport {
 }
 
 interface FaArchiveMetadata {
+  type?: string;
   title?: string;
   date?: string;
   description?: string;
@@ -143,18 +144,24 @@ export class FaArchiveImporter extends Importer {
     fileEntry,
     thumbnailEntry,
   }: FaArchiveImport): Promise<void> {
+    const text = await fs.readFile(jsonEntry.path, 'utf-8');
+    const metadata: FaArchiveMetadata = JSON.parse(text);
     const submission = await this.createSubmission(
       fileEntry,
-      await this.getDefaultPartData(jsonEntry, location === 'scraps'),
-      thumbnailEntry,
+      await this.getDefaultPartData(jsonEntry, metadata, location === 'scraps'),
+      // FurAffinity image thumbnails are pretty useless, they're just badly
+      // scaled versions of the original image. So don't import them, target
+      // websites can generate a better thumbnail themselves.
+      metadata.type === 'image' ? undefined : thumbnailEntry,
     );
     this.logger.debug(submission._id, 'Imported Submission');
   }
 
-  private async getDefaultPartData({ path }: DirectoryEntry, scraps: boolean): Promise<any> {
-    const text = await fs.readFile(path, 'utf-8');
-    const metadata: FaArchiveMetadata = JSON.parse(text);
-    const { title, date, description, tags, rating } = metadata;
+  private async getDefaultPartData(
+    { path }: DirectoryEntry,
+    { title, date, description, tags, rating }: FaArchiveMetadata,
+    scraps: boolean,
+  ): Promise<any> {
     const data: any = {};
 
     data.title = `${scraps ? 'Scrap: ' : ''}${title || parse(path).name}`;
