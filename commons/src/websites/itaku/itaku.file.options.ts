@@ -21,6 +21,11 @@ export class ItakuFileOptionsEntity extends DefaultFileOptionsEntity implements 
   @DefaultValue(true)
   shareOnFeed!: boolean;
 
+  @Expose()
+  @IsString()
+  @IsOptional()
+  spoilerText?: string;
+
   constructor(entity?: Partial<ItakuFileOptions>) {
     super(entity as DefaultFileOptions);
   }
