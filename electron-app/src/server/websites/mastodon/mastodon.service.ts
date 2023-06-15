@@ -276,7 +276,8 @@ export class Mastodon extends Website {
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
     const M = this.getMastodonInstance(accountData);
-    const maxChars = M ? M?.configuration?.statuses?.max_characters : 500;
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
+    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
 
