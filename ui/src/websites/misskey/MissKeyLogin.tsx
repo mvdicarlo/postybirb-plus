@@ -10,16 +10,20 @@ import generator, { OAuth } from 'megalodon'
 
 interface State extends MissKeyAccountData {
   code: string;
+  client_id: string;
+  client_secret: string;
   loading: boolean;
 }
 
 export default class MissKeyLogin extends React.Component<LoginDialogProps, State> {
   state: State = {
-    username: '',
-    token: '',
     website: 'misskey.io',
     code: '',
-    loading: true
+    loading: true,
+    client_id: '',
+    client_secret: '',
+    tokenData: null,
+    username: ''
   };
 
   private view: any;
@@ -47,8 +51,6 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
   }
 
   private getAuthURL(website: string) {
-    let client_id = ""
-    let client_secret = "";
     let auth_url : string = "";
 
     // Get the Auth URL ... Display it. 
@@ -58,42 +60,32 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
     }
     client.registerApp('PostyBirb', opts )
       .then(appData => {
-        client_id = appData.clientId
-        client_secret = appData.clientSecret
+        this.state.client_id = appData.clientId;
+        this.state.client_secret = appData.clientSecret;
+        this.state.username = appData.name;
         auth_url = appData.url || "Error - no auth url";
         this.view.src = auth_url;
       });
   }
 
-  // private getWebsiteURL(website?: string) {
-  //   return `https://${website || this.state.website}`;
-  // }
-
   submit() {
-
-
-    // Axios.post<{ success: boolean; error: string; data: { token: string; username: string } }>(
-    //   `${window.AUTH_SERVER_URL}/misskey/v2/authorize/`,
-    //   {
-    //     website,
-    //     code: this.state.code
-    //   },
-    //   { responseType: 'json' }
-    // )
-    //   .then(({ data }) => {
-    //     if (data.success) {
-    //       LoginService.setAccountData(this.props.account._id, { ...data.data, website }).then(
-    //         () => {
-    //           message.success(`${website} authenticated.`);
-    //         }
-    //       );
-    //     } else {
-    //       message.error(data.error);
-    //     }
-    //   })
-    //   .catch(() => {
-    //     message.error(`Failed to authenticate ${website}.`);
-    //   });
+    const client = generator('misskey', `https://${this.state.website}`);
+    client.fetchAccessToken(this.state.client_id, this.state.client_secret, this.state.code).then((value: OAuth.TokenData) => {
+      // Get the username so we have complete data.
+      const usernameClient = generator('misskey', `https://${this.state.website}`, value.accessToken);
+      usernameClient.verifyAccountCredentials().then((res)=>{
+        let website = `https://${this.state.website}`;
+        this.state.username = res.data.username;
+        this.state.tokenData = value;
+        LoginService.setAccountData(this.props.account._id, this.state ).then(
+          () => {
+            message.success(`${this.state.website} authenticated.`);
+          });
+      });
+    })
+    .catch((err: Error) => {
+      message.error(`Failed to authenticate ${this.state.website}.`);
+    })
   }
 
   isValid(): boolean {
