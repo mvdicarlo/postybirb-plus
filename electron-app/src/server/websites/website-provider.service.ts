@@ -32,6 +32,7 @@ import { Itaku } from './itaku/itaku.service';
 import { Picarto } from './picarto/picarto.service';
 import { SubscribeStarAdult } from './subscribe-star-adult/subscribe-star-adult.service';
 import { Pixelfed } from './pixelfed/pixelfed.service';
+import { MissKey } from './misskey/misskey.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -63,6 +64,7 @@ export class WebsiteProvider {
     readonly deviantArt: DeviantArt,
     readonly manebooru: Manebooru,
     readonly mastodon: Mastodon,
+    readonly misskey: MissKey,
     readonly twitter: Twitter,
     readonly pillowfort: Pillowfort,
     readonly telegram: Telegram,
