@@ -14,7 +14,9 @@
     "antd": "^3.26.20",
     "axios": "^0.21.4",
     "file-saver": "^2.0.5",
+    "helpers": "^0.0.6",
     "lodash": "^4.17.21",
+    "megalodon": "^6.1.0",
     "mobx": "^5.15.7",
     "mobx-react": "^6.3.1",
     "postybirb-commons": "file:../commons",
@@ -28,7 +30,7 @@
     "react-scripts": "3.2.0",
     "sanitize-html": "^1.27.5",
     "socket.io": "^2.4.1",
-    "typescript": "3.7.2"
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "start": "react-scripts start",

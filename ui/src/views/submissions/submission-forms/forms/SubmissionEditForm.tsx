@@ -135,7 +135,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   }, 1250);
 
   onSubmit = () => {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       if (this.state.touched || this.scheduleHasChanged()) {
         const submissionFromStore = submissionStore.getSubmission(this.id);
         if (submissionFromStore && submissionFromStore.submission.isPosting) {
