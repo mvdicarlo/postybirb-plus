@@ -75,8 +75,13 @@ export class MissKey extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
+    this.logger.debug("Checking MissKey login status");
+    this.logger.debug(data.data);
     const accountData: MissKeyAccountData = data.data;
-    if (accountData && accountData.token) {
+    this.logger.debug(accountData);
+    if (accountData && accountData.tokenData) {
+      this.logger.debug("We have token data");
+      this.logger.debug(accountData.tokenData);
       const refresh = await this.refreshToken(accountData);
       if (refresh) {
         status.loggedIn = true;
@@ -88,7 +93,7 @@ export class MissKey extends Website {
   }
 
   private async getInstanceInfo(profileId: string, data: MissKeyAccountData) {   
-    const client = generator('misskey', data.website, data.token);
+    const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
     const instance = await client.getInstance();
    
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
@@ -101,7 +106,7 @@ export class MissKey extends Website {
   }
 
   private getMissKeyInstance(data: MissKeyAccountData) : Entity.Instance {
-    const client = generator('misskey', data.website, data.token);
+    const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
     client.getInstance().then((res) => {
       return res.data;
     });
@@ -144,7 +149,7 @@ export class MissKey extends Website {
         headers: {
           Accept: '*/*',
           'User-Agent': 'node-MissKey-client/PostyBirb',
-          Authorization: `Bearer ${data.token}`,
+          Authorization: `Bearer ${data.tokenData.access_token}`,
         },
       },
     );
@@ -163,7 +168,7 @@ export class MissKey extends Website {
             headers: {
               Accept: '*/*',
               'User-Agent': 'node-MissKey-client/PostyBirb',
-              Authorization: `Bearer ${data.token}`,
+              Authorization: `Bearer ${data.tokenData.access_token}`,
             },
           },
         );
@@ -188,7 +193,7 @@ export class MissKey extends Website {
     data: FilePostData<MissKeyFileOptions>,
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
-    const M = generator('misskey', accountData.website, accountData.token);
+    const M = generator('misskey', `https://${accountData.website}`, accountData.tokenData.access_token);
 
     const files = [data.primary, ...data.additional];
     this.checkCancelled(cancellationToken);
@@ -283,7 +288,7 @@ export class MissKey extends Website {
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
     const mInstance = this.getMissKeyInstance(accountData);
-    const M = generator('misskey', accountData.website, accountData.token);
+    const M = generator('misskey', `https://${accountData.website}`, accountData.tokenData.access_token);
     
     const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
 

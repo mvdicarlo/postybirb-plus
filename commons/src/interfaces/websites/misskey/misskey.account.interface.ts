@@ -1,5 +1,6 @@
+import { OAuth } from 'megalodon'
 export interface MissKeyAccountData {
-  token: string;
+  tokenData: OAuth.TokenData | null;
   website: string;
   username: string;
 }
