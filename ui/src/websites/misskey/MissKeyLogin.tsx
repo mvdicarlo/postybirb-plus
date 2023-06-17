@@ -6,23 +6,17 @@ import { MissKeyAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 
-<<<<<<< HEAD
 import generator, { OAuth } from 'megalodon'
 
 interface State extends MissKeyAccountData {
   code: string;
   client_id: string;
   client_secret: string;
-=======
-interface State extends MissKeyAccountData {
-  code: string;
->>>>>>> e52eddd (MissKey / CalcKey compatibility)
   loading: boolean;
 }
 
 export default class MissKeyLogin extends React.Component<LoginDialogProps, State> {
   state: State = {
-<<<<<<< HEAD
     website: 'misskey.io',
     code: '',
     loading: true,
@@ -30,13 +24,6 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
     client_secret: '',
     tokenData: null,
     username: ''
-=======
-    username: '',
-    token: '',
-    website: 'misskey.io',
-    code: '',
-    loading: true
->>>>>>> e52eddd (MissKey / CalcKey compatibility)
   };
 
   private view: any;
@@ -59,7 +46,6 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
       });
       view.allowpopups = true;
       view.partition = `persist:${this.props.account._id}`;
-<<<<<<< HEAD
       this.getAuthURL(this.state.website);
     }
   }
@@ -100,46 +86,6 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
     .catch((err: Error) => {
       message.error(`Failed to authenticate ${this.state.website}.`);
     })
-=======
-      view.src = this.getAuthURL();
-    }
-  }
-
-  private getAuthURL(website?: string): string {
-    return `${window.AUTH_SERVER_URL}/misskey/v2/authorize?website=${encodeURIComponent(
-      this.getWebsiteURL(website)
-    )}`;
-  }
-
-  private getWebsiteURL(website?: string) {
-    return `https://${website || this.state.website}`;
-  }
-
-  submit() {
-    const website = this.getWebsiteURL();
-    Axios.post<{ success: boolean; error: string; data: { token: string; username: string } }>(
-      `${window.AUTH_SERVER_URL}/misskey/v2/authorize/`,
-      {
-        website,
-        code: this.state.code
-      },
-      { responseType: 'json' }
-    )
-      .then(({ data }) => {
-        if (data.success) {
-          LoginService.setAccountData(this.props.account._id, { ...data.data, website }).then(
-            () => {
-              message.success(`${website} authenticated.`);
-            }
-          );
-        } else {
-          message.error(data.error);
-        }
-      })
-      .catch(() => {
-        message.error(`Failed to authenticate ${website}.`);
-      });
->>>>>>> e52eddd (MissKey / CalcKey compatibility)
   }
 
   isValid(): boolean {
