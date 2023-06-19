@@ -23,6 +23,14 @@ export default class SubmissionCreateModel implements SubmissionCreate {
   @IsOptional()
   parts: string; // Array<SubmissionPart<any>>;
 
+  @IsObject()
+  @IsOptional()
+  thumbnailFile: UploadedFile;
+
+  @IsString()
+  @IsOptional()
+  thumbnailPath: string;
+
   constructor(partial?: Partial<SubmissionCreateModel>) {
     Object.assign(this, partial);
   }

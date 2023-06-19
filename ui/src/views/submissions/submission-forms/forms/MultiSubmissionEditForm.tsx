@@ -27,7 +27,8 @@ import {
   TreeSelect,
   Anchor,
   Popconfirm,
-  Alert
+  Alert,
+  Checkbox
 } from 'antd';
 
 interface Props {
@@ -42,6 +43,7 @@ export interface MultiSubmissionEditFormState {
   touched: boolean;
   removedParts: string[];
   saveVisible: boolean;
+  keepDefault: boolean;
 }
 
 @inject('loginStatusStore')
@@ -79,7 +81,8 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
     loading: false,
     touched: false,
     removedParts: [],
-    saveVisible: false
+    saveVisible: false,
+    keepDefault: false
   };
 
   constructor(props: Props) {
@@ -100,6 +103,9 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
     this.setState({ loading: true, saveVisible: false });
     const updatedParts = _.cloneDeep(this.state.parts);
     this.state.removedParts.forEach(accountId => delete updatedParts[accountId]);
+    if (this.state.keepDefault) {
+      delete updatedParts.default;
+    }
     Promise.all(
       selected.map(submission =>
         SubmissionService.overwriteSubmissionParts({
@@ -119,6 +125,17 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
   };
 
   importData(parts: Array<SubmissionPart<any>>) {
+    // Set the keep default option to a reasonable state. If there's anything
+    // written into the defaults in this form or if there's explicitly a default
+    // given by the template, we want to use that default part. Otherwise we
+    // want to keep it, since clobbering stuff with blank defaults is useless.
+    // If the user has unusual desires, they can (un)check it again themselves.
+    const existingDefaultPart = Object.values(this.state.parts).find(part => part.isDefault);
+    const haveExistingDefault =
+      existingDefaultPart && !ImportDataSelect.isEmptyDefaultPart(existingDefaultPart);
+    const haveDefaultInTemplate = !!parts.find(part => part.isDefault);
+    this.setState({ keepDefault: !haveExistingDefault && !haveDefaultInTemplate });
+
     parts.forEach(p => {
       const existing = Object.values(this.state.parts).find(part => part.accountId === p.accountId);
       p.submissionId = 'multi';
@@ -333,11 +350,21 @@ class MultiSubmissionEditForm extends React.Component<Props, MultiSubmissionEdit
                     Defaults
                   </span>
                 </Typography.Title>
-                <DefaultFormSection
-                  part={this.state.parts.default}
-                  onUpdate={this.onUpdate}
-                  submission={{} as any}
-                />
+                <div className="ant-form-item">
+                  <Checkbox
+                    checked={this.state.keepDefault}
+                    onChange={e => this.setState({ keepDefault: e.target.checked })}
+                  >
+                    Keep defaults
+                  </Checkbox>
+                </div>
+                {!this.state.keepDefault && (
+                  <DefaultFormSection
+                    part={this.state.parts.default}
+                    onUpdate={this.onUpdate}
+                    submission={{} as any}
+                  />
+                )}
               </Form.Item>
 
               <Form.Item className="form-section jumpable-section">

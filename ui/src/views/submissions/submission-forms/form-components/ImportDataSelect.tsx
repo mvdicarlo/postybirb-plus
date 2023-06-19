@@ -8,6 +8,7 @@ import { TreeNode } from 'antd/lib/tree-select';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import SubmissionTemplateSelect from '../../submission-template-select/SubmissionTemplateSelect';
 import { SubmissionType } from 'postybirb-commons';
+import { DefaultOptions } from 'postybirb-commons';
 
 interface Props {
   className?: string;
@@ -101,6 +102,20 @@ export default class ImportDataSelect extends React.Component<Props, State> {
     return [];
   };
 
+  static isEmptyDefaultPart(part: SubmissionPart<any>): boolean {
+    if (part.isDefault) {
+      const defaultOptions: DefaultOptions = part.data;
+      return !(
+        defaultOptions.title?.trim() ||
+        defaultOptions.tags?.value?.length ||
+        defaultOptions.description?.value?.trim() ||
+        !_.isNil(defaultOptions.rating)
+      );
+    } else {
+      return false;
+    }
+  }
+
   render() {
     const title = this.props.label || 'Import';
     return (
@@ -127,7 +142,13 @@ export default class ImportDataSelect extends React.Component<Props, State> {
               onSelect={(id, type, parts) => {
                 this.setState({
                   selected: parts,
-                  selectedFields: parts ? Object.values(parts).map(p => p.accountId) : []
+                  selectedFields: parts
+                    ? Object.values(parts)
+                        // Don't pre-select the default section when it's empty. The user
+                        // probably doesn't want their defaults clobbered with nothingness.
+                        .filter(_.negate(ImportDataSelect.isEmptyDefaultPart))
+                        .map(p => p.accountId)
+                    : []
                 });
               }}
             />

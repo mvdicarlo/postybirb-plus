@@ -7,4 +7,6 @@ export interface SubmissionCreate {
   path?: string;
   file?: UploadedFile;
   parts?: string;
+  thumbnailPath?: string;
+  thumbnailFile?: UploadedFile;
 }

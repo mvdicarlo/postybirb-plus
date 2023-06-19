@@ -179,6 +179,20 @@ export class SubmissionService {
       throw new InternalServerErrorException(err.message);
     }
 
+    const { thumbnailFile, thumbnailPath } = createDto;
+    if (completedSubmission.primary && thumbnailFile && thumbnailPath) {
+      try {
+        await this.fileSubmissionService.changeThumbnailFile(
+          completedSubmission,
+          thumbnailFile,
+          thumbnailPath,
+        );
+      } catch (err) {
+        // Failure to set a thumbnail is not fatal, just keep going
+        this.logger.error(err.message, err.stack, 'Create Thumbnail Failure');
+      }
+    }
+
     try {
       const submission = await this.repository.save(completedSubmission);
       await this.partService.createDefaultPart(completedSubmission);
@@ -552,7 +566,7 @@ export class SubmissionService {
 
     const allParts = await this.partService.getPartsForSubmission(submission._id, false);
     const keepIds = submissionOverwrite.parts.map((p) => p.accountId);
-    const removeParts = allParts.filter((p) => !keepIds.includes(p.accountId));
+    const removeParts = allParts.filter((p) => !keepIds.includes(p.accountId) && !p.isDefault);
 
     await Promise.all(submissionOverwrite.parts.map((part) => this.setPart(submission, part)));
     await Promise.all(removeParts.map((p) => this.partService.removeSubmissionPart(p._id)));
