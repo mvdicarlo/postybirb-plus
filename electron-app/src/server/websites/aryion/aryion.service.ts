@@ -12,7 +12,7 @@ import {
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -28,7 +28,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class Aryion extends Website {
   readonly BASE_URL = 'https://aryion.com';
-  readonly defaultDescriptionParser = PlaintextParser.parse;
+  readonly defaultDescriptionParser = BBCodeParser.parse;
   readonly usernameShortcuts = [
     {
       key: 'ar',

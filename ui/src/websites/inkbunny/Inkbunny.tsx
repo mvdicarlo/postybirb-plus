@@ -23,20 +23,36 @@ export class Inkbunny extends WebsiteImpl {
         ratings: [
           {
             value: '2',
-            name: 'Nudity - Nonsexual'
+            name: 'Nudity'
           },
           {
             value: '3',
-            name: 'Violence - Mild'
+            name: 'Violence'
+          },
+          {
+            value: '2,3',
+            name: 'Nudity + Violence',
           },
           {
             value: '4',
-            name: 'Sexual Themes - Erotic'
+            name: 'Sexual'
           },
           {
             value: '5',
-            name: 'Strong Violence'
-          }
+            name: 'Brutal'
+          },
+          {
+            value: '2,5',
+            name: 'Nudity + Brutal',
+          },
+          {
+            value: '3,4',
+            name: 'Sexual + Violent',
+          },
+          {
+            value: '4,5',
+            name: 'Sexual + Brutal',
+          },
         ]
       }}
       key={props.part.accountId}

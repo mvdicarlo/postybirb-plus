@@ -11,6 +11,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { SubmissionService } from './submission.service';
+import { SubmissionImporterService } from './submission-importer/submission-importer.service';
 import { SubmissionType } from 'postybirb-commons';
 import {
   SubmissionUpdate,
@@ -24,6 +25,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import SubmissionScheduleModel from './models/submission-schedule.model';
 import SubmissionLogEntity from './log/models/submission-log.entity';
 import SubmissionCreateModel from './models/submission-create.model';
+import SubmissionImportModel from './models/submission-import.model';
 
 interface FileChangeBodyDTO {
   path: string;
@@ -35,7 +37,10 @@ interface FileChangeParamsDTO {
 
 @Controller('submission')
 export class SubmissionController {
-  constructor(private readonly service: SubmissionService) {}
+  constructor(
+    private readonly service: SubmissionService,
+    private readonly importerService: SubmissionImporterService,
+  ) {}
 
   private isTrue(value: string): boolean {
     return value === 'true' || value === '';
@@ -71,6 +76,11 @@ export class SubmissionController {
   @Post('recreate')
   async recreateFromLog(@Body() log: SubmissionLogEntity) {
     return this.service.recreate(log);
+  }
+
+  @Post('import')
+  async importDirectory(@Body() { path }: SubmissionImportModel) {
+    return this.importerService.importDirectory(path);
   }
 
   @Patch('update')

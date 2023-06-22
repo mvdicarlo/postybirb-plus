@@ -282,10 +282,9 @@ export class Mastodon extends Website {
     data: PostData<Submission, MastodonNotificationOptions>,
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
-    const mInstance = this.getMastodonInstance(accountData);
-    const M = generator('mastodon', accountData.website, accountData.token);
-    
-    const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
+    const M = this.getMastodonInstance(accountData);
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
+    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
 

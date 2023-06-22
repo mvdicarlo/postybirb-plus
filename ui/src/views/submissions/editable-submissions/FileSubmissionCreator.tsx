@@ -52,6 +52,29 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
       .catch(() => message.error('Failed to create submission.'));
   }
 
+  createFromImport() {
+    window.electron.dialog
+      .showOpenDialog({ title: 'Choose directory to import', properties: ['openDirectory'] })
+      .then(({ canceled, filePaths }) => {
+        if (!canceled && filePaths && filePaths.length > 0) {
+          return SubmissionService.importFromDirectory(filePaths[0]);
+        } else {
+          return null;
+        }
+      })
+      .then(result => {
+        if (result) {
+          const { importType, submissionCount } = result;
+          if (importType && submissionCount !== 0) {
+            message.success(`Importing ${submissionCount} submission(s) from ${importType}.`);
+          } else {
+            message.error('Found nothing to import.');
+          }
+        }
+      })
+      .catch(() => message.error('Failed to import submissions.'));
+  }
+
   performUpload = _.debounce(async (files: RcFile[]) => {
     const isPoster: boolean = this.uploadQueue.length === 0;
     if (files) {
@@ -123,6 +146,12 @@ export class FileSubmissionCreator extends React.Component<any, FileSubmissionCr
           >
             <Icon type="copy" />
             Copy from clipboard
+          </Button>
+        </div>
+        <div className="mt-1">
+          <Button onClick={this.createFromImport.bind(this)} block>
+            <Icon type="folder" />
+            Import directory
           </Button>
         </div>
         <div className="mt-1 flex">

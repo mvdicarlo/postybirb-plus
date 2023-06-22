@@ -1,5 +1,6 @@
 import { FileRecord } from 'postybirb-commons';
 import { SubmissionCreate } from 'postybirb-commons';
+import { SubmissionImportResult } from 'postybirb-commons';
 import { SubmissionOverwrite } from 'postybirb-commons';
 import { SubmissionPackage } from 'postybirb-commons';
 import { SubmissionUpdate } from 'postybirb-commons';
@@ -28,6 +29,12 @@ export default class SubmissionService {
     formData.set('file', window.electron.clipboard.read());
     formData.set('type', 'FILE');
     return axios.post('/submission/create/', formData);
+  }
+
+  static importFromDirectory(path: string) {
+    return axios
+      .post<SubmissionImportResult>('/submission/import', { path })
+      .then(({ data }) => data);
   }
 
   static changeFallback(id: string, file: File) {

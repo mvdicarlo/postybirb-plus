@@ -1,4 +1,4 @@
-import { Form, Select, Checkbox } from 'antd';
+import { Form, Select, Checkbox, Input } from 'antd';
 import {
   FileSubmission,
   SubmissionRating,
@@ -45,10 +45,6 @@ export class Itaku extends WebsiteImpl {
           {
             value: SubmissionRating.ADULT,
             name: 'NSFW'
-          },
-          {
-            value: SubmissionRating.EXTREME,
-            name: 'NSFL'
           }
         ]
       }}
@@ -79,10 +75,6 @@ export class Itaku extends WebsiteImpl {
           {
             value: SubmissionRating.ADULT,
             name: 'NSFW'
-          },
-          {
-            value: SubmissionRating.EXTREME,
-            name: 'Extreme'
           }
         ]
       }}
@@ -198,7 +190,14 @@ export class ItakuFileSubmissionForm extends GenericFileSubmissionSection<ItakuF
         >
           Share on feed
         </Checkbox>
-      </div>
+      </div>,
+      <Form.Item label="Content Warning">
+        <Input
+          value={data.spoilerText}
+          onChange={this.handleValueChange.bind(this, 'spoilerText')}
+          maxLength={30}
+        />
+      </Form.Item>
     );
     return elements;
   }

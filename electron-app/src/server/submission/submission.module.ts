@@ -17,6 +17,7 @@ import { DatabaseFactory } from 'src/server/database/database.factory';
 import { ParserModule } from './parser/parser.module';
 import SubmissionEntity from './models/submission.entity';
 import FileSubmissionEntity from './file-submission/models/file-submission.entity';
+import { SubmissionImporterModule } from './submission-importer/submission-importer.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import FileSubmissionEntity from './file-submission/models/file-submission.entit
     SubmissionPartModule,
     SubmissionTemplateModule,
     ParserModule,
+    SubmissionImporterModule,
   ],
   controllers: [SubmissionController],
   providers: [

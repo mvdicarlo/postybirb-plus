@@ -158,10 +158,12 @@ export class Inkbunny extends Website {
       keywords: this.formatTags(data.tags),
     };
 
-    const rating = this.getRating(data.rating);
-    if (rating !== '0') {
+    const ratings = this.getRating(data.rating);
+    if (ratings !== '0') {
       // when not general
-      editForm[`tag[${rating}]`] = 'yes';
+      for(const rating of ratings.split(',')) {
+        editForm[`tag[${rating}]`] = 'yes';
+      }
     }
 
     const { options } = data;
