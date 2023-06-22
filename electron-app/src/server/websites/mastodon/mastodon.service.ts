@@ -282,7 +282,7 @@ export class Mastodon extends Website {
     data: PostData<Submission, MastodonNotificationOptions>,
     accountData: MastodonAccountData,
   ): Promise<PostResponse> {
-    const M = this.getMastodonInstance(accountData);
+    const M = generator('mastodon', accountData.website, accountData.token);
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
@@ -319,7 +319,7 @@ export class Mastodon extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-
+    
     M.postStatus(status, statusOptions).then((result) => {
       let res = result.data as Entity.Status;
       return this.createPostResponse({ source: res.url });
