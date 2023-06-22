@@ -18,7 +18,6 @@ import { AryionModule } from './aryion/aryion.module';
 import { CustomModule } from './custom/custom.module';
 import { NewgroundsModule } from './newgrounds/newgrounds.module';
 import { PixivModule } from './pixiv/pixiv.module';
-import { NewTumblModule } from './new-tumbl/new-tumbl.module';
 import { FurryLifeModule } from './furry-life/furry-life.module';
 import { FurryNetworkModule } from './furry-network/furry-network.module';
 import { PatreonModule } from './patreon/patreon.module';
@@ -56,7 +55,6 @@ import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-
     KoFiModule,
     ManebooruModule,
     MastodonModule,
-    NewTumblModule,
     NewgroundsModule,
     PatreonModule,
     PiczelModule,
