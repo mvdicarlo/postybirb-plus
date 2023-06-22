@@ -5,9 +5,9 @@ import {
   FileRecord,
   FileSubmission,
   FileSubmissionType,
-  MissKeyAccountData,
-  MissKeyFileOptions,
-  MissKeyNotificationOptions,
+  MastodonAccountData,
+  MastodonFileOptions,
+  MastodonNotificationOptions,
   PostResponse,
   Submission,
   SubmissionPart,
@@ -36,7 +36,7 @@ import { FileManagerService } from 'src/server/file-manager/file-manager.service
 
 const INFO_KEY = 'INSTANCE INFO';
 
-type MissKeyInstanceInfo = {
+type MastodonInstanceInfo = {
   configuration: {
     statuses: {
       max_characters: number;
@@ -51,7 +51,7 @@ type MissKeyInstanceInfo = {
 };
 
 @Injectable()
-export class MissKey extends Website {
+export class Mastodon extends Website {
   constructor(private readonly fileRepository: FileManagerService) {
     super();
   }
@@ -75,8 +75,8 @@ export class MissKey extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const accountData: MissKeyAccountData = data.data;
-    if (accountData && accountData.tokenData) {
+    const accountData: MastodonAccountData = data.data;
+    if (accountData && accountData.token) {
       const refresh = await this.refreshToken(accountData);
       if (refresh) {
         status.loggedIn = true;
@@ -87,21 +87,21 @@ export class MissKey extends Website {
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: MissKeyAccountData) {   
-    const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
+  private async getInstanceInfo(profileId: string, data: MastodonAccountData) {   
+    const client = generator('mastodon', data.website, data.token);
     const instance = await client.getInstance();
    
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
   // TBH not entirely sure why this is a thing, but its in the old code so... :shrug:
-  private async refreshToken(data: MissKeyAccountData): Promise<boolean> {
-    const M = this.getMissKeyInstance(data);
+  private async refreshToken(data: MastodonAccountData): Promise<boolean> {
+    const M = this.getMastodonInstance(data);
     return true;
   }
 
-  private getMissKeyInstance(data: MissKeyAccountData) : Entity.Instance {
-    const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
+  private getMastodonInstance(data: MastodonAccountData) : Entity.Instance {
+    const client = generator('mastodon', data.website, data.token);
     client.getInstance().then((res) => {
       return res.data;
     });
@@ -109,7 +109,7 @@ export class MissKey extends Website {
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
     return instanceInfo?.configuration?.media_attachments
       ? {
           maxHeight: 4000,
@@ -127,29 +127,68 @@ export class MissKey extends Website {
   }
 
   private async uploadMedia(
-    data: MissKeyAccountData,
+    data: MastodonAccountData,
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
+    const upload = await Http.post<{ id: string; errors: any; url: string }>(
+      `${data.website}/api/v2/media`,
+      undefined,
+      {
+        type: 'multipart',
+        data: {
+          file,
+          description: altText,
+        },
+        requestOptions: { json: true },
+        headers: {
+          Accept: '*/*',
+          'User-Agent': 'node-mastodon-client/PostyBirb',
+          Authorization: `Bearer ${data.token}`,
+        },
+      },
+    );
 
-    const M = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
-    const upload = await M.uploadMedia(file.value, { description: altText });
-    console.log(upload)
-    if (upload.status > 300) {
+    this.verifyResponse(upload, 'Verify upload');
+
+    // Processing
+    if (upload.response.statusCode === 202 || !upload.body.url) {
+      for (let i = 0; i < 10; i++) {
+        await WaitUtil.wait(4000);
+        const checkUpload = await Http.get<{ id: string; errors: any; url: string }>(
+          `${data.website}/api/v1/media/${upload.body.id}`,
+          undefined,
+          {
+            requestOptions: { json: true },
+            headers: {
+              Accept: '*/*',
+              'User-Agent': 'node-mastodon-client/PostyBirb',
+              Authorization: `Bearer ${data.token}`,
+            },
+          },
+        );
+
+        if (checkUpload.body.url) {
+          break;
+        }
+      }
+    }
+
+    if (upload.body.errors) {
       return Promise.reject(
-        this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
+        this.createPostResponse({ additionalInfo: upload.body, message: upload.body.errors }),
       );
     }
 
-    return { id: upload.data.id };
+    return { id: upload.body.id };
   }
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<MissKeyFileOptions>,
-    accountData: MissKeyAccountData,
+    data: FilePostData<MastodonFileOptions>,
+    accountData: MastodonAccountData,
   ): Promise<PostResponse> {
-    const M = generator('misskey', `https://${accountData.website}`, accountData.tokenData.access_token);
+    const M = generator('mastodon', accountData.website, accountData.token);
 
     const files = [data.primary, ...data.additional];
     this.checkCancelled(cancellationToken);
@@ -160,7 +199,7 @@ export class MissKey extends Website {
       uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
     }
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
     const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
@@ -206,7 +245,7 @@ export class MissKey extends Website {
         maxLength: 100,
       });
 
-      // Update the post content with the Tags if any are specified - for MissKey, we need to append 
+      // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
       // these onto the post, *IF* there is character count available.
       if (tags.length > 0) {
         status += "\n\n";
@@ -246,13 +285,12 @@ export class MissKey extends Website {
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
-    data: PostData<Submission, MissKeyNotificationOptions>,
-    accountData: MissKeyAccountData,
+    data: PostData<Submission, MastodonNotificationOptions>,
+    accountData: MastodonAccountData,
   ): Promise<PostResponse> {
-    const mInstance = this.getMissKeyInstance(accountData);
-    const M = generator('misskey', `https://${accountData.website}`, accountData.tokenData.access_token);
-    
-    const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
+    const M = generator('mastodon', accountData.website, accountData.token);
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
+    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
 
@@ -270,7 +308,7 @@ export class MissKey extends Website {
       maxLength: 100,
     });
 
-    // Update the post content with the Tags if any are specified - for MissKey, we need to append 
+    // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
     // these onto the post, *IF* there is character count available.
     if (tags.length > 0) {
       status += "\n\n";
@@ -293,7 +331,7 @@ export class MissKey extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-
+    
     M.postStatus(status, statusOptions).then((result) => {
       let res = result.data as Entity.Status;
       return this.createPostResponse({ source: res.url });
@@ -307,7 +345,7 @@ export class MissKey extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<MissKeyFileOptions>,
+    submissionPart: SubmissionPart<MastodonFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -318,7 +356,7 @@ export class MissKey extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(
       submissionPart.accountId,
       INFO_KEY,
     );
@@ -326,7 +364,7 @@ export class MissKey extends Website {
 
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
       );
     }
 
@@ -355,11 +393,11 @@ export class MissKey extends Website {
         ) {
           warnings.push(`${name} will be scaled down to ${FileSize.BytesToMB(maxImageSize)}MB`);
         } else {
-          problems.push(`MissKey limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
+          problems.push(`Mastodon limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
         }
       }
 
-      // Check the image dimensions are not over 4000 x 4000 - this is the MissKey server max
+      // Check the image dimensions are not over 4000 x 4000 - this is the Mastodon server max
       if (
         isAutoscaling && 
         type === FileSubmissionType.IMAGE && 
@@ -382,7 +420,7 @@ export class MissKey extends Website {
 
   validateNotificationSubmission(
     submission: Submission,
-    submissionPart: SubmissionPart<MissKeyNotificationOptions>,
+    submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const warnings = [];
@@ -390,14 +428,14 @@ export class MissKey extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(
+    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(
       submissionPart.accountId,
       INFO_KEY,
     );
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
       );
     }
 
