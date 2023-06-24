@@ -31,7 +31,7 @@ function looksLikeSubmission(name: string): boolean {
 }
 
 function looksLikeThumbnail(name: string): boolean {
-  return /^\.(png|jpe?g)$/i.test(parse(name).ext);
+  return /^\.(gif|png|jpe?g)$/i.test(parse(name).ext);
 }
 
 // Imports dumps from https://github.com/askmeaboutlo0m/faescape
