@@ -10,6 +10,11 @@ export class TelegramFileOptionsEntity extends DefaultFileOptionsEntity
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
+  spoiler!: boolean;
+  
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
   silent!: boolean;
 
   @Expose()

@@ -156,6 +156,11 @@ export class TelegramFileSubmissionForm extends GenericFileSubmissionSection<Tel
         <Checkbox checked={data.silent} onChange={this.handleCheckedChange.bind(this, 'silent')}>
           Silent Notification
         </Checkbox>
+      </div>,
+      <div>
+        <Checkbox checked={data.spoiler} onChange={this.handleCheckedChange.bind(this, 'spoiler')}>
+          Spoiler
+        </Checkbox>
       </div>
     );
     return elements;
