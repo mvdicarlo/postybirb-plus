@@ -16,7 +16,6 @@ import { Aryion } from './aryion/aryion.service';
 import { Custom } from './custom/custom.service';
 import { Newgrounds } from './newgrounds/newgrounds.service';
 import { Pixiv } from './pixiv/pixiv.service';
-import { NewTumbl } from './new-tumbl/new-tumbl.service';
 import { FurryLife } from './furry-life/furry-life.service';
 import { FurryNetwork } from './furry-network/furry-network.service';
 import { Patreon } from './patreon/patreon.service';
@@ -56,7 +55,6 @@ export class WebsiteProvider {
     readonly custom: Custom,
     readonly newgrounds: Newgrounds,
     readonly pixiv: Pixiv,
-    readonly newTumbl: NewTumbl,
     readonly furryNetwork: FurryNetwork,
     readonly patreon: Patreon,
     readonly tumblr: Tumblr,
