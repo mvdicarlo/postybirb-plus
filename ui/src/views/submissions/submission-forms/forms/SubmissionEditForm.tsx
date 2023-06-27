@@ -45,6 +45,7 @@ import {
   Tooltip
 } from 'antd';
 import { Problem } from 'postybirb-commons';
+import { scrollSubmissionStore } from '../../../../stores/scroll-submission.store';
 
 interface Props {
   match: Match;
@@ -118,6 +119,10 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
       });
   }
 
+  componentDidMount() {
+    scrollSubmissionStore.set(this.id);
+  }
+
   onUpdate = (updatePart: SubmissionPart<any> | Array<SubmissionPart<any>>) => {
     const parts = _.cloneDeep(this.state.parts);
     const updateParts = Array.isArray(updatePart) ? updatePart : [updatePart];
@@ -134,7 +139,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     ).then(({ data }) => this.setState({ problems: data }));
   }, 1250);
 
-  onSubmit = () => {
+  close(): void {
+    this.props.history.push(`/${this.state.submissionType}`);
+  }
+
+  onSubmit(close: boolean) {
     return new Promise(resolve => {
       if (this.state.touched || this.scheduleHasChanged()) {
         const submissionFromStore = submissionStore.getSubmission(this.id);
@@ -164,6 +173,9 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
               touched: false
             });
             message.success('Submission was successfully saved.');
+            if (close) {
+              this.close();
+            }
           })
           .catch(() => {
             this.setState({ loading: false });
@@ -172,11 +184,19 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           .finally(resolve);
       }
     });
+  }
+
+  onClose = () => {
+    if (this.formHasChanges()) {
+      this.onSubmit(true);
+    } else {
+      this.close();
+    }
   };
 
   onPost = async (saveFirst: boolean) => {
     if (saveFirst) {
-      await this.onSubmit();
+      await this.onSubmit(false);
     }
 
     uiStore.setPendingChanges(false);
@@ -872,11 +892,19 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
 
             <Button
               className="mr-1"
-              onClick={this.onSubmit}
+              onClick={() => this.onSubmit(false)}
               type="primary"
               disabled={!this.formHasChanges()}
             >
               Save
+            </Button>
+
+            <Button
+              className="mr-1"
+              onClick={this.onClose}
+              type={this.formHasChanges() ? 'primary' : 'default'}
+            >
+              {this.formHasChanges() ? 'Save and Close' : 'Close'}
             </Button>
 
             {isPosting ? (
