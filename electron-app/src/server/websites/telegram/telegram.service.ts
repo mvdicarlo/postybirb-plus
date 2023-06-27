@@ -119,7 +119,7 @@ export class Telegram extends Website {
           srp_B: string;
         }>(data.appId, 'account.getPassword', {});
 
-        const { A, M1 } = (await this.instances[data.appId] as any).crypto.getSRPParams({
+        const { A, M1 } = await (this.instances[data.appId] as any).crypto.getSRPParams({
           g,
           p,
           salt1,
