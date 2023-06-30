@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@jest-runner/electron": "^3.0.1",
-    "@nestjs/cli": "^7.6.0",
+    "@nestjs/cli": "^10.1.0",
     "@nestjs/schematics": "^7.3.1",
     "@nestjs/testing": "^7.6.18",
     "@types/cheerio": "^0.22.30",
