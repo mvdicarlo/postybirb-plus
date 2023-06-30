@@ -13,7 +13,6 @@ export * from './inkbunny/inkbunny.options';
 export * from './ko-fi/ko-fi.options';
 export * from './manebooru/manebooru.options';
 export * from './mastodon/mastodon.options';
-export * from './new-tumbl/new-tumbl.options';
 export * from './newgrounds/newgrounds.options';
 export * from './patreon/patreon.options';
 export * from './picarto/picarto.options';

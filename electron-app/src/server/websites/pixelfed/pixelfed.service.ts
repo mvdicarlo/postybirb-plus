@@ -54,15 +54,7 @@ export class Pixelfed extends Website {
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
-  readonly acceptsFiles = [
-    'png',
-    'jpeg',
-    'jpg',
-    'gif',
-    'swf',
-    'flv',
-    'mp4',
-  ];
+  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'flv', 'mp4'];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -188,7 +180,9 @@ export class Pixelfed extends Website {
     }
 
     const instanceInfo: PixelfedInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    const chunkCount = instanceInfo
+      ? instanceInfo?.configuration?.statuses?.max_media_attachments
+      : 4;
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
@@ -215,26 +209,23 @@ export class Pixelfed extends Website {
         };
       }
 
-      this.logger.debug(`Number of tags set ${data.tags.length}`);
+      const tags = this.formatTags(data.tags);
 
-      // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
+      // Update the post content with the Tags if any are specified - for Pixelfed, we need to append
       // these onto the post, *IF* there is character count available.
-      if (data.tags.length > 0) {
-        form.status += "\n\n";
+      if (tags.length > 0) {
+        form.status += '\n\n';
       }
 
-      data.tags.forEach(tag => {
+      tags.forEach((tag) => {
         let remain = maxChars - form.status.length;
         let tagToInsert = tag;
-        if (!tag.startsWith('#')) {
-          tagToInsert = `#${tagToInsert}`
-        }
-        if (remain > (tagToInsert.length)) {
-          form.status += ` ${tagToInsert}`
+        if (remain > tagToInsert.length) {
+          form.status += ` ${tagToInsert}`;
         }
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      })
-      
+      });
+
       if (options.spoilerText) {
         form.spoiler_text = options.spoilerText;
       }
@@ -252,6 +243,20 @@ export class Pixelfed extends Website {
     this.checkCancelled(cancellationToken);
 
     return this.createPostResponse({});
+  }
+
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(''),
+        ),
+      { spaceReplacer: '' },
+    ).map((tag) => `#${tag}`);
   }
 
   validateFileSubmission(
@@ -308,12 +313,13 @@ export class Pixelfed extends Website {
       }
     });
 
-    if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
-      submissionPart.data.visibility != "public") {
-        warnings.push(
-              `This post won't be listed under any hashtag as it is not public. Only public posts 
-              can be searched by hashtag.`,
-            );
+    if (
+      (submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) &&
+      submissionPart.data.visibility != 'public'
+    ) {
+      warnings.push(
+        `This post won't be listed under any hashtag as it is not public. Only public posts can be searched by hashtag.`,
+      );
     }
 
     return { problems, warnings };

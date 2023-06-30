@@ -41,29 +41,32 @@ export default class WebsiteSections extends React.Component<WebsiteSectionsProp
     Object.keys(groups).forEach(website => {
       const sortedChildren: Array<SubmissionPart<any>> = _.sortBy(groups[website], 'alias');
 
-      const childrenSections = sortedChildren.map(child => {
-        return {
-          alias: loginStatusStore!.getAliasForAccountId(child.accountId),
-          problems: _.get(props.problems[child.accountId], 'problems', []),
-          key: child.accountId,
-          form:
-            this.props.submissionType === SubmissionType.FILE
-              ? WebsiteRegistry.websites[child.website].FileSubmissionForm({
-                  defaultData: defaultPart.data,
-                  part: child,
-                  onUpdate: props.onUpdate,
-                  problems: props.problems[child.accountId],
-                  submission: props.submission! as FileSubmission
-                })
-              : WebsiteRegistry.websites[child.website].NotificationSubmissionForm!({
-                  defaultData: defaultPart.data,
-                  part: child,
-                  onUpdate: props.onUpdate,
-                  problems: props.problems[child.accountId],
-                  submission: props.submission!
-                })
-        };
-      });
+      const childrenSections = sortedChildren
+        .map(child => {
+          return {
+            alias: loginStatusStore!.getAliasForAccountId(child.accountId),
+            problems: _.get(props.problems[child.accountId], 'problems', []),
+            key: child.accountId,
+            form:
+              this.props.submissionType === SubmissionType.FILE
+                ? WebsiteRegistry.websites[child.website]?.FileSubmissionForm({
+                    defaultData: defaultPart.data,
+                    part: child,
+                    onUpdate: props.onUpdate,
+                    problems: props.problems[child.accountId],
+                    submission: props.submission! as FileSubmission
+                  })
+                : WebsiteRegistry.websites[child.website]?.NotificationSubmissionForm!({
+                    defaultData: defaultPart.data,
+                    part: child,
+                    onUpdate: props.onUpdate,
+                    problems: props.problems[child.accountId],
+                    submission: props.submission!
+                  })
+          };
+        })
+        .filter(section => section.form);
+
       sections.push(
         <Form.Item className="form-section jumpable-section">
           <Typography.Title style={{ marginBottom: '0' }} level={3}>

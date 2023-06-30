@@ -123,11 +123,11 @@ export class Mastodon extends Website {
               ? instanceInfo.configuration.media_attachments.image_size_limit
               : instanceInfo.configuration.media_attachments.video_size_limit,
         }
-      : {           
+      : {
           maxHeight: 4000,
           maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300) 
-      };
+          maxSize: FileSize.MBtoBytes(300),
+        };
   }
 
   private async uploadMedia(
@@ -204,7 +204,9 @@ export class Mastodon extends Website {
     }
 
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    const chunkCount = instanceInfo
+      ? instanceInfo?.configuration?.statuses?.max_media_attachments
+      : 4;
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
@@ -231,24 +233,23 @@ export class Mastodon extends Website {
         };
       }
 
-      // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+      const tags = this.formatTags(data.tags);
+
+      // Update the post content with the Tags if any are specified - for Mastodon, we need to append
       // these onto the post, *IF* there is character count available.
-      if (data.tags.length > 0) {
-        form.status += "\n\n";
+      if (tags.length > 0) {
+        form.status += '\n\n';
       }
 
-      data.tags.forEach(tag => {
+      tags.forEach((tag) => {
         let remain = maxChars - form.status.length;
         let tagToInsert = tag;
-        if (!tag.startsWith('#')) {
-          tagToInsert = `#${tagToInsert}`
-        }
-        if (remain > (tagToInsert.length)) {
-          form.status += ` ${tagToInsert}`
+        if (remain > tagToInsert.length) {
+          form.status += ` ${tagToInsert}`;
         }
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      })
-      
+      });
+
       if (options.spoilerText) {
         form.spoiler_text = options.spoilerText;
       }
@@ -288,23 +289,22 @@ export class Mastodon extends Website {
       visibility: options.visibility || 'public',
     };
 
-    // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+    const tags = this.formatTags(data.tags);
+
+    // Update the post content with the Tags if any are specified - for Mastodon, we need to append
     // these onto the post, *IF* there is character count available.
-    if (data.tags.length > 0) {
-      form.status += "\n\n";
+    if (tags.length > 0) {
+      form.status += '\n\n';
     }
 
-    data.tags.forEach(tag => {
+    tags.forEach((tag) => {
       let remain = maxChars - form.status.length;
       let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`
-      }
-      if (remain > (tagToInsert.length)) {
-        form.status += ` ${tagToInsert}`
+      if (remain > tagToInsert.length) {
+        form.status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-    })
+    });
 
     if (options.spoilerText) {
       form.spoiler_text = options.spoilerText;
@@ -320,6 +320,20 @@ export class Mastodon extends Website {
     }
 
     return this.createPostResponse({ source: post.data.url });
+  }
+
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(''),
+        ),
+      { spaceReplacer: '' },
+    ).map((tag) => `#${tag}`);
   }
 
   validateFileSubmission(
@@ -378,20 +392,23 @@ export class Mastodon extends Website {
 
       // Check the image dimensions are not over 4000 x 4000 - this is the Mastodon server max
       if (
-        isAutoscaling && 
-        type === FileSubmissionType.IMAGE && 
-        (file.height > 4000 || file.width > 4000)) {
-          warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
-           aspect ratio`);
-        }
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        (file.height > 4000 || file.width > 4000)
+      ) {
+        warnings.push(
+          `${name} will be scaled down to a maximum size of 4000x4000, while maintaining aspect ratio`,
+        );
+      }
     });
 
-    if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
-      submissionPart.data.visibility != "public") {
-        warnings.push(
-              `This post won't be listed under any hashtag as it is not public. Only public posts 
-              can be searched by hashtag.`,
-            );
+    if (
+      (submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) &&
+      submissionPart.data.visibility != 'public'
+    ) {
+      warnings.push(
+        `This post won't be listed under any hashtag as it is not public. Only public posts can be searched by hashtag.`,
+      );
     }
 
     return { problems, warnings };
