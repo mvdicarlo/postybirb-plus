@@ -1,5 +1,5 @@
 /* tslint:disable: no-console no-var-requires */
-const path = require('path');
+import path from 'path';
 import {
   app,
   BrowserWindow,
