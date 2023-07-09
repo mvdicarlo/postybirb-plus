@@ -23,8 +23,7 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-
-import _ = require('lodash');
+import _ from 'lodash';
 
 @Injectable()
 export class HentaiFoundry extends Website {

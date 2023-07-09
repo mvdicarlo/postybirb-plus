@@ -28,8 +28,7 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-
-import _ = require('lodash');
+import _ from 'lodash';
 import Http from 'src/server/http/http.util';
 
 /*
