@@ -24,10 +24,9 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {  BskyAgent, stringifyLex, jsonToLex } from '@atproto/api';
+import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
-import { error } from 'console';
 
  // Start of Polyfill
 
@@ -137,13 +136,17 @@ export class Bluesky extends Website {
     }).catch(error => {
       status.loggedIn = false;
       this.logger.error(error);
-    })
+    });
   
     return status;
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(10) };
+    return { // Yes they are this lame: https://github.com/bluesky-social/social-app/blob/main/src/lib/constants.ts
+      maxHeight: 2000,
+      maxWidth: 2000,
+      maxSize: FileSize.MBtoBytes(1) 
+    };
   }
 
   async postFileSubmission(
@@ -154,27 +157,47 @@ export class Bluesky extends Website {
 
     this.checkCancelled(cancellationToken);
 
+    const agent = new BskyAgent({ service: 'https://bsky.social' })
 
+    await agent.login({
+      identifier: accountData.username,
+      password: accountData.password,
+    });
 
-    // const post = await Http.post<{ success: boolean; data: { id_string: string }; error: string }>(
-    //   OAuthUtil.getURL('tumblr/v2/post'),
-    //   undefined,
-    //   {
-    //     type: 'json',
-    //     data: form,
-    //     requestOptions: { json: true },
-    //   },
-    // );
+    const blobUpload = await agent.uploadBlob(data.primary.file.value).catch(err => {
+      return Promise.reject(
+          this.createPostResponse({ message: err }),
+      );
+    });
 
-    // if (post.body.success) {
-    //   return this.createPostResponse({
-    //     source: `https://${form.options.blog}.tumblr.com/post/${post.body.data.id_string}/`,
-    //   });
-    // }
+    if (blobUpload.success) {
+      // response has blob.ref
+      const image: AppBskyEmbedImages.Image = { image: blobUpload.data.blob, alt: data.options.altText }
+      const embed : AppBskyEmbedImages.Main = {images: [image] }
 
-    // return Promise.reject(
-    //   this.createPostResponse({ additionalInfo: post.body, message: post.body.error }),
-    // );
+      let postResult = await agent.post({
+        text: data.description,
+        embed: embed
+      }).catch(err => {
+        return Promise.reject(
+            this.createPostResponse({ message: err }),
+        );
+      });
+    
+      if (postResult && postResult.uri) {
+        return this.createPostResponse({
+          source: postResult.uri,
+        });
+      } else {
+        return Promise.reject(
+          this.createPostResponse({ message: "Unknown error occurred" }),
+        );
+      }
+    } else {
+      return Promise.reject(
+          this.createPostResponse({ message: "An unknown error uploading the image occurred" }),
+      );
+    }
 
     return Promise.reject(
       this.createPostResponse({  }),
@@ -226,37 +249,40 @@ export class Bluesky extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    // const files = [
-    //   submission.primary,
-    //   ...(submission.additional || []).filter(
-    //     f => !f.ignoredAccounts!.includes(submissionPart.accountId),
-    //   ),
-    // ];
+    const files = [
+      submission.primary,
+      ...(submission.additional || []).filter(
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+      ),
+    ];
 
-    // files.forEach(file => {
-    //   const { type, size, name, mimetype } = file;
-    //   if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
-    //     problems.push(`Does not support file format: (${name}) ${mimetype}.`);
-    //   }
+    files.forEach(file => {
+      const { type, size, name, mimetype } = file;
+      if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
+        problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
 
-    //   let maxMB: number = 10;
-    //   if (type === FileSubmissionType.IMAGE && mimetype === 'image/gif') {
-    //     maxMB = 10;
-    //   } else if (type === FileSubmissionType.VIDEO) {
-    //     maxMB = 100;
-    //   }
-    //   if (FileSize.MBtoBytes(maxMB) < size) {
-    //     if (
-    //       isAutoscaling &&
-    //       type === FileSubmissionType.IMAGE &&
-    //       ImageManipulator.isMimeType(mimetype)
-    //     ) {
-    //       warnings.push(`${name} will be scaled down to ${maxMB}MB`);
-    //     } else {
-    //       problems.push(`Tumblr limits ${mimetype} to ${maxMB}MB`);
-    //     }
-    //   }
-    // });
+      let maxMB: number = 1;
+      if (FileSize.MBtoBytes(maxMB) < size) {
+        if (
+          isAutoscaling &&
+          type === FileSubmissionType.IMAGE &&
+          ImageManipulator.isMimeType(mimetype)
+        ) {
+          warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+        } else {
+          problems.push(`BlueSky limits ${mimetype} to ${maxMB}MB`);
+        }
+      }
+
+      if (
+        isAutoscaling && 
+        type === FileSubmissionType.IMAGE && 
+        (file.height > 2000 || file.width > 2000)) {
+          warnings.push(`${name} will be scaled down to a maximum size of 2000x2000, while maintaining
+            aspect ratio`);
+        }
+    });
 
     return { problems, warnings };
   }
