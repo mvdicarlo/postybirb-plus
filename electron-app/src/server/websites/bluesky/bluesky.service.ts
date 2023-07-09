@@ -13,7 +13,6 @@ import {
   BlueskyNotificationOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { CustomHTMLParser } from 'src/server/description-parsing/html/custom.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -26,7 +25,9 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import {  BskyAgent, stringifyLex, jsonToLex } from '@atproto/api';
+import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
+import { error } from 'console';
 
  // Start of Polyfill
 
@@ -115,6 +116,7 @@ export class Bluesky extends Website {
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
   readonly acceptsAdditionalFiles = false;
   readonly refreshInterval = 45 * 60000;
+  readonly defaultDescriptionParser = PlaintextParser.parse;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     BskyAgent.configure({fetch: fetchHandler});
@@ -190,27 +192,29 @@ export class Bluesky extends Website {
     const postData = data.description;
 
     const agent = new BskyAgent({ service: 'https://bsky.social' })
-    
+
     await agent.login({
       identifier: accountData.username,
       password: accountData.password,
     });
 
-    await agent.post({
+    let postResult = await agent.post({
       text: postData
-    }).then(res => {
-      return this.createPostResponse({
-        source: res.uri,
-      });
     }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
       );
-    })
-
-    return Promise.reject(
-      this.createPostResponse({  }),
-    );
+    });
+  
+    if (postResult && postResult.uri) {
+      return this.createPostResponse({
+        source: postResult.uri,
+      });
+    } else {
+      return Promise.reject(
+        this.createPostResponse({ message: "Unknown error occurred" }),
+      );
+    }
   }
 
   validateFileSubmission(
@@ -264,6 +268,12 @@ export class Bluesky extends Website {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
+
+    if (submissionPart.data.description.value.length > 300) {
+      problems.push(
+        `Max description length allowed is 300 characters.`,
+      );
+    }
 
     return { problems, warnings };
   }
