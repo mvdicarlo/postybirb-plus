@@ -32,11 +32,13 @@ import { Itaku } from './itaku/Itaku';
 import { Picarto } from './picarto/Picarto';
 import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 import { Pixelfed } from './pixelfed/Pixelfed';
+import { Bluesky } from './bluesky/Bluesky';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
     Artconomy: new Artconomy(),
     Aryion: new Aryion(),
+    Bluesky: new Bluesky(),
     Custom: new Custom(),
     Derpibooru: new Derpibooru(),
     DeviantArt: new DeviantArt(),

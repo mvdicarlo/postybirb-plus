@@ -33,7 +33,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { TelegramStorage } from './telegram.storage';
-import _ = require('lodash');
+import _ from 'lodash';
 
 @Injectable()
 export class Telegram extends Website {

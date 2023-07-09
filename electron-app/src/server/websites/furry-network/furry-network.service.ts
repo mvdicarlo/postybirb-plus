@@ -29,8 +29,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { FurryNetworkAccountData } from './furry-network-account.interface';
-
-import _ = require('lodash');
+import _ from 'lodash';
 
 @Injectable()
 export class FurryNetwork extends Website {

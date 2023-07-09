@@ -93,6 +93,9 @@ export * from './interfaces/websites/telegram/telegram.file.options.interface';
 export * from './interfaces/websites/telegram/telegram.notification.options.interface';
 export * from './interfaces/websites/pixelfed/pixelfed.account.interface';
 export * from './interfaces/websites/pixelfed/pixelfed.file.options.interface';
+export * from './interfaces/websites/bluesky/bluesky.account.interface';
+export * from './interfaces/websites/bluesky/bluesky.file.options.interface';
+export * from './interfaces/websites/bluesky/bluesky.notification.options.interface';
 
 // Models/Entities
 export * from './models/default-options.entity';

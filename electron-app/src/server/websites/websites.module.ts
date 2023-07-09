@@ -35,6 +35,7 @@ import { ItakuModule } from './itaku/itaku.module';
 import { PicartoModule } from './picarto/picarto.module';
 import { PixelfedModule } from './pixelfed/pixelfed.module';
 import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-adult.module';
+import { BlueskyModule } from './bluesky/bluesky.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -43,6 +44,7 @@ import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-
   imports: [
     ArtconomyModule,
     AryionModule,
+    BlueskyModule,
     CustomModule,
     DerpibooruModule,
     DeviantArtModule,
