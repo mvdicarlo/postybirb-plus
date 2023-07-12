@@ -27,7 +27,6 @@ import { Website } from '../website.base';
 import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
-import fs from 'fs'
 
  // Start of Polyfill
 
@@ -165,7 +164,7 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    const blobUpload = await agent.uploadBlob(data.primary.file.value, { encoding: 'image/jpeg' }).catch(err => {
+    const blobUpload = await agent.uploadBlob(data.primary.file.value, { encoding: data.primary.file.options.contentType }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
       );
@@ -248,6 +247,10 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
+
+    if (!submissionPart.data.altText) {
+      problems.push(`Bluesky requires alt text to be provided`);
+    }
 
     const files = [
       submission.primary,
