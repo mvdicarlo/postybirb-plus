@@ -27,6 +27,7 @@ import { Website } from '../website.base';
 import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
+import fs from 'fs'
 
  // Start of Polyfill
 
@@ -164,7 +165,7 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    const blobUpload = await agent.uploadBlob(data.primary.file.value).catch(err => {
+    const blobUpload = await agent.uploadBlob(data.primary.file.value, { encoding: 'image/jpeg' }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
       );
@@ -173,11 +174,13 @@ export class Bluesky extends Website {
     if (blobUpload.success) {
       // response has blob.ref
       const image: AppBskyEmbedImages.Image = { image: blobUpload.data.blob, alt: data.options.altText }
-      const embed : AppBskyEmbedImages.Main = {images: [image] }
+      console.log(image);
+      const embeds : AppBskyEmbedImages.Main = {images: [image], $type: "app.bsky.embed.images" }
+      console.log(embeds);
 
       let postResult = await agent.post({
         text: data.description,
-        embed: embed
+        embed: embeds
       }).catch(err => {
         return Promise.reject(
             this.createPostResponse({ message: err }),
@@ -199,9 +202,6 @@ export class Bluesky extends Website {
       );
     }
 
-    return Promise.reject(
-      this.createPostResponse({  }),
-    );
   }
 
   async postNotificationSubmission(
