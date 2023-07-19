@@ -1,12 +1,13 @@
 import React from 'react';
 import { LoginDialogProps } from '../interfaces/website.interface';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, Checkbox, message } from 'antd';
 import LoginService from '../../services/login.service';
 import BrowserLink from '../../components/BrowserLink';
 
 interface State {
   name: string;
   webhook: string;
+  forum: boolean,
   sending: boolean;
 }
 
@@ -14,6 +15,7 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
   state: State = {
     name: '',
     webhook: '',
+    forum: false,
     sending: false
   };
 
@@ -29,7 +31,8 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
     this.setState({ sending: true });
     LoginService.setAccountData(this.props.account._id, {
       name: this.state.name,
-      webhook: this.state.webhook
+      webhook: this.state.webhook,
+      forum: this.state.forum,
     })
       .then(() => {
         message.success('Discord updated.');
@@ -67,6 +70,14 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
               defaultValue={this.state.webhook}
               onBlur={({ target }) => this.setState({ webhook: target.value })}
             />
+          </Form.Item>
+          <Form.Item>
+            <Checkbox
+              checked={this.state.forum}
+              onChange={e => this.setState({ forum: e.target.checked })}
+            >
+              Webhook points at a forum channel, not a regular text channel
+            </Checkbox>
           </Form.Item>
           <Form.Item>
             <Button
