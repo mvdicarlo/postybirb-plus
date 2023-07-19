@@ -242,7 +242,7 @@ export class Artconomy extends Website {
       problems.push(
         'You must have at least 5 tags. Think about the following: ' +
           'sex/gender (required, if character), ' +
-          'species (ditto), kinks/fetishes (ditto), genre, subject matter, ' +
+          'species, genre, subject matter, ' +
           'focus of the piece, location, pose/position, art style, ' +
           'clothing/accessories, ' +
           'relationships depicted',
