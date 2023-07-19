@@ -239,13 +239,19 @@ export class Mastodon extends Website {
       }      
      }
 
+      const tags: string[] = this.parseTags(data.tags, {
+        spaceReplacer: '_',
+        minLength: 1,
+        maxLength: 100,
+      });
+
       // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
       // these onto the post, *IF* there is character count available.
-      if (data.tags.length > 0) {
+      if (tags.length > 0) {
         status += "\n\n";
       }
 
-      data.tags.forEach(tag => {
+      tags.forEach(tag => {
         let remain = maxChars - form.status.length;
         let tagToInsert = tag;
         if (!tag.startsWith('#')) {
@@ -296,13 +302,19 @@ export class Mastodon extends Website {
       spoiler_text: ""
     };
 
+    const tags: string[] = this.parseTags(data.tags, {
+      spaceReplacer: '_',
+      minLength: 1,
+      maxLength: 100,
+    });
+
     // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
     // these onto the post, *IF* there is character count available.
-    if (data.tags.length > 0) {
+    if (tags.length > 0) {
       status += "\n\n";
     }
 
-    data.tags.forEach(tag => {
+    tags.forEach(tag => {
       let remain = maxChars - status.length;
       let tagToInsert = tag;
       if (!tag.startsWith('#')) {
