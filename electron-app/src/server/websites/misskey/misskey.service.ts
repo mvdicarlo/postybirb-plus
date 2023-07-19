@@ -75,13 +75,8 @@ export class MissKey extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    this.logger.debug("Checking MissKey login status");
-    this.logger.debug(data.data);
     const accountData: MissKeyAccountData = data.data;
-    this.logger.debug(accountData);
     if (accountData && accountData.tokenData) {
-      this.logger.debug("We have token data");
-      this.logger.debug(accountData.tokenData);
       const refresh = await this.refreshToken(accountData);
       if (refresh) {
         status.loggedIn = true;
@@ -136,56 +131,17 @@ export class MissKey extends Website {
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
-    const upload = await Http.post<{ id: string; errors: any; url: string }>(
-      `${data.website}/api/v2/media`,
-      undefined,
-      {
-        type: 'multipart',
-        data: {
-          file,
-          description: altText,
-        },
-        requestOptions: { json: true },
-        headers: {
-          Accept: '*/*',
-          'User-Agent': 'node-MissKey-client/PostyBirb',
-          Authorization: `Bearer ${data.tokenData.access_token}`,
-        },
-      },
-    );
 
-    this.verifyResponse(upload, 'Verify upload');
-
-    // Processing
-    if (upload.response.statusCode === 202 || !upload.body.url) {
-      for (let i = 0; i < 10; i++) {
-        await WaitUtil.wait(4000);
-        const checkUpload = await Http.get<{ id: string; errors: any; url: string }>(
-          `${data.website}/api/v1/media/${upload.body.id}`,
-          undefined,
-          {
-            requestOptions: { json: true },
-            headers: {
-              Accept: '*/*',
-              'User-Agent': 'node-MissKey-client/PostyBirb',
-              Authorization: `Bearer ${data.tokenData.access_token}`,
-            },
-          },
-        );
-
-        if (checkUpload.body.url) {
-          break;
-        }
-      }
-    }
-
-    if (upload.body.errors) {
+    const M = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
+    const upload = await M.uploadMedia(file.value, { description: altText });
+    console.log(upload)
+    if (upload.status > 300) {
       return Promise.reject(
-        this.createPostResponse({ additionalInfo: upload.body, message: upload.body.errors }),
+        this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
       );
     }
 
-    return { id: upload.body.id };
+    return { id: upload.data.id };
   }
 
   async postFileSubmission(
@@ -244,13 +200,19 @@ export class MissKey extends Website {
       }      
      }
 
+      const tags: string[] = this.parseTags(data.tags, {
+        spaceReplacer: '_',
+        minLength: 1,
+        maxLength: 100,
+      });
+
       // Update the post content with the Tags if any are specified - for MissKey, we need to append 
       // these onto the post, *IF* there is character count available.
-      if (data.tags.length > 0) {
+      if (tags.length > 0) {
         status += "\n\n";
       }
 
-      data.tags.forEach(tag => {
+      tags.forEach(tag => {
         let remain = maxChars - form.status.length;
         let tagToInsert = tag;
         if (!tag.startsWith('#')) {
@@ -302,13 +264,19 @@ export class MissKey extends Website {
       spoiler_text: ""
     };
 
+    const tags: string[] = this.parseTags(data.tags, {
+      spaceReplacer: '_',
+      minLength: 1,
+      maxLength: 100,
+    });
+
     // Update the post content with the Tags if any are specified - for MissKey, we need to append 
     // these onto the post, *IF* there is character count available.
-    if (data.tags.length > 0) {
+    if (tags.length > 0) {
       status += "\n\n";
     }
 
-    data.tags.forEach(tag => {
+    tags.forEach(tag => {
       let remain = maxChars - status.length;
       let tagToInsert = tag;
       if (!tag.startsWith('#')) {
