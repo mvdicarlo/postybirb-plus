@@ -229,12 +229,28 @@ export class Artconomy extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    const maxMB: number = 99;
-    files.forEach(file => {
+    const tags = [...submissionPart.data.tags.value];
+    if (submissionPart.data.tags.extendDefault) {
+      tags.push(...defaultPart.data.tags.value);
+    }
+
+    if (tags.length < 5) {
+      problems.push(
+        'You must have at least 5 tags. Think about the following: ' +
+          'sex/gender (required, if character), ' +
+          'species, genre, subject matter, ' +
+          'focus of the piece, location, pose/position, art style, ' +
+          'clothing/accessories, ' +
+          'relationships depicted',
+      );
+    }
+
+    const maxMB = 99;
+    files.forEach((file) => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);

@@ -62,30 +62,9 @@ export class Discord extends Website {
     data: PostData<Submission, DiscordNotificationOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    const description = data.description.substring(0, 2000).trim();
-    const mentions = description.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
-
-    const json = {
-      content: mentions.length ? mentions.join(' ') : undefined,
-      // username: 'PostyBirb',
-      // avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
-      allowed_mentions: {
-        parse: ['everyone', 'users', 'roles'],
-      },
-      embeds: [
-        {
-          title: data.options.useTitle ? data.title : undefined,
-          description,
-          footer: {
-            text: 'Posted using PostyBirb',
-          },
-        },
-      ],
-    };
-
     this.checkCancelled(cancellationToken);
     const res = await Http.post<any>(accountData.webhook.trim(), '', {
-      data: json,
+      data: this.buildDescriptionPayload(data, accountData),
       type: 'json',
       skipCookies: true,
     });
@@ -108,47 +87,36 @@ export class Discord extends Website {
     data: FilePostData<DiscordFileOptions>,
     accountData: DiscordAccountData,
   ): Promise<PostResponse> {
-    if (data.description && data.description.length) {
-      await this.postNotificationSubmission(
-        cancellationToken,
-        data as PostData<Submission, DiscordFileOptions>,
-        accountData,
-      );
-    }
-
-    const formData = {
-      // username: 'PostyBirb',
-      // avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
+    const formData: any = {
+      payload_json: JSON.stringify(this.buildDescriptionPayload(data, accountData)),
     };
 
-    let error = null;
     const files = [data.primary, ...data.additional];
-    this.checkCancelled(cancellationToken);
-    for (const file of files) {
+    files.forEach((file, i) => {
       if (data.options.spoiler) {
         file.file.options.filename = `SPOILER_${file.file.options.filename}`;
       }
+      formData[`files[${i}]`] = file.file;
+    });
 
-      const res = await Http.post<any>(accountData.webhook.trim(), '', {
-        data: { ...formData, file: file.file },
-        type: 'multipart',
-        skipCookies: true,
-      });
+    this.checkCancelled(cancellationToken);
+    const res = await Http.post<any>(accountData.webhook.trim(), '', {
+      data: formData,
+      type: 'multipart',
+      skipCookies: true,
+    });
 
-      if (res.error || res.response.statusCode >= 300) {
-        error = this.createPostResponse({
+    if (res.error || res.response.statusCode >= 300) {
+      return Promise.reject(
+        this.createPostResponse({
           error: res.error,
           message: 'Webhook Failure',
           additionalInfo: res.body,
-        });
-      }
+        }),
+      );
     }
 
-    if (error) {
-      return Promise.reject(error);
-    }
-
-    return this.createPostResponse({});
+    return this.createPostResponse({ additionalInfo: res.body });
   }
 
   transformAccountData(data: DiscordAccountData) {
@@ -207,5 +175,31 @@ export class Discord extends Website {
     }
 
     return { problems, warnings };
+  }
+
+  private buildDescriptionPayload(
+    data: PostData<Submission, DiscordNotificationOptions>,
+    accountData: DiscordAccountData,
+  ) {
+    const description = data.description?.substring(0, 2000)?.trim();
+    const mentions = description?.match(/(<){0,1}@(&){0,1}[a-zA-Z0-9]+(>){0,1}/g) || [];
+    return {
+      content: mentions.length ? mentions.join(' ') : undefined,
+      // username: 'PostyBirb',
+      // avatar_url: 'https://i.imgur.com/l2mt2Q7.png',
+      allowed_mentions: {
+        parse: ['everyone', 'users', 'roles'],
+      },
+      embeds: [
+        {
+          title: data.options.useTitle ? data.title : undefined,
+          description: description?.length ? description : undefined,
+          footer: {
+            text: 'Posted using PostyBirb',
+          },
+        },
+      ],
+      thread_name: accountData.forum ? data.title || 'PostyBirb Post' : undefined,
+    };
   }
 }

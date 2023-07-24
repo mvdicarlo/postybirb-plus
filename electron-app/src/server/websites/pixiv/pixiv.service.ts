@@ -36,7 +36,7 @@ import { Website } from '../website.base';
 export class Pixiv extends Website {
   readonly BASE_URL = 'https://www.pixiv.net';
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
-  readonly waitBetweenPostsInterval = 60_000;
+  readonly waitBetweenPostsInterval = 60_000 * 5;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsAdditionalFiles = true;
 
