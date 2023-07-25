@@ -139,11 +139,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     ).then(({ data }) => this.setState({ problems: data }));
   }, 1250);
 
-  close(): void {
-    this.props.history.push(`/${this.state.submissionType}`);
-  }
-
-  onSubmit(close: boolean) {
+  onSubmit = () => {
     return new Promise<void>(resolve => {
       if (this.state.touched || this.scheduleHasChanged()) {
         const submissionFromStore = submissionStore.getSubmission(this.id);
