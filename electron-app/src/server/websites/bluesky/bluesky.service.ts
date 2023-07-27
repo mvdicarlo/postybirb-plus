@@ -145,7 +145,7 @@ export class Bluesky extends Website {
     return { // Yes they are this lame: https://github.com/bluesky-social/social-app/blob/main/src/lib/constants.ts
       maxHeight: 2000,
       maxWidth: 2000,
-      maxSize: FileSize.MBtoBytes(1) 
+      maxSize: FileSize.MBtoBytes(0.9) 
     };
   }
 
