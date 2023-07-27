@@ -252,6 +252,12 @@ export class Bluesky extends Website {
       problems.push(`Bluesky requires alt text to be provided`);
     }
 
+    if (submissionPart.data.description.value.length > 300) {
+      problems.push(
+        `Max description length allowed is 300 characters.`,
+      );
+    }
+
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
