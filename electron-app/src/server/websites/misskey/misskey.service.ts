@@ -200,11 +200,7 @@ export class MissKey extends Website {
       }      
      }
 
-      const tags: string[] = this.parseTags(data.tags, {
-        spaceReplacer: '_',
-        minLength: 1,
-        maxLength: 100,
-      });
+      const tags = this.formatTags(data.tags);
 
       // Update the post content with the Tags if any are specified - for MissKey, we need to append 
       // these onto the post, *IF* there is character count available.
@@ -215,9 +211,6 @@ export class MissKey extends Website {
       tags.forEach(tag => {
         let remain = maxChars - form.status.length;
         let tagToInsert = tag;
-        if (!tag.startsWith('#')) {
-          tagToInsert = `#${tagToInsert}`
-        }
         if (remain > (tagToInsert.length)) {
           status += ` ${tagToInsert}`
         }
@@ -264,11 +257,7 @@ export class MissKey extends Website {
       spoiler_text: ""
     };
 
-    const tags: string[] = this.parseTags(data.tags, {
-      spaceReplacer: '_',
-      minLength: 1,
-      maxLength: 100,
-    });
+    const tags = this.formatTags(data.tags);
 
     // Update the post content with the Tags if any are specified - for MissKey, we need to append 
     // these onto the post, *IF* there is character count available.
@@ -279,9 +268,6 @@ export class MissKey extends Website {
     tags.forEach(tag => {
       let remain = maxChars - status.length;
       let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`
-      }
       if (remain > (tagToInsert.length)) {
         status += ` ${tagToInsert}`
       }
@@ -303,6 +289,20 @@ export class MissKey extends Website {
       );
     })
     return this.createPostResponse({});
+  }
+
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(''),
+        ),
+      { spaceReplacer: '_' },
+    ).map((tag) => `#${tag}`);
   }
 
   validateFileSubmission(

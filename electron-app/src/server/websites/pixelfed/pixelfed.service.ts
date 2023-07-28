@@ -218,20 +218,19 @@ export class Pixelfed extends Website {
         statusOptions.media_ids = chunks[i].map((media) => media.id);
      }
 
-      this.logger.debug(`Number of tags set ${data.tags.length}`);
+      const tags = this.formatTags(data.tags);
+
+      this.logger.debug(`Number of tags set ${tags.length}`);
 
       // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
       // these onto the post, *IF* there is character count available.
-      if (data.tags.length > 0) {
+      if (tags.length > 0) {
         status += "\n\n";
       }
 
-      data.tags.forEach(tag => {
+      tags.forEach(tag => {
         let remain = maxChars - status.length;
         let tagToInsert = tag;
-        if (!tag.startsWith('#')) {
-          tagToInsert = `#${tagToInsert}`
-        }
         if (remain > (tagToInsert.length)) {
           status += ` ${tagToInsert}`
         }
@@ -256,6 +255,20 @@ export class Pixelfed extends Website {
     }
 
     return this.createPostResponse({});
+  }
+
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(''),
+        ),
+      { spaceReplacer: '_' },
+    ).map((tag) => `#${tag}`);
   }
 
   validateFileSubmission(

@@ -207,6 +207,7 @@ export class Mastodon extends Website {
     const { options } = data;
     const chunks = _.chunk(uploadedMedias, chunkCount);
     let lastId = undefined;
+    let status = "";
 
     for (let i = 0; i < chunks.length; i++) {
       let statusOptions: any = {
@@ -215,7 +216,7 @@ export class Mastodon extends Website {
         visibility: options.visibility || 'public',
         spoiler_text: ''
       };
-      let status = undefined;
+
 
       let form = undefined;
       if (i === 0) {
@@ -239,11 +240,7 @@ export class Mastodon extends Website {
       }      
      }
 
-      const tags: string[] = this.parseTags(data.tags, {
-        spaceReplacer: '_',
-        minLength: 1,
-        maxLength: 100,
-      });
+     const tags = this.formatTags(data.tags);
 
       // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
       // these onto the post, *IF* there is character count available.
@@ -252,7 +249,7 @@ export class Mastodon extends Website {
       }
 
       tags.forEach(tag => {
-        let remain = maxChars - form.status.length;
+        let remain = maxChars - status.length;
         let tagToInsert = tag;
         if (!tag.startsWith('#')) {
           tagToInsert = `#${tagToInsert}`
@@ -302,11 +299,7 @@ export class Mastodon extends Website {
       spoiler_text: ""
     };
 
-    const tags: string[] = this.parseTags(data.tags, {
-      spaceReplacer: '_',
-      minLength: 1,
-      maxLength: 100,
-    });
+    const tags = this.formatTags(data.tags);
 
     // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
     // these onto the post, *IF* there is character count available.
@@ -341,6 +334,20 @@ export class Mastodon extends Website {
       );
     })
     return this.createPostResponse({});
+  }
+
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(''),
+        ),
+      { spaceReplacer: '_' },
+    ).map((tag) => `#${tag}`);
   }
 
   validateFileSubmission(
