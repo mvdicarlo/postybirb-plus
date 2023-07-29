@@ -56,7 +56,7 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
     // Get the Auth URL ... Display it. 
     const client = generator('misskey', `https://${website}`);
     let opts: any = {
-      redirect_uris: `https://localhost:${window['PORT']}/misskey/display?auth=${window.AUTH_ID}`
+      redirect_uris: `https://localhost:${window['PORT']}/misskey/display/${window.AUTH_ID}`
     }
     client.registerApp('PostyBirb', opts )
       .then(appData => {
