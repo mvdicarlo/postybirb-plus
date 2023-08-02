@@ -12,7 +12,7 @@
     "incremental": true,
     "rootDir": "./src",
     "paths": {
-      "postybirb-commons": ["../commons/src/index.ts"]
+      "postybirb-commons": ["../../commons/src/index.ts"]
     }
   },
   "include": ["src"],

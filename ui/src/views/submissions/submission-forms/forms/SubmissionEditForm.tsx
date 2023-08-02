@@ -181,7 +181,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
             this.setState({ loading: false });
             message.error('A problem occurred when trying to save the submission.');
           })
-          .finally(resolve);
+          .finally(resolve as any);
       }
     });
   }

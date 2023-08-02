@@ -19,7 +19,10 @@
     "noEmit": true,
     "jsx": "react",
     "noImplicitAny": false,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "paths": {
+      "postybirb-commons": ["../commons/src/index.ts"]
+    }
   },
   "include": [
     "src"
