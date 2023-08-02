@@ -32,10 +32,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm run build:clean && npm run build:style && react-scripts build && shx mv build ../electron-app",
+    "build": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-scripts build && shx mv build ../electron-app",
     "build:clean": "rimraf ../electron-app/build",
     "build:style": "npm run build:tailwind && npm run build:themes",
-    "build:tailwind": "tailwind build src/styles/index.css -o public/styles/tailwind.css && npm run build:antd-tweaks",
+    "build:tailwind": "tailwind build src/styles/index.css -o public/styles/tailwind.css",
     "build:antd-tweaks": "tailwind build src/styles/antd-dark-tweaks.css -o public/styles/dark-tweaks.css && tailwind build src/styles/antd-light-tweaks.css -o public/styles/light-tweaks.css && tailwind build src/styles/antd-base-tweaks.css -o public/styles/antd-tweaks.css",
     "build:themes": "lessc --js ./src/themes/light.less ./public/styles/light.css && lessc --js ./src/themes/dark.less ./public/styles/dark.css",
     "test": "react-scripts test",
