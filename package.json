@@ -16,7 +16,7 @@
 		"release:linux": "node create-signer.js && npm run make && cd electron-app && yarn run release:linux",
 		"release:osx": "npm run make && cd electron-app && yarn run release:osx",
 		"contribute": "run-s --silent --print-name ci:** && run-s build:**",
-		"contribute:debug": "run-s --silent --print-name ci:** && --print-label run-s build:**",
+		"contribute:debug": "run-p --silent --print-name ci:** && --print-label run-p build:**",
 		"ci:commons": "cd commons && npm ci --no-audit && npm run build",
 		"ci:app": "cd electron-app && npm ci --no-audit",
 		"ci:ui": "cd ui && npm ci --no-audit"
