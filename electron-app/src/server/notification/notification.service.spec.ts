@@ -5,6 +5,7 @@ import PostyBirbNotificationEntity from './models/postybirb-notification.entity'
 import { NotificationService } from './notification.service';
 import { PostyBirbNotification } from 'postybirb-commons';
 import { NotificationRepositoryToken } from './notification.repository';
+import { SettingsService } from '../settings/settings.service';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -14,6 +15,7 @@ describe('NotificationService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         NotificationService,
+        SettingsService,
         mockEventEmitterProvider,
         {
           provide: NotificationRepositoryToken,
