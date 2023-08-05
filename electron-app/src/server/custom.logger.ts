@@ -1,7 +1,7 @@
 import { app } from 'electron';
 import { Logger } from '@nestjs/common';
-import * as winston from 'winston';
-import * as path from 'path';
+import winston from 'winston';
+import path from 'path';
 import 'winston-daily-rotate-file';
 
 export class CustomLogger extends Logger {

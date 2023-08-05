@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { detect } from 'chardet';
 import { app, nativeImage } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import { decode } from 'iconv-lite';
-import * as _ from 'lodash';
-import * as path from 'path';
+import _ from 'lodash';
+import path from 'path';
 import { FileRecord, FileSubmission, UploadedFile } from 'postybirb-commons';
-import * as shortid from 'shortid';
+import shortid from 'shortid';
 import { SUBMISSION_FILE_DIRECTORY, THUMBNAIL_FILE_DIRECTORY } from 'src/server/directories';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import { ImageManipulationPoolService } from 'src/server/file-manipulation/pools/image-manipulation-pool.service';

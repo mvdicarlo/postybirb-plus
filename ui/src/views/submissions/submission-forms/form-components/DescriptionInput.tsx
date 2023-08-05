@@ -1,5 +1,5 @@
 import React from 'react';
-import * as sanitize from 'sanitize-html';
+import sanitize from 'sanitize-html';
 import { inject, observer } from 'mobx-react';
 import { Editor } from '@tinymce/tinymce-react';
 import { Form, Switch, Button, Popover, Typography } from 'antd';

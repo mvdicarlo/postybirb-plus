@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { SettingsService } from 'src/server/settings/settings.service';
 import { TagConverterService } from 'src/server/tag-converter/tag-converter.service';

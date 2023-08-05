@@ -1,7 +1,7 @@
-import * as forge from 'node-forge';
-import * as fs from 'fs-extra';
+import forge from 'node-forge';
+import fs from 'fs-extra';
 import { app } from 'electron';
-import * as path from 'path';
+import path from 'path';
 
 (forge as any).options.usePureJavaScript = true;
 

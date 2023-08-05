@@ -1,5 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import * as Datastore from 'nedb';
+import Datastore from 'nedb';
 import * as util from 'util';
 import { validateOrReject } from 'class-validator';
 import { classToPlain } from 'class-transformer';
