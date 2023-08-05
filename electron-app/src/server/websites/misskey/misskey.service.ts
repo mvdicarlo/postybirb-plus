@@ -221,7 +221,9 @@ export class MissKey extends Website {
         statusOptions.spoiler_text = options.spoilerText;
       }
 
-      M.postStatus(status, statusOptions).then((result) => {
+      this.checkCancelled(cancellationToken);
+
+      await M.postStatus(status, statusOptions).then((result) => {
         lastId = result.data.id;
         let res = result.data as Entity.Status;
         return this.createPostResponse({ source: res.url });
@@ -231,8 +233,6 @@ export class MissKey extends Website {
         );
       })
     }
-
-    this.checkCancelled(cancellationToken);
 
     return this.createPostResponse({});
   }

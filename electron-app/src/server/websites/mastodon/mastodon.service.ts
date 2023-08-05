@@ -325,7 +325,7 @@ export class Mastodon extends Website {
 
     this.checkCancelled(cancellationToken);
     
-    M.postStatus(status, statusOptions).then((result) => {
+    await M.postStatus(status, statusOptions).then((result) => {
       let res = result.data as Entity.Status;
       return this.createPostResponse({ source: res.url });
     }).catch((err: Error) => {
