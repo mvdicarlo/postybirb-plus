@@ -4,10 +4,10 @@ import { NotificationType } from 'src/server/notification/enums/notification-typ
 import { SubmissionCreate, SubmissionType, UploadedFile } from 'postybirb-commons';
 import { SubmissionImporterService } from '../submission-importer.service';
 import { basename } from 'path';
-import * as filetype from 'file-type';
-import * as fs from 'fs-extra';
-import * as domutils from 'domutils';
-import * as htmlparser2 from 'htmlparser2';
+import filetype from 'file-type';
+import fs from 'fs-extra';
+import domutils from 'domutils';
+import htmlparser2 from 'htmlparser2';
 import render from 'dom-serializer';
 import { Element, Node, NodeWithChildren } from 'domhandler';
 

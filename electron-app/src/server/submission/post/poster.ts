@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {
   DefaultFileOptions, DefaultOptions,
   PostResponse,

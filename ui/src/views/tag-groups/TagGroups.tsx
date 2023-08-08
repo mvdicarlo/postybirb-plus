@@ -1,5 +1,5 @@
 import React from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import './TagGroup.css';
 import { inject, observer } from 'mobx-react';
 import { TagGroupStore } from '../../stores/tag-group.store';
