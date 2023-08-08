@@ -126,17 +126,6 @@ export class ItakuNotificationSubmissionForm extends GenericSubmissionSection<
             <Select.Option value={f.value}>{f.label}</Select.Option>
           ))}
         </Select>
-      </Form.Item>,
-      <Form.Item label="Visibility">
-        <Select
-          {...GenericSelectProps}
-          className="w-full"
-          value={data.visibility}
-          onChange={this.setValue.bind(this, 'visibility')}
-        >
-          <Select.Option value={'PUBLIC'}>Public Post</Select.Option>
-          <Select.Option value={'PROFILE_ONLY'}>Profile Only</Select.Option>
-        </Select>
       </Form.Item>
     );
     return elements;
@@ -185,18 +174,6 @@ export class ItakuFileSubmissionForm extends GenericFileSubmissionSection<ItakuF
           {this.state.folders.map(f => (
             <Select.Option value={f.value}>{f.label}</Select.Option>
           ))}
-        </Select>
-      </Form.Item>,
-      <Form.Item label="Visibility">
-        <Select
-          {...GenericSelectProps}
-          className="w-full"
-          value={data.visibility}
-          onChange={this.setValue.bind(this, 'visibility')}
-        >
-          <Select.Option value={'PUBLIC'}>Public Gallery</Select.Option>
-          <Select.Option value={'PROFILE_ONLY'}>Profile Only</Select.Option>
-          <Select.Option value={'UNLISTED'}>Unlisted</Select.Option>
         </Select>
       </Form.Item>
     );

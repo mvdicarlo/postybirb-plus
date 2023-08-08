@@ -137,11 +137,8 @@ export class Itaku extends Website {
       tags: JSON.stringify(data.tags.map((tag) => ({ name: tag }))),
       visibility: data.options.visibility,
       image: data.primary.file,
+      add_to_feed: `${data.options.shareOnFeed}`,
     };
-    
-    if (data.options.shareOnFeed) {
-      postData.add_to_feed = true;
-    }
 
     if (data.options.spoilerText) {
       postData.content_warning = data.options.spoilerText;
