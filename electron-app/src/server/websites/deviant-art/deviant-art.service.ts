@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {
   DefaultOptions,
   DeviantArtAccountData,
@@ -15,7 +15,6 @@ import {
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
-import { GifManipulator } from 'src/server/file-manipulation/manipulators/gif.manipulator';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -23,6 +22,7 @@ import { FilePostData } from 'src/server/submission/post/interfaces/file-post-da
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
+import FormContent from 'src/server/utils/form-content.util';
 import { ApiResponse, OAuthUtil } from 'src/server/utils/oauth.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
@@ -62,6 +62,7 @@ export class DeviantArt extends Website {
       url: 'https://deviantart.com/$1',
     },
   ];
+  private readonly MAX_TAGS = 30;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -140,9 +141,7 @@ export class DeviantArt extends Website {
     const folders: Folder[] = [];
     const results = res.body.results || [];
     const flattenedFolders: DeviantArtFolder[] = [];
-    results.forEach((r: DeviantArtFolder) =>
-      flattenedFolders.push(...this.flattenFolders(r)),
-    );
+    results.forEach((r: DeviantArtFolder) => flattenedFolders.push(...this.flattenFolders(r)));
 
     flattenedFolders.forEach((folder) => {
       const parent = folder.parent
@@ -171,7 +170,14 @@ export class DeviantArt extends Website {
       .replace(/style="text-align:right;"/g, 'align="right"');
 
     text = UsernameParser.replaceText(text, 'da', ':icon$1::dev$1:');
-    return text.replace(/<p/gm, '<div').replace(/<\/p>/gm, '</div>').replace(/\n/g, '');
+    return text.replace(/<p/gm, '<div').replace(/<\/p>/gm, '</div>').replace(/\n/g, '<br>');
+  }
+
+  formatTags(tags: string[]): string[] {
+    tags = super.parseTags(tags);
+    if (tags.length > this.MAX_TAGS) {
+      return tags.slice(0, this.MAX_TAGS - 1);
+    } else return tags;
   }
 
   async postFileSubmission(
@@ -186,7 +192,7 @@ export class DeviantArt extends Website {
       artist_comments: data.description,
     };
 
-    this.parseTags(data.tags)
+    this.formatTags(data.tags)
       .map((t) => t.replace(/\//g, '_'))
       .forEach((t, i) => {
         uploadForm[`tags[${i}]`] = t;
@@ -333,6 +339,12 @@ export class DeviantArt extends Website {
           problems.push(`Folder (${f}) not found.`);
         }
       });
+    }
+
+    if (
+      FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length > this.MAX_TAGS
+    ) {
+      problems.push(`Tags will be limited to ${this.MAX_TAGS}.`);
     }
 
     const rating = submissionPart.data.rating || defaultPart.data.rating;

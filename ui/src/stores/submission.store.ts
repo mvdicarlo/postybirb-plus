@@ -1,5 +1,5 @@
 import socket from '../utils/websocket';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { SubmissionPackage } from 'postybirb-commons';
 import { observable, computed, action } from 'mobx';
 import { Submission } from 'postybirb-commons';

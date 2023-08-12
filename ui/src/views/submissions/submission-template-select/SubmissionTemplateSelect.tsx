@@ -4,6 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { Form, Select } from 'antd';
 import { SubmissionPart } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
+import { SubmissionTemplate } from 'postybirb-commons';
 import { SubmissionStore } from '../../../stores/submission.store';
 import { SubmissionTemplateStore } from '../../../stores/submission-template.store';
 import SubmissionUtil from '../../../utils/submission.util';
@@ -107,7 +108,8 @@ export default class SubmissionTemplateSelect extends React.Component<Props> {
   handleSelect = (value: string | number | LabeledValue, option: React.ReactElement<any>) => {
     const [type, id] = value.toString().split(':');
     
-    let parts: Record<string, SubmissionPart<any>> = {};
+//    let parts: Record<string, SubmissionPart<any>> = {};
+    let parts: any;
     switch (type as TemplateType) {
         case 'SUBMISSION':
             parts = this.props.submissionStore?.getSubmission(id)!.parts!;

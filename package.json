@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.1.24",
+  "version": "3.1.25",
   "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,13 @@
     "make": "run-s install build",
     "release:windows": "node create-signer.js && npm run make && cd electron-app && yarn run release:windows",
     "release:linux": "node create-signer.js && npm run make && cd electron-app && yarn run release:linux",
-    "release:osx": "npm run make && cd electron-app && yarn run release:osx"
-  },
+    "release:osx": "npm run make && cd electron-app && yarn run release:osx",
+		"contribute": "run-p --silent --print-name ci:** && run-p build:**",
+		"contribute:debug": "run-p --silent --print-name ci:** && --print-label run-p build:**",
+		"ci:commons": "cd commons && npm ci --no-audit && npm run build",
+		"ci:app": "cd electron-app && npm ci --no-audit",
+		"ci:ui": "cd ui && npm ci --no-audit"
+	},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mvdicarlo/postybirb-plus.git"
@@ -28,7 +33,7 @@
   "homepage": "https://github.com/mvdicarlo/postybirb-plus#readme",
   "dependencies": {
     "@mtproto/core": "^5.3.0",
-    "npm-run-all": "^4.1.5",
+		"npm-run-all2": "^6.0.6",
     "rimraf": "^5.0.1",
     "shx": "^0.3.4",
     "typescript": "^4.9.5",
@@ -44,3 +49,4 @@
     "eslint-plugin-prefer-arrow": "^1.2.3"
   }
 }
+

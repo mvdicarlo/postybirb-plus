@@ -1,4 +1,4 @@
-import * as Turndown from 'turndown';
+import Turndown from 'turndown';
 
 export class MarkdownConverter {
   static convert(html: string): string {

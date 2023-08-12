@@ -1,4 +1,4 @@
-import * as path from 'path';
+import path from 'path';
 import { FileSubmissionType } from 'postybirb-commons';
 
 const IMAGE_TYPES: string[] = [

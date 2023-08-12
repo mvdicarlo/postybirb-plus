@@ -1,5 +1,5 @@
 import React from 'react';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { SubmissionTemplateStore } from '../../stores/submission-template.store';
 import { headerStore } from '../../stores/header.store';
 import { Link } from 'react-router-dom';

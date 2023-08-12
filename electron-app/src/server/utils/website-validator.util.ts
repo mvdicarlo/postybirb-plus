@@ -1,6 +1,6 @@
 import { FileRecord, Folder } from 'postybirb-commons';
 
-import * as path from 'path';
+import path from 'path';
 
 export default class WebsiteValidator {
   private constructor() {}

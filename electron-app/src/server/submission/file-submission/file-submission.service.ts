@@ -10,7 +10,7 @@ import SubmissionCreateModel from '../models/submission-create.model';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import { ImageManipulationPoolService } from 'src/server/file-manipulation/pools/image-manipulation-pool.service';
 
-import * as path from 'path';
+import path from 'path';
 
 @Injectable()
 export class FileSubmissionService {
