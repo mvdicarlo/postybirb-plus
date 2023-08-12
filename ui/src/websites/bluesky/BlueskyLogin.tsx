@@ -64,7 +64,7 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
                 onChange={({ target }) => this.setState({ username: target.value })}
               />
             </Form.Item>
-            <Form.Item label="Password" help="An *app* password - you can one of these in Settings" required>
+            <Form.Item label="Password" help="An *app* password - you can get one of these in Settings" required>
               <Input
                 value={this.state.password}
                 onChange={({ target }) => this.setState({ password: target.value })}
