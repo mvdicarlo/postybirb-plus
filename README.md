@@ -52,6 +52,7 @@ Error: error:0308010C:digital envelope routines::unsupported
     
   </details>
 
+To fix this error, replace `react-scripts build` with `react-scripts --openssl-legacy-provider build`
  
 </details>
 
