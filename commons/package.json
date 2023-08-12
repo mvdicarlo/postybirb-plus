@@ -11,13 +11,8 @@
   },
   "author": "Michael DiCarlo",
   "license": "ISC",
-  "devDependencies": {
-    "prettier": "^2.0.5",
-    "rimraf": "^3.0.2",
-    "tslint": "^6.1.2",
-    "megalodon": "^6.1.0",
-  },
   "dependencies": {
+    "megalodon": "^6.1.0",
     "@types/node": "^14.11.1",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2"
