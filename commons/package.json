@@ -5,6 +5,7 @@
   "main": "lib/index",
   "types": "lib/index",
   "scripts": {
+    "prebuild": "rimraf lib",
     "build": "tsc",
     "lint": "eslint ./src",
     "format": "prettier --write ./src"

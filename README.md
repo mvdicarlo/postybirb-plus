@@ -16,16 +16,50 @@ React code that handles UI of the application displayed in the desktop applicati
 To set up a local copy of PostyBirb for development:
 
 1. clone this repository and `cd` into it.
-2. `npm install` to install the base requirements.
-3. For the `commons`, `ui`, and `electron-app` directories, cd into each and run `npm install`. Be sure to start with commons first.
+2. ```npm run contribute``` to install dependencies in every folder
 
-Then, from the base directory again, run:
+<details>
+  <summary>INSTALL TROUBLESHOOTING</summary>
 
-```bash
-npm run make && npm run start --prefix electron-app
+  _Temporary until react-scripts will be replaced with vite_
+
+  ### Common
+  If something does not work and you can't determine where error happened (since there is 3 parallel scripts) run `npm run contribute:debug`
+
+  ### ERR_OSSL_EVP_UNSUPPORTED
+  <details>
+    <summary>Error</summary>
+
 ```
+Error: error:0308010C:digital envelope routines::unsupported
+  at new Hash (node:internal/crypto/hash:71:19)
+  at Object.createHash (node:crypto:133:10)
+  at module.exports (ui\node_modules\webpack\lib\util\createHash.js:135:53)
+  at NormalModule._initBuildHash (ui\node_modules\webpack\lib\NormalModule.js:417:16)
+  at ui\node_modules\webpack\lib\NormalModule.js:452:10
+  at ui\node_modules\webpack\lib\NormalModule.js:323:13
+  at ui\node_modules\loader-runner\lib\LoaderRunner.js:367:11
+  at ui\node_modules\loader-runner\lib\LoaderRunner.js:233:18
+  at context.callback (ui\node_modules\loader-runner\lib\LoaderRunner.js:111:13)
+  at ui\node_modules\babel-loader\lib\index.js:55:103
+  at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {    
+  opensslErrorStack: [ 'error:03000086:digital envelope routines::initialization error' ],
+  library: 'digital envelope routines',
+  reason: 'unsupported',
+  code: 'ERR_OSSL_EVP_UNSUPPORTED'
+}
+```
+    
+  </details>
 
-This will build and run the application. After making changes, close out of the app and run the above command again to rebuild and run with your changes.
+ 
+</details>
+
+### Start
+
+```
+npm run start --prefix electron-app
+```
 
 ## Contribution Guide
 _Pending_
