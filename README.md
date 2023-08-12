@@ -68,3 +68,5 @@ _Pending_
 If you are interested in adding features or websites to the application, please let me know.
 
 PR branch is develop.
+
+Dont forget to `npm run codestyle` before pull request if you haven't installed eslint and prettier extensions!
