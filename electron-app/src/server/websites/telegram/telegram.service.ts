@@ -299,7 +299,7 @@ export class Telegram extends Website {
     return { maxSize: FileSize.MBtoBytes(10) };
   }
 
-  private async upload(appId: string, file: PostFileRecord) {
+  private async upload(appId: string, file: PostFileRecord, spoiler: boolean) {
     const parts = _.chunk(file.file.value, 512000); // 512KB
     const file_id = Date.now();
     const props: {
@@ -339,6 +339,7 @@ export class Telegram extends Website {
 
       return {
         ...props,
+        spoiler: spoiler,
         file: {
           _: 'inputFileBig',
           id: file_id,
@@ -359,6 +360,7 @@ export class Telegram extends Website {
 
       return {
         ...props,
+        spoiler: spoiler,
         file: {
           _: 'inputFile',
           id: file_id,
@@ -378,6 +380,7 @@ export class Telegram extends Website {
     const files = [data.primary, ...data.additional];
     const fileData: {
       _: string;
+      spoiler: boolean;
       file: {
         _: string;
         id: number;
@@ -387,9 +390,9 @@ export class Telegram extends Website {
     }[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      fileData.push(await this.upload(appId, file));
+      fileData.push(await this.upload(appId, file, data.options.spoiler));
     }
-
+    
     const description = data.description.slice(0, 4096).trim();
 
     for (const channel of data.options.channels) {
@@ -437,12 +440,39 @@ export class Telegram extends Website {
         }
 
         // multimedia send
-        const id = Date.now();
+        let mediaData = [];
         for (let i = 0; i < fileData.length; i++) {
-          await this.callApi(appId, 'messages.sendMedia', {
-            random_id: id + i,
+          let messageMediaPhoto = await this.callApi<{ photo: { id: number, access_hash: number, file_reference: string}}>(appId, 'messages.uploadMedia', {
+            peer: {
+              _: 'inputPeerChannel',
+              channel_id,
+              access_hash,
+            },
             media: fileData[i],
-            message: messagePosted ? '' : i === 0 ? data.description : '',
+          });
+          await WaitUtil.wait(1000);
+          mediaData.push({
+            _: 'inputSingleMedia',
+            random_id: Date.now(),
+            media: {
+              _: "inputMediaPhoto",
+              spoiler: fileData[i].spoiler,
+              id: {
+                _: "inputPhoto",
+                id: messageMediaPhoto.photo.id,
+                access_hash: messageMediaPhoto.photo.access_hash,
+                file_reference: messageMediaPhoto.photo.file_reference,
+              }
+            },
+            message: i == 0 && !messagePosted ? data.description : '',
+          });
+        }
+
+        let photosPerBatch = 10;
+        let batches = 1 + ((mediaData.length - 1) / photosPerBatch);
+        for (let i = 0; i < batches; i++) {
+          await this.callApi(appId, 'messages.sendMultiMedia', {
+            multi_media: mediaData.slice(i*photosPerBatch,(i+1)*photosPerBatch),
             peer,
             silent: data.options.silent,
           });
