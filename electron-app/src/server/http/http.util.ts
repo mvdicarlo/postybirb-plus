@@ -1,9 +1,9 @@
-import * as request from 'request';
+import request from 'request';
 import { BrowserWindow, LoadURLOptions, session } from 'electron';
 import 'url';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import CookieConverter from 'src/server/utils/cookie-converter.util';
-import * as setCookie from 'set-cookie-parser';
+import setCookie from 'set-cookie-parser';
 import { Logger } from '@nestjs/common';
 const FormData = require('form-data');
 

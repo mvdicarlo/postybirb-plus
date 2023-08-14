@@ -1,5 +1,5 @@
 import HtmlNode from './html-node';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ConvertOptions } from './convert-options.interface';
 import { HtmlConverter } from './converters/html.converter';
 import { BBCodeConverter } from './converters/bbcode.converter';

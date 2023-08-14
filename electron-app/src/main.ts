@@ -1,5 +1,5 @@
 /* tslint:disable: no-console no-var-requires */
-const path = require('path');
+import path from 'path';
 import {
   app,
   BrowserWindow,
@@ -10,7 +10,7 @@ import {
   Notification,
   webContents,
 } from 'electron';
-import * as WindowStateKeeper from 'electron-window-state';
+import WindowStateKeeper from 'electron-window-state';
 import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
 import { initialize as initializeRemote, enable as enableRemote } from '@electron/remote/main';
@@ -30,7 +30,7 @@ app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
 process.env.PORT =
   process.argv.find((arg) => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
-global.AUTH_SERVER_URL = 'https://postybirb-auth.azurewebsites.net';
+global.AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'https://postybirb-auth.azurewebsites.net';
 global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
 global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');

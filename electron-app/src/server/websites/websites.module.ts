@@ -25,6 +25,7 @@ import { TumblrModule } from './tumblr/tumblr.module';
 import { DeviantArtModule } from './deviant-art/deviant-art.module';
 import { ManebooruModule } from './manebooru/manebooru.module';
 import { MastodonModule } from './mastodon/mastodon.module';
+import { MissKeyModule } from './misskey/misskey.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { PillowfortModule } from './pillowfort/pillowfort.module';
 import { TelegramModule } from './telegram/telegram.module';
@@ -33,6 +34,7 @@ import { ItakuModule } from './itaku/itaku.module';
 import { PicartoModule } from './picarto/picarto.module';
 import { PixelfedModule } from './pixelfed/pixelfed.module';
 import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-adult.module';
+import { BlueskyModule } from './bluesky/bluesky.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -41,6 +43,7 @@ import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-
   imports: [
     ArtconomyModule,
     AryionModule,
+    BlueskyModule,
     CustomModule,
     DerpibooruModule,
     DeviantArtModule,
@@ -55,6 +58,7 @@ import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-
     KoFiModule,
     ManebooruModule,
     MastodonModule,
+    MissKeyModule,
     NewgroundsModule,
     PatreonModule,
     PiczelModule,

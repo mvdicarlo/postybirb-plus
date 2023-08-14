@@ -1,20 +1,22 @@
 {
   "name": "postybirb-plus-ui",
-  "version": "3.1.24",
+  "version": "3.1.25",
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
   "description": "(UI) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "dependencies": {
+    "@atproto/api": "^0.2.7",
     "@tinymce/tinymce-react": "^3.8.4",
     "@types/jest": "24.0.22",
-    "@types/node": "12.12.6",
+    "@types/node": "^16.10.2",
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.4",
     "antd": "^3.26.20",
     "axios": "^0.21.4",
     "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
+    "megalodon": "^6.1.0",
     "mobx": "^5.15.7",
     "mobx-react": "^6.3.1",
     "postybirb-commons": "file:../commons",
@@ -27,15 +29,14 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.2.0",
     "sanitize-html": "^1.27.5",
-    "socket.io": "^2.4.1",
-    "typescript": "3.7.2"
+    "socket.io": "^2.4.1"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm run build:clean && npm run build:style && react-scripts build && shx mv build ../electron-app",
+    "build": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-scripts build && shx mv build ../electron-app",
     "build:clean": "rimraf ../electron-app/build",
     "build:style": "npm run build:tailwind && npm run build:themes",
-    "build:tailwind": "tailwind build src/styles/index.css -o public/styles/tailwind.css && npm run build:antd-tweaks",
+    "build:tailwind": "tailwind build src/styles/index.css -o public/styles/tailwind.css",
     "build:antd-tweaks": "tailwind build src/styles/antd-dark-tweaks.css -o public/styles/dark-tweaks.css && tailwind build src/styles/antd-light-tweaks.css -o public/styles/light-tweaks.css && tailwind build src/styles/antd-base-tweaks.css -o public/styles/antd-tweaks.css",
     "build:themes": "lessc --js ./src/themes/light.less ./public/styles/light.css && lessc --js ./src/themes/dark.less ./public/styles/dark.css",
     "test": "react-scripts test",
@@ -76,6 +77,7 @@
     "prettier": "^1.18.2",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4",
-    "tailwindcss": "^1.9.6"
+    "tailwindcss": "^1.9.6",
+    "typescript": "^4.4.3"
   }
 }

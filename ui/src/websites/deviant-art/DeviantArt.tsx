@@ -19,31 +19,34 @@ import { WebsiteImpl } from '../website.base';
 import { DeviantArtLogin } from './DeviantArtLogin';
 
 export class DeviantArt extends WebsiteImpl {
-  internalName: string = 'DeviantArt';
-  name: string = 'Deviant Art';
-  supportsAdditionalFiles: boolean = false;
-  supportsTags: boolean = true;
-  loginUrl: string = '';
+         internalName: string = 'DeviantArt';
+         name: string = 'Deviant Art';
+         supportsAdditionalFiles: boolean = false;
+         supportsTags: boolean = true;
+         loginUrl: string = '';
 
-  LoginDialog = (props: LoginDialogProps) => <DeviantArtLogin {...props} />;
+         LoginDialog = (props: LoginDialogProps) => <DeviantArtLogin {...props} />;
 
-  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DeviantArtFileOptions>) => (
-    <DeviantArtFileSubmissionForm
-      key={props.part.accountId}
-      hideThumbnailOptions={true}
-      {...props}
-    />
-  );
+         FileSubmissionForm = (
+           props: WebsiteSectionProps<FileSubmission, DeviantArtFileOptions>
+         ) => (
+           <DeviantArtFileSubmissionForm
+             key={props.part.accountId}
+             tagOptions={{ show: true, options: { maxLength: 30, mode: 'count' } }}
+             hideThumbnailOptions={true}
+             {...props}
+           />
+         );
 
-  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
-    <GenericSubmissionSection
-      key={props.part.accountId}
-      tagOptions={{ show: false }}
-      ratingOptions={{ show: false }}
-      {...props}
-    />
-  );
-}
+         NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
+           <GenericSubmissionSection
+             key={props.part.accountId}
+             tagOptions={{ show: false }}
+             ratingOptions={{ show: false }}
+             {...props}
+           />
+         );
+       }
 
 interface DeviantArtFileSubmissionState {
   folders: Folder[];

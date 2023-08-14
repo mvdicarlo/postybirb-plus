@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 import { nativeImage } from 'electron';
 import {
   DefaultOptions,
@@ -30,7 +30,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
-import _ = require('lodash');
+import _ from 'lodash';
 
 @Injectable()
 export class SubscribeStarAdult extends Website {

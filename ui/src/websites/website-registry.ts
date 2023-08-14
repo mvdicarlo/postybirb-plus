@@ -22,6 +22,7 @@ import { Tumblr } from './tumblr/Tumblr';
 import { DeviantArt } from './deviant-art/DeviantArt';
 import { Manebooru } from './manebooru/Manebooru';
 import { Mastodon } from './mastodon/Mastodon';
+import { MissKey } from './misskey/MissKey';
 import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
 import { Telegram } from './telegram/Telegram';
@@ -30,11 +31,13 @@ import { Itaku } from './itaku/Itaku';
 import { Picarto } from './picarto/Picarto';
 import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 import { Pixelfed } from './pixelfed/Pixelfed';
+import { Bluesky } from './bluesky/Bluesky';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
     Artconomy: new Artconomy(),
     Aryion: new Aryion(),
+    Bluesky: new Bluesky(),
     Custom: new Custom(),
     Derpibooru: new Derpibooru(),
     DeviantArt: new DeviantArt(),
@@ -48,6 +51,7 @@ export class WebsiteRegistry {
     KoFi: new KoFi(),
     Manebooru: new Manebooru(),
     Mastodon: new Mastodon(),
+    MissKey: new MissKey(),
     Newgrounds: new Newgrounds(),
     Patreon: new Patreon(),
     Picarto: new Picarto(),
