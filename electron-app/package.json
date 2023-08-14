@@ -37,6 +37,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@atproto/api": "^0.2.7",
     "@electron/remote": "^2.0.8",
     "@mtproto/core": "^6.3.0",
     "@nestjs/common": "^7.6.18",
@@ -45,6 +46,7 @@
     "@nestjs/platform-socket.io": "^7.6.18",
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/websockets": "^7.6.18",
+    "@types/node": "^16.10.2",
     "chardet": "^0.8.0",
     "cheerio": "^1.0.0-rc.10",
     "class-transformer": "^0.3.1",
@@ -64,9 +66,11 @@
     "megalodon": "^6.1.0",
     "nanoid": "^2.1.8",
     "nedb": "^1.8.0",
+    "node-fetch": "^2.6.12",
     "node-forge": "^0.10.0",
     "parse5": "^5.1.1",
     "postybirb-commons": "file:../commons",
+    "react-native-fs": "^2.20.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "rimraf": "^3.0.0",
