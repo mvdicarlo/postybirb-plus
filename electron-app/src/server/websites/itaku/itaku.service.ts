@@ -140,7 +140,7 @@ export class Itaku extends Website {
     };
     
     if (data.options.shareOnFeed) {
-      postData.add_to_feed = true;
+      postData.add_to_feed = "true";
     }
 
     if (data.options.spoilerText) {
