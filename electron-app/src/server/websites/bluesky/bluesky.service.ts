@@ -116,6 +116,7 @@ export class Bluesky extends Website {
   readonly acceptsAdditionalFiles = false;
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
+  readonly MAX_CHARS = 300;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     BskyAgent.configure({fetch: fetchHandler});
@@ -149,6 +150,19 @@ export class Bluesky extends Website {
     };
   }
 
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            .join(''),
+        ),
+      { spaceReplacer: '_' },
+    ).map((tag) => `#${tag}`);
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<BlueskyFileOptions>,
@@ -177,8 +191,30 @@ export class Bluesky extends Website {
       const embeds : AppBskyEmbedImages.Main = {images: [image], $type: "app.bsky.embed.images" }
       console.log(embeds);
 
+      let status = data.description;
+
+      const tags = this.formatTags(data.tags);
+
+      // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+      // these onto the post, *IF* there is character count available.
+      if (tags.length > 0) {
+        status += "\n\n";
+      }
+  
+      tags.forEach(tag => {
+        let remain = this.MAX_CHARS - status.length;
+        let tagToInsert = tag;
+        if (!tag.startsWith('#')) {
+          tagToInsert = `#${tagToInsert}`
+        }
+        if (remain > (tagToInsert.length)) {
+          status += ` ${tagToInsert}`
+        }
+        // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      })
+
       let postResult = await agent.post({
-        text: data.description,
+        text: status,
         embed: embeds
       }).catch(err => {
         return Promise.reject(
@@ -211,8 +247,6 @@ export class Bluesky extends Website {
 
     this.checkCancelled(cancellationToken);
 
-    const postData = data.description;
-
     const agent = new BskyAgent({ service: 'https://bsky.social' })
 
     await agent.login({
@@ -220,8 +254,31 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
+
+    let status = data.description;
+
+    const tags = this.formatTags(data.tags);
+
+    // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+    // these onto the post, *IF* there is character count available.
+    if (tags.length > 0) {
+      status += "\n\n";
+    }
+
+    tags.forEach(tag => {
+      let remain = this.MAX_CHARS - status.length;
+      let tagToInsert = tag;
+      if (!tag.startsWith('#')) {
+        tagToInsert = `#${tagToInsert}`
+      }
+      if (remain > (tagToInsert.length)) {
+        status += ` ${tagToInsert}`
+      }
+      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+    })
+
     let postResult = await agent.post({
-      text: postData
+      text: status
     }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
@@ -252,9 +309,9 @@ export class Bluesky extends Website {
       problems.push(`Bluesky requires alt text to be provided`);
     }
 
-    if (submissionPart.data.description.value.length > 300) {
+    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is 300 characters.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     }
 
@@ -304,9 +361,9 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    if (submissionPart.data.description.value.length > 300) {
+    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is 300 characters.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     }
 
