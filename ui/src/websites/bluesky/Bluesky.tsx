@@ -50,8 +50,19 @@ BlueskyNotificationOptions
   renderLeftForm(data: BlueskyNotificationOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
-      <div>
-      </div>,
+      <Form.Item label="Label Rating">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.label_rating}
+          onChange={this.setValue.bind(this, 'label_rating')}
+        >
+          <Select.Option value={''}>Suitable for all ages</Select.Option>
+          <Select.Option value={'sexual'}>Adult: Suggestive</Select.Option>
+          <Select.Option value={'nudity'}>Adult: Nudity</Select.Option>
+          <Select.Option value={'porn'}>Adult: Porn</Select.Option>
+        </Select>
+      </Form.Item>,            
     );
     return elements;
   }
@@ -61,6 +72,19 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
   renderLeftForm(data: BlueskyFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
+      <Form.Item label="Label Rating">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.label_rating}
+          onChange={this.setValue.bind(this, 'label_rating')}
+        >
+          <Select.Option value={''}>Suitable for all ages</Select.Option>
+          <Select.Option value={'sexual'}>Adult: Suggestive</Select.Option>
+          <Select.Option value={'nudity'}>Adult: Nudity</Select.Option>
+          <Select.Option value={'porn'}>Adult: Porn</Select.Option>
+        </Select>
+      </Form.Item>,      
       <Form.Item label="Alt Text">
         <Input
           value={data.altText}

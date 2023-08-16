@@ -24,7 +24,7 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages } from '@atproto/api';
+import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, ComAtprotoLabelDefs } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
 
@@ -117,6 +117,7 @@ export class Bluesky extends Website {
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly MAX_CHARS = 300;
+  readonly MAX_MEDIA = 4;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     BskyAgent.configure({fetch: fetchHandler});
@@ -187,9 +188,7 @@ export class Bluesky extends Website {
     if (blobUpload.success) {
       // response has blob.ref
       const image: AppBskyEmbedImages.Image = { image: blobUpload.data.blob, alt: data.options.altText }
-      console.log(image);
       const embeds : AppBskyEmbedImages.Main = {images: [image], $type: "app.bsky.embed.images" }
-      console.log(embeds);
 
       let status = data.description;
 
@@ -213,9 +212,15 @@ export class Bluesky extends Website {
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
       })
 
+      let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined; 
+      if (data.options.label_rating) {
+        labelsRecord = {values: [ { val: data.options.label_rating } ], $type: "com.atproto.label.defs#selfLabels" };
+      }  
+
       let postResult = await agent.post({
         text: status,
-        embed: embeds
+        embed: embeds,
+        labels: labelsRecord
       }).catch(err => {
         return Promise.reject(
             this.createPostResponse({ message: err }),
@@ -236,7 +241,6 @@ export class Bluesky extends Website {
           this.createPostResponse({ message: "An unknown error uploading the image occurred" }),
       );
     }
-
   }
 
   async postNotificationSubmission(
@@ -253,7 +257,6 @@ export class Bluesky extends Website {
       identifier: accountData.username,
       password: accountData.password,
     });
-
 
     let status = data.description;
 
@@ -277,8 +280,14 @@ export class Bluesky extends Website {
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
     })
 
+    let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined; 
+    if (data.options.label_rating) {
+      labelsRecord = {values: [ { val: data.options.label_rating } ], $type: "com.atproto.label.defs#selfLabels" };
+    }
+
     let postResult = await agent.post({
-      text: status
+      text: status,
+      labels: labelsRecord
     }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),

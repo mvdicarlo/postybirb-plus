@@ -8,6 +8,10 @@ import { DefaultOptionsEntity } from '../../models/default-options.entity';
 export class BlueskyNotificationOptionsEntity extends DefaultOptionsEntity
   implements BlueskyNotificationOptions {
 
+  @Expose()
+  @IsString()
+  label_rating: string = '';
+
   constructor(entity?: Partial<BlueskyNotificationOptions>) {
     super(entity as DefaultOptions);
   }
