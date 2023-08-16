@@ -194,7 +194,7 @@ export class Bluesky extends Website {
 
       const tags = this.formatTags(data.tags);
 
-      // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+      // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append 
       // these onto the post, *IF* there is character count available.
       if (tags.length > 0) {
         status += "\n\n";
@@ -262,7 +262,7 @@ export class Bluesky extends Website {
 
     const tags = this.formatTags(data.tags);
 
-    // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append 
     // these onto the post, *IF* there is character count available.
     if (tags.length > 0) {
       status += "\n\n";
