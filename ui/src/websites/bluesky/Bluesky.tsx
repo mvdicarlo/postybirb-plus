@@ -18,7 +18,7 @@ import BlueskyLogin from './BlueskyLogin';
 export class Bluesky extends WebsiteImpl {
   internalName: string = 'Bluesky';
   name: string = 'Bluesky';
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   loginUrl: string = '';
 

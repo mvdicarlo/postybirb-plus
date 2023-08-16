@@ -15,6 +15,7 @@ export class BlueskyFileOptionsEntity extends DefaultFileOptionsEntity
 
   @Expose()
   @IsString()
+  @DefaultValue('')
   label_rating: string = '';
   
 

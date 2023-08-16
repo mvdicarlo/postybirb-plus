@@ -10,6 +10,7 @@ export class BlueskyNotificationOptionsEntity extends DefaultOptionsEntity
 
   @Expose()
   @IsString()
+  @DefaultValue('')
   label_rating: string = '';
 
   constructor(entity?: Partial<BlueskyNotificationOptions>) {
