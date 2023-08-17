@@ -16,7 +16,7 @@ import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import { FilePostData, PostFile } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
@@ -24,7 +24,7 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages } from '@atproto/api';
+import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, ComAtprotoLabelDefs, BlobRef } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
 
@@ -113,9 +113,11 @@ async function fetchHandler(
 export class Bluesky extends Website {
   readonly BASE_URL = '';
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
-  readonly acceptsAdditionalFiles = false;
+  readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
+  readonly MAX_CHARS = 300;
+  readonly MAX_MEDIA = 4;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     BskyAgent.configure({fetch: fetchHandler});
@@ -149,6 +151,37 @@ export class Bluesky extends Website {
     };
   }
 
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags
+        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map((tag) =>
+          tag
+            .split(' ')
+            .join(''),
+        ),
+      { spaceReplacer: '_' },
+    ).map((tag) => `#${tag}`);
+  }
+
+  private async uploadMedia(
+    agent: BskyAgent,
+    data: BlueskyAccountData,
+    file: PostFile,
+    altText: string,
+  ): Promise<BlobRef|undefined> {
+    const blobUpload = await agent.uploadBlob(file.value, { encoding: file.options.contentType }).catch(err => {
+      return Promise.reject(
+          this.createPostResponse({ }),
+      );
+    });
+
+    if (blobUpload.success) {
+      // response has blob.ref
+      return blobUpload.data.blob;
+    } 
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<BlueskyFileOptions>,
@@ -164,43 +197,66 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    const blobUpload = await agent.uploadBlob(data.primary.file.value, { encoding: data.primary.file.options.contentType }).catch(err => {
+    const files = [data.primary, ...data.additional];
+    let uploadedMedias: AppBskyEmbedImages.Image[] = [];
+    let fileCount = 0;
+    for (const file of files) {
+      const ref = await this.uploadMedia(agent, accountData, file.file, data.options.altText);
+      const image: AppBskyEmbedImages.Image = { image: ref, alt: data.options.altText };
+      uploadedMedias.push(image);
+      fileCount++;
+      if (fileCount == this.MAX_MEDIA) {
+        break;
+      }
+    }
+
+    const embeds : AppBskyEmbedImages.Main = {images: uploadedMedias, $type: "app.bsky.embed.images" };
+
+    let status = data.description;
+    const tags = this.formatTags(data.tags);
+
+    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append 
+    // these onto the post, *IF* there is character count available.
+    if (tags.length > 0) {
+      status += "\n\n";
+    }
+
+    tags.forEach(tag => {
+      let remain = this.MAX_CHARS - status.length;
+      let tagToInsert = tag;
+      if (!tag.startsWith('#')) {
+        tagToInsert = `#${tagToInsert}`
+      }
+      if (remain > (tagToInsert.length)) {
+        status += ` ${tagToInsert}`
+      }
+      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+    })
+
+    let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined; 
+    if (data.options.label_rating) {
+      labelsRecord = {values: [ { val: data.options.label_rating } ], $type: "com.atproto.label.defs#selfLabels" };
+    }  
+
+    let postResult = await agent.post({
+      text: status,
+      embed: embeds,
+      labels: labelsRecord
+    }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
       );
     });
-
-    if (blobUpload.success) {
-      // response has blob.ref
-      const image: AppBskyEmbedImages.Image = { image: blobUpload.data.blob, alt: data.options.altText }
-      console.log(image);
-      const embeds : AppBskyEmbedImages.Main = {images: [image], $type: "app.bsky.embed.images" }
-      console.log(embeds);
-
-      let postResult = await agent.post({
-        text: data.description,
-        embed: embeds
-      }).catch(err => {
-        return Promise.reject(
-            this.createPostResponse({ message: err }),
-        );
+  
+    if (postResult && postResult.uri) {
+      return this.createPostResponse({
+        source: postResult.uri,
       });
-    
-      if (postResult && postResult.uri) {
-        return this.createPostResponse({
-          source: postResult.uri,
-        });
-      } else {
-        return Promise.reject(
-          this.createPostResponse({ message: "Unknown error occurred" }),
-        );
-      }
     } else {
       return Promise.reject(
-          this.createPostResponse({ message: "An unknown error uploading the image occurred" }),
+        this.createPostResponse({ message: "Unknown error occurred" }),
       );
     }
-
   }
 
   async postNotificationSubmission(
@@ -211,8 +267,6 @@ export class Bluesky extends Website {
 
     this.checkCancelled(cancellationToken);
 
-    const postData = data.description;
-
     const agent = new BskyAgent({ service: 'https://bsky.social' })
 
     await agent.login({
@@ -220,8 +274,36 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
+    let status = data.description;
+
+    const tags = this.formatTags(data.tags);
+
+    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append 
+    // these onto the post, *IF* there is character count available.
+    if (tags.length > 0) {
+      status += "\n\n";
+    }
+
+    tags.forEach(tag => {
+      let remain = this.MAX_CHARS - status.length;
+      let tagToInsert = tag;
+      if (!tag.startsWith('#')) {
+        tagToInsert = `#${tagToInsert}`
+      }
+      if (remain > (tagToInsert.length)) {
+        status += ` ${tagToInsert}`
+      }
+      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+    })
+
+    let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined; 
+    if (data.options.label_rating) {
+      labelsRecord = {values: [ { val: data.options.label_rating } ], $type: "com.atproto.label.defs#selfLabels" };
+    }
+
     let postResult = await agent.post({
-      text: postData
+      text: status,
+      labels: labelsRecord
     }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
@@ -252,9 +334,9 @@ export class Bluesky extends Website {
       problems.push(`Bluesky requires alt text to be provided`);
     }
 
-    if (submissionPart.data.description.value.length > 300) {
+    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is 300 characters.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     }
 
@@ -293,6 +375,10 @@ export class Bluesky extends Website {
         }
     });
 
+    if (files.length > this.MAX_MEDIA) {
+      warnings.push("Too many files selected for this platform, only the first four will be posted");
+    }
+
     return { problems, warnings };
   }
 
@@ -304,9 +390,9 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    if (submissionPart.data.description.value.length > 300) {
+    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is 300 characters.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     }
 

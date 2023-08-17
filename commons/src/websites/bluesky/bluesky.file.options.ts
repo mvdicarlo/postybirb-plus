@@ -12,6 +12,11 @@ export class BlueskyFileOptionsEntity extends DefaultFileOptionsEntity
   @IsOptional()
   @IsString()
   altText?: string;
+
+  @Expose()
+  @IsString()
+  @DefaultValue('')
+  label_rating: string = '';
   
 
   constructor(entity?: Partial<BlueskyFileOptions>) {
