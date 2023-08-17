@@ -37,7 +37,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@atproto/api": "^0.2.7",
+    "@atproto/api": "^0.6.4",
     "@electron/remote": "^2.0.8",
     "@mtproto/core": "^6.3.0",
     "@nestjs/common": "^7.6.18",
