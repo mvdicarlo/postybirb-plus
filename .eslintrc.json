@@ -29,7 +29,7 @@
     {
       "files": "ui/**",
       "parserOptions": {
-        "project": ["ui/tsconfig.json"],
+        "project": ["tsconfig.json", "ui/tsconfig.json"],
         "sourceType": "module"
       },
       "plugins": ["react", "react-hooks"],
