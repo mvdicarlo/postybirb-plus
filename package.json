@@ -1,41 +1,57 @@
 {
-	"name": "postybirb-plus",
-	"version": "3.1.26",
-	"description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
-	"main": "index.js",
-	"scripts": {
-		"install": "run-p install:**",
-		"install:commons": "cd commons && npm install && npm run build",
-		"install:app": "cd electron-app && npm install",
-		"install:ui": "cd ui && npm install",
-		"build": "run-p build:**",
-		"build:app": "cd electron-app && npm run build",
-		"build:ui": "cd ui && npm run build",
-		"make": "run-s install build",
-		"release:windows": "node create-signer.js && npm run make && cd electron-app && yarn run release:windows",
-		"release:linux": "node create-signer.js && npm run make && cd electron-app && yarn run release:linux",
-		"release:osx": "npm run make && cd electron-app && yarn run release:osx",
-		"contribute": "run-p --silent --print-name ci:** && run-p build:**",
-		"contribute:debug": "run-p --silent --print-name ci:** && --print-label run-p build:**",
-		"ci:commons": "cd commons && npm ci --no-audit && npm run build",
-		"ci:app": "cd electron-app && npm ci --no-audit",
-		"ci:ui": "cd ui && npm ci --no-audit"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/mvdicarlo/postybirb-plus.git"
-	},
-	"author": "Michael DiCarlo",
-	"license": "BSD-3-Clause",
-	"bugs": {
-		"url": "https://github.com/mvdicarlo/postybirb-plus/issues"
-	},
-	"homepage": "https://github.com/mvdicarlo/postybirb-plus#readme",
-	"dependencies": {
-		"@mtproto/core": "^5.3.0",
-		"npm-run-all2": "^6.0.6",
-		"shx": "^0.3.4",
-		"yarn": "^1.22.4"
-	}
+  "name": "postybirb-plus",
+  "version": "3.1.26",
+  "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
+  "main": "index.js",
+  "scripts": {
+    "install": "run-p install:**",
+    "install:commons": "cd commons && npm install && npm run build",
+    "install:app": "cd electron-app && npm install",
+    "install:ui": "cd ui && npm install",
+    "build": "run-p build:**",
+    "build:app": "cd electron-app && npm run build",
+    "build:ui": "cd ui && npm run build",
+    "make": "run-s install build",
+    "release:windows": "node create-signer.js && npm run make && cd electron-app && yarn run release:windows",
+    "release:linux": "node create-signer.js && npm run make && cd electron-app && yarn run release:linux",
+    "release:osx": "npm run make && cd electron-app && yarn run release:osx",
+    "contribute": "npm ci --ignore-scripts && run-p --silent --print-name ci:** && run-p build:**",
+    "contribute:debug": "npm ci --ignore-scripts && run-p --print-name ci:** && --print-label run-p build:**",
+    "ci:commons": "cd commons && npm ci --no-audit&& npm run build",
+    "ci:app": "cd electron-app && npm ci --no-audit",
+    "ci:ui": "cd ui && npm ci --no-audit --no-fund --no-deprecate",
+    "codestyle": "run-s format lint",
+    "format": "prettier --write \"{commons/src,ui/src,electron-app/{test,src}}/**/*.ts\"",
+    "lint": "eslint \"{commons/src,ui/src,electron-app/{test,src}}/**/*.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mvdicarlo/postybirb-plus.git"
+  },
+  "author": "Michael DiCarlo",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/mvdicarlo/postybirb-plus/issues"
+  },
+  "homepage": "https://github.com/mvdicarlo/postybirb-plus#readme",
+  "dependencies": {
+    "@mtproto/core": "^5.3.0",
+    "npm-run-all2": "^6.0.6",
+    "prettier": "^3.0.1",
+    "rimraf": "^5.0.1",
+    "shx": "^0.3.4",
+    "typescript": "^4.9.5",
+    "yarn": "^1.22.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.9.0",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-jsdoc": "^46.4.5",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  }
 }
-
