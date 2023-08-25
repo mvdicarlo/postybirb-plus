@@ -19,8 +19,6 @@ export class PlaintextParser {
     }
 
     const $ = cheerio.load('');
-    return $(html)
-      .text()
-      .trim();
+    return $(html).text().trim();
   }
 }

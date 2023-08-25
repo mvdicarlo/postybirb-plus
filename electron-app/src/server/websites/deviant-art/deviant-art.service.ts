@@ -125,7 +125,7 @@ export class DeviantArt extends Website {
       return folders;
     }
 
-    folder.subfolders.forEach((sf) => folders.push(...this.flattenFolders(sf)));
+    folder.subfolders.forEach(sf => folders.push(...this.flattenFolders(sf)));
     return folders;
   }
 
@@ -143,9 +143,9 @@ export class DeviantArt extends Website {
     const flattenedFolders: DeviantArtFolder[] = [];
     results.forEach((r: DeviantArtFolder) => flattenedFolders.push(...this.flattenFolders(r)));
 
-    flattenedFolders.forEach((folder) => {
+    flattenedFolders.forEach(folder => {
       const parent = folder.parent
-        ? flattenedFolders.find((f) => f.folderid === folder.parent && f.name !== 'Featured')
+        ? flattenedFolders.find(f => f.folderid === folder.parent && f.name !== 'Featured')
         : undefined;
       folders.push({
         value: folder.folderid,
@@ -193,7 +193,7 @@ export class DeviantArt extends Website {
     };
 
     this.formatTags(data.tags)
-      .map((t) => t.replace(/\//g, '_'))
+      .map(t => t.replace(/\//g, '_'))
       .forEach((t, i) => {
         uploadForm[`tags[${i}]`] = t;
       });
@@ -334,7 +334,7 @@ export class DeviantArt extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.folders.forEach((f) => {
+      submissionPart.data.folders.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Folder (${f}) not found.`);
         }

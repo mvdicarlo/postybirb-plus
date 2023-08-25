@@ -4,8 +4,10 @@ import { DefaultFileOptions } from '../../interfaces/submission/default-options.
 import { FurbooruFileOptions } from '../../interfaces/websites/furbooru/furbooru.file.options.interface';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class FurbooruFileOptionsEntity extends DefaultFileOptionsEntity
-  implements FurbooruFileOptions {
+export class FurbooruFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements FurbooruFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

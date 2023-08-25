@@ -5,8 +5,10 @@ import { SubscribeStarNotificationOptions } from '../../interfaces/websites/subs
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class SubscribeStarNotificationOptionsEntity extends DefaultOptionsEntity
-  implements SubscribeStarNotificationOptions {
+export class SubscribeStarNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements SubscribeStarNotificationOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

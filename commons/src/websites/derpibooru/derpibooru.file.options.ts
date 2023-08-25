@@ -4,8 +4,10 @@ import { DefaultFileOptions } from '../../interfaces/submission/default-options.
 import { DerpibooruFileOptions } from '../../interfaces/websites/derpibooru/derpibooru.file.options.interface';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class DerpibooruFileOptionsEntity extends DefaultFileOptionsEntity
-  implements DerpibooruFileOptions {
+export class DerpibooruFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements DerpibooruFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

@@ -101,12 +101,12 @@ export class ParserService {
     if (tags.length) {
       const conversionMap = {};
       (await this.tagConverter.getTagConvertersForWebsite(website.constructor.name)).forEach(
-        (converter) => {
+        converter => {
           conversionMap[converter.tag] = converter.getTagForWebsite(website.constructor.name);
         },
       );
 
-      tags = tags.map((tag) => conversionMap[tag] || tag).filter((tag) => !!tag.trim().length);
+      tags = tags.map(tag => conversionMap[tag] || tag).filter(tag => !!tag.trim().length);
     }
 
     return tags;
@@ -140,7 +140,12 @@ export class ParserService {
   ): Promise<void> {
     const options: DefaultFileOptions = data.options as DefaultFileOptions;
     const canScale = options.autoScale;
-    data.primary = await this.attemptFileScale(websitePart.accountId, website, submission.primary, canScale);
+    data.primary = await this.attemptFileScale(
+      websitePart.accountId,
+      website,
+      submission.primary,
+      canScale,
+    );
 
     if (submission.thumbnail && options.useThumbnail) {
       data.thumbnail = this.fileRecordAsPostFileRecord(submission.thumbnail).file;
@@ -158,11 +163,13 @@ export class ParserService {
 
     if (website.acceptsAdditionalFiles) {
       const additionalFiles = (submission.additional || []).filter(
-        (record) => !record.ignoredAccounts!.includes(websitePart.accountId),
+        record => !record.ignoredAccounts!.includes(websitePart.accountId),
       );
 
       data.additional = await Promise.all(
-        additionalFiles.map((file) => this.attemptFileScale(websitePart.accountId, website, file, canScale)),
+        additionalFiles.map(file =>
+          this.attemptFileScale(websitePart.accountId, website, file, canScale),
+        ),
       );
     } else {
       data.additional = [];

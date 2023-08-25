@@ -5,8 +5,10 @@ import { DiscordFileOptions } from '../../interfaces/websites/discord/discord.fi
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class DiscordFileOptionsEntity extends DefaultFileOptionsEntity
-  implements DiscordFileOptions {
+export class DiscordFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements DiscordFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

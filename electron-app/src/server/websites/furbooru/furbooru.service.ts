@@ -99,7 +99,7 @@ export class Furbooru extends Website {
       'grimdark',
       'grotesque',
     ];
-    const lowerCaseTags = tags.map((t) => t.toLowerCase());
+    const lowerCaseTags = tags.map(t => t.toLowerCase());
     if (!lowerCaseTags.includes(ratingTag)) {
       let add = true;
 

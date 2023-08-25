@@ -5,9 +5,10 @@ import { BlueskyNotificationOptions } from '../../interfaces/websites/bluesky/bl
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class BlueskyNotificationOptionsEntity extends DefaultOptionsEntity
-  implements BlueskyNotificationOptions {
-
+export class BlueskyNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements BlueskyNotificationOptions
+{
   @Expose()
   @IsString()
   @DefaultValue('')

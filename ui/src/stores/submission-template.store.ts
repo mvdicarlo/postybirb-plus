@@ -12,7 +12,7 @@ export interface SubmissionStoreState {
 export class SubmissionTemplateStore {
   @observable state: SubmissionStoreState = {
     templates: [],
-    loading: true
+    loading: true,
   };
 
   constructor() {

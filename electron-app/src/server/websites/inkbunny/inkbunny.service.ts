@@ -161,7 +161,7 @@ export class Inkbunny extends Website {
     const ratings = this.getRating(data.rating);
     if (ratings !== '0') {
       // when not general
-      for(const rating of ratings.split(',')) {
+      for (const rating of ratings.split(',')) {
         editForm[`tag[${rating}]`] = 'yes';
       }
     }
@@ -213,7 +213,7 @@ export class Inkbunny extends Website {
   }
 
   parseTags(tags: string[]) {
-    return tags.map((tag) => {
+    return tags.map(tag => {
       return tag.trim().replace(/\s/gm, '_').replace(/\\/gm, '/');
     });
   }
@@ -242,12 +242,12 @@ export class Inkbunny extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
     const maxMB: number = 200;
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);

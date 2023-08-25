@@ -5,8 +5,10 @@ import { FurryLifeFileOptions } from '../../interfaces/websites/furry-life/furry
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class FurryLifeFileOptionsEntity extends DefaultFileOptionsEntity
-  implements FurryLifeFileOptions {
+export class FurryLifeFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements FurryLifeFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

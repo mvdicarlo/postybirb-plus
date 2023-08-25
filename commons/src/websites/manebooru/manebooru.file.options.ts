@@ -4,8 +4,10 @@ import { DefaultFileOptions } from '../../interfaces/submission/default-options.
 import { ManebooruFileOptions } from '../../interfaces/websites/manebooru/manebooru.file.options.interface';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class ManebooruFileOptionsEntity extends DefaultFileOptionsEntity
-  implements ManebooruFileOptions {
+export class ManebooruFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements ManebooruFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

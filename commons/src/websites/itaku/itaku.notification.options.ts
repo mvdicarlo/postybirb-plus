@@ -5,8 +5,10 @@ import { ItakuNotificationOptions } from '../../interfaces/websites/itaku/itaku.
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class ItakuNotificationOptionsEntity extends DefaultOptionsEntity
-  implements ItakuNotificationOptions {
+export class ItakuNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements ItakuNotificationOptions
+{
   @Expose()
   @IsArray()
   @DefaultValue([])

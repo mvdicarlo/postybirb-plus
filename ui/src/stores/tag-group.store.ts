@@ -10,7 +10,7 @@ export interface TagGroupState {
 
 export class TagGroupStore {
   @observable state: TagGroupState = {
-    groups: []
+    groups: [],
   };
 
   constructor() {

@@ -143,7 +143,9 @@ export class Discord extends Website {
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (FileSize.MBtoBytes(maxMB) < size) {
-        warnings.push(`Discord requires files be 25MB or less, unless your channel has been boosted.`);
+        warnings.push(
+          `Discord requires files be 25MB or less, unless your channel has been boosted.`,
+        );
       }
     });
 

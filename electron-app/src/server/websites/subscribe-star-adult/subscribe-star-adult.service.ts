@@ -61,7 +61,9 @@ export class SubscribeStarAdult extends Website {
       status.loggedIn = true;
       status.username = res.body.match(/<div class="top_bar-user_name">(.*?)<\/div>/)[1];
 
-      let usernameLink = res.body.match(/class="top_bar-branding for-adult">(.*?)href="(.*?)"/ims)[2];
+      let usernameLink = res.body.match(
+        /class="top_bar-branding for-adult">(.*?)href="(.*?)"/ims,
+      )[2];
       if (usernameLink && usernameLink.includes('/feed')) {
         usernameLink = `/${status.username}`;
       }
@@ -251,7 +253,7 @@ export class SubscribeStarAdult extends Website {
     `,
     );
 
-    const files = [data.primary, ...data.additional].map((f) => f.file);
+    const files = [data.primary, ...data.additional].map(f => f.file);
     this.checkCancelled(cancellationToken);
     let processData = null;
     for (const file of files) {
@@ -316,7 +318,7 @@ export class SubscribeStarAdult extends Website {
     if (files.length > 1) {
       const order = processData.imgs_and_videos
         .sort((a, b) => a.id - b.id)
-        .map((record) => record.id);
+        .map(record => record.id);
 
       const reorder = await this.postFileMessily(
         data.part.accountId,
@@ -372,8 +374,8 @@ export class SubscribeStarAdult extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.tiers.forEach((tier) => {
-        if (!folders.find((f) => f.value === tier)) {
+      submissionPart.data.tiers.forEach(tier => {
+        if (!folders.find(f => f.value === tier)) {
           warnings.push(`Access Tier (${tier}) not found.`);
         }
       });
@@ -382,11 +384,11 @@ export class SubscribeStarAdult extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       let maxMB = 5;
       if (type === FileSubmissionType.AUDIO) {
@@ -431,8 +433,8 @@ export class SubscribeStarAdult extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.tiers.forEach((tier) => {
-        if (!folders.find((f) => f.value === tier)) {
+      submissionPart.data.tiers.forEach(tier => {
+        if (!folders.find(f => f.value === tier)) {
           warnings.push(`Access Tier (${tier}) not found.`);
         }
       });

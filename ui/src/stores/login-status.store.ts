@@ -10,7 +10,7 @@ export interface LoginStatusState {
 
 export class LoginStatusStore {
   @observable state: LoginStatusState = {
-    statuses: []
+    statuses: [],
   };
 
   constructor() {
@@ -51,5 +51,5 @@ export class LoginStatusStore {
 export const loginStatusStore = new LoginStatusStore();
 
 socket.on(Events.AccountEvent.STATUS_UPDATED, (data: UserAccountDto[]) =>
-  loginStatusStore.updateStatuses(data)
+  loginStatusStore.updateStatuses(data),
 );

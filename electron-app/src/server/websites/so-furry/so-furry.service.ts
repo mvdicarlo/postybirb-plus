@@ -66,7 +66,7 @@ export class SoFurry extends Website {
     $('#UploadForm_folderId')
       .children()
       .toArray()
-      .forEach((o) => {
+      .forEach(o => {
         folders.push({ value: $(o).attr('value'), label: $(o).text() });
       });
 
@@ -226,7 +226,7 @@ export class SoFurry extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find((f) => f.value === submissionPart.data.folder)) {
+      if (!folders.find(f => f.value === submissionPart.data.folder)) {
         warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
     }

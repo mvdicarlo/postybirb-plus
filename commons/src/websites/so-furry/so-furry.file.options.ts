@@ -5,8 +5,10 @@ import { SoFurryFileOptions } from '../../interfaces/websites/so-furry/so-furry.
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class SoFurryFileOptionsEntity extends DefaultFileOptionsEntity
-  implements SoFurryFileOptions {
+export class SoFurryFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements SoFurryFileOptions
+{
   @Expose()
   @IsString()
   @DefaultValue('0')

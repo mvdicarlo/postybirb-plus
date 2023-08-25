@@ -78,7 +78,7 @@ export class FurryLife extends Website {
     });
 
     const data = await Promise.all<Folder>(
-      albumUrls.map(async (albumUrl) => {
+      albumUrls.map(async albumUrl => {
         const res = await Http.get<string>(`${this.BASE_URL}${albumUrl}`, profileId);
         const $$ = cheerio.load(res.body);
         const urlParts = albumUrl.split('/');
@@ -101,7 +101,7 @@ export class FurryLife extends Website {
           label: 'General (SFW)',
           nsfw: false,
         },
-        ...data.filter((d) => !d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
+        ...data.filter(d => !d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
       ],
     };
 
@@ -114,7 +114,7 @@ export class FurryLife extends Website {
           label: 'General (NSFW)',
           nsfw: true,
         },
-        ...data.filter((d) => d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
+        ...data.filter(d => d.nsfw).sort((a, b) => a.label.localeCompare(b.label)),
       ],
     };
 
@@ -185,7 +185,7 @@ export class FurryLife extends Website {
 
     const isNotAlbum = options.album === this.SFW_ALBUM || options.album === this.NSFW_ALBUM;
 
-    const files = [data.primary, ...data.additional].map((f) => f.file);
+    const files = [data.primary, ...data.additional].map(f => f.file);
 
     await BrowserWindowUtil.getPage(
       data.part.accountId,
@@ -211,7 +211,7 @@ export class FurryLife extends Website {
     this.checkCancelled(cancellationToken);
     try {
       const uploads = await Promise.all(
-        files.map((file) => this.upload(data.part.accountId, token, href, file)),
+        files.map(file => this.upload(data.part.accountId, token, href, file)),
       );
 
       const uploadData: any = {
@@ -229,7 +229,7 @@ export class FurryLife extends Website {
         uploadData.album_id = album.split('.').pop();
       }
 
-      uploads.forEach((u) => {
+      uploads.forEach(u => {
         const mediaId = `media[${u.temp_media_id}]`;
         uploadData[`${mediaId}[title]`] = data.title;
         uploadData[`${mediaId}[description]`] = '';
@@ -353,12 +353,12 @@ export class FurryLife extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
     const maxMB: number = 1023;
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
