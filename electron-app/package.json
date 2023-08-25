@@ -24,7 +24,7 @@
     "release:osx": "export $(cat .env | xargs) && electron-builder -m -p always",
     "clean": "rimraf release",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "run-s prebuild build start:electron",
+    "start": "run-s build start:electron",
     "start:electron": "electron dist/main --develop",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
