@@ -16,6 +16,7 @@ import { CancellationException } from './cancellation/cancellation.exception';
 import { FilePostData } from './interfaces/file-post-data.interface';
 import { PostData } from './interfaces/post-data.interface';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Poster {
   on(
     event: 'cancelled',
@@ -86,6 +87,7 @@ export interface Poster {
   ): this;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Poster extends EventEmitter {
   isPosting: boolean = false;
   isReady: boolean = false;
