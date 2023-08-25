@@ -9,6 +9,7 @@ import { WebsiteImpl } from '../website.base';
 import E621Login from './e621Login';
 import { e621TagSearchProvider } from './providers';
 
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 export class e621 extends WebsiteImpl {
   internalName: string = 'e621';
   name: string = 'e621';

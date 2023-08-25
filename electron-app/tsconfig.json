@@ -14,7 +14,11 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "paths": {
+      "postybirb-commons": ["../../commons/src/index.ts"]
+    }
   },
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

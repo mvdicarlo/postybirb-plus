@@ -112,10 +112,10 @@ export default class SubmissionTemplateSelect extends React.Component<Props> {
     let parts: any;
     switch (type as TemplateType) {
         case 'SUBMISSION':
-            parts = this.props.submissionStore?.getSubmission(id)!.parts;
+            parts = this.props.submissionStore?.getSubmission(id)!.parts!;
             break;
         case 'TEMPLATE':
-            parts = this.props.submissionTemplateStore?.getSubmissionTemplate(id)!.parts;
+            parts = this.props.submissionTemplateStore?.getSubmissionTemplate(id)!.parts!;
             break;
     }
 
