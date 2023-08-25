@@ -6,6 +6,16 @@ setTimeout(() => {
   process.exit(1);
 }, 60000 * 30);
 
+// Work around Jimp's hard-coded memory limit when loading JPEG files.
+// See https://github.com/jimp-dev/jimp/issues/915
+(function () {
+  const decoder: any = Jimp.decoders['image/jpeg']
+  Jimp.decoders['image/jpeg'] = (data: any) => {
+    const userOpts = { maxMemoryUsageInMB: Number.POSITIVE_INFINITY };
+    return decoder(data, userOpts);
+  }
+}());
+
 let manipulator = null; // JIMP
 process.on('message', async (msg: any) => {
   let hasChanges = false;
