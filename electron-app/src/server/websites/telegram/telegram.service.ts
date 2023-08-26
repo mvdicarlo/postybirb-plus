@@ -307,7 +307,7 @@ export class Telegram extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(20) };
+    return { maxSize: FileSize.MBtoBytes(this.MAX_MB) };
   }
 
   private async upload(appId: string, file: PostFileRecord, spoiler: boolean) {
