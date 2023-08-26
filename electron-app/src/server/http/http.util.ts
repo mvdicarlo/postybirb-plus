@@ -31,7 +31,7 @@ export default class Http {
   static Request = request.defaults({
     headers: {
       'User-Agent': session.defaultSession.getUserAgent(),
-    }
+    },
   });
 
   static parseCookies(cookies: Electron.Cookie[]) {
