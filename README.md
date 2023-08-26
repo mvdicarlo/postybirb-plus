@@ -69,4 +69,6 @@ If you are interested in adding features or websites to the application, please 
 
 PR branch is develop.
 
-Dont forget to `npm run codestyle` before pull request if you haven't installed eslint and prettier extensions!
+Dont forget to `npm run test --prefix electron-app` before pull 
+
+Also run `npm run codestyle` if you haven't installed eslint and prettier extensions!
