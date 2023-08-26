@@ -31,8 +31,7 @@ export default class Http {
   static Request = request.defaults({
     headers: {
       'User-Agent': session.defaultSession.getUserAgent(),
-    },
-    proxy: "http://127.0.0.1:9999/"
+    }
   });
 
   static parseCookies(cookies: Electron.Cookie[]) {
