@@ -49,7 +49,9 @@ export class Weasyl extends Website {
     const login: string = _.get(res.body, 'login');
     status.loggedIn = !!login;
     status.username = login;
-    await this.retrieveFolders(data._id, status.username);
+    if (status.loggedIn) {
+      await this.retrieveFolders(data._id, status.username);
+    }
     return status;
   }
 
