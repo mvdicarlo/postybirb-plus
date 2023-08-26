@@ -46,7 +46,11 @@ export class Telegram extends Website {
   public waitBetweenPostsInterval = 30_000;
   private lastCall: number;
   private DEFAULT_WAIT: number = 3000;
-  private MAX_MB: number = 10;
+
+  // Real telegram limit is 2GB but i don't think anyone
+  // will send such big files throught PostyBirb because
+  // no other site support such big files
+  private MAX_MB: number = 30;
   private usernameMap: Record<string, string> = {};
 
   private async callApi<T>(appId: string, protocol: string, data: any): Promise<T> {
@@ -272,7 +276,7 @@ export class Telegram extends Website {
     });
 
     const channels: Folder[] = chats
-      .filter((c) => {
+      .filter(c => {
         // Skip forbidden chats
         if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
 
@@ -284,7 +288,7 @@ export class Telegram extends Website {
         )
           return true;
       })
-      .map((c) => ({
+      .map(c => ({
         label: c.title,
         value: `${c.id}-${c.access_hash}`,
       }));
@@ -309,18 +313,19 @@ export class Telegram extends Website {
   private async upload(appId: string, file: PostFileRecord, spoiler: boolean) {
     const parts = _.chunk(file.file.value, FileSize.MBtoBytes(0.5)); // 512KB
     const file_id = Date.now();
-
-    // See scaling options above. Will this ever be true?..
-    const bigFile = file.file.value.length >= FileSize.MBtoBytes(10);
     const type: 'photo' | 'document' =
       file.file.options.contentType === 'image/png' ||
       file.file.options.contentType === 'image/jpg' ||
       file.file.options.contentType === 'image/jpeg'
         ? 'photo'
         : 'document';
+        
+    // saveBigFile part is only needed for document (video, files etc)
+    const bigFile = file.file.value.length >= FileSize.MBtoBytes(10) && type === 'document';
 
     let media: InputMedia = {
       _: `inputMediaUploaded${type === 'document' ? 'Document' : 'Photo'}`,
+      spoiler
     };
 
     if (type === 'document') {
@@ -331,12 +336,22 @@ export class Telegram extends Website {
       }
     }
 
+    this.logger.debug({ media });
+
+    const total_parts = bigFile ? { file_total_parts: parts.length } : {};
     for (let i = 0; i < parts.length; i++) {
-      console.log({ file_id, file_part: i, file_total_parts: bigFile ? parts.length : void 0 });
-      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`, {
+      const part = {
         file_id,
         file_part: i,
-        file_total_parts: bigFile ? parts.length : void 0,
+        ...total_parts,
+      };
+
+      this.logger.debug({
+        ...part,
+        bytes_size: parts[i].length,
+      });
+      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`, {
+        ...part,
         bytes: parts[i],
       });
     }
@@ -370,11 +385,12 @@ export class Telegram extends Website {
       data.description.trim().slice(0, 4096),
     );
     let mediaDescription = '';
-    let mediaEntities = []
+    let mediaEntities = [];
     let messageDescription = '';
     if (description.length < 1024) {
+      // Description fit image/album limit, no separate message
       mediaDescription = description;
-      mediaEntities = entities
+      mediaEntities = entities;
     } else {
       messageDescription = description;
     }
@@ -392,7 +408,7 @@ export class Telegram extends Website {
           random_id: Date.now(),
           media: medias[0],
           message: mediaDescription,
-          entities,
+          entities: mediaEntities,
           silent: data.options.silent,
           peer,
         });
@@ -498,7 +514,8 @@ export class Telegram extends Website {
 
   private getSourceFromResponse(response: SendMessageResponse) {
     // TODO Maybe support multiple sources from multiple channels. Need to rewrite some ui
-    const update = response.updates.find((e) => e._ === 'updateNewChannelMessage');
+    const update = response.updates.find(e => e._ === 'updateNewChannelMessage');
+    if (!update || !update.peer_id || !update.id) return '';
     return `https://t.me/c/${update.peer_id.channel_id}/${update.id}`;
   }
 
@@ -517,7 +534,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach((f) => {
+      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Channel (${f}) not found.`);
         }
@@ -534,19 +551,31 @@ export class Telegram extends Website {
       warnings.push('Max description length allowed is 4,096 characters.');
     }
 
-    const { type, size, name } = submission.primary;
-    const maxMB: number = 10;
-    if (FileSize.MBtoBytes(maxMB) < size) {
-      if (
-        isAutoscaling &&
-        type === FileSubmissionType.IMAGE &&
-        ImageManipulator.isMimeType(submission.primary.mimetype)
-      ) {
-        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
-      } else {
-        problems.push(`Telegram limits ${submission.primary.mimetype} to ${maxMB}MB`);
+    const files = [
+      submission.primary,
+      ...(submission.additional || []).filter(
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+      ),
+    ];
+
+    files.forEach(file => {
+      const { type, size, name, mimetype } = file;
+      if (FileSize.MBtoBytes(this.MAX_MB) < size) {
+        if (
+          isAutoscaling &&
+          type === FileSubmissionType.IMAGE &&
+          ImageManipulator.isMimeType(mimetype)
+        ) {
+          warnings.push(`${name} will be scaled down to ${this.MAX_MB}MB`);
+        } else {
+          problems.push(`Telegram limits ${mimetype} to ${this.MAX_MB}MB`);
+        }
       }
-    }
+
+      if (FileSize.MBtoBytes(10) < size && type !== FileSubmissionType.IMAGE) {
+        warnings.push(`${name} will show in channel as Unknown Track but still will be avaible for open.`);
+      }
+    });
 
     return { problems, warnings };
   }
@@ -565,7 +594,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach((f) => {
+      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Channel (${f}) not found.`);
         }
