@@ -319,7 +319,7 @@ export class Telegram extends Website {
       file.file.options.contentType === 'image/jpeg'
         ? 'photo'
         : 'document';
-        
+
     // saveBigFile part is only needed for document (video, files etc)
     const bigFile = file.file.value.length >= FileSize.MBtoBytes(10) && type === 'document';
 
@@ -336,22 +336,12 @@ export class Telegram extends Website {
       }
     }
 
-    this.logger.debug({ media });
-
     const total_parts = bigFile ? { file_total_parts: parts.length } : {};
     for (let i = 0; i < parts.length; i++) {
-      const part = {
+      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`,{
+        ...total_parts,
         file_id,
         file_part: i,
-        ...total_parts,
-      };
-
-      this.logger.debug({
-        ...part,
-        bytes_size: parts[i].length,
-      });
-      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`, {
-        ...part,
         bytes: parts[i],
       });
     }
