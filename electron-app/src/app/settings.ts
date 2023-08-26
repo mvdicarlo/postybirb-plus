@@ -24,6 +24,7 @@ const settingDefaults: Settings = {
   maxJPEGSizeCompression: 50,
   silentNotification: false,
   defaultTagSearchProvider: 'none',
+  proxy: '',
 };
 settings.defaults(settingDefaults).write();
 
