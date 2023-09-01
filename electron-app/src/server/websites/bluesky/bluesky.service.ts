@@ -331,7 +331,7 @@ export class Bluesky extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (!submissionPart.data.altText) {
-      problems.push(`Bluesky requires alt text to be provided`);
+      warnings.push(`Bluesky recommends alt text to be provided`);
     }
 
     if (submissionPart.data.description.value.length > this.MAX_CHARS) {
