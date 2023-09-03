@@ -9,6 +9,7 @@ import { Inkbunny } from './inkbunny/Inkbunny';
 import { SoFurry } from './sofurry/SoFurry';
 import { e621 } from './e621/e621';
 import { FurAffinity } from './fur-affinity/FurAffinity';
+import { Furtastic } from './furtastic/furtastic';
 import { SubscribeStar } from './subscribe-star/SubscribeStar';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 import { Aryion } from './aryion/Aryion';
@@ -43,6 +44,7 @@ export class WebsiteRegistry {
     DeviantArt: new DeviantArt(),
     Discord: new Discord(),
     FurAffinity: new FurAffinity(),
+    Furtastic: new Furtastic(),
     Furbooru: new Furbooru(),
     FurryNetwork: new FurryNetwork(),
     HentaiFoundry: new HentaiFoundry(),
