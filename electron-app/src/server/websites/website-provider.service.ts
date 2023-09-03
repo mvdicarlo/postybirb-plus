@@ -9,6 +9,7 @@ import { KoFi } from './ko-fi/ko-fi.service';
 import { Inkbunny } from './inkbunny/inkbunny.service';
 import { SoFurry } from './so-furry/so-furry.service';
 import { e621 } from './e621/e621.service';
+import { Furtastic } from './furtastic/furtastic.service';
 import { FurAffinity } from './fur-affinity/fur-affinity.service';
 import { SubscribeStar } from './subscribe-star/subscribe-star.service';
 import { HentaiFoundry } from './hentai-foundry/hentai-foundry.service';
@@ -51,6 +52,7 @@ export class WebsiteProvider {
     readonly sofurry: SoFurry,
     readonly e621: e621,
     readonly furaffinity: FurAffinity,
+    readonly furtastic: Furtastic,
     readonly subscribestar: SubscribeStar,
     readonly subscribestarAdult: SubscribeStarAdult,
     readonly hentaiFoundry: HentaiFoundry,
