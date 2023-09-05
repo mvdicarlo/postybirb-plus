@@ -75,7 +75,7 @@ export class FaArchiveImporter extends Importer {
     }
 
     const count = imports.length;
-    this.tryExtractImports(imports).then((successes) => {
+    this.tryExtractImports(imports).then(successes => {
       this.logger.debug(`${successes}/${count} imported`, 'Imported Finished');
       this.showCompletedNotification(successes, count);
     });

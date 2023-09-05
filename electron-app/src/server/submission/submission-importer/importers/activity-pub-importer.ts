@@ -100,7 +100,7 @@ export class ActivityPubImporter extends Importer {
     }
 
     const count = imports.length;
-    this.tryExtractImports(imports).then((successes) => {
+    this.tryExtractImports(imports).then(successes => {
       this.logger.debug(`${successes}/${count} imported`, 'Imported Finished');
       this.showCompletedNotification(successes, count);
     });
@@ -125,7 +125,7 @@ export class ActivityPubImporter extends Importer {
       return null;
     }
 
-    if(this.looksLikeDirectMessage(item)) {
+    if (this.looksLikeDirectMessage(item)) {
       return null;
     }
 
@@ -168,7 +168,7 @@ export class ActivityPubImporter extends Importer {
     return imp;
   }
 
-  private looksLikeDirectMessage({to, cc}: ActivityPubOutboxItem): boolean {
+  private looksLikeDirectMessage({ to, cc }: ActivityPubOutboxItem): boolean {
     for (const recipient of [...(to || []), ...(cc || [])]) {
       // If the post goes to the public or someone's followers, it's not a DM.
       if (/(#public|\/followers)$/i.test(recipient)) {

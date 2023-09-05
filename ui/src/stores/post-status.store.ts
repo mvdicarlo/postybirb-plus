@@ -1,9 +1,6 @@
 import { observable, computed, action } from 'mobx';
 import socket from '../utils/websocket';
-import {
-  PostStatuses,
-  PostInfo
-} from 'postybirb-commons';
+import { PostStatuses, PostInfo } from 'postybirb-commons';
 import PostService from '../services/post.service';
 import { Submission } from 'postybirb-commons';
 import { Events } from 'postybirb-commons';
@@ -12,7 +9,7 @@ export class PostStatusStore {
   @observable
   state: PostStatuses = {
     queued: [],
-    posting: []
+    posting: [],
   };
 
   constructor() {

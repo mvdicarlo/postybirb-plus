@@ -30,7 +30,11 @@ export default class ImageManipulator {
     return !!this.deferredLocation;
   }
 
-  private constructor(private readonly buffer: Buffer, type: MimeType, deferredObj: string) {
+  private constructor(
+    private readonly buffer: Buffer,
+    type: MimeType,
+    deferredObj: string,
+  ) {
     this.type = type;
     this.originalType = type;
     this.quality = 100;

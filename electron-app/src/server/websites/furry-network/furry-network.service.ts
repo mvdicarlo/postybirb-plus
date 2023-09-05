@@ -293,8 +293,8 @@ export class FurryNetwork extends Website {
             &resumableTotalSize=${data.thumbnail.value.length}
             &resumableType=${encodeURIComponent(data.thumbnail.options.contentType)}
             &resumableIdentifier=${data.thumbnail.value.length}-${encodeURIComponent(
-                  data.thumbnail.options.filename,
-                ).replace('.', '')}
+              data.thumbnail.options.filename,
+            ).replace('.', '')}
             &resumableFilename=${encodeURIComponent(
               data.thumbnail.options.filename,
             )}&resumableRelativePath=${encodeURIComponent(data.thumbnail.options.filename)}
@@ -425,16 +425,12 @@ export class FurryNetwork extends Website {
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
       if (submission.primary.type === FileSubmissionType.TEXT && !submission.fallback) {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
         problems.push('A fallback file is required.');
       } else if (submission.primary.type === FileSubmissionType.TEXT && submission.fallback) {
         warnings.push('The fallback text will be used.');
       } else {
-        problems.push(
-          `Currently supported file formats: ${this.acceptsFiles.join(', ')}`,
-        );
+        problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
       }
     }
 

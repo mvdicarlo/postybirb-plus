@@ -17,7 +17,7 @@ export default class LoginService {
       _id: id,
       website,
       alias,
-      data
+      data,
     });
   }
 

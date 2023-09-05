@@ -5,7 +5,10 @@ import { TumblrNotificationOptions } from '../../interfaces/websites/tumblr/tumb
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class TumblrNotificationOptionsEntity extends DefaultOptionsEntity implements TumblrNotificationOptions {
+export class TumblrNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements TumblrNotificationOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

@@ -1,9 +1,11 @@
 import { EventEmitter } from 'events';
 import _ from 'lodash';
 import {
-  DefaultFileOptions, DefaultOptions,
+  DefaultFileOptions,
+  DefaultOptions,
   PostResponse,
-  PostStatus, Submission
+  PostStatus,
+  Submission,
 } from 'postybirb-commons';
 import { SettingsService } from 'src/server/settings/settings.service';
 import { Website } from 'src/server/websites/website.base';
@@ -142,7 +144,7 @@ export class Poster extends EventEmitter {
           throw new Error('Not logged in');
         }
       }
-      
+
       if (this.isCancelled()) {
         return;
       }
@@ -238,7 +240,7 @@ export class Poster extends EventEmitter {
       const random = _.random(0, 100);
       if (random > 90) {
         setTimeout(
-          function() {
+          function () {
             resolve({ website: this.part.website });
           }.bind(this),
           _.random(8000),

@@ -5,8 +5,10 @@ import { MastodonNotificationOptions } from '../../interfaces/websites/mastodon/
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class MastodonNotificationOptionsEntity extends DefaultOptionsEntity
-  implements MastodonNotificationOptions {
+export class MastodonNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements MastodonNotificationOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

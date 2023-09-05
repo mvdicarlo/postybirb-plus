@@ -522,5 +522,5 @@ export const HentaiFoundryCategories: Record<string, string> = {
   '541': 'Attack on Titan',
   '542': 'Lollipop Chainsaw',
   '543': 'Archeage',
-  '544': 'Overwatch'
+  '544': 'Overwatch',
 };

@@ -89,7 +89,7 @@ export class Itaku extends Website {
       },
     );
 
-    const postFolders: Folder[] = postFolderRes.body.map((f) => ({
+    const postFolders: Folder[] = postFolderRes.body.map(f => ({
       value: f.title,
       label: f.title,
     }));
@@ -105,7 +105,7 @@ export class Itaku extends Website {
       },
     });
 
-    const galleryFolders: Folder[] = galleryFolderRes.body.results.map((f) => ({
+    const galleryFolders: Folder[] = galleryFolderRes.body.results.map(f => ({
       value: f.title,
       label: f.title,
     }));
@@ -134,13 +134,13 @@ export class Itaku extends Website {
       description: data.description,
       sections: JSON.stringify(data.options.folders),
       maturity_rating: this.convertRating(data.rating),
-      tags: JSON.stringify(data.tags.map((tag) => ({ name: tag }))),
+      tags: JSON.stringify(data.tags.map(tag => ({ name: tag }))),
       visibility: data.options.visibility,
       image: data.primary.file,
     };
-    
+
     if (data.options.shareOnFeed) {
-      postData.add_to_feed = "true";
+      postData.add_to_feed = 'true';
     }
 
     if (data.options.spoilerText) {
@@ -192,7 +192,7 @@ export class Itaku extends Website {
       folders: data.options.folders,
       gallery_images: [],
       maturity_rating: this.convertRating(data.rating),
-      tags: data.tags.map((tag) => ({ name: tag })),
+      tags: data.tags.map(tag => ({ name: tag })),
       visibility: data.options.visibility,
     };
 

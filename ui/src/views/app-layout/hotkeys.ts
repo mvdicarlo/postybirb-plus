@@ -3,11 +3,11 @@ export class JumpableHotKeys {
   static readonly JUMPABLE_CLASS: string = 'jumpable-section';
   static handlers = {
     JUMP_UP: JumpableHotKeys.JumpSection.bind(undefined, true),
-    JUMP_DOWN: JumpableHotKeys.JumpSection.bind(undefined, false)
+    JUMP_DOWN: JumpableHotKeys.JumpSection.bind(undefined, false),
   };
   static keyMap = {
     JUMP_UP: 'ctrl+up',
-    JUMP_DOWN: 'ctrl+down'
+    JUMP_DOWN: 'ctrl+down',
   };
 
   static JumpSection(up: boolean) {
@@ -57,7 +57,7 @@ export class JumpableHotKeys {
     const potentialElements: HTMLElement[] = [
       el.querySelector('input') as HTMLElement,
       el.querySelector('button') as HTMLElement,
-      el.querySelector('[tabindex]') as HTMLElement
+      el.querySelector('[tabindex]') as HTMLElement,
     ];
     for (const e of potentialElements) {
       if (e) return e;

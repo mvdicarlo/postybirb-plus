@@ -5,8 +5,10 @@ import { PillowfortNotificationOptions } from '../../interfaces/websites/pillowf
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class PillowfortNotificationOptionsEntity extends DefaultOptionsEntity
-  implements PillowfortNotificationOptions {
+export class PillowfortNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements PillowfortNotificationOptions
+{
   @Expose()
   @IsString()
   @DefaultValue('public')

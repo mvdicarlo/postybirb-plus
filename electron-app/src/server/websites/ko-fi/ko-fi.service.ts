@@ -177,7 +177,7 @@ export class KoFi extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find((f) => f.value === submissionPart.data.album)) {
+      if (!folders.find(f => f.value === submissionPart.data.album)) {
         warnings.push(`Folder (${submissionPart.data.album}) not found.`);
       }
     }

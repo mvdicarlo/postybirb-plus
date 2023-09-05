@@ -5,7 +5,10 @@ export class BBCodeNodeConverter {
   public endTag: string = '';
   public startTag: string = '';
 
-  constructor(private node: HtmlNode, private options?: BBCodeConvertOptions) {
+  constructor(
+    private node: HtmlNode,
+    private options?: BBCodeConvertOptions,
+  ) {
     this.convert();
   }
 

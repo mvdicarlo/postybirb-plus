@@ -10,7 +10,7 @@ export class TelegramController extends GenericWebsiteController {
   }
 
   @Post('authenticate')
-  async authenticate(@Body() data: { appId: string; code: string, password: string }) {
+  async authenticate(@Body() data: { appId: string; code: string; password: string }) {
     return this.service.authenticate(data);
   }
 

@@ -3,5 +3,5 @@ export enum FileSubmissionType {
   TEXT = 'TEXT',
   VIDEO = 'VIDEO',
   AUDIO = 'AUDIO',
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = 'UNKNOWN',
 }

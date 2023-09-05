@@ -223,7 +223,7 @@ export class Telegram extends Website {
           api_id: Number(appId),
           api_hash: appHash,
           storageOptions: {
-            instance: new TelegramStorage(appId)
+            instance: new TelegramStorage(appId),
           },
         });
 
@@ -271,7 +271,7 @@ export class Telegram extends Website {
     });
 
     const channels: Folder[] = chats
-      .filter((c) => {
+      .filter(c => {
         // Skip forbidden chats
         if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
 
@@ -283,7 +283,7 @@ export class Telegram extends Website {
         )
           return true;
       })
-      .map((c) => ({
+      .map(c => ({
         label: c.title,
         value: `${c.id}-${c.access_hash}`,
       }));
@@ -392,7 +392,7 @@ export class Telegram extends Website {
       this.checkCancelled(cancellationToken);
       fileData.push(await this.upload(appId, file, data.options.spoiler));
     }
-    
+
     const description = data.description.slice(0, 4096).trim();
 
     for (const channel of data.options.channels) {
@@ -442,7 +442,9 @@ export class Telegram extends Website {
         // multimedia send
         let mediaData = [];
         for (let i = 0; i < fileData.length; i++) {
-          let messageMediaPhoto = await this.callApi<{ photo: { id: number, access_hash: number, file_reference: string}}>(appId, 'messages.uploadMedia', {
+          let messageMediaPhoto = await this.callApi<{
+            photo: { id: number; access_hash: number; file_reference: string };
+          }>(appId, 'messages.uploadMedia', {
             peer: {
               _: 'inputPeerChannel',
               channel_id,
@@ -455,24 +457,24 @@ export class Telegram extends Website {
             _: 'inputSingleMedia',
             random_id: Date.now(),
             media: {
-              _: "inputMediaPhoto",
+              _: 'inputMediaPhoto',
               spoiler: fileData[i].spoiler,
               id: {
-                _: "inputPhoto",
+                _: 'inputPhoto',
                 id: messageMediaPhoto.photo.id,
                 access_hash: messageMediaPhoto.photo.access_hash,
                 file_reference: messageMediaPhoto.photo.file_reference,
-              }
+              },
             },
             message: i == 0 && !messagePosted ? data.description : '',
           });
         }
 
         let photosPerBatch = 10;
-        let batches = 1 + ((mediaData.length - 1) / photosPerBatch);
+        let batches = 1 + (mediaData.length - 1) / photosPerBatch;
         for (let i = 0; i < batches; i++) {
           await this.callApi(appId, 'messages.sendMultiMedia', {
-            multi_media: mediaData.slice(i*photosPerBatch,(i+1)*photosPerBatch),
+            multi_media: mediaData.slice(i * photosPerBatch, (i + 1) * photosPerBatch),
             peer,
             silent: data.options.silent,
           });
@@ -525,7 +527,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach((f) => {
+      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Channel (${f}) not found.`);
         }
@@ -573,7 +575,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach((f) => {
+      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Folder (${f}) not found.`);
         }

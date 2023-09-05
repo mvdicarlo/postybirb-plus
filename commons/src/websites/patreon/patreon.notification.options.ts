@@ -5,11 +5,13 @@ import { PatreonNotificationOptions } from '../../interfaces/websites/patreon/pa
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class PatreonNotificationOptionsEntity extends DefaultOptionsEntity
-  implements PatreonNotificationOptions {
+export class PatreonNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements PatreonNotificationOptions
+{
   @Expose()
   @IsArray()
-  @DefaultValue(["0"])
+  @DefaultValue(['0'])
   tiers!: string[];
 
   @Expose()

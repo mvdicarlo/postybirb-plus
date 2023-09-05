@@ -10,12 +10,12 @@ export interface TagConverterState {
 
 export class TagConverterStore {
   @observable state: TagConverterState = {
-    tagConverters: []
+    tagConverters: [],
   };
 
   constructor() {
     TagConverterService.getAll().then(({ data }) =>
-      this.state.tagConverters.push(...data.sort((a, b) => a.tag.localeCompare(b.tag)))
+      this.state.tagConverters.push(...data.sort((a, b) => a.tag.localeCompare(b.tag))),
     );
   }
 

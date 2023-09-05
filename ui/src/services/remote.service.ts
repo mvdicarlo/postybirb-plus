@@ -16,7 +16,7 @@ export default class RemoteService {
   static async updateCookies(accountId: string) {
     return axios.post('/remote/updateCookies', {
       accountId,
-      cookies: await window.electron.session.getCookies(accountId)
+      cookies: await window.electron.session.getCookies(accountId),
     });
   }
 
@@ -24,7 +24,7 @@ export default class RemoteService {
     if (!RemoteService.isRemote()) return url;
     else
       return `${this.getRemoteURI()}/remote/static?uri=${encodeURIComponent(
-        url
+        url,
       )}&auth=${RemoteService.getAuthId()}`;
   }
 
@@ -40,8 +40,8 @@ export default class RemoteService {
   static testConnection() {
     return fetch(`${localStorage.getItem('REMOTE_URI') as string}/remote/ping`, {
       headers: {
-        Authorization: localStorage.getItem('REMOTE_AUTH') as string
-      }
+        Authorization: localStorage.getItem('REMOTE_AUTH') as string,
+      },
     }).then(response => {
       return response.ok ? Promise.resolve() : Promise.reject();
     });

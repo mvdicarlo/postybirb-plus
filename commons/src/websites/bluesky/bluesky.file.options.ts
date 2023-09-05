@@ -5,9 +5,10 @@ import { BlueskyFileOptions } from '../../interfaces/websites/bluesky/bluesky.fi
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class BlueskyFileOptionsEntity extends DefaultFileOptionsEntity
-  implements BlueskyFileOptions {
-
+export class BlueskyFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements BlueskyFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()
@@ -17,7 +18,6 @@ export class BlueskyFileOptionsEntity extends DefaultFileOptionsEntity
   @IsString()
   @DefaultValue('')
   label_rating: string = '';
-  
 
   constructor(entity?: Partial<BlueskyFileOptions>) {
     super(entity as DefaultFileOptions);

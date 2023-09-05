@@ -5,8 +5,10 @@ import { MissKeyNotificationOptions } from '../../interfaces/websites/misskey/mi
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class MissKeyNotificationOptionsEntity extends DefaultOptionsEntity
-  implements MissKeyNotificationOptions {
+export class MissKeyNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements MissKeyNotificationOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
