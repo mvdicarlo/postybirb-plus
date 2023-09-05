@@ -58,5 +58,5 @@ export const PicartoCategories = [
   'Always ON',
   'ASMR',
   'Podcast',
-  'Talkshow'
+  'Talkshow',
 ];

@@ -73,17 +73,17 @@ export class SubmissionService {
     const submissions: Array<SubmissionPackage<SubmissionEntity>> = await this.getAllAndValidate();
     const now = Date.now();
     submissions
-      .filter((p) => p.submission.schedule.isScheduled)
-      .filter((p) => p.submission.schedule.postAt <= now)
-      .filter((p) => !this.postService.isCurrentlyPosting(p.submission))
-      .filter((p) => !this.postService.isCurrentlyQueued(p.submission))
+      .filter(p => p.submission.schedule.isScheduled)
+      .filter(p => p.submission.schedule.postAt <= now)
+      .filter(p => !this.postService.isCurrentlyPosting(p.submission))
+      .filter(p => !this.postService.isCurrentlyQueued(p.submission))
       .sort((a, b) => {
         if (a.submission.schedule.postAt === b.submission.schedule.postAt) {
           return a.submission.order - b.submission.order;
         }
         return a.submission.schedule.postAt - b.submission.schedule.postAt;
       })
-      .forEach((p) => {
+      .forEach(p => {
         this.scheduleSubmission(p.submission._id, false);
         this.postService.queue(p.submission);
       });
@@ -93,7 +93,7 @@ export class SubmissionService {
   async checkForQueuedOrScheduled() {
     this.logger.debug('Queued/Scheduled Check');
     const submissions: Array<SubmissionPackage<any>> = await this.getAllAndValidate();
-    const hasScheduled = !!submissions.filter((p) => p.submission.schedule.isScheduled).length;
+    const hasScheduled = !!submissions.filter(p => p.submission.schedule.isScheduled).length;
     const hasQueuedOrPosting =
       this.postService.hasAnyQueued() || this.postService.isCurrentlyPostingToAny();
 
@@ -131,7 +131,7 @@ export class SubmissionService {
     }
 
     const submissions = await this.repository.find(query);
-    submissions.forEach((submission) => {
+    submissions.forEach(submission => {
       submission.isPosting = this.postService.isCurrentlyPosting(submission);
       submission.isQueued = this.postService.isCurrentlyQueued(submission);
     });
@@ -140,8 +140,8 @@ export class SubmissionService {
   }
 
   async getAllAndValidate(type?: SubmissionType): Promise<Array<SubmissionPackage<any>>> {
-    return (await Promise.all((await this.getAll(type)).map((s) => this.validate(s)))).filter(
-      (s) => Object.keys(s.parts).length,
+    return (await Promise.all((await this.getAll(type)).map(s => this.validate(s)))).filter(
+      s => Object.keys(s.parts).length,
     ); // filter out submissions that are missing parts entirely (assumes it is currently being deleted)
   }
 
@@ -199,7 +199,7 @@ export class SubmissionService {
       if (createDto.parts) {
         const parts: Array<SubmissionPart<any>> = JSON.parse(createDto.parts);
         await Promise.all(
-          parts.map((part) => {
+          parts.map(part => {
             delete part._id;
             delete part.lastUpdated;
             delete part.created;
@@ -247,14 +247,14 @@ export class SubmissionService {
 
     try {
       const submissionParts: Array<SubmissionPartEntity<any>> = parts
-        .map((responsePart) => responsePart.part)
-        .map((part) => {
+        .map(responsePart => responsePart.part)
+        .map(part => {
           part.submissionId = newSubmission._id;
           part.postStatus = 'UNPOSTED';
           part.postedTo = undefined;
           return part;
         })
-        .filter(async (part) => {
+        .filter(async part => {
           try {
             if (part.isDefault) {
               return true;
@@ -265,13 +265,13 @@ export class SubmissionService {
             return false;
           }
         })
-        .map((part) => new SubmissionPartEntity(part));
+        .map(part => new SubmissionPartEntity(part));
 
       const defaultEntity = new SubmissionPartEntity(defaultPart);
       defaultEntity.submissionId = newSubmission._id;
 
       await Promise.all([
-        ...submissionParts.map((p) =>
+        ...submissionParts.map(p =>
           this.partService.createOrUpdateSubmissionPart(p, newSubmission.type),
         ),
         this.partService.createOrUpdateSubmissionPart(defaultEntity, newSubmission.type),
@@ -343,21 +343,21 @@ export class SubmissionService {
 
     const unsupportedAdditionalWebsites = this.websiteProvider
       .getAllWebsiteModules()
-      .filter((w) => !w.acceptsAdditionalFiles)
-      .map((w) => w.constructor.name);
+      .filter(w => !w.acceptsAdditionalFiles)
+      .map(w => w.constructor.name);
 
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
 
     const websitePartsThatNeedSplitting = parts
-      .filter((p) => !p.isDefault)
-      .filter((p) => unsupportedAdditionalWebsites.includes(p.website));
+      .filter(p => !p.isDefault)
+      .filter(p => unsupportedAdditionalWebsites.includes(p.website));
 
     if (!websitePartsThatNeedSplitting.length) {
       return; // Nothing needs to be done
     }
 
     // Reintroduce default part
-    websitePartsThatNeedSplitting.push(parts.find((p) => p.isDefault));
+    websitePartsThatNeedSplitting.push(parts.find(p => p.isDefault));
 
     let order: number = submission.order;
     for (const additional of submission.additional) {
@@ -372,7 +372,7 @@ export class SubmissionService {
         newSubmission = await this.fileSubmissionService.duplicateSubmission(newSubmission);
         const createdSubmission = await this.repository.save(newSubmission);
         await Promise.all(
-          websitePartsThatNeedSplitting.map((p) => {
+          websitePartsThatNeedSplitting.map(p => {
             p.submissionId = newSubmission._id;
             p.postStatus = 'UNPOSTED';
             return this.partService.createOrUpdateSubmissionPart(p, newSubmission.type);
@@ -416,7 +416,7 @@ export class SubmissionService {
       // Duplicate parts
       const parts = await this.partService.getPartsForSubmission(originalId, true);
       await Promise.all(
-        parts.map((p) => {
+        parts.map(p => {
           p.submissionId = duplicate._id;
           p.postStatus = 'UNPOSTED';
           return this.partService.createOrUpdateSubmissionPart(p, duplicate.type);
@@ -442,7 +442,7 @@ export class SubmissionService {
     const submissions = (await this.getAll(movingSubmission.type)).sort(
       (a, b) => a.order - b.order,
     );
-    const fromSubmission = submissions.find((s) => s._id === id);
+    const fromSubmission = submissions.find(s => s._id === id);
     fromSubmission.order = from < to ? to + 0.1 : to - 0.1;
     await Promise.all(
       submissions
@@ -463,10 +463,10 @@ export class SubmissionService {
         record.order = index;
         return record;
       });
-    await Promise.all(ordered.map((record) => this.repository.update(record)));
+    await Promise.all(ordered.map(record => this.repository.update(record)));
 
     const orderRecord: Record<string, number> = {};
-    Object.values(ordered).forEach((submission) => {
+    Object.values(ordered).forEach(submission => {
       orderRecord[submission._id] = submission.order;
     });
     this.eventEmitter.emit(Events.SubmissionEvent.REORDER, orderRecord);
@@ -487,7 +487,7 @@ export class SubmissionService {
     }
 
     const mappedParts: Parts = {};
-    parts.forEach((part) => (mappedParts[part.accountId] = part.asPlain())); // asPlain to expose the _id (a model might work better)
+    parts.forEach(part => (mappedParts[part.accountId] = part.asPlain())); // asPlain to expose the _id (a model might work better)
     return {
       submission,
       parts: mappedParts,
@@ -548,8 +548,8 @@ export class SubmissionService {
     }
     await this.repository.update(submissionToUpdate);
 
-    await Promise.all(removedParts.map((partId) => this.partService.removeSubmissionPart(partId)));
-    await Promise.all(parts.map((p) => this.setPart(submissionToUpdate, p)));
+    await Promise.all(removedParts.map(partId => this.partService.removeSubmissionPart(partId)));
+    await Promise.all(parts.map(p => this.setPart(submissionToUpdate, p)));
 
     const packaged: SubmissionPackage<any> = await this.validate(submissionToUpdate);
     this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [packaged]);
@@ -565,11 +565,11 @@ export class SubmissionService {
     }
 
     const allParts = await this.partService.getPartsForSubmission(submission._id, false);
-    const keepIds = submissionOverwrite.parts.map((p) => p.accountId);
-    const removeParts = allParts.filter((p) => !keepIds.includes(p.accountId) && !p.isDefault);
+    const keepIds = submissionOverwrite.parts.map(p => p.accountId);
+    const removeParts = allParts.filter(p => !keepIds.includes(p.accountId) && !p.isDefault);
 
-    await Promise.all(submissionOverwrite.parts.map((part) => this.setPart(submission, part)));
-    await Promise.all(removeParts.map((p) => this.partService.removeSubmissionPart(p._id)));
+    await Promise.all(submissionOverwrite.parts.map(part => this.setPart(submission, part)));
+    await Promise.all(removeParts.map(p => this.partService.removeSubmissionPart(p._id)));
 
     const packaged: SubmissionPackage<any> = await this.validate(submission);
     this.eventEmitter.emit(Events.SubmissionEvent.UPDATED, [packaged]);
@@ -807,7 +807,7 @@ export class SubmissionService {
 
     if (submission.additional) {
       const recordToUpdate: FileRecord = submission.additional.find(
-        (r) => r.location === record.location,
+        r => r.location === record.location,
       );
       if (recordToUpdate) {
         recordToUpdate.ignoredAccounts = record.ignoredAccounts || [];

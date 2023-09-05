@@ -93,7 +93,7 @@ export class Patreon extends Website {
       this.loadTiers(
         data._id,
         body.included.filter(
-          (included) => included.type === 'reward' || included.type === 'access-rule',
+          included => included.type === 'reward' || included.type === 'access-rule',
         ),
       );
     }
@@ -115,16 +115,16 @@ export class Patreon extends Website {
   ) {
     const tiers: Folder[] = rewardAttributes
       .filter(({ type }) => type === 'reward')
-      .map((attr) => ({
+      .map(attr => ({
         label: attr.attributes.title || attr.attributes.description,
         value: attr.id,
       }));
 
     rewardAttributes
       .filter(({ type }) => type === 'access-rule')
-      .forEach((rule) => {
+      .forEach(rule => {
         if (rule.relationships?.tier?.data?.id) {
-          const matchingTier = tiers.find((t) => t.value === rule.relationships.tier.data.id);
+          const matchingTier = tiers.find(t => t.value === rule.relationships.tier.data.id);
           if (matchingTier) {
             matchingTier.value = rule.id;
           }
@@ -133,9 +133,9 @@ export class Patreon extends Website {
 
     rewardAttributes
       .filter(({ type }) => type === 'access-rule')
-      .forEach((rule) => {
+      .forEach(rule => {
         if (rule.attributes.access_rule_type === 'public') {
-          tiers.find((t) => t.value === '-1').value = rule.id;
+          tiers.find(t => t.value === '-1').value = rule.id;
         }
       });
 
@@ -160,7 +160,7 @@ export class Patreon extends Website {
       return '';
     }
     // encode html
-    text = text.replace(/[\u00A0-\u9999<>&](?!#)/gim, (i) => {
+    text = text.replace(/[\u00A0-\u9999<>&](?!#)/gim, i => {
       return '&#' + i.charCodeAt(0) + ';';
     });
 
@@ -273,7 +273,7 @@ export class Patreon extends Website {
 
     // Tags
     const formattedTags = this.formatTags(data.tags);
-    const relationshipTags = formattedTags.map((tag) => {
+    const relationshipTags = formattedTags.map(tag => {
       return {
         id: tag.id,
         type: tag.type,
@@ -281,7 +281,7 @@ export class Patreon extends Website {
     });
 
     const { options } = data;
-    const accessRules: any[] = options.tiers.map((tier) => {
+    const accessRules: any[] = options.tiers.map(tier => {
       return { type: 'access-rule', id: tier };
     });
 
@@ -324,7 +324,7 @@ export class Patreon extends Website {
       included: formattedTags,
     };
 
-    accessRules.forEach((rule) => form.included.push(rule));
+    accessRules.forEach(rule => form.included.push(rule));
 
     this.checkCancelled(cancellationToken);
     const post = await this.finalizePost(data.part.accountId, link, csrf, form);
@@ -356,9 +356,9 @@ export class Patreon extends Website {
     const link = create.data.id;
 
     // Files
-    [data.primary.file, data.thumbnail, ...data.additional.map((f) => f.file)]
-      .filter((f) => f)
-      .forEach((f) => (f.options.filename = f.options.filename.replace(/'/g, '')));
+    [data.primary.file, data.thumbnail, ...data.additional.map(f => f.file)]
+      .filter(f => f)
+      .forEach(f => (f.options.filename = f.options.filename.replace(/'/g, '')));
 
     let uploadType = 'main';
     let shouldUploadThumbnail: boolean = false;
@@ -424,7 +424,7 @@ export class Patreon extends Website {
 
     // Tags
     const formattedTags = this.formatTags(data.tags);
-    const relationshipTags = formattedTags.map((tag) => {
+    const relationshipTags = formattedTags.map(tag => {
       return {
         id: tag.id,
         type: tag.type,
@@ -432,7 +432,7 @@ export class Patreon extends Website {
     });
 
     const { options } = data;
-    const accessRules: any[] = options.tiers.map((tier) => {
+    const accessRules: any[] = options.tiers.map(tier => {
       return { type: 'access-rule', id: tier };
     });
 
@@ -477,7 +477,7 @@ export class Patreon extends Website {
     ) {
       image_order = [
         thumbnailFileUpload ? thumbnailFileUpload.body.data.id : primaryFileUpload.body.data.id,
-        ...additionalImageUploads.map((img) => img.body.data.id),
+        ...additionalImageUploads.map(img => img.body.data.id),
       ];
     }
 
@@ -493,7 +493,7 @@ export class Patreon extends Website {
       },
     };
 
-    accessRules.forEach((rule) => form.included.push(rule));
+    accessRules.forEach(rule => form.included.push(rule));
 
     this.checkCancelled(cancellationToken);
     const post = await this.finalizePost(data.part.accountId, link, csrf, form);
@@ -603,9 +603,9 @@ export class Patreon extends Website {
   }
 
   formatTags(tags: string[]): any {
-    tags = tags.filter((tag) => tag.length <= 25);
+    tags = tags.filter(tag => tag.length <= 25);
     return tags
-      .map((tag) => {
+      .map(tag => {
         return {
           type: 'post_tag',
           id: `user_defined;${tag}`,
@@ -630,7 +630,7 @@ export class Patreon extends Website {
     const options = submissionPart.data;
     if (options.tiers && options.tiers.length) {
       const folders = this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS);
-      options.tiers.forEach((tier) => {
+      options.tiers.forEach(tier => {
         if (!WebsiteValidator.folderIdExists(tier, folders)) {
           problems.push(`Access Tier (${tier}) could not be found.`);
         }
@@ -642,11 +642,11 @@ export class Patreon extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       const maxMB = 200;
       if (FileSize.MBtoBytes(maxMB) < size) {
@@ -676,7 +676,7 @@ export class Patreon extends Website {
     const options = submissionPart.data;
     if (options.tiers && options.tiers.length) {
       const folders = this.getAccountInfo(submissionPart.accountId, GenericAccountProp.FOLDERS);
-      options.tiers.forEach((tier) => {
+      options.tiers.forEach(tier => {
         if (!WebsiteValidator.folderIdExists(tier, folders)) {
           problems.push(`Access Tier (${tier}) could not be found.`);
         }

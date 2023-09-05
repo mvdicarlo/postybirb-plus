@@ -5,8 +5,10 @@ import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { Expose } from 'class-transformer';
 
-export class InkbunnyFileOptionsEntity extends DefaultFileOptionsEntity
-  implements InkbunnyFileOptions {
+export class InkbunnyFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements InkbunnyFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

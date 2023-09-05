@@ -11,7 +11,7 @@ export interface NotificationState {
 export class NotificationStore {
   @observable
   state: NotificationState = {
-    notifications: []
+    notifications: [],
   };
 
   constructor() {
@@ -32,5 +32,5 @@ export class NotificationStore {
 export const notificationStore = new NotificationStore();
 
 socket.on(Events.NotificationEvent.UPDATE, (notifications: PostyBirbNotification[]) =>
-  notificationStore.setNotifications(notifications)
+  notificationStore.setNotifications(notifications),
 );

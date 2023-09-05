@@ -5,8 +5,10 @@ import { FurryNetworkFileOptions } from '../../interfaces/websites/furry-network
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class FurryNetworkFileOptionsEntity extends DefaultFileOptionsEntity
-  implements FurryNetworkFileOptions {
+export class FurryNetworkFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements FurryNetworkFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

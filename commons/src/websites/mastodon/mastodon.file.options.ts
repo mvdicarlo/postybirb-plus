@@ -5,8 +5,10 @@ import { MastodonFileOptions } from '../../interfaces/websites/mastodon/mastodon
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class MastodonFileOptionsEntity extends DefaultFileOptionsEntity
-  implements MastodonFileOptions {
+export class MastodonFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements MastodonFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
@@ -16,7 +18,7 @@ export class MastodonFileOptionsEntity extends DefaultFileOptionsEntity
   @IsOptional()
   @IsString()
   spoilerText?: string;
-  
+
   @Expose()
   @IsString()
   @DefaultValue('public')
@@ -26,7 +28,6 @@ export class MastodonFileOptionsEntity extends DefaultFileOptionsEntity
   @IsOptional()
   @IsString()
   altText?: string;
-  
 
   constructor(entity?: Partial<MastodonFileOptions>) {
     super(entity as DefaultFileOptions);

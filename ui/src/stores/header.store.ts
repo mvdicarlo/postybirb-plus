@@ -14,19 +14,19 @@ export interface BreadcrumbNavItem extends Route {
 export class HeaderStore {
   @observable state: HeaderState = {
     routes: [],
-    title: 'Home'
+    title: 'Home',
   };
 
   private home: BreadcrumbNavItem = {
     path: '/',
     breadcrumbName: '',
-    icon: 'home'
+    icon: 'home',
   };
 
   @computed
   get headerState(): HeaderState {
     const headerState = {
-      ...this.state
+      ...this.state,
     };
 
     headerState.routes = [this.home, ...headerState.routes];

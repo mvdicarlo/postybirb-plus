@@ -9,10 +9,7 @@ export default class WebsiteValidator {
     const split = fileInfo.mimetype.split('/')[1];
     let extension = null;
     if (fileInfo.name) {
-      extension = path
-        .extname(fileInfo.name)
-        .replace('.', '')
-        .toLowerCase();
+      extension = path.extname(fileInfo.name).replace('.', '').toLowerCase();
     }
 
     for (const type of supportedFileTypes) {

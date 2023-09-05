@@ -5,8 +5,10 @@ import { FurryNetworkNotificationOptions } from '../../interfaces/websites/furry
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class FurryNetworkNotificationOptionsEntity extends DefaultOptionsEntity
-  implements FurryNetworkNotificationOptions {
+export class FurryNetworkNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements FurryNetworkNotificationOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

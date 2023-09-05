@@ -35,7 +35,7 @@ export class FileListImporter extends Importer {
   override async extract(tree: DirectoryEntry): Promise<number> {
     const entries = _.sortBy(tree.entries, ['name']).filter(looksLikeSubmissionFile);
     const count = entries.length;
-    this.tryExtractFiles(entries).then((successes) => {
+    this.tryExtractFiles(entries).then(successes => {
       this.logger.debug(`${successes}/${count} imported`, 'Imported Finished');
       this.showCompletedNotification(successes, count);
     });

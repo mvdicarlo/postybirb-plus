@@ -66,7 +66,7 @@ export class WebsiteRegistry {
     Tumblr: new Tumblr(),
     Twitter: new Twitter(),
     Weasyl: new Weasyl(),
-    e621: new e621()
+    e621: new e621(),
   };
 
   static getAllAsArray() {
@@ -76,7 +76,7 @@ export class WebsiteRegistry {
   static find(website: string): Website | undefined {
     const search = website.toLowerCase();
     return Object.values(WebsiteRegistry.websites).find(
-      w => w.name.toLowerCase() === search || w.internalName.toLowerCase() === search
+      w => w.name.toLowerCase() === search || w.internalName.toLowerCase() === search,
     );
   }
 }

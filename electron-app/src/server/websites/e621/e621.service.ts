@@ -97,7 +97,7 @@ export class e621 extends Website {
       'upload[description]': data.description,
       'upload[parent_id]': data.options.parentId || '',
       'upload[source]': [...data.options.sources, ...data.sources]
-        .filter((s) => s)
+        .filter(s => s)
         .slice(0, 5)
         .join('%0A'),
     };

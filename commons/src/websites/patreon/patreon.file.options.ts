@@ -5,11 +5,13 @@ import { PatreonFileOptions } from '../../interfaces/websites/patreon/patreon.fi
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class PatreonFileOptionsEntity extends DefaultFileOptionsEntity
-  implements PatreonFileOptions {
+export class PatreonFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements PatreonFileOptions
+{
   @Expose()
   @IsArray()
-  @DefaultValue(["0"])
+  @DefaultValue(['0'])
   tiers!: string[];
 
   @Expose()

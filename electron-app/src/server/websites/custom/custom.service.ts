@@ -89,7 +89,7 @@ export class Custom extends Website {
     };
 
     const headers: any = {};
-    accountData.headers.forEach((header) => {
+    accountData.headers.forEach(header => {
       headers[header.name] = header.value;
     });
 
@@ -121,12 +121,12 @@ export class Custom extends Website {
       [accountData.tagField || 'tags']: data.tags.join(','),
       [accountData.titleField || 'title']: data.title,
       [accountData.ratingField || 'rating']: data.rating,
-      [accountData.fileField || 'file']: [data.primary.file, ...data.additional.map((a) => a.file)],
+      [accountData.fileField || 'file']: [data.primary.file, ...data.additional.map(a => a.file)],
       [accountData.thumbnaiField || 'thumbnail']: data.thumbnail,
     };
 
     const headers: any = {};
-    accountData.headers.forEach((header) => {
+    accountData.headers.forEach(header => {
       headers[header.name] = header.value;
     });
 

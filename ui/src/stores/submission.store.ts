@@ -17,7 +17,7 @@ export interface SubmissionState {
 export class SubmissionStore {
   @observable state: SubmissionState = {
     submissions: [],
-    loading: true
+    loading: true,
   };
 
   constructor() {
@@ -43,7 +43,7 @@ export class SubmissionStore {
           const files = _.compact([
             copySubmission.primary,
             copySubmission.thumbnail,
-            ...(copySubmission.additional || [])
+            ...(copySubmission.additional || []),
           ]);
           files.forEach(f => {
             f.location = RemoteService.getFileUrl(f.location);
@@ -74,7 +74,7 @@ export class SubmissionStore {
   addOrUpdateSubmissions(submissions: Array<SubmissionPackage<Submission>>) {
     submissions.forEach(submission => {
       const index: number = this.state.submissions.findIndex(
-        s => s.submission._id === submission.submission._id
+        s => s.submission._id === submission.submission._id,
       );
       if (index === -1) {
         this.state.submissions.push(submission);
@@ -122,7 +122,7 @@ export class SubmissionStore {
   changeOrder(id: string, from: number, to: number) {
     const fromSubmission = this.state.submissions.find(s => s.submission._id === id)!;
     const submissions: SubmissionPackage<any>[] = this.all.filter(
-      s => s.submission.type === fromSubmission.submission.type
+      s => s.submission.type === fromSubmission.submission.type,
     );
     fromSubmission.submission.order = from < to ? to + 0.1 : to - 0.1;
     submissions

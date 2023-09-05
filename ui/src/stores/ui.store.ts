@@ -22,7 +22,7 @@ export class UIStore {
     navId: 0,
     theme: window.IS_DARK_THEME ? 'dark' : 'light',
     websiteFilter: [],
-    activeNav: 'home'
+    activeNav: 'home',
   };
 
   constructor() {

@@ -18,7 +18,7 @@ export class FileSubmissionService {
 
   constructor(
     private readonly fileRepository: FileManagerService,
-    private readonly imageManipulationPool: ImageManipulationPoolService
+    private readonly imageManipulationPool: ImageManipulationPoolService,
   ) {}
 
   async createSubmission(
@@ -48,9 +48,8 @@ export class FileSubmissionService {
       },
     });
 
-    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
-    {
-        const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png')) {
+      const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
         file.buffer,
         file.mimetype,
       );
@@ -90,8 +89,7 @@ export class FileSubmissionService {
       type: getSubmissionType(file.mimetype, file.originalname),
     };
 
-    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
-    {
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png')) {
       const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
         file.buffer,
         file.mimetype,
@@ -136,13 +134,12 @@ export class FileSubmissionService {
       type: getSubmissionType(scaledUpload.mimetype, scaledUpload.originalname),
     };
 
-    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
-    {
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png')) {
       const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
         scaledUpload.buffer,
         scaledUpload.mimetype,
       );
-      
+
       submission.thumbnail.width = im.getWidth();
       submission.thumbnail.height = im.getHeight();
 
@@ -215,16 +212,15 @@ export class FileSubmissionService {
       type: getSubmissionType(file.mimetype, file.originalname),
       ignoredAccounts: [],
       height: 0,
-      width : 0
-    }
+      width: 0,
+    };
 
-    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png'))
-    {
+    if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png')) {
       const im: ImageManipulator = await this.imageManipulationPool.getImageManipulator(
         file.buffer,
         file.mimetype,
-      );  
-      
+      );
+
       additionalSub.height = im.getHeight();
       additionalSub.width = im.getWidth();
 
