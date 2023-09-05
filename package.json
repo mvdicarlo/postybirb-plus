@@ -22,7 +22,8 @@
     "ci:ui": "cd ui && npm ci --no-audit --no-fund --no-deprecate",
     "codestyle": "run-s format lint",
     "format": "prettier --write \"{commons/src,ui/src,electron-app/{test,src}}/**/*.ts\"",
-    "lint": "eslint \"{commons/src,ui/src,electron-app/{test,src}}/**/*.ts\""
+    "lint": "eslint \"{commons/src,ui/src,electron-app/{test,src}}/**/*.ts\"",
+    "start": "npm run start --prefix electron-app"
   },
   "repository": {
     "type": "git",
