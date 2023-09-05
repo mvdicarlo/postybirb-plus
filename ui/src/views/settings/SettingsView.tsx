@@ -299,7 +299,7 @@ export default class SettingsView extends React.Component<Props> {
               Usually need when using VPN since requests from PostyBirb does not go throught some
               VPN's by default.
               <br />
-              If that happens, you can configure your VPN to listen on local adress and then set it here
+              If that happens, you can configure your VPN to listen on local address and then set it here
               <br />
               <strong>
                 Any changes to these settings will require you to restart the application.
