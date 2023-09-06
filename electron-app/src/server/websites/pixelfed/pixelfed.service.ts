@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import generator, { Entity, Response } from 'megalodon'
+import generator, { Entity, Response } from 'megalodon';
 import {
   DefaultOptions,
   FileRecord,
@@ -58,15 +58,7 @@ export class Pixelfed extends Website {
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
-  readonly acceptsFiles = [
-    'png',
-    'jpeg',
-    'jpg',
-    'gif',
-    'swf',
-    'flv',
-    'mp4',
-  ];
+  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'flv', 'mp4'];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -82,10 +74,10 @@ export class Pixelfed extends Website {
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: PixelfedAccountData) {   
+  private async getInstanceInfo(profileId: string, data: PixelfedAccountData) {
     const client = generator('mastodon', data.website, data.token);
     const instance = await client.getInstance();
-   
+
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
@@ -95,9 +87,9 @@ export class Pixelfed extends Website {
     return true;
   }
 
-  private getPixelfedInstance(data: PixelfedAccountData) : Entity.Instance {
+  private getPixelfedInstance(data: PixelfedAccountData): Entity.Instance {
     const client = generator('mastodon', data.website, data.token);
-    client.getInstance().then((res) => {
+    client.getInstance().then(res => {
       return res.data;
     });
     return null;
@@ -114,11 +106,11 @@ export class Pixelfed extends Website {
               ? instanceInfo.configuration.media_attachments.image_size_limit
               : instanceInfo.configuration.media_attachments.video_size_limit,
         }
-      : {           
+      : {
           maxHeight: 4000,
           maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300) 
-      };
+          maxSize: FileSize.MBtoBytes(300),
+        };
   }
 
   private async uploadMedia(
@@ -195,7 +187,9 @@ export class Pixelfed extends Website {
     }
 
     const instanceInfo: PixelfedInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    const chunkCount = instanceInfo
+      ? instanceInfo?.configuration?.statuses?.max_media_attachments
+      : 4;
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
@@ -205,53 +199,53 @@ export class Pixelfed extends Website {
     let statusOptions: any = {
       sensitive: isSensitive,
       visibility: options.visibility || 'public',
-      in_reply_to_id: lastId,  
-      spoiler_text: "",    
-    }  
-    let status = "";
+      in_reply_to_id: lastId,
+      spoiler_text: '',
+    };
+    let status = '';
 
     for (let i = 0; i < chunks.length; i++) {
       if (i === 0) {
         status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${
           data.description
-          }`.substring(0, maxChars);
-        statusOptions.media_ids = chunks[i].map((media) => media.id);
-     }
+        }`.substring(0, maxChars);
+        statusOptions.media_ids = chunks[i].map(media => media.id);
+      }
 
       const tags = this.formatTags(data.tags);
 
       this.logger.debug(`Number of tags set ${tags.length}`);
 
-      // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
+      // Update the post content with the Tags if any are specified - for Pixelfed, we need to append
       // these onto the post, *IF* there is character count available.
       if (tags.length > 0) {
-        status += "\n\n";
+        status += '\n\n';
       }
 
       tags.forEach(tag => {
         let remain = maxChars - status.length;
         let tagToInsert = tag;
-        if (remain > (tagToInsert.length)) {
-          status += ` ${tagToInsert}`
+        if (remain > tagToInsert.length) {
+          status += ` ${tagToInsert}`;
         }
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      })
-      
+      });
+
       if (options.spoilerText) {
         statusOptions.spoiler_text = options.spoilerText;
       }
 
       this.checkCancelled(cancellationToken);
 
-      await M.postStatus(status, statusOptions).then((result) => {
-        lastId = result.data.id;
-        let res = result.data as Entity.Status;
-        return this.createPostResponse({ source: res.url });
-      }).catch((err: Error) => {
-        return Promise.reject(
-          this.createPostResponse({ message: err.message }),
-        );
-      })
+      await M.postStatus(status, statusOptions)
+        .then(result => {
+          lastId = result.data.id;
+          let res = result.data as Entity.Status;
+          return this.createPostResponse({ source: res.url });
+        })
+        .catch((err: Error) => {
+          return Promise.reject(this.createPostResponse({ message: err.message }));
+        });
     }
 
     return this.createPostResponse({});
@@ -260,15 +254,15 @@ export class Pixelfed extends Website {
   formatTags(tags: string[]) {
     return this.parseTags(
       tags
-        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
-        .map((tag) =>
+        .map(tag => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map(tag =>
           tag
             .split(' ')
             // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(''),
         ),
       { spaceReplacer: '_' },
-    ).map((tag) => `#${tag}`);
+    ).map(tag => `#${tag}`);
   }
 
   validateFileSubmission(
@@ -299,7 +293,7 @@ export class Pixelfed extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
@@ -307,7 +301,7 @@ export class Pixelfed extends Website {
       ? instanceInfo?.configuration?.media_attachments?.image_size_limit
       : FileSize.MBtoBytes(50);
 
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
@@ -327,20 +321,23 @@ export class Pixelfed extends Website {
 
       // Check the image dimensions are not over 4000 x 4000 - this is the Pixelfed server max
       if (
-        isAutoscaling && 
-        type === FileSubmissionType.IMAGE && 
-        (file.height > 4000 || file.width > 4000)) {
-          warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        (file.height > 4000 || file.width > 4000)
+      ) {
+        warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
            aspect ratio`);
-        }
+      }
     });
 
-    if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
-      submissionPart.data.visibility != "public") {
-        warnings.push(
-              `This post won't be listed under any hashtag as it is not public. Only public posts 
+    if (
+      (submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) &&
+      submissionPart.data.visibility != 'public'
+    ) {
+      warnings.push(
+        `This post won't be listed under any hashtag as it is not public. Only public posts 
               can be searched by hashtag.`,
-            );
+      );
     }
 
     return { problems, warnings };

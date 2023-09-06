@@ -347,12 +347,12 @@ export class FurAffinity extends Website {
 
   formatTags(tags: string[]): string {
     const maxLength = 250;
-    tags = super.parseTags(tags).map((tag) => tag.replace(/(\/|\\)/gm, '_'));
-    const filteredTags = tags.filter((tag) => tag.length >= 3);
+    tags = super.parseTags(tags).map(tag => tag.replace(/(\/|\\)/gm, '_'));
+    const filteredTags = tags.filter(tag => tag.length >= 3);
     let tagString = filteredTags.join(' ').trim();
     if (tagString.length > maxLength) {
       const fitTags = [];
-      filteredTags.forEach((tag) => {
+      filteredTags.forEach(tag => {
         if (fitTags.join(' ').length + 1 + tag.length < maxLength) {
           fitTags.push(tag);
         }
@@ -384,8 +384,8 @@ export class FurAffinity extends Website {
         'flat_folders',
         [],
       );
-      submissionPart.data.folders.forEach((folder) => {
-        if (!folders.find((f) => f.value === folder)) {
+      submissionPart.data.folders.forEach(folder => {
+        if (!folders.find(f => f.value === folder)) {
           warnings.push(`Folder (${folder}) not found.`);
         }
       });

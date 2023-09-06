@@ -35,28 +35,27 @@ export class FileManipulationService {
 
       try {
         let skipRescale = false;
-        // Is the file above the pixel dimension limits, if set ? 
+        // Is the file above the pixel dimension limits, if set ?
         if (scalingOptions.maxHeight || scalingOptions.maxWidth) {
           let maxSize = 0;
           if (scalingOptions.maxWidth) {
             maxSize = scalingOptions.maxWidth;
           }
           if (scalingOptions.maxHeight && scalingOptions.maxHeight < maxSize) {
-              maxSize = scalingOptions.maxHeight;
+            maxSize = scalingOptions.maxHeight;
           }
 
           if (maxSize < im.getHeight() || maxSize < im.getWidth()) {
             const scaled = await im.resize(maxSize).getData();
             newBuffer = scaled.buffer;
-            const newIm = await this.imageManipulationPool.getImageManipulator(
-              newBuffer,
-              mimeType,
-            ); 
-            newIm.destroy();    
+            const newIm = await this.imageManipulationPool.getImageManipulator(newBuffer, mimeType);
+            newIm.destroy();
 
             if (newBuffer.length > targetSize) {
-              this.logger.debug(`newBuffer still in excess of the target size; will need to rescale by size not px`)
-            } else { 
+              this.logger.debug(
+                `newBuffer still in excess of the target size; will need to rescale by size not px`,
+              );
+            } else {
               skipRescale = true;
             }
           }
@@ -66,7 +65,6 @@ export class FileManipulationService {
         if (!skipRescale) {
           const originalFileSize = buffer.length;
           if (originalFileSize > targetSize) {
-
             if (settings.convertToJPEG) {
               im.toJPEG();
             }
@@ -91,8 +89,7 @@ export class FileManipulationService {
             }
           }
         }
-      }
-      finally {
+      } finally {
         im.destroy();
       }
     }

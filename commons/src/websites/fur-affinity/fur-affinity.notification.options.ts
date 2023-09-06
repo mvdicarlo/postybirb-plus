@@ -5,8 +5,10 @@ import { FurAffinityNotificationOptions } from '../../interfaces/websites/fur-af
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class FurAffinityNotificationOptionsEntity extends DefaultOptionsEntity
-  implements FurAffinityNotificationOptions {
+export class FurAffinityNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements FurAffinityNotificationOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(true)

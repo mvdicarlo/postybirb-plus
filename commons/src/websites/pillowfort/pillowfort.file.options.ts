@@ -5,8 +5,10 @@ import { PillowfortFileOptions } from '../../interfaces/websites/pillowfort/pill
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class PillowfortFileOptionsEntity extends DefaultFileOptionsEntity
-  implements PillowfortFileOptions {
+export class PillowfortFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements PillowfortFileOptions
+{
   @Expose()
   @IsString()
   @DefaultValue('public')

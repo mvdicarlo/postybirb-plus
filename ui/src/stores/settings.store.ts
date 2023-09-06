@@ -17,7 +17,7 @@ export class SettingsStore {
     maxJPEGQualityCompression: 10,
     maxJPEGSizeCompression: 30,
     silentNotification: false,
-    defaultTagSearchProvider: 'none'
+    defaultTagSearchProvider: 'none',
   };
 
   constructor() {

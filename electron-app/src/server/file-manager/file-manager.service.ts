@@ -120,7 +120,7 @@ export class FileManagerService {
       submission.fallback,
       ...(submission.additional || []),
     ];
-    await Promise.all(files.filter((f) => !!f).map((f) => this.removeSubmissionFile(f)));
+    await Promise.all(files.filter(f => !!f).map(f => this.removeSubmissionFile(f)));
   }
 
   scaleImage(file: UploadedFile, scalePx: number): UploadedFile {

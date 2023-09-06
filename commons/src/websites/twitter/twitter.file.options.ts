@@ -4,8 +4,10 @@ import { DefaultFileOptions } from '../../interfaces/submission/default-options.
 import { TwitterFileOptions } from '../../interfaces/websites/twitter/twitter.file.options.interface';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class TwitterFileOptionsEntity extends DefaultFileOptionsEntity
-  implements TwitterFileOptions {
+export class TwitterFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements TwitterFileOptions
+{
   @Expose()
   @IsString()
   contentBlur?: 'other' | 'graphic_violence' | 'adult_content';

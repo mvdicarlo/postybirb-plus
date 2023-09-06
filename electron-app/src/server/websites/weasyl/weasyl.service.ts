@@ -49,7 +49,9 @@ export class Weasyl extends Website {
     const login: string = _.get(res.body, 'login');
     status.loggedIn = !!login;
     status.username = login;
-    await this.retrieveFolders(data._id, status.username);
+    if (status.loggedIn) {
+      await this.retrieveFolders(data._id, status.username);
+    }
     return status;
   }
 
@@ -286,7 +288,7 @@ export class Weasyl extends Website {
     const convertedFolders: Folder[] = [];
 
     const folders = res.body.folders || [];
-    folders.forEach((f) => {
+    folders.forEach(f => {
       const folder: Folder = {
         label: f.title,
         value: f.folder_id,
@@ -295,7 +297,7 @@ export class Weasyl extends Website {
       convertedFolders.push(folder);
 
       if (f.subfolders) {
-        f.subfolders.forEach((sf) => {
+        f.subfolders.forEach(sf => {
           const subfolder: Folder = {
             label: `${folder.label} / ${sf.title}`,
             value: sf.folder_id,
@@ -328,7 +330,7 @@ export class Weasyl extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      if (!folders.find((f) => f.value === submissionPart.data.folder)) {
+      if (!folders.find(f => f.value === submissionPart.data.folder)) {
         warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
     }

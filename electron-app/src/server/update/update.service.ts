@@ -41,11 +41,11 @@ export class UpdateService {
 
     autoUpdater.on('checking-for-update', () => this.logger.log('Checking for update...'));
 
-    autoUpdater.on('update-available', (info) => {
+    autoUpdater.on('update-available', info => {
       this.updateAvailable.available = true;
       if (Array.isArray(info.releaseNotes)) {
         this.updateAvailable.releaseNotes = (info.releaseNotes as any[])
-          .map((note) => `<h2>${note.version}</h2>${note.note}`)
+          .map(note => `<h2>${note.version}</h2>${note.note}`)
           .join('\n');
       }
 
@@ -58,7 +58,7 @@ export class UpdateService {
       this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
     });
 
-    autoUpdater.on('error', (err) => {
+    autoUpdater.on('error', err => {
       this.isUpdating = false;
       this.updateAvailable.isUpdating = false;
       this.updateAvailable.error = err.toString();
@@ -76,7 +76,7 @@ export class UpdateService {
       this.eventEmitter.emit(Events.UpdateEvent.AVAILABLE, this.updateAvailable);
 
       if (!this.postService.isCurrentlyPostingToAny()) {
-        BrowserWindow.getAllWindows().forEach((w) => {
+        BrowserWindow.getAllWindows().forEach(w => {
           w.destroy();
         });
 

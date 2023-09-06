@@ -55,8 +55,8 @@ export class DescriptionParser {
         {
           name: 'tags',
           content:
-            defaultPart.data.tags.value.map((t) => '#' + t).join(' ') ??
-            websitePart.data.tags.value.map((t) => '#' + t).join(' ') ??
+            defaultPart.data.tags.value.map(t => '#' + t).join(' ') ??
+            websitePart.data.tags.value.map(t => '#' + t).join(' ') ??
             '',
         },
       ]);
@@ -79,10 +79,9 @@ export class DescriptionParser {
       description = website.preparseDescription(description, type);
 
       // Parse website shortcuts
-      Object.values(this.websiteDescriptionShortcuts).forEach((websiteShortcuts) =>
+      Object.values(this.websiteDescriptionShortcuts).forEach(websiteShortcuts =>
         websiteShortcuts.forEach(
-          (shortcut) =>
-            (description = UsernameParser.parse(description, shortcut.key, shortcut.url)),
+          shortcut => (description = UsernameParser.parse(description, shortcut.key, shortcut.url)),
         ),
       );
 
@@ -101,12 +100,12 @@ export class DescriptionParser {
 
   private async parseCustomDescriptionShortcuts(description: string): Promise<string> {
     const customShortcuts = await this.customShortcuts.getAll();
-    customShortcuts.forEach((scEntity) => {
+    customShortcuts.forEach(scEntity => {
       scEntity.content = scEntity.content.replace(/(^<p.*?>|<\/p>$)/g, ''); // Remove surrounding blocks
       if (scEntity.isDynamic) {
         const dynamicMatches =
           description.match(new RegExp(`{${scEntity.shortcut}:(.+?)}`, 'gms')) || [];
-        dynamicMatches.forEach((match) => {
+        dynamicMatches.forEach(match => {
           let content = scEntity.content;
           const matchedContent =
             match
@@ -130,7 +129,7 @@ export class DescriptionParser {
 
   private parseShortcuts(description: string): ShortcutData[] {
     const matches = description.match(/\{([^\{]*?)\}/gms) || [];
-    return matches.map((m) => {
+    return matches.map(m => {
       const matchInfo = m.match(/\{(\[([^\[\]]*)\])?(\w+):?(.*?)\}/s);
       if (!matchInfo) {
         throw new Error(`Invalid shortcut: ${m}`);
@@ -140,7 +139,7 @@ export class DescriptionParser {
       if (mods) {
         mods
           .split(';')
-          .map((mod) => mod.split('='))
+          .map(mod => mod.split('='))
           .forEach(([key, value]) => (modifiers[key] = value));
       }
 
@@ -168,8 +167,8 @@ export class DescriptionParser {
     allowed: string,
   ): string {
     shortcuts
-      .filter((sc) => sc.modifiers.only)
-      .forEach((sc) => {
+      .filter(sc => sc.modifiers.only)
+      .forEach(sc => {
         if (sc.modifiers.only.toLowerCase().split(',').includes(allowed)) {
           description = description.replace(
             sc.originalText,

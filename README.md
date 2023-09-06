@@ -59,7 +59,7 @@ To fix this error, replace `react-scripts build` with `react-scripts --openssl-l
 ### Start
 
 ```
-npm run start --prefix electron-app
+npm run start
 ```
 
 ## Contribution Guide

@@ -29,10 +29,10 @@ app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
 process.env.PORT =
-  process.argv.find((arg) => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
+  process.argv.find(arg => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
 global.AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'https://postybirb-auth.azurewebsites.net';
-global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
-global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');
+global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
+global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
 global.CHILD_PROCESS_IDS = [];
 
@@ -98,7 +98,7 @@ app.on(
 app.on('quit', () => {
   enableSleep();
   clearTimeout(backgroundAlertTimeout);
-  global.CHILD_PROCESS_IDS.forEach((id) => process.kill(id));
+  global.CHILD_PROCESS_IDS.forEach(id => process.kill(id));
 });
 
 async function initialize() {
@@ -106,9 +106,7 @@ async function initialize() {
     return;
   }
   const ses = session.fromPartition('persist:name');
-  const userAgent = `PostyBirb/${
-    app.getVersion()
-  } (by mvdicarlo on GitHub) ${ses.getUserAgent()}`;
+  const userAgent = `PostyBirb/${app.getVersion()} (by mvdicarlo on GitHub) ${ses.getUserAgent()}`;
 
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     details.requestHeaders['User-Agent'] = userAgent;
@@ -177,7 +175,7 @@ function createWindow() {
     mainWindowState.manage(mainWindow);
   }
 
-  mainWindow.webContents.on('new-window', (event) => event.preventDefault());
+  mainWindow.webContents.on('new-window', event => event.preventDefault());
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (global.tray && util.isWindows()) {

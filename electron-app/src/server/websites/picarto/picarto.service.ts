@@ -93,7 +93,7 @@ export class Picarto extends Website {
     const { data } = res.body;
     const { albums } = data;
 
-    const folders: Folder[] = albums.map((album) => ({ value: album.id, label: album.title }));
+    const folders: Folder[] = albums.map(album => ({ value: album.id, label: album.title }));
 
     this.storeAccountInformation(id, GenericAccountProp.FOLDERS, folders);
   }
@@ -189,7 +189,7 @@ export class Picarto extends Website {
           );
         }),
       )
-    ).map((res) => res.body.data.uid);
+    ).map(res => res.body.data.uid);
 
     this.checkCancelled(cancellationToken);
 
@@ -240,7 +240,12 @@ export class Picarto extends Website {
       finishPost.body?.data?.createArtwork?.status === 'error' ||
       finishPost.body.errors?.length
     ) {
-      return Promise.reject(this.createPostResponse({ message: finishPost.body?.data?.createArtwork?.message, additionalInfo: finishPost.body }));
+      return Promise.reject(
+        this.createPostResponse({
+          message: finishPost.body?.data?.createArtwork?.message,
+          additionalInfo: finishPost.body,
+        }),
+      );
     }
 
     return this.createPostResponse({});
@@ -249,7 +254,7 @@ export class Picarto extends Website {
   formatTags(tags: string[]) {
     return super
       .formatTags(tags, { spaceReplacer: '_', maxLength: 30, minLength: 1 })
-      .filter((tag) => tag.length >= 1)
+      .filter(tag => tag.length >= 1)
       .slice(0, 30);
   }
 

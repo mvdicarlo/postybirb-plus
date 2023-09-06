@@ -5,8 +5,10 @@ import { DeviantArtFileOptions } from '../../interfaces/websites/deviant-art/dev
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class DeviantArtFileOptionsEntity extends DefaultFileOptionsEntity
-  implements DeviantArtFileOptions {
+export class DeviantArtFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements DeviantArtFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

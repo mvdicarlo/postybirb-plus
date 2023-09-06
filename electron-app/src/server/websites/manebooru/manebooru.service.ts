@@ -54,7 +54,6 @@ export class Manebooru extends Website {
     return { maxSize: FileSize.MBtoBytes(100) };
   }
 
-
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<ManebooruFileOptions>,
@@ -100,7 +99,7 @@ export class Manebooru extends Website {
       'grimdark',
       'grotesque',
     ];
-    const lowerCaseTags = tags.map((t) => t.toLowerCase());
+    const lowerCaseTags = tags.map(t => t.toLowerCase());
     if (!lowerCaseTags.includes(ratingTag)) {
       let add = true;
 

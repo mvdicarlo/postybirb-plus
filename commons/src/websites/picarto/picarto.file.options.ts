@@ -5,8 +5,10 @@ import { PicartoFileOptions } from '../../interfaces/websites/picarto/picarto.fi
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class PicartoFileOptionsEntity extends DefaultFileOptionsEntity
-  implements PicartoFileOptions {
+export class PicartoFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements PicartoFileOptions
+{
   @Expose()
   @IsArray()
   folder!: string;

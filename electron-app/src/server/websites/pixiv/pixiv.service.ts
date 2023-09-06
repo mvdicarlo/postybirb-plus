@@ -85,8 +85,8 @@ export class Pixiv extends Website {
     const $ = cheerio.load(body);
     const accountInfo = JSON.parse($('#__NEXT_DATA__').contents().first().text());
     const token = accountInfo.props.pageProps.token;
-    const files = [data.thumbnail, data.primary.file, ...data.additional.map((f) => f.file)].filter(
-      (f) => f,
+    const files = [data.thumbnail, data.primary.file, ...data.additional.map(f => f.file)].filter(
+      f => f,
     );
 
     const { options } = data;
@@ -121,12 +121,12 @@ export class Pixiv extends Website {
     if (sexualType !== 'general') {
       delete form.sexual;
       if (options.matureContent) {
-        options.matureContent.forEach((c) => (form[`attributes[${c}]`] = 'true'));
+        options.matureContent.forEach(c => (form[`attributes[${c}]`] = 'true'));
       }
     }
 
     if (options.containsContent) {
-      options.containsContent.forEach((c) => (form[`ratings[${c}]`] = 'true'));
+      options.containsContent.forEach(c => (form[`ratings[${c}]`] = 'true'));
     }
 
     this.checkCancelled(cancellationToken);
@@ -168,7 +168,7 @@ export class Pixiv extends Website {
         if (value.options && value.value) {
           form.append(key, value.value, value.options);
         } else if (Array.isArray(value)) {
-          value.forEach((v) => {
+          value.forEach(v => {
             form.append(key, v);
           });
         } else {
@@ -176,7 +176,7 @@ export class Pixiv extends Website {
         }
       });
 
-      files.forEach((file) => {
+      files.forEach(file => {
         form.append('files[]', file.value, file.options);
       });
 
@@ -207,8 +207,8 @@ export class Pixiv extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<PixivFileOptions>,
   ): Promise<PostResponse> {
-    const files = [data.thumbnail, data.primary.file, ...data.additional.map((f) => f.file)].filter(
-      (f) => f,
+    const files = [data.thumbnail, data.primary.file, ...data.additional.map(f => f.file)].filter(
+      f => f,
     );
 
     const form: any = {
@@ -229,7 +229,7 @@ export class Pixiv extends Website {
       qropen: '',
       ai_type: data.options.aiGenerated ? '2' : '1',
       'files[]': files,
-      'file_info[]': files.map((f) =>
+      'file_info[]': files.map(f =>
         JSON.stringify({
           name: f.options.filename,
           type: f.options.contentType,
@@ -247,12 +247,12 @@ export class Pixiv extends Website {
       if (options.sexual) form.sexual = 'implicit';
     } else {
       if (options.matureContent) {
-        options.matureContent.forEach((c) => (form[c] = 'on'));
+        options.matureContent.forEach(c => (form[c] = 'on'));
       }
     }
 
     if (options.containsContent) {
-      options.containsContent.forEach((c) => (form[c] = 'on'));
+      options.containsContent.forEach(c => (form[c] = 'on'));
     }
 
     this.checkCancelled(cancellationToken);
@@ -325,7 +325,7 @@ export class Pixiv extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
@@ -334,7 +334,7 @@ export class Pixiv extends Website {
     }
 
     const maxMB: number = 32;
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (FileSize.MBtoBytes(maxMB) < size) {
         if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {

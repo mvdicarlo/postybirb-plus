@@ -4,10 +4,10 @@ const socket = io(localStorage.getItem('REMOTE_URI') || `https://localhost:${win
   transportOptions: {
     polling: {
       extraHeaders: {
-        Authorization: localStorage.getItem('REMOTE_AUTH') || window.AUTH_ID
-      }
-    }
-  }
+        Authorization: localStorage.getItem('REMOTE_AUTH') || window.AUTH_ID,
+      },
+    },
+  },
 });
 socket.on('connect', () => console.log('Connected'));
 

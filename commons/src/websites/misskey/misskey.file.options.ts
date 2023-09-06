@@ -5,8 +5,10 @@ import { MissKeyFileOptions } from '../../interfaces/websites/misskey/misskey.fi
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class MissKeyFileOptionsEntity extends DefaultFileOptionsEntity
-  implements MissKeyFileOptions {
+export class MissKeyFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements MissKeyFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
@@ -16,7 +18,7 @@ export class MissKeyFileOptionsEntity extends DefaultFileOptionsEntity
   @IsOptional()
   @IsString()
   spoilerText?: string;
-  
+
   @Expose()
   @IsString()
   @DefaultValue('public')
@@ -26,7 +28,6 @@ export class MissKeyFileOptionsEntity extends DefaultFileOptionsEntity
   @IsOptional()
   @IsString()
   altText?: string;
-  
 
   constructor(entity?: Partial<MissKeyFileOptions>) {
     super(entity as DefaultFileOptions);
