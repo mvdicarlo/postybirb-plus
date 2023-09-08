@@ -6,7 +6,7 @@ import BrowserLink from '../../components/BrowserLink';
 import { furtasticAccountData } from 'postybirb-commons';
 import Axios from 'axios';
 
-interface State extends furtasticAccountData {
+interface State extends FurtasticAccountData {
   username: string;
   key: string;
   sending: boolean;

@@ -1,12 +1,12 @@
 import { Expose } from 'class-transformer';
 import { IsArray, IsOptional, IsString } from 'class-validator';
 import { DefaultFileOptions } from '../../interfaces/submission/default-options.interface';
-import { furtasticFileOptions } from '../../interfaces/websites/furtastic/furtastic.file.options.interface';
+import { FurtasticFileOptions } from '../../interfaces/websites/furtastic/furtastic.file.options.interface';
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
 // tslint:disable-next-line: class-name
-export class furtasticFileOptionsEntity extends DefaultFileOptionsEntity implements furtasticFileOptions {
+export class FurtasticFileOptionsEntity extends DefaultFileOptionsEntity implements FurtasticFileOptions {
   @Expose()
   @IsArray()
   @DefaultValue([])
@@ -17,7 +17,7 @@ export class furtasticFileOptionsEntity extends DefaultFileOptionsEntity impleme
   @IsString()
   parentId?: string;
 
-  constructor(entity?: Partial<furtasticFileOptions>) {
+  constructor(entity?: Partial<FurtasticFileOptions>) {
     super(entity as DefaultFileOptions);
   }
 }

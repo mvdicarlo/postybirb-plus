@@ -1,13 +1,13 @@
 import { Form, Input } from 'antd';
 import _ from 'lodash';
-import { furtasticFileOptions, FileSubmission, SubmissionPart } from 'postybirb-commons';
+import { FurtasticFileOptions, FileSubmission, SubmissionPart } from 'postybirb-commons';
 import React from 'react';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
 import FurtasticLogin from './furtasticLogin';
-import { e621TagSearchProvider } from '../e621/providers';
+import { FurtasticTagSearchProvider } from './providers';
 
 export class Furtastic extends WebsiteImpl {
   internalName: string = 'furtastic';
@@ -23,7 +23,7 @@ export class Furtastic extends WebsiteImpl {
       hideThumbnailOptions={true}
       tagOptions={{
         show: true,
-        searchProvider: e621TagSearchProvider
+        searchProvider: FurtasticTagSearchProvider
       }}
       key={props.part.accountId}
       {...props}
@@ -31,9 +31,9 @@ export class Furtastic extends WebsiteImpl {
   );
 }
 
-export class FurtasticFileSubmissionForm extends GenericFileSubmissionSection<furtasticFileOptions> {
+export class FurtasticFileSubmissionForm extends GenericFileSubmissionSection<FurtasticFileOptions> {
   handleSourceChange(index: number, { target }) {
-    const part: SubmissionPart<furtasticFileOptions> = _.cloneDeep(this.props.part);
+    const part: SubmissionPart<FurtasticFileOptions> = _.cloneDeep(this.props.part);
     part.data.sources[index] = target.value;
     this.props.onUpdate(part);
   }
@@ -51,7 +51,7 @@ export class FurtasticFileSubmissionForm extends GenericFileSubmissionSection<fu
     return sources;
   }
 
-  renderRightForm(data: furtasticFileOptions) {
+  renderRightForm(data: FurtasticFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
       <Form.Item label="Parent Id">

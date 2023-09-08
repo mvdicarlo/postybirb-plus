@@ -1,8 +1,8 @@
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
-import { furtasticFileOptionsEntity } from './furtastic.file.options';
+import { FurtasticFileOptionsEntity } from './furtastic.file.options';
 
 // tslint:disable-next-line: class-name
-export class furtastic {
-  static readonly FileOptions = furtasticFileOptionsEntity;
+export class Furtastic {
+  static readonly FileOptions = FurtasticFileOptionsEntity;
   static readonly NotificationOptions = DefaultOptionsEntity;
 }

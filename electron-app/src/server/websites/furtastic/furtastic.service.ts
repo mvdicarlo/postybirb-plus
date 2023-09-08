@@ -32,11 +32,11 @@ export class Furtastic extends Website {
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webm'];
   readonly acceptsSourceUrls: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
-  readonly enableAdvertisement: boolean = false;
+  readonly enableAdvertisement: boolean = true;
 
   readonly usernameShortcuts = [
     {
-      key: 'e6',
+      key: 'ft',
       url: 'https://furtastic.art/profile/$1',
     },
   ];
@@ -56,7 +56,7 @@ export class Furtastic extends Website {
   }
 
   preparseDescription(text: string) {
-    return UsernameParser.replaceText(text, 'e6', '@$1').replace(
+    return UsernameParser.replaceText(text, 'ft', '@$1').replace(
       /<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi,
       '"$4":$2',
     );
