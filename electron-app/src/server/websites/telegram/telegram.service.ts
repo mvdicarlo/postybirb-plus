@@ -585,7 +585,6 @@ export class Telegram extends Website {
         [],
       );
       submissionPart.data.channels.forEach(f => {
-      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Channel (${f}) not found.`);
         }
