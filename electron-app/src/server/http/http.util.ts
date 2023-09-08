@@ -5,6 +5,7 @@ import _ from 'lodash';
 import CookieConverter from 'src/server/utils/cookie-converter.util';
 import setCookie from 'set-cookie-parser';
 import { Logger } from '@nestjs/common';
+import { Settings } from 'postybirb-commons';
 const FormData = require('form-data');
 
 interface GetOptions {
@@ -26,12 +27,16 @@ export interface HttpResponse<T> {
   returnUrl: string;
 }
 
+// For more clear code and typechecking because global is lowdb<any>
+const settingsState: Settings = global.settingsDB.getState()
+
 export default class Http {
   private static logger: Logger = new Logger(Http.name);
   static Request = request.defaults({
     headers: {
       'User-Agent': session.defaultSession.getUserAgent(),
     },
+    ...(settingsState.proxy ? { proxy: settingsState.proxy } : {}),
   });
 
   static parseCookies(cookies: Electron.Cookie[]) {

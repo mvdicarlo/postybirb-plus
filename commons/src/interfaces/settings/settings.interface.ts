@@ -14,4 +14,5 @@ export interface Settings {
   maxJPEGSizeCompression: number;
   silentNotification: boolean;
   defaultTagSearchProvider: TagSearchProviders;
+  proxy: string;
 }
