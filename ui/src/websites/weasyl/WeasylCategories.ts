@@ -2,93 +2,93 @@ export const WeasylCategories = {
   IMAGE: [
     {
       id: '1010',
-      name: 'Sketch'
+      name: 'Sketch',
     },
     {
       id: '1020',
-      name: 'Traditional'
+      name: 'Traditional',
     },
     {
       id: '1030',
-      name: 'Digital'
+      name: 'Digital',
     },
     {
       id: '1040',
-      name: 'Animation'
+      name: 'Animation',
     },
     {
       id: '1050',
-      name: 'Photography'
+      name: 'Photography',
     },
     {
       id: '1060',
-      name: 'Design / Interface'
+      name: 'Design / Interface',
     },
     {
       id: '1070',
-      name: 'Modeling / Sculpture'
+      name: 'Modeling / Sculpture',
     },
     {
       id: '1075',
-      name: 'Crafts / Jewelry'
+      name: 'Crafts / Jewelry',
     },
     {
       id: '1080',
-      name: 'Desktop / Wallpaper'
+      name: 'Desktop / Wallpaper',
     },
     {
       id: '1999',
-      name: 'Other'
-    }
+      name: 'Other',
+    },
   ],
   TEXT: [
     {
       id: '2010',
-      name: 'Story'
+      name: 'Story',
     },
     {
       id: '2020',
-      name: 'Poetry / Lyrics'
+      name: 'Poetry / Lyrics',
     },
     {
       id: '2030',
-      name: 'Script / Screenplay'
+      name: 'Script / Screenplay',
     },
     {
       id: '2999',
-      name: 'Other'
-    }
+      name: 'Other',
+    },
   ],
   VIDEO: [
     {
       id: '3500',
-      name: 'Embedded Video'
+      name: 'Embedded Video',
     },
     {
       id: '3999',
-      name: 'Other'
-    }
+      name: 'Other',
+    },
   ],
   AUDIO: [
     {
       id: '3010',
-      name: 'Original Music'
+      name: 'Original Music',
     },
     {
       id: '3020',
-      name: 'Cover Version'
+      name: 'Cover Version',
     },
     {
       id: '3030',
-      name: 'Remix / Mashup'
+      name: 'Remix / Mashup',
     },
     {
       id: '3040',
-      name: 'Speech / Reading'
+      name: 'Speech / Reading',
     },
     {
       id: '3999',
-      name: 'Other'
-    }
-  ]
+      name: 'Other',
+    },
+  ],
 };

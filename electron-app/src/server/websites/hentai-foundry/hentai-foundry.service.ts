@@ -147,7 +147,7 @@ export class HentaiFoundry extends Website {
       ? tagString
           .substring(0, maxLength)
           .split(', ')
-          .filter((tag) => tag.length >= 3)
+          .filter(tag => tag.length >= 3)
           .join(', ')
       : tagString;
   }

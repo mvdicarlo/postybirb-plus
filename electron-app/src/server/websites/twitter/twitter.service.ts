@@ -73,7 +73,7 @@ export class Twitter extends Website {
       title: '',
       description: data.description,
       tags: data.tags,
-      files: [data.primary, ...data.additional].map((f) => ({
+      files: [data.primary, ...data.additional].map(f => ({
         data: f.file.value.toString('base64'),
         ...f.file.options,
       })),
@@ -161,11 +161,11 @@ export class Twitter extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);

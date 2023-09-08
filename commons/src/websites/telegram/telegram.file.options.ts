@@ -5,13 +5,15 @@ import { TelegramFileOptions } from '../../interfaces/websites/telegram/telegram
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class TelegramFileOptionsEntity extends DefaultFileOptionsEntity
-  implements TelegramFileOptions {
+export class TelegramFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements TelegramFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
   spoiler!: boolean;
-  
+
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

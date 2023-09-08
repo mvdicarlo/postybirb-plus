@@ -73,9 +73,10 @@ export class WebsiteProvider {
     readonly picarto: Picarto,
     readonly pixelfed: Pixelfed,
   ) {
-    this.websiteModules = [...arguments].filter((arg) => arg instanceof Website);
+    // eslint-disable-next-line
+    this.websiteModules = [...arguments].filter(arg => arg instanceof Website);
     this.websiteModules.forEach(
-      (website) => (this.websiteModulesMap[website.constructor.name.toLowerCase()] = website),
+      website => (this.websiteModulesMap[website.constructor.name.toLowerCase()] = website),
     );
   }
 

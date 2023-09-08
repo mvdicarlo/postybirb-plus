@@ -5,8 +5,10 @@ import { HentaiFoundryFileOptions } from '../../interfaces/websites/hentai-found
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class HentaiFoundryFileOptionsEntity extends DefaultFileOptionsEntity
-  implements HentaiFoundryFileOptions {
+export class HentaiFoundryFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements HentaiFoundryFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

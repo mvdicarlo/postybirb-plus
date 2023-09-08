@@ -23,5 +23,5 @@ export default class WebsiteService {
 }
 
 WebsiteService.getUsernameShortcuts().then(
-  shortcuts => (WebsiteService.usernameShortcuts = shortcuts)
+  shortcuts => (WebsiteService.usernameShortcuts = shortcuts),
 );

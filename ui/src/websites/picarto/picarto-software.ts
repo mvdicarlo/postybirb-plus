@@ -162,5 +162,5 @@ export const PicartoSoftware = [
   'ZBrush',
   'Zmodeler',
   'ZW3D',
-  'ZWCAD'
+  'ZWCAD',
 ];

@@ -41,9 +41,7 @@ export class HtmlConverter {
           standardVal += ` href="${node.href}" target="_blank"`;
         }
 
-        return `${
-          node.breakBefore ? `${depth}<br />\n` : ''
-        }${standardVal}>\n${node.children
+        return `${node.breakBefore ? `${depth}<br />\n` : ''}${standardVal}>\n${node.children
           .map(child => HtmlConverter.convert(child).trimEnd())
           .join('\n')}\n${depth}</${node.tagName}>`;
     }

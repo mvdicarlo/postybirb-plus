@@ -1,12 +1,15 @@
+import { DefaultOptions, PostStatus, SubmissionPart } from 'postybirb-commons';
 import Entity from 'src/server/database/models/entity.model';
-import { SubmissionPart, PostStatus, DefaultOptions } from 'postybirb-commons';
 
-import { IsBoolean, IsObject, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { Expose } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
-export default class SubmissionPartEntity<T extends DefaultOptions> extends Entity
-  implements SubmissionPart<T> {
+export default class SubmissionPartEntity<T extends DefaultOptions>
+  extends Entity
+  implements SubmissionPart<T>
+{
   @Expose()
+  // eslint-disable-next-line
   // @ts-ignore
   get _id(): string {
     return `${this.submissionId}-${this.accountId}`; // generatated id

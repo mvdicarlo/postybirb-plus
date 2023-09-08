@@ -3,6 +3,6 @@ export interface SubmissionImport {
 }
 
 export interface SubmissionImportResult {
-  importType: string|null;
+  importType: string | null;
   submissionCount: number;
 }

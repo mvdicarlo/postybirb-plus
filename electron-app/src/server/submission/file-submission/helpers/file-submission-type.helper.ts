@@ -34,10 +34,7 @@ const AUDIO_TYPES: string[] = ['wav', 'wave', 'x-wav', 'x-pn-wav', 'audio', 'odt
 const VIDEO_TYPES: string[] = ['video', 'avi', 'flv', 'm3u8', 'mov', 'wmv', 'swf', 'webm'];
 
 export function getSubmissionType(mime: string, filename: string): FileSubmissionType {
-  const ext: string = path
-    .parse(filename)
-    .ext.replace('.', '')
-    .toLowerCase();
+  const ext: string = path.parse(filename).ext.replace('.', '').toLowerCase();
 
   const mimeParts: string[] = mime.split('/');
   if (

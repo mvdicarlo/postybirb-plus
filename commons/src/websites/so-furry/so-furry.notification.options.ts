@@ -5,8 +5,10 @@ import { SoFurryNotificationOptions } from '../../interfaces/websites/so-furry/s
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class SoFurryNotificationOptionsEntity extends DefaultOptionsEntity
-  implements SoFurryNotificationOptions {
+export class SoFurryNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements SoFurryNotificationOptions
+{
   @Expose()
   @IsString()
   @DefaultValue('0')

@@ -5,6 +5,7 @@ import _ from 'lodash';
 import CookieConverter from 'src/server/utils/cookie-converter.util';
 import setCookie from 'set-cookie-parser';
 import { Logger } from '@nestjs/common';
+import { Settings } from 'postybirb-commons';
 const FormData = require('form-data');
 
 interface GetOptions {
@@ -26,16 +27,20 @@ export interface HttpResponse<T> {
   returnUrl: string;
 }
 
+// For more clear code and typechecking because global is lowdb<any>
+const settingsState: Settings = global.settingsDB.getState()
+
 export default class Http {
   private static logger: Logger = new Logger(Http.name);
   static Request = request.defaults({
     headers: {
       'User-Agent': session.defaultSession.getUserAgent(),
     },
+    ...(settingsState.proxy ? { proxy: settingsState.proxy } : {}),
   });
 
   static parseCookies(cookies: Electron.Cookie[]) {
-    return cookies.map((c) => `${c.name}=${c.value}`).join('; ');
+    return cookies.map(c => `${c.name}=${c.value}`).join('; ');
   }
 
   static async getWebsiteCookies(partitionId: string, url: string): Promise<Electron.Cookie[]> {
@@ -70,8 +75,8 @@ export default class Http {
     expirationDate = new Date(expirationDate.setMonth(expirationDate.getMonth() + 2));
     await Promise.all(
       cookies
-        .filter((c) => c.session)
-        .map((c) => {
+        .filter(c => c.session)
+        .map(c => {
           const cookie: Electron.CookiesSetDetails = {
             ...CookieConverter.convertCookie(c),
             expirationDate: expirationDate.valueOf() / 1000,
@@ -113,7 +118,7 @@ export default class Http {
     }
 
     const opts = Http.getCommonOptions(headers, options.requestOptions);
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       Http.Request.get(uri, opts, async (error, response, body) => {
         const res: HttpResponse<T> = {
           response,
@@ -190,7 +195,7 @@ export default class Http {
       opts.body = options.data;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const request = Http.Request[type](uri, opts, async (error, response, body) => {
         const res: HttpResponse<T> = {
           error,

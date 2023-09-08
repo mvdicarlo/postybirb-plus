@@ -8,8 +8,10 @@ import {
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class NewgroundsFileOptionsEntity extends DefaultFileOptionsEntity
-  implements NewgroundsFileOptions {
+export class NewgroundsFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements NewgroundsFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

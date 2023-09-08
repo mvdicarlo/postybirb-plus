@@ -1,6 +1,7 @@
 const MTProtoClass = require('@mtproto/core');
 import { MTProto } from '@mtproto/core';
 import { Injectable } from '@nestjs/common';
+import cheerio from 'cheerio';
 import {
   DefaultOptions,
   FileRecord,
@@ -10,12 +11,12 @@ import {
   PostResponse,
   Submission,
   SubmissionPart,
+  SubmissionType,
   TelegramAccountData,
   TelegramFileOptions,
   TelegramNotificationOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server/account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
@@ -33,12 +34,11 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { TelegramStorage } from './telegram.storage';
-import _ from 'lodash';
+import _ = require('lodash');
 
 @Injectable()
 export class Telegram extends Website {
   readonly BASE_URL: string;
-  readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsFiles: string[] = [];
   private readonly instances: Record<string, MTProto> = {};
   private authData: Record<string, { phone_code_hash: string; phone_number: string }> = {};
@@ -46,6 +46,11 @@ export class Telegram extends Website {
   public waitBetweenPostsInterval = 30_000;
   private lastCall: number;
   private DEFAULT_WAIT: number = 3000;
+
+  // Real telegram limit is 2GB but i don't think anyone
+  // will send such big files throught PostyBirb because
+  // no other site support such big files
+  private MAX_MB: number = 30;
   private usernameMap: Record<string, string> = {};
 
   private async callApi<T>(appId: string, protocol: string, data: any): Promise<T> {
@@ -223,7 +228,7 @@ export class Telegram extends Website {
           api_id: Number(appId),
           api_hash: appHash,
           storageOptions: {
-            instance: new TelegramStorage(appId)
+            instance: new TelegramStorage(appId),
           },
         });
 
@@ -271,7 +276,7 @@ export class Telegram extends Website {
     });
 
     const channels: Folder[] = chats
-      .filter((c) => {
+      .filter(c => {
         // Skip forbidden chats
         if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
 
@@ -283,7 +288,7 @@ export class Telegram extends Website {
         )
           return true;
       })
-      .map((c) => ({
+      .map(c => ({
         label: c.title,
         value: `${c.id}-${c.access_hash}`,
       }));
@@ -295,80 +300,60 @@ export class Telegram extends Website {
     return data;
   }
 
+  parseDescription(text: string, type?: SubmissionType): string {
+    // Actual parsing happens in post methods because we
+    // need to get entities and split them
+    return text;
+  }
+
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(10) };
+    return { maxSize: FileSize.MBtoBytes(this.MAX_MB) };
   }
 
   private async upload(appId: string, file: PostFileRecord, spoiler: boolean) {
-    const parts = _.chunk(file.file.value, 512000); // 512KB
+    const parts = _.chunk(file.file.value, FileSize.MBtoBytes(0.5)); // 512KB
     const file_id = Date.now();
-    const props: {
-      _: 'inputMediaUploadedDocument' | 'inputMediaUploadedPhoto';
-      mime_type?: string;
-      nosound_video?: boolean;
-      attributes?: any[];
-    } = {
-      _: 'inputMediaUploadedDocument',
-    };
-    if (
+    const type: 'photo' | 'document' =
       file.file.options.contentType === 'image/png' ||
       file.file.options.contentType === 'image/jpg' ||
       file.file.options.contentType === 'image/jpeg'
-    ) {
-      props._ = 'inputMediaUploadedPhoto';
-    } else {
-      props.attributes = [];
-      props.mime_type = file.file.options.contentType;
-      if (props.mime_type === 'image/gif') {
-        props.nosound_video = true;
+        ? 'photo'
+        : 'document';
+
+    // saveBigFile part is only needed for document (video, files etc)
+    const bigFile = file.file.value.length >= FileSize.MBtoBytes(10) && type === 'document';
+
+    let media: InputMedia = {
+      _: `inputMediaUploaded${type === 'document' ? 'Document' : 'Photo'}`,
+      spoiler
+    };
+
+    if (type === 'document') {
+      media.attributes = [];
+      media.mime_type = file.file.options.contentType;
+      if (media.mime_type === 'image/gif') {
+        media.nosound_video = true;
       }
     }
 
-    if (file.file.value.length >= FileSize.MBtoBytes(10)) {
-      // Big file path
-      for (let i = 0; i < parts.length; i++) {
-        await this.callApi(appId, 'upload.saveBigFilePart', {
-          file_id,
-          file_part: i,
-          file_total_parts: parts.length,
-          bytes: parts[i],
-        });
-
-        WaitUtil.wait(1000); // Too much perhaps?
-      }
-
-      return {
-        ...props,
-        spoiler: spoiler,
-        file: {
-          _: 'inputFileBig',
-          id: file_id,
-          parts: parts.length,
-          name: file.file.options.filename,
-        },
-      };
-    } else {
-      for (let i = 0; i < parts.length; i++) {
-        await this.callApi(appId, 'upload.saveFilePart', {
-          file_id,
-          file_part: i,
-          bytes: parts[i],
-        });
-
-        WaitUtil.wait(1000); // Too much perhaps?
-      }
-
-      return {
-        ...props,
-        spoiler: spoiler,
-        file: {
-          _: 'inputFile',
-          id: file_id,
-          parts: parts.length,
-          name: file.file.options.filename,
-        },
-      };
+    const total_parts = bigFile ? { file_total_parts: parts.length } : {};
+    for (let i = 0; i < parts.length; i++) {
+      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`,{
+        ...total_parts,
+        file_id,
+        file_part: i,
+        bytes: parts[i],
+      });
     }
+
+    media.file = {
+      _: `inputFile${bigFile ? 'Big' : ''}`,
+      id: file_id,
+      parts: parts.length,
+      name: file.file.options.filename,
+    };
+
+    return media;
   }
 
   async postFileSubmission(
@@ -378,22 +363,27 @@ export class Telegram extends Website {
   ): Promise<PostResponse> {
     const appId = accountData.appId;
     const files = [data.primary, ...data.additional];
-    const fileData: {
-      _: string;
-      spoiler: boolean;
-      file: {
-        _: string;
-        id: number;
-        parts: number;
-        name: string;
-      };
-    }[] = [];
+    const medias: InputMedia[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      fileData.push(await this.upload(appId, file, data.options.spoiler));
+      medias.push(await this.upload(appId, file, data.options.spoiler));
     }
-    
-    const description = data.description.slice(0, 4096).trim();
+
+    let response: SendMessageResponse;
+
+    const { description, entities } = TelegramDescription.fromHTML(
+      data.description.trim().slice(0, 4096),
+    );
+    let mediaDescription = '';
+    let mediaEntities = [];
+    let messageDescription = '';
+    if (description.length < 1024) {
+      // Description fit image/album limit, no separate message
+      mediaDescription = description;
+      mediaEntities = entities;
+    } else {
+      messageDescription = description;
+    }
 
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
@@ -404,86 +394,79 @@ export class Telegram extends Website {
         access_hash,
       };
       if (files.length === 1) {
-        let messagePosted = false;
-        if (description.length > 1024) {
-          messagePosted = true;
-          await this.callApi(accountData.appId, 'messages.sendMessage', {
-            random_id: Date.now(),
-            message: data.description.slice(0, 4096).trim(),
-            peer: {
-              _: 'inputPeerChannel',
-              channel_id,
-              access_hash,
-            },
-          });
-        }
-        await this.callApi(appId, 'messages.sendMedia', {
+        response = await this.callApi(appId, `messages.sendMedia`, {
           random_id: Date.now(),
-          media: fileData[0],
-          message: messagePosted ? '' : data.description,
-          peer,
+          media: medias[0],
+          message: mediaDescription,
+          entities: mediaEntities,
           silent: data.options.silent,
+          peer,
         });
       } else {
-        let messagePosted = false;
-        if (description.length > 1024) {
-          messagePosted = true;
-          await this.callApi(accountData.appId, 'messages.sendMessage', {
-            random_id: Date.now(),
-            message: data.description.slice(0, 4096).trim(),
-            peer: {
-              _: 'inputPeerChannel',
-              channel_id,
-              access_hash,
-            },
+        let singleMedias: {
+          _: 'inputSingleMedia';
+          message: string;
+          entities: any[];
+          random_id: number;
+          media: InputMedia;
+        }[] = [];
+        for (let i = 0; i < medias.length; i++) {
+          const media = medias[i];
+          const type = media._.includes('Document') ? 'document' : 'photo';
+          const messageMedia = await this.callApi<{
+            spoiler: boolean;
+            ttl_seconds: number;
+            document?: Input;
+            photo?: Input;
+          }>(appId, `messages.uploadMedia`, {
+            media,
+            peer,
           });
-        }
-
-        // multimedia send
-        let mediaData = [];
-        for (let i = 0; i < fileData.length; i++) {
-          let messageMediaPhoto = await this.callApi<{ photo: { id: number, access_hash: number, file_reference: string}}>(appId, 'messages.uploadMedia', {
-            peer: {
-              _: 'inputPeerChannel',
-              channel_id,
-              access_hash,
-            },
-            media: fileData[i],
-          });
-          await WaitUtil.wait(1000);
-          mediaData.push({
+          const file = messageMedia.photo ?? messageMedia.document;
+          singleMedias.push({
             _: 'inputSingleMedia',
             random_id: Date.now(),
             media: {
-              _: "inputMediaPhoto",
-              spoiler: fileData[i].spoiler,
+              ...media,
+              _: type === 'photo' ? 'inputMediaPhoto' : 'inputMediaDocument',
               id: {
-                _: "inputPhoto",
-                id: messageMediaPhoto.photo.id,
-                access_hash: messageMediaPhoto.photo.access_hash,
-                file_reference: messageMediaPhoto.photo.file_reference,
-              }
+                _: type === 'photo' ? 'inputPhoto' : 'inputDocument',
+                id: file.id,
+                access_hash: file.access_hash,
+                file_reference: file.file_reference,
+              },
             },
-            message: i == 0 && !messagePosted ? data.description : '',
+            message: i === 0 ? mediaDescription : void 0,
+            entities: i === 0 ? mediaEntities : void 0,
           });
         }
 
-        let photosPerBatch = 10;
-        let batches = 1 + ((mediaData.length - 1) / photosPerBatch);
+        const mediasPerBatch = 10;
+        const batches = 1 + (singleMedias.length - 1) / mediasPerBatch;
         for (let i = 0; i < batches; i++) {
-          await this.callApi(appId, 'messages.sendMultiMedia', {
-            multi_media: mediaData.slice(i*photosPerBatch,(i+1)*photosPerBatch),
-            peer,
+          response = await this.callApi(appId, 'messages.sendMultiMedia', {
+            multi_media: singleMedias.slice(i * mediasPerBatch, (i + 1) * mediasPerBatch),
             silent: data.options.silent,
+            peer,
           });
-          await WaitUtil.wait(1000);
         }
       }
 
-      WaitUtil.wait(1000);
+      // Send long description by separate message(s) after media
+      if (messageDescription) {
+        await this.callApi(accountData.appId, 'messages.sendMessage', {
+          random_id: Date.now(),
+          message: messageDescription,
+          silent: data.options.silent,
+          entities,
+          peer,
+        });
+      }
+
+      await WaitUtil.wait(1000);
     }
 
-    return this.createPostResponse({});
+    return this.createPostResponse({ source: this.getSourceFromResponse(response) });
   }
 
   async postNotificationSubmission(
@@ -491,23 +474,39 @@ export class Telegram extends Website {
     data: PostData<Submission, TelegramNotificationOptions>,
     accountData: TelegramAccountData,
   ) {
+    let response: SendMessageResponse;
+    const description = data.description.trim();
+    const descriptions = description.length < 4096 ? [description] : _.chunk(description, 4069);
+
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
       const [channel_id, access_hash] = channel.split('-');
-      await this.callApi(accountData.appId, 'messages.sendMessage', {
-        random_id: Date.now(),
-        message: data.description.slice(0, 4096).trim(),
-        peer: {
-          _: 'inputPeerChannel',
-          channel_id,
-          access_hash,
-        },
-      });
+      const peer = {
+        _: 'inputPeerChannel',
+        channel_id,
+        access_hash,
+      };
+      const id = Date.now();
+      for (let i = 0; i < descriptions.length; i++) {
+        response = await this.callApi(accountData.appId, 'messages.sendMessage', {
+          random_id: id + i,
+          message: descriptions[i],
+          silent: data.options.silent,
+          peer,
+        });
+      }
 
       await WaitUtil.wait(2000);
     }
 
-    return this.createPostResponse({});
+    return this.createPostResponse({ source: this.getSourceFromResponse(response) });
+  }
+
+  private getSourceFromResponse(response: SendMessageResponse) {
+    // TODO Maybe support multiple sources from multiple channels. Need to rewrite some ui
+    const update = response.updates.find(e => e._ === 'updateNewChannelMessage');
+    if (!update || !update.peer_id || !update.id) return '';
+    return `https://t.me/c/${update.peer_id.channel_id}/${update.id}`;
   }
 
   validateFileSubmission(
@@ -525,7 +524,7 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach((f) => {
+      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
           problems.push(`Channel (${f}) not found.`);
         }
@@ -534,7 +533,7 @@ export class Telegram extends Website {
       problems.push('No channel(s) selected.');
     }
 
-    const description = this.defaultDescriptionParser(
+    const { description } = TelegramDescription.fromHTML(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
@@ -542,19 +541,31 @@ export class Telegram extends Website {
       warnings.push('Max description length allowed is 4,096 characters.');
     }
 
-    const { type, size, name } = submission.primary;
-    const maxMB: number = 10;
-    if (FileSize.MBtoBytes(maxMB) < size) {
-      if (
-        isAutoscaling &&
-        type === FileSubmissionType.IMAGE &&
-        ImageManipulator.isMimeType(submission.primary.mimetype)
-      ) {
-        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
-      } else {
-        problems.push(`Telegram limits ${submission.primary.mimetype} to ${maxMB}MB`);
+    const files = [
+      submission.primary,
+      ...(submission.additional || []).filter(
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+      ),
+    ];
+
+    files.forEach(file => {
+      const { type, size, name, mimetype } = file;
+      if (FileSize.MBtoBytes(this.MAX_MB) < size) {
+        if (
+          isAutoscaling &&
+          type === FileSubmissionType.IMAGE &&
+          ImageManipulator.isMimeType(mimetype)
+        ) {
+          warnings.push(`${name} will be scaled down to ${this.MAX_MB}MB`);
+        } else {
+          problems.push(`Telegram limits ${mimetype} to ${this.MAX_MB}MB`);
+        }
       }
-    }
+
+      if (FileSize.MBtoBytes(10) < size && type !== FileSubmissionType.IMAGE) {
+        warnings.push(`${name} will show in channel as Unknown Track but still will be avaible for open.`);
+      }
+    });
 
     return { problems, warnings };
   }
@@ -573,16 +584,17 @@ export class Telegram extends Website {
         GenericAccountProp.FOLDERS,
         [],
       );
-      submissionPart.data.channels.forEach((f) => {
+      submissionPart.data.channels.forEach(f => {
+      submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(`Folder (${f}) not found.`);
+          problems.push(`Channel (${f}) not found.`);
         }
       });
     } else {
       problems.push('No channel(s) selected.');
     }
 
-    const description = this.defaultDescriptionParser(
+    const { description } = TelegramDescription.fromHTML(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
@@ -593,3 +605,100 @@ export class Telegram extends Website {
     return { problems, warnings };
   }
 }
+
+interface InputMedia {
+  _: `inputMedia${'Uploaded' | ''}${'Document' | 'Photo'}`;
+  file?: {
+    _: `inputFile${'Big' | ''}`;
+    id: number;
+    parts: number;
+    name: string;
+  };
+  id?: Input;
+  spoiler?: boolean;
+  mime_type?: string;
+  nosound_video?: boolean;
+  attributes?: any[];
+}
+
+interface Input {
+  _: `input${'Document' | 'Photo'}`;
+  id: number;
+  access_hash: number;
+  file_reference: any;
+}
+
+interface SendMessageResponse {
+  updates: { _: 'updateNewChannelMessage'; id: number; peer_id: { channel_id: number } }[];
+}
+
+type TelegramEntityParser = ({ node, output }: { node: cheerio.TagElement; output: string }) => any;
+
+// Maybe move to parsers folder?
+class TelegramDescription {
+  private static parsers: Record<string, TelegramEntityParser> = {};
+  public static entity(type: string, tags: string[], parse?: TelegramEntityParser) {
+    if (!parse) {
+      parse = ({ node, output }) => {
+        return {
+          _: `messageEntity${type}`,
+          offset: output.length,
+          length: 0,
+        };
+      };
+    }
+    for (const tag of tags) this.parsers[tag] = parse;
+    return parse;
+  }
+
+  public static fromHTML(html: string) {
+    let output = '';
+    let entities: { _: string; offset: number; length: number }[] = [];
+
+    const parseNodes = (doc: cheerio.Element[] | ReturnType<typeof $>, parent: number | null) => {
+      for (const node of doc) {
+        if (node.type === 'tag') {
+          if (node.name === 'br') {
+            output += '\n';
+          } else {
+            const parser = TelegramDescription.parsers[node.name];
+            let index = null;
+            if (parser) {
+              index = entities.push(parser({ node, output })) - 1;
+            }
+
+            // Recurse parse other nodes
+            if (node.children.length) parseNodes(node.children, index);
+          }
+        } else if (node.type === 'text') {
+          output += node.data;
+        }
+      }
+
+      // Set actual length of parent element if needed
+      if (parent) {
+        entities[parent].length = output.length - entities[parent].offset;
+      }
+    };
+
+    const $ = cheerio.load('');
+    parseNodes($(html), null);
+
+    return { description: output, entities };
+  }
+}
+
+TelegramDescription.entity('Bold', ['b', 'strong']);
+TelegramDescription.entity('Underline', ['u', 'ins']);
+TelegramDescription.entity('Strike', ['s', 'strike', 'del']);
+TelegramDescription.entity('Italic', ['i', 'em']);
+TelegramDescription.entity('Code', ['code']);
+TelegramDescription.entity('Pre', ['pre']);
+TelegramDescription.entity('TextUrl', ['a'], ({ node, output }) => {
+  return {
+    _: 'messageEntityTextUrl',
+    offset: output.length,
+    lenght: 0,
+    url: node.attribs.href,
+  };
+});

@@ -10,12 +10,12 @@ export interface CustomShortcutState {
 
 export class CustomShortcutStore {
   @observable state: CustomShortcutState = {
-    shortcuts: []
+    shortcuts: [],
   };
 
   constructor() {
     CustomShortcutService.getAll().then(({ data }) =>
-      this.state.shortcuts.push(...data.sort((a, b) => a.shortcut.localeCompare(b.shortcut)))
+      this.state.shortcuts.push(...data.sort((a, b) => a.shortcut.localeCompare(b.shortcut))),
     );
   }
 

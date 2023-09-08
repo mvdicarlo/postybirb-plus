@@ -1,3 +1,3 @@
 export enum PostEvent {
-  UPDATED = '[POST STATUS] UPDATED'
+  UPDATED = '[POST STATUS] UPDATED',
 }

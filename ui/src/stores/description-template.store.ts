@@ -10,11 +10,13 @@ export interface DescriptionTemplateState {
 
 export class DescriptionTemplateStore {
   @observable state: DescriptionTemplateState = {
-    templates: []
+    templates: [],
   };
 
   constructor() {
-    DescriptionTemplateService.getAll().then(({ data }) => (this.state.templates.push(...data.sort((a, b) => a.title.localeCompare(b.title)))));
+    DescriptionTemplateService.getAll().then(({ data }) =>
+      this.state.templates.push(...data.sort((a, b) => a.title.localeCompare(b.title))),
+    );
   }
 
   @computed

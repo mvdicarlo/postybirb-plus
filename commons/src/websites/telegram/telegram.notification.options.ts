@@ -5,8 +5,10 @@ import { TelegramNotificationOptions } from '../../interfaces/websites/telegram/
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class TelegramNotificationOptionsEntity extends DefaultOptionsEntity
-  implements TelegramNotificationOptions {
+export class TelegramNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements TelegramNotificationOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

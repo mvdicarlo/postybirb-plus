@@ -233,7 +233,7 @@ export class Newgrounds extends Website {
     }
 
     const newCookies: any = {};
-    parkFile.response.headers['set-cookie'].forEach((cookie) => {
+    parkFile.response.headers['set-cookie'].forEach(cookie => {
       const cookieParts = cookie.split(';')[0].split('=');
       return (newCookies[cookieParts[0]] = cookieParts[1]);
     });
@@ -271,7 +271,7 @@ export class Newgrounds extends Website {
       let message = '';
       try {
         message = post.body.errors
-          .map((err) => {
+          .map(err => {
             if (err.includes('You must agree to the terms of the submissions agreement.')) {
               return 'You must first manually post to Newgrounds to accept the terms of the submissions agreement.';
             }
@@ -293,7 +293,7 @@ export class Newgrounds extends Website {
   formatTags(tags: string[]): any {
     return super
       .formatTags(tags, { spaceReplacer: '-' })
-      .map((tag) => {
+      .map(tag => {
         return tag.replace(/(\(|\)|:|#|;|\]|\[|')/g, '').replace(/_/g, '-');
       })
       .slice(0, 12);

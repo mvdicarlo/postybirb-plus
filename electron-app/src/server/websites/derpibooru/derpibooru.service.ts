@@ -8,7 +8,7 @@ import {
   PostResponse,
   SubmissionPart,
   SubmissionRating,
-  UsernameShortcut
+  UsernameShortcut,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
@@ -99,7 +99,7 @@ export class Derpibooru extends Website {
       'grimdark',
       'grotesque',
     ];
-    const lowerCaseTags = tags.map((t) => t.toLowerCase());
+    const lowerCaseTags = tags.map(t => t.toLowerCase());
     if (!lowerCaseTags.includes(ratingTag)) {
       let add = true;
 

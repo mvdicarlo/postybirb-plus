@@ -5,8 +5,10 @@ import { SubscribeStarFileOptions } from '../../interfaces/websites/subscribe-st
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class SubscribeStarFileOptionsEntity extends DefaultFileOptionsEntity
-  implements SubscribeStarFileOptions {
+export class SubscribeStarFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements SubscribeStarFileOptions
+{
   @Expose()
   @IsOptional()
   @IsString()

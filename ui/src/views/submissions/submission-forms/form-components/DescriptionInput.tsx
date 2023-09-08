@@ -23,6 +23,7 @@ interface Props {
   anchorLength?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {}
 
 @inject('descriptionTemplateStore', 'customShortcutStore')

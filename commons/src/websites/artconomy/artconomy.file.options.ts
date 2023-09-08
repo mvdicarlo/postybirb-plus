@@ -5,8 +5,10 @@ import { ArtconomyFileOptions } from '../../interfaces/websites/artconomy/artcon
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultFileOptionsEntity } from '../../models/default-file-options.entity';
 
-export class ArtconomyFileOptionsEntity extends DefaultFileOptionsEntity
-  implements ArtconomyFileOptions {
+export class ArtconomyFileOptionsEntity
+  extends DefaultFileOptionsEntity
+  implements ArtconomyFileOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(false)

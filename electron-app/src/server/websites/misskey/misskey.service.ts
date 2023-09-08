@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import generator, { Entity, Response } from 'megalodon'
+import generator, { Entity, Response } from 'megalodon';
 import {
   DefaultOptions,
   FileRecord,
@@ -87,10 +87,10 @@ export class MissKey extends Website {
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: MissKeyAccountData) {   
+  private async getInstanceInfo(profileId: string, data: MissKeyAccountData) {
     const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
     const instance = await client.getInstance();
-   
+
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
@@ -100,9 +100,9 @@ export class MissKey extends Website {
     return true;
   }
 
-  private getMissKeyInstance(data: MissKeyAccountData) : Entity.Instance {
+  private getMissKeyInstance(data: MissKeyAccountData): Entity.Instance {
     const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
-    client.getInstance().then((res) => {
+    client.getInstance().then(res => {
       return res.data;
     });
     return null;
@@ -119,11 +119,11 @@ export class MissKey extends Website {
               ? instanceInfo.configuration.media_attachments.image_size_limit
               : instanceInfo.configuration.media_attachments.video_size_limit,
         }
-      : {           
+      : {
           maxHeight: 4000,
           maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300) 
-      };
+          maxSize: FileSize.MBtoBytes(300),
+        };
   }
 
   private async uploadMedia(
@@ -131,10 +131,9 @@ export class MissKey extends Website {
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
-
     const M = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
     const upload = await M.uploadMedia(file.value, { description: altText });
-    console.log(upload)
+    console.log(upload);
     if (upload.status > 300) {
       return Promise.reject(
         this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
@@ -149,7 +148,11 @@ export class MissKey extends Website {
     data: FilePostData<MissKeyFileOptions>,
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
-    const M = generator('misskey', `https://${accountData.website}`, accountData.tokenData.access_token);
+    const M = generator(
+      'misskey',
+      `https://${accountData.website}`,
+      accountData.tokenData.access_token,
+    );
 
     const files = [data.primary, ...data.additional];
     this.checkCancelled(cancellationToken);
@@ -161,7 +164,9 @@ export class MissKey extends Website {
     }
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    const chunkCount = instanceInfo
+      ? instanceInfo?.configuration?.statuses?.max_media_attachments
+      : 4;
     const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
@@ -174,7 +179,7 @@ export class MissKey extends Website {
         status: '',
         sensitive: isSensitive,
         visibility: options.visibility || 'public',
-        spoiler_text: ''
+        spoiler_text: '',
       };
       let status = undefined;
 
@@ -182,56 +187,56 @@ export class MissKey extends Website {
       if (i === 0) {
         status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${
           data.description
-        }`.substring(0, maxChars)
+        }`.substring(0, maxChars);
 
         statusOptions = {
           sensitive: isSensitive,
           visibility: options.visibility || 'public',
-          media_ids: chunks[i].map((media) => media.id), 
-          spoiler_text: "",
-        }
-     } else {
-      statusOptions = {
-        sensitive: isSensitive,
-        visibility: options.visibility || 'public',
-        media_ids: chunks[i].map((media) => media.id),
-        in_reply_to_id: lastId,  
-        spoiler_text: "",    
-      }      
-     }
+          media_ids: chunks[i].map(media => media.id),
+          spoiler_text: '',
+        };
+      } else {
+        statusOptions = {
+          sensitive: isSensitive,
+          visibility: options.visibility || 'public',
+          media_ids: chunks[i].map(media => media.id),
+          in_reply_to_id: lastId,
+          spoiler_text: '',
+        };
+      }
 
       const tags = this.formatTags(data.tags);
 
-      // Update the post content with the Tags if any are specified - for MissKey, we need to append 
+      // Update the post content with the Tags if any are specified - for MissKey, we need to append
       // these onto the post, *IF* there is character count available.
       if (tags.length > 0) {
-        status += "\n\n";
+        status += '\n\n';
       }
 
       tags.forEach(tag => {
         let remain = maxChars - form.status.length;
         let tagToInsert = tag;
-        if (remain > (tagToInsert.length)) {
-          status += ` ${tagToInsert}`
+        if (remain > tagToInsert.length) {
+          status += ` ${tagToInsert}`;
         }
         // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      })
-      
+      });
+
       if (options.spoilerText) {
         statusOptions.spoiler_text = options.spoilerText;
       }
 
       this.checkCancelled(cancellationToken);
 
-      await M.postStatus(status, statusOptions).then((result) => {
-        lastId = result.data.id;
-        let res = result.data as Entity.Status;
-        return this.createPostResponse({ source: res.url });
-      }).catch((err: Error) => {
-        return Promise.reject(
-          this.createPostResponse({ message: err.message }),
-        );
-      })
+      await M.postStatus(status, statusOptions)
+        .then(result => {
+          lastId = result.data.id;
+          let res = result.data as Entity.Status;
+          return this.createPostResponse({ source: res.url });
+        })
+        .catch((err: Error) => {
+          return Promise.reject(this.createPostResponse({ message: err.message }));
+        });
     }
 
     return this.createPostResponse({});
@@ -243,8 +248,12 @@ export class MissKey extends Website {
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
     const mInstance = this.getMissKeyInstance(accountData);
-    const M = generator('misskey', `https://${accountData.website}`, accountData.tokenData.access_token);
-    
+    const M = generator(
+      'misskey',
+      `https://${accountData.website}`,
+      accountData.tokenData.access_token,
+    );
+
     const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
@@ -254,25 +263,25 @@ export class MissKey extends Website {
     const statusOptions: any = {
       sensitive: isSensitive,
       visibility: options.visibility || 'public',
-      spoiler_text: ""
+      spoiler_text: '',
     };
 
     const tags = this.formatTags(data.tags);
 
-    // Update the post content with the Tags if any are specified - for MissKey, we need to append 
+    // Update the post content with the Tags if any are specified - for MissKey, we need to append
     // these onto the post, *IF* there is character count available.
     if (tags.length > 0) {
-      status += "\n\n";
+      status += '\n\n';
     }
 
     tags.forEach(tag => {
       let remain = maxChars - status.length;
       let tagToInsert = tag;
-      if (remain > (tagToInsert.length)) {
-        status += ` ${tagToInsert}`
+      if (remain > tagToInsert.length) {
+        status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-    })
+    });
 
     if (options.spoilerText) {
       statusOptions.spoiler_text = options.spoilerText;
@@ -280,29 +289,29 @@ export class MissKey extends Website {
 
     this.checkCancelled(cancellationToken);
 
-    await M.postStatus(status, statusOptions).then((result) => {
-      let res = result.data as Entity.Status;
-      return this.createPostResponse({ source: res.url });
-    }).catch((err: Error) => {
-      return Promise.reject(
-        this.createPostResponse({ message: err.message }),
-      );
-    })
+    await M.postStatus(status, statusOptions)
+      .then(result => {
+        let res = result.data as Entity.Status;
+        return this.createPostResponse({ source: res.url });
+      })
+      .catch((err: Error) => {
+        return Promise.reject(this.createPostResponse({ message: err.message }));
+      });
     return this.createPostResponse({});
   }
 
   formatTags(tags: string[]) {
     return this.parseTags(
       tags
-        .map((tag) => tag.replace(/[^a-z0-9]/gi, ' '))
-        .map((tag) =>
+        .map(tag => tag.replace(/[^a-z0-9]/gi, ' '))
+        .map(tag =>
           tag
             .split(' ')
             // .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(''),
         ),
       { spaceReplacer: '_' },
-    ).map((tag) => `#${tag}`);
+    ).map(tag => `#${tag}`);
   }
 
   validateFileSubmission(
@@ -333,7 +342,7 @@ export class MissKey extends Website {
     const files = [
       submission.primary,
       ...(submission.additional || []).filter(
-        (f) => !f.ignoredAccounts!.includes(submissionPart.accountId),
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
 
@@ -341,7 +350,7 @@ export class MissKey extends Website {
       ? instanceInfo?.configuration?.media_attachments?.image_size_limit
       : FileSize.MBtoBytes(50);
 
-    files.forEach((file) => {
+    files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
@@ -361,20 +370,23 @@ export class MissKey extends Website {
 
       // Check the image dimensions are not over 4000 x 4000 - this is the MissKey server max
       if (
-        isAutoscaling && 
-        type === FileSubmissionType.IMAGE && 
-        (file.height > 4000 || file.width > 4000)) {
-          warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        (file.height > 4000 || file.width > 4000)
+      ) {
+        warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
            aspect ratio`);
-        }
+      }
     });
 
-    if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
-      submissionPart.data.visibility != "public") {
-        warnings.push(
-              `This post won't be listed under any hashtag as it is not public. Only public posts 
+    if (
+      (submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) &&
+      submissionPart.data.visibility != 'public'
+    ) {
+      warnings.push(
+        `This post won't be listed under any hashtag as it is not public. Only public posts 
               can be searched by hashtag.`,
-            );
+      );
     }
 
     return { problems, warnings };

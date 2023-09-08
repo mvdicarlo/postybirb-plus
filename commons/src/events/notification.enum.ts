@@ -1,3 +1,3 @@
 export enum NotificationEvent {
-  UPDATE = '[NOTIFICATION] UPDATED'
+  UPDATE = '[NOTIFICATION] UPDATED',
 }

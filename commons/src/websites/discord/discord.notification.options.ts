@@ -5,8 +5,10 @@ import { DiscordNotificationOptions } from '../../interfaces/websites/discord/di
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
 import { DefaultOptionsEntity } from '../../models/default-options.entity';
 
-export class DiscordNotificationOptionsEntity extends DefaultOptionsEntity
-  implements DiscordNotificationOptions {
+export class DiscordNotificationOptionsEntity
+  extends DefaultOptionsEntity
+  implements DiscordNotificationOptions
+{
   @Expose()
   @IsBoolean()
   @DefaultValue(true)
