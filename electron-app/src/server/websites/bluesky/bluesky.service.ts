@@ -7,14 +7,12 @@ import {
   PostResponse,
   Submission,
   SubmissionPart,
-  SubmissionRating,
   BlueskyAccountData,
   BlueskyFileOptions,
   BlueskyNotificationOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
@@ -128,6 +126,7 @@ export class Bluesky extends Website {
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly MAX_CHARS = 300;
   readonly MAX_MEDIA = 4;
+  readonly enableAdvertisement = false;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     BskyAgent.configure({ fetch: fetchHandler });
