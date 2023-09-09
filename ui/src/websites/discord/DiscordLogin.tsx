@@ -7,7 +7,7 @@ import BrowserLink from '../../components/BrowserLink';
 interface State {
   name: string;
   webhook: string;
-  forum: boolean,
+  forum: boolean;
   sending: boolean;
 }
 

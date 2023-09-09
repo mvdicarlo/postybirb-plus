@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { app } from 'electron';
 import {
   DefaultOptions,
-  furtasticAccountData,
-  furtasticFileOptions,
+  FurtasticAccountData,
+  FurtasticFileOptions,
   FileRecord,
   FileSubmission,
   FileSubmissionType,
@@ -43,7 +43,7 @@ export class Furtastic extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const accountData: furtasticAccountData = data.data;
+    const accountData: FurtasticAccountData = data.data;
     if (accountData?.username) {
       status.username = accountData.username;
       status.loggedIn = true;
@@ -85,8 +85,8 @@ export class Furtastic extends Website {
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<furtasticFileOptions>,
-    accountData: furtasticAccountData,
+    data: FilePostData<FurtasticFileOptions>,
+    accountData: FurtasticAccountData,
   ): Promise<PostResponse> {
     const form: any = {
       tags: this.formatTags(data.tags),
@@ -147,7 +147,7 @@ export class Furtastic extends Website {
     return super.formatTags(tags).join(' ').trim();
   }
 
-  transformAccountData(data: furtasticAccountData) {
+  transformAccountData(data: FurtasticAccountData) {
     return {
       username: data?.username,
     };
