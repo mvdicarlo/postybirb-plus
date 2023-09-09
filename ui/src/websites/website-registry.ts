@@ -9,7 +9,7 @@ import { Inkbunny } from './inkbunny/Inkbunny';
 import { SoFurry } from './sofurry/SoFurry';
 import { e621 } from './e621/e621';
 import { FurAffinity } from './fur-affinity/FurAffinity';
-import { Furtastic } from './furtastic/furtastic';
+import { Furtastic } from './furtastic/Furtastic';
 import { SubscribeStar } from './subscribe-star/SubscribeStar';
 import { HentaiFoundry } from './hentai-foundry/HentaiFoundry';
 import { Aryion } from './aryion/Aryion';
