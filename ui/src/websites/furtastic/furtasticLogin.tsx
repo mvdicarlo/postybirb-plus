@@ -3,7 +3,7 @@ import { LoginDialogProps } from '../interfaces/website.interface';
 import { Form, Input, Button, message } from 'antd';
 import LoginService from '../../services/login.service';
 import BrowserLink from '../../components/BrowserLink';
-import { furtasticAccountData } from 'postybirb-commons';
+import { FurtasticAccountData } from 'postybirb-commons';
 import Axios from 'axios';
 
 interface State extends FurtasticAccountData {
@@ -30,7 +30,7 @@ export default class FurtasticLogin extends React.Component<LoginDialogProps, St
   submit() {
     if (this.state.key && this.state.username) {
       this.setState({ sending: true });
-      const data: furtasticAccountData = {
+      const data: FurtasticAccountData = {
         username: this.state.username.trim(),
         key: this.state.key.trim()
       };
