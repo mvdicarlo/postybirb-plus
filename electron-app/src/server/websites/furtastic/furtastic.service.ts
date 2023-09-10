@@ -33,6 +33,7 @@ export class Furtastic extends Website {
   readonly acceptsSourceUrls: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly enableAdvertisement: boolean = true;
+  readonly acceptsAdditionalFiles: boolean = true;
 
   readonly usernameShortcuts = [
     {
