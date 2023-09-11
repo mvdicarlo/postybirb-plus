@@ -28,6 +28,7 @@ import { Website } from '../website.base';
 import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
+import Graphemer from 'graphemer';
 
 // Start of Polyfill
 
