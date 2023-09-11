@@ -12,7 +12,7 @@ import { FurtasticTagSearchProvider } from './Providers';
 export class Furtastic extends WebsiteImpl {
   internalName: string = 'Furtastic';
   name: string = 'Furtastic';
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
   loginUrl: string = '';
 
