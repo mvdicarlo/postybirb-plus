@@ -25,16 +25,9 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {
-  BskyAgent,
-  stringifyLex,
-  jsonToLex,
-  AppBskyEmbedImages,
-  ComAtprotoLabelDefs,
-  BlobRef,
-} from '@atproto/api';
+import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 // Start of Polyfill
 
@@ -284,6 +277,7 @@ export class Bluesky extends Website {
     });
 
     let status = data.description;
+    let r = new RichText({text: status});
 
     const tags = this.formatTags(data.tags);
 
@@ -294,12 +288,12 @@ export class Bluesky extends Website {
     }
 
     tags.forEach(tag => {
-      let remain = this.MAX_CHARS - status.length;
+      let remain = this.MAX_CHARS - r.graphemeLength;
       let tagToInsert = tag;
       if (!tag.startsWith('#')) {
         tagToInsert = `#${tagToInsert}`;
       }
-      if (remain > tagToInsert.length) {
+      if (remain > (tagToInsert.length)) {
         status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
@@ -313,15 +307,19 @@ export class Bluesky extends Website {
       };
     }
 
-    let postResult = await agent
-      .post({
-        text: status,
-        labels: labelsRecord,
-      })
-      .catch(err => {
-        return Promise.reject(this.createPostResponse({ message: err }));
-      });
-
+    const rt = new RichText({ text: status });
+    rt.detectFacets(agent);
+    
+    let postResult = await agent.post({
+      text: rt.text,
+      facets: rt.facets,
+      labels: labelsRecord
+    }).catch(err => {
+      return Promise.reject(
+          this.createPostResponse({ message: err }),
+      );
+    });
+  
     if (postResult && postResult.uri) {
       return this.createPostResponse({
         source: postResult.uri,
@@ -344,8 +342,14 @@ export class Bluesky extends Website {
       warnings.push(`Bluesky recommends alt text to be provided`);
     }
 
-    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
-      problems.push(`Max description length allowed is ${this.MAX_CHARS} characters.`);
+    const rt = new RichText({ text: submissionPart.data.description.value });
+    const agent = new BskyAgent({ service: 'https://bsky.social' })
+    rt.detectFacets(agent);
+
+    if (rt.graphemeLength > this.MAX_CHARS) {
+      problems.push(
+        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+      );
     }
 
     const files = [
@@ -401,8 +405,14 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
-      problems.push(`Max description length allowed is ${this.MAX_CHARS} characters.`);
+    const rt = new RichText({ text: submissionPart.data.description.value });
+    const agent = new BskyAgent({ service: 'https://bsky.social' })
+    rt.detectFacets(agent);
+
+    if (rt.graphemeLength > this.MAX_CHARS) {
+      problems.push(
+        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+      );
     }
 
     return { problems, warnings };
