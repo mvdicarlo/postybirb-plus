@@ -216,6 +216,8 @@ export class Bluesky extends Website {
     };
 
     let status = data.description;
+    let r = new RichText({text: status});
+
     const tags = this.formatTags(data.tags);
 
     // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append
@@ -234,6 +236,7 @@ export class Bluesky extends Website {
         status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      r = new RichText({text: status});
     });
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
@@ -244,9 +247,13 @@ export class Bluesky extends Website {
       };
     }
 
+    const rt = new RichText({ text: status });
+    await rt.detectFacets(agent);
+
     let postResult = await agent
       .post({
-        text: status,
+        text: rt.text,
+        facets: rt.facets,
         embed: embeds,
         labels: labelsRecord,
       })
@@ -298,6 +305,7 @@ export class Bluesky extends Website {
         status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      r = new RichText({text: status});
     });
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
@@ -309,7 +317,7 @@ export class Bluesky extends Website {
     }
 
     const rt = new RichText({ text: status });
-    rt.detectFacets(agent);
+    await rt.detectFacets(agent);
     
     let postResult = await agent.post({
       text: rt.text,
