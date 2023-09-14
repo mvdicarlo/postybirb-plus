@@ -1,10 +1,10 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsDefined, IsNotEmpty } from 'class-validator';
 import { Settings } from 'postybirb-commons';
 
 export class SettingsUpdateDto {
   @IsNotEmpty()
   key: keyof Settings;
 
-  @IsNotEmpty()
+  @IsDefined()
   value: any;
 }

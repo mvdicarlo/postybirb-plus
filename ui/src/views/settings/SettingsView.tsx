@@ -13,7 +13,7 @@ import {
   Input,
   Typography,
   Button,
-  message
+  message,
 } from 'antd';
 import { UIStore } from '../../stores/ui.store';
 import UpdateService from '../../services/update.service';
@@ -28,12 +28,7 @@ interface Props {
 @observer
 export default class SettingsView extends React.Component<Props> {
   private updateSetting(key: keyof Settings, value: any) {
-    if (
-      value === undefined ||
-      (value === '' && key !== 'defaultTagSearchProvider') ||
-      value === null
-    )
-      return;
+    if (value === undefined || value === null) return;
     if (value === this.props.settingsStore!.settings[key]) return;
     SettingsService.updateSetting(key, value);
   }
@@ -124,7 +119,7 @@ export default class SettingsView extends React.Component<Props> {
                   onChange={value =>
                     this.updateSetting(
                       'maxPNGSizeCompression',
-                      Math.min(99, Math.max(0, Number(value)))
+                      Math.min(99, Math.max(0, Number(value))),
                     )
                   }
                 />
@@ -134,7 +129,7 @@ export default class SettingsView extends React.Component<Props> {
                 extra={this.exampleDimensionChange(
                   settings.maxPNGSizeCompressionWithAlpha,
                   1000,
-                  1000
+                  1000,
                 )}
               >
                 <InputNumber
@@ -145,7 +140,7 @@ export default class SettingsView extends React.Component<Props> {
                   onChange={value =>
                     this.updateSetting(
                       'maxPNGSizeCompressionWithAlpha',
-                      Math.min(99, Math.max(0, Number(value)))
+                      Math.min(99, Math.max(0, Number(value))),
                     )
                   }
                 />
@@ -164,7 +159,7 @@ export default class SettingsView extends React.Component<Props> {
                   onChange={value =>
                     this.updateSetting(
                       'maxJPEGSizeCompression',
-                      Math.min(99, Math.max(0, Number(value)))
+                      Math.min(99, Math.max(0, Number(value))),
                     )
                   }
                 />
@@ -181,7 +176,7 @@ export default class SettingsView extends React.Component<Props> {
                   onChange={value =>
                     this.updateSetting(
                       'maxJPEGQualityCompression',
-                      Math.min(99, Math.max(0, Number(value)))
+                      Math.min(99, Math.max(0, Number(value))),
                     )
                   }
                 />
@@ -249,14 +244,14 @@ export default class SettingsView extends React.Component<Props> {
                 placeholder={`localhost:${window.PORT}`}
                 defaultValue={(localStorage.getItem('REMOTE_URI') || '').replace(
                   /http(s){0,1}:\/\//,
-                  ''
+                  '',
                 )}
                 onBlur={({ target }) => {
                   localStorage.setItem(
                     'REMOTE_URI',
                     target.value.trim()
                       ? `https://${target.value.replace(/http(s){0,1}:\/\//, '')}`
-                      : ''
+                      : '',
                   );
                   this.setState({});
                 }}
@@ -299,7 +294,8 @@ export default class SettingsView extends React.Component<Props> {
               Usually need when using VPN since requests from PostyBirb does not go throught some
               VPN's by default.
               <br />
-              If that happens, you can configure your VPN to listen on local address and then set it here
+              If that happens, you can configure your VPN to listen on local address and then set it
+              here
               <br />
               <strong>
                 Any changes to these settings will require you to restart the application.
@@ -308,8 +304,9 @@ export default class SettingsView extends React.Component<Props> {
             <Form.Item>
               <Input
                 placeholder="http://127.0.0.1:1111"
+                defaultValue={settings.proxy || ''}
                 onBlur={({ target }) => {
-                  this.updateSetting('proxy', target.value)
+                  this.updateSetting('proxy', target.value);
                 }}
               />
             </Form.Item>

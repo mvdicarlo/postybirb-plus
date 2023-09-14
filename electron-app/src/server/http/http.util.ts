@@ -1,11 +1,12 @@
-import request from 'request';
-import { BrowserWindow, LoadURLOptions, session } from 'electron';
-import 'url';
-import _ from 'lodash';
-import CookieConverter from 'src/server/utils/cookie-converter.util';
-import setCookie from 'set-cookie-parser';
 import { Logger } from '@nestjs/common';
+import { BrowserWindow, LoadURLOptions, session } from 'electron';
+import _ from 'lodash';
+import lowdb from 'lowdb';
 import { Settings } from 'postybirb-commons';
+import request from 'request';
+import setCookie from 'set-cookie-parser';
+import CookieConverter from 'src/server/utils/cookie-converter.util';
+import 'url';
 const FormData = require('form-data');
 
 interface GetOptions {
@@ -27,16 +28,12 @@ export interface HttpResponse<T> {
   returnUrl: string;
 }
 
-// For more clear code and typechecking because global is lowdb<any>
-const settingsState: Settings = global.settingsDB.getState()
-
 export default class Http {
   private static logger: Logger = new Logger(Http.name);
   static Request = request.defaults({
     headers: {
       'User-Agent': session.defaultSession.getUserAgent(),
     },
-    ...(settingsState.proxy ? { proxy: settingsState.proxy } : {}),
   });
 
   static parseCookies(cookies: Electron.Cookie[]) {
@@ -91,13 +88,19 @@ export default class Http {
     headers: Record<string, any>,
     requestOptions?: request.CoreOptions,
   ): request.CoreOptions {
+    const commonRequestOptions = requestOptions ?? {};
+    const proxyValue =
+      (global.settingsDB as lowdb.LowdbSync<Settings>).get<any>('proxy').value() || '';
+    if (proxyValue.trim()) {
+      commonRequestOptions.proxy = (proxyValue || '').trim();
+    }
     return Object.assign(
       {
         headers,
         followAllRedirects: true,
         timeout: 480_000,
       },
-      requestOptions,
+      commonRequestOptions,
     );
   }
 
