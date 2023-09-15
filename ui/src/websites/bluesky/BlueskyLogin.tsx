@@ -58,7 +58,7 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
       <div className="h-full">
         <div className="container">
           <Form layout="vertical">
-            <Form.Item label="Username" help="Your username or instance id" required>
+            <Form.Item label="Username" help="Your DID or handle - for example yourname.bsky.social" required>
               <Input
                 value={this.state.username}
                 onChange={({ target }) => this.setState({ username: target.value })}

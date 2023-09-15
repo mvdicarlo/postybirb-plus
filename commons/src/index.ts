@@ -55,6 +55,8 @@ export * from './interfaces/websites/fur-affinity/fur-affinity.notification.opti
 export * from './interfaces/websites/furry-life/furry-life.file.options.interface';
 export * from './interfaces/websites/furry-network/furry-network.file.options.interface';
 export * from './interfaces/websites/furry-network/furry-network.notification.options.interface';
+export * from './interfaces/websites/furtastic/furtastic.account.interface';
+export * from './interfaces/websites/furtastic/furtastic.file.options.interface';
 export * from './interfaces/websites/hentai-foundry/hentai-foundry.file.options.interface';
 export * from './interfaces/websites/inkbunny/inkbunny.file.options.interface';
 export * from './interfaces/websites/ko-fi/ko-fi.file.options.interface';

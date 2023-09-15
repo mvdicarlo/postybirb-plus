@@ -210,8 +210,11 @@ export class Mastodon extends Website {
     const chunks = _.chunk(uploadedMedias, chunkCount);
     let lastId = undefined;
     let status = '';
+    let result: Response<Entity.Status>;
 
     for (let i = 0; i < chunks.length; i++) {
+      this.checkCancelled(cancellationToken);
+
       let statusOptions: any = {
         status: '',
         sensitive: isSensitive,
@@ -219,7 +222,6 @@ export class Mastodon extends Website {
         spoiler_text: '',
       };
 
-      let form = undefined;
       if (i === 0) {
         status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${
           data.description
@@ -265,20 +267,23 @@ export class Mastodon extends Website {
         statusOptions.spoiler_text = options.spoilerText;
       }
 
-      await M.postStatus(status, statusOptions)
-        .then(result => {
-          lastId = result.data.id;
-          let res = result.data as Entity.Status;
-          return this.createPostResponse({ source: res.url });
-        })
-        .catch((err: Error) => {
-          return Promise.reject(this.createPostResponse({ message: err.message }));
-        });
+      try {
+        result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
+        lastId = result.data.id;
+      } catch (err) {
+        return Promise.reject(
+          this.createPostResponse({
+            message: err.message,
+            stack: err.stack,
+            additionalInfo: { chunkNumber: i },
+          }),
+        );
+      }
     }
 
     this.checkCancelled(cancellationToken);
 
-    return this.createPostResponse({});
+    return this.createPostResponse({ source: result.data.url });
   }
 
   async postNotificationSubmission(
@@ -326,15 +331,12 @@ export class Mastodon extends Website {
 
     this.checkCancelled(cancellationToken);
 
-    await M.postStatus(status, statusOptions)
-      .then(result => {
-        let res = result.data as Entity.Status;
-        return this.createPostResponse({ source: res.url });
-      })
-      .catch((err: Error) => {
-        return Promise.reject(this.createPostResponse({ message: err.message }));
-      });
-    return this.createPostResponse({});
+    try {
+      const result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
+      return this.createPostResponse({ source: result.data.url });
+    } catch (err) {
+      return Promise.reject(this.createPostResponse({ message: err.message, stack: err.stack }));
+    }
   }
 
   formatTags(tags: string[]) {

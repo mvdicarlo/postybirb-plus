@@ -8,6 +8,7 @@ export * from './e621/e621.options';
 export * from './fur-affinity/fur-affinity.options';
 export * from './furry-life/furry-life.options';
 export * from './furry-network/furry-network.options';
+export * from './furtastic/furtastic.options';
 export * from './hentai-foundry/hentai-foundry.options';
 export * from './inkbunny/inkbunny.options';
 export * from './ko-fi/ko-fi.options';

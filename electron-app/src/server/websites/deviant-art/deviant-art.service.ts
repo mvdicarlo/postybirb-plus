@@ -279,6 +279,58 @@ export class DeviantArt extends Website {
       );
     }
 
+    const deviationId = post.body?.deviationid;
+    if (deviationId && options.folders.length) {
+      // Used to move posts to selected folders due to the api not doing this correctly anymore
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(data.part.accountId),
+        GenericAccountProp.FOLDERS,
+        [],
+      );
+
+      // Find the featured folder id and remove it from the selected lis to determine actions to take
+      const featuredId = folders.find(f => f.label === 'Featured').value;
+      let removeFromFeatured = !options.folders.some(f => f === featuredId);
+      if (options.feature) {
+        removeFromFeatured = false;
+      }
+      const featureFilteredFolders = options.folders.filter(fid => fid !== featuredId);
+      // Copy to other folders when other folders are provided
+      if (featureFilteredFolders.length) {
+        for (const folderId of featureFilteredFolders) {
+          await Http.post<any>(
+            `${this.BASE_URL}/api/v1/oauth2/gallery/folders/copy_deviations`,
+            undefined,
+            {
+              type: 'multipart',
+              data: {
+                access_token: accountData.access_token,
+                target_folderid: folderId,
+                'deviationids[0]': deviationId,
+              },
+              requestOptions: { json: true },
+            },
+          );
+        }
+
+        if (removeFromFeatured) {
+          await Http.post<any>(
+            `${this.BASE_URL}/api/v1/oauth2/gallery/folders/remove_deviations`,
+            undefined,
+            {
+              type: 'multipart',
+              data: {
+                access_token: accountData.access_token,
+                folderid: featuredId,
+                'deviationids[0]': deviationId,
+              },
+              requestOptions: { json: true },
+            },
+          );
+        }
+      }
+    }
+
     return this.createPostResponse({ source: post.body.url });
   }
 
