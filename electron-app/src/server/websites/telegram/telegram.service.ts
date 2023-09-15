@@ -325,7 +325,7 @@ export class Telegram extends Website {
 
     let media: InputMedia = {
       _: `inputMediaUploaded${type === 'document' ? 'Document' : 'Photo'}`,
-      spoiler
+      spoiler,
     };
 
     if (type === 'document') {
@@ -338,7 +338,7 @@ export class Telegram extends Website {
 
     const total_parts = bigFile ? { file_total_parts: parts.length } : {};
     for (let i = 0; i < parts.length; i++) {
-      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`,{
+      await this.callApi(appId, `upload.save${bigFile ? 'Big' : ''}FilePart`, {
         ...total_parts,
         file_id,
         file_part: i,
@@ -475,8 +475,9 @@ export class Telegram extends Website {
     accountData: TelegramAccountData,
   ) {
     let response: SendMessageResponse;
-    const description = data.description.trim();
-    const descriptions = description.length < 4096 ? [description] : _.chunk(description, 4069);
+    const { description, entities } = TelegramDescription.fromHTML(
+      data.description.trim().slice(0, 4096),
+    );
 
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
@@ -486,15 +487,13 @@ export class Telegram extends Website {
         channel_id,
         access_hash,
       };
-      const id = Date.now();
-      for (let i = 0; i < descriptions.length; i++) {
-        response = await this.callApi(accountData.appId, 'messages.sendMessage', {
-          random_id: id + i,
-          message: descriptions[i],
-          silent: data.options.silent,
-          peer,
-        });
-      }
+      response = await this.callApi(accountData.appId, 'messages.sendMessage', {
+        random_id: Date.now(),
+        message: description,
+        entities: entities,
+        silent: data.options.silent,
+        peer,
+      });
 
       await WaitUtil.wait(2000);
     }
@@ -563,7 +562,9 @@ export class Telegram extends Website {
       }
 
       if (FileSize.MBtoBytes(10) < size && type !== FileSubmissionType.IMAGE) {
-        warnings.push(`${name} will show in channel as Unknown Track but still will be avaible for open.`);
+        warnings.push(
+          `${name} will show in channel as Unknown Track but still will be avaible for open.`,
+        );
       }
     });
 
@@ -596,6 +597,8 @@ export class Telegram extends Website {
     const { description } = TelegramDescription.fromHTML(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
+
+    console.log();
 
     if (description.length > 4096) {
       warnings.push('Max description length allowed is 4,096 characters.');
