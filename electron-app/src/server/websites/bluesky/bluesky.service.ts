@@ -25,16 +25,10 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {
-  BskyAgent,
-  stringifyLex,
-  jsonToLex,
-  AppBskyEmbedImages,
-  ComAtprotoLabelDefs,
-  BlobRef,
-} from '@atproto/api';
+import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
+import Graphemer from 'graphemer';
 
 // Start of Polyfill
 
@@ -222,6 +216,8 @@ export class Bluesky extends Website {
     };
 
     let status = data.description;
+    let r = new RichText({text: status});
+
     const tags = this.formatTags(data.tags);
 
     // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append
@@ -240,6 +236,7 @@ export class Bluesky extends Website {
         status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      r = new RichText({text: status});
     });
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
@@ -250,9 +247,13 @@ export class Bluesky extends Website {
       };
     }
 
+    const rt = new RichText({ text: status });
+    await rt.detectFacets(agent);
+
     let postResult = await agent
       .post({
-        text: status,
+        text: rt.text,
+        facets: rt.facets,
         embed: embeds,
         labels: labelsRecord,
       })
@@ -284,6 +285,7 @@ export class Bluesky extends Website {
     });
 
     let status = data.description;
+    let r = new RichText({text: status});
 
     const tags = this.formatTags(data.tags);
 
@@ -294,15 +296,16 @@ export class Bluesky extends Website {
     }
 
     tags.forEach(tag => {
-      let remain = this.MAX_CHARS - status.length;
+      let remain = this.MAX_CHARS - r.graphemeLength;
       let tagToInsert = tag;
       if (!tag.startsWith('#')) {
         tagToInsert = `#${tagToInsert}`;
       }
-      if (remain > tagToInsert.length) {
+      if (remain > (tagToInsert.length)) {
         status += ` ${tagToInsert}`;
       }
       // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      r = new RichText({text: status});
     });
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
@@ -313,15 +316,19 @@ export class Bluesky extends Website {
       };
     }
 
-    let postResult = await agent
-      .post({
-        text: status,
-        labels: labelsRecord,
-      })
-      .catch(err => {
-        return Promise.reject(this.createPostResponse({ message: err }));
-      });
-
+    const rt = new RichText({ text: status });
+    await rt.detectFacets(agent);
+    
+    let postResult = await agent.post({
+      text: rt.text,
+      facets: rt.facets,
+      labels: labelsRecord
+    }).catch(err => {
+      return Promise.reject(
+          this.createPostResponse({ message: err }),
+      );
+    });
+  
     if (postResult && postResult.uri) {
       return this.createPostResponse({
         source: postResult.uri,
@@ -341,11 +348,17 @@ export class Bluesky extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (!submissionPart.data.altText) {
-      problems.push(`Bluesky requires alt text to be provided`);
+      warnings.push(`Bluesky recommends alt text to be provided`);
     }
 
-    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
-      problems.push(`Max description length allowed is ${this.MAX_CHARS} characters.`);
+    const rt = new RichText({ text: submissionPart.data.description.value });
+    const agent = new BskyAgent({ service: 'https://bsky.social' })
+    rt.detectFacets(agent);
+
+    if (rt.graphemeLength > this.MAX_CHARS) {
+      problems.push(
+        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+      );
     }
 
     const files = [
@@ -401,8 +414,14 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    if (submissionPart.data.description.value.length > this.MAX_CHARS) {
-      problems.push(`Max description length allowed is ${this.MAX_CHARS} characters.`);
+    const rt = new RichText({ text: submissionPart.data.description.value });
+    const agent = new BskyAgent({ service: 'https://bsky.social' })
+    rt.detectFacets(agent);
+
+    if (rt.graphemeLength > this.MAX_CHARS) {
+      problems.push(
+        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+      );
     }
 
     return { problems, warnings };
