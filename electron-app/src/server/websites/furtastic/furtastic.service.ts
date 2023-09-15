@@ -64,26 +64,26 @@ export class Furtastic extends Website {
   }
 
   parseDescription(text: string) {
-    text = text.replace(/<b>/gi, '[b]');
-    text = text.replace(/<i>/gi, '[i]');
-    text = text.replace(/<u>/gi, '[u]');
-    text = text.replace(/<s>/gi, '[s]');
-    text = text.replace(/<\/b>/gi, '[/b]');
-    text = text.replace(/<\/i>/gi, '[/i]');
-    text = text.replace(/<\/u>/gi, '[/u]');
-    text = text.replace(/<\/s>/gi, '[/s]');
-    text = text.replace(/<em>/gi, '[i]');
-    text = text.replace(/<\/em>/gi, '[/i]');
-    text = text.replace(/<strong>/gi, '[b]');
-    text = text.replace(/<\/strong>/gi, '[/b]');
+    text = text.replace(/<b>/gi, '**');
+    text = text.replace(/<i>/gi, '*');
+    text = text.replace(/<u>/gi, '');
+    text = text.replace(/<s>/gi, '~~');
+    text = text.replace(/<\/b>/gi, '**');
+    text = text.replace(/<\/i>/gi, '*');
+    text = text.replace(/<\/u>/gi, '');
+    text = text.replace(/<\/s>/gi, '~~');
+    text = text.replace(/<em>/gi, '*');
+    text = text.replace(/<\/em>/gi, '*');
+    text = text.replace(/<strong>/gi, '**');
+    text = text.replace(/<\/strong>/gi, '**');
     text = text.replace(
       /<span style="color:\s*(.*?);*">((.|\n)*?)<\/span>/gim,
-      '[color=$1]$2[/color]',
+      '$2',
     );
-    text = text.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '"$4":$2');
+    text = text.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '[$4]($2)');
     return super.parseDescription(text);
   }
-
+  
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<FurtasticFileOptions>,
