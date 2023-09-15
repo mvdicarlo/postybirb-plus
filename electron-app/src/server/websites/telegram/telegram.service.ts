@@ -563,7 +563,7 @@ export class Telegram extends Website {
 
       if (FileSize.MBtoBytes(10) < size && type !== FileSubmissionType.IMAGE) {
         warnings.push(
-          `${name} will show in channel as Unknown Track but still will be avaible for open.`,
+          `${name} will show in channel as Unknown Track but still will be available.`,
         );
       }
     });
@@ -597,8 +597,6 @@ export class Telegram extends Website {
     const { description } = TelegramDescription.fromHTML(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
-
-    console.log();
 
     if (description.length > 4096) {
       warnings.push('Max description length allowed is 4,096 characters.');
