@@ -17,6 +17,7 @@ import { Custom } from './custom/custom.service';
 import { Newgrounds } from './newgrounds/newgrounds.service';
 import { Pixiv } from './pixiv/pixiv.service';
 import { FurryLife } from './furry-life/furry-life.service';
+import { Furtastic } from './furtastic/furtastic.service';
 import { FurryNetwork } from './furry-network/furry-network.service';
 import { Patreon } from './patreon/patreon.service';
 import { Tumblr } from './tumblr/tumblr.service';
@@ -51,6 +52,7 @@ export class WebsiteProvider {
     readonly sofurry: SoFurry,
     readonly e621: e621,
     readonly furaffinity: FurAffinity,
+    readonly furtastic: Furtastic,
     readonly subscribestar: SubscribeStar,
     readonly subscribestarAdult: SubscribeStarAdult,
     readonly hentaiFoundry: HentaiFoundry,
