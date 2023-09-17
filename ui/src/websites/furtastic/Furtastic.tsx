@@ -38,22 +38,8 @@ export class FurtasticFileSubmissionForm extends GenericFileSubmissionSection<Fu
     this.props.onUpdate(part);
   }
 
-  getSourceSection() {
-    const sources: JSX.Element[] = [];
-    const { data } = this.props.part;
-    for (let i = 0; i < 5; i++) {
-      sources.push(
-        <Form.Item label={`Source ${i + 1}`}>
-          <Input value={data.sources[i]} onChange={this.handleSourceChange.bind(this, i)} />
-        </Form.Item>
-      );
-    }
-    return sources;
-  }
-
   renderRightForm(data: FurtasticFileOptions) {
     const elements = super.renderRightForm(data);
-    elements.push(...this.getSourceSection());
     return elements;
   }
 }
