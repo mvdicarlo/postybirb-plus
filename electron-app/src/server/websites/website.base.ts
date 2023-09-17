@@ -130,6 +130,24 @@ export abstract class Website {
     return this.parseTags(tags, options);
   }
 
+  /**
+   * Appends the tags to the description if there is enough character count available.
+   */
+  appendTags(tags: string[], description: string, limit: number) {
+    if (!tags.length || description.length + 4 > limit) return description;
+
+    description += '\n\n';
+
+    tags.forEach(tag => {
+      if (description.length + 1 + tag.length < limit) {
+        description += ` ${tag}`;
+      }
+      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+    });
+
+    return description;
+  }
+
   parseDescription(text: string, type?: SubmissionType): string {
     return this.defaultDescriptionParser(text);
   }
