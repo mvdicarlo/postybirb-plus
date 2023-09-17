@@ -17,12 +17,8 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import {
-  FilePostData,
-  PostFile,
-} from 'src/server/submission/post/interfaces/file-post-data.interface';
+import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
@@ -31,7 +27,6 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { Website } from '../website.base';
 import _ from 'lodash';
-import WaitUtil from 'src/server/utils/wait.util';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
 
 const INFO_KEY = 'INSTANCE INFO';
@@ -77,35 +72,19 @@ export class MissKey extends Website {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: MissKeyAccountData = data.data;
     if (accountData && accountData.tokenData) {
-      const refresh = await this.refreshToken(accountData);
-      if (refresh) {
-        status.loggedIn = true;
-        status.username = accountData.username;
-        this.getInstanceInfo(data._id, accountData);
-      }
+      await this.getAndStoreInstanceInfo(data._id, accountData);
+
+      status.loggedIn = true;
+      status.username = accountData.username;
     }
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: MissKeyAccountData) {
+  private async getAndStoreInstanceInfo(profileId: string, data: MissKeyAccountData) {
     const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
     const instance = await client.getInstance();
 
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
-  }
-
-  // TBH not entirely sure why this is a thing, but its in the old code so... :shrug:
-  private async refreshToken(data: MissKeyAccountData): Promise<boolean> {
-    const M = this.getMissKeyInstance(data);
-    return true;
-  }
-
-  private getMissKeyInstance(data: MissKeyAccountData): Entity.Instance {
-    const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
-    client.getInstance().then(res => {
-      return res.data;
-    });
-    return null;
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
@@ -126,23 +105,6 @@ export class MissKey extends Website {
         };
   }
 
-  private async uploadMedia(
-    data: MissKeyAccountData,
-    file: PostFile,
-    altText: string,
-  ): Promise<{ id: string }> {
-    const M = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
-    const upload = await M.uploadMedia(file.value, { description: altText });
-    console.log(upload);
-    if (upload.status > 300) {
-      return Promise.reject(
-        this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
-      );
-    }
-
-    return { id: upload.data.id };
-  }
-
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<MissKeyFileOptions>,
@@ -155,91 +117,59 @@ export class MissKey extends Website {
     );
 
     const files = [data.primary, ...data.additional];
-    this.checkCancelled(cancellationToken);
-    const uploadedMedias: {
-      id: string;
-    }[] = [];
+    const uploadedMedias: string[] = [];
     for (const file of files) {
-      uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
+      this.checkCancelled(cancellationToken);
+      const upload = await M.uploadMedia(file.file.value, { description: data.options.altText });
+      if (upload.status > 300) {
+        return Promise.reject(
+          this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
+        );
+      }
+      uploadedMedias.push(upload.data.id);
     }
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo
-      ? instanceInfo?.configuration?.statuses?.max_media_attachments
-      : 4;
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const chunkCount = instanceInfo?.configuration?.statuses?.max_media_attachments ?? 4;
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-    const { options } = data;
     const chunks = _.chunk(uploadedMedias, chunkCount);
-    let lastId = undefined;
+    let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
+      data.description
+    }`.substring(0, maxChars);
+    let lastId = '';
+    let source = '';
 
     for (let i = 0; i < chunks.length; i++) {
-      let statusOptions: any = {
-        status: '',
+      const statusOptions: any = {
         sensitive: isSensitive,
-        visibility: options.visibility || 'public',
-        spoiler_text: '',
+        visibility: data.options.visibility || 'public',
+        media_ids: chunks[i],
       };
-      let status = undefined;
 
-      let form = undefined;
-      if (i === 0) {
-        status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${
-          data.description
-        }`.substring(0, maxChars);
-
-        statusOptions = {
-          sensitive: isSensitive,
-          visibility: options.visibility || 'public',
-          media_ids: chunks[i].map(media => media.id),
-          spoiler_text: '',
-        };
-      } else {
-        statusOptions = {
-          sensitive: isSensitive,
-          visibility: options.visibility || 'public',
-          media_ids: chunks[i].map(media => media.id),
-          in_reply_to_id: lastId,
-          spoiler_text: '',
-        };
+      if (i !== 0) {
+        statusOptions.in_reply_to_id = lastId;
+      }
+      if (data.options.spoilerText) {
+        statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      const tags = this.formatTags(data.tags);
-
-      // Update the post content with the Tags if any are specified - for MissKey, we need to append
-      // these onto the post, *IF* there is character count available.
-      if (tags.length > 0) {
-        status += '\n\n';
-      }
-
-      tags.forEach(tag => {
-        let remain = maxChars - form.status.length;
-        let tagToInsert = tag;
-        if (remain > tagToInsert.length) {
-          status += ` ${tagToInsert}`;
-        }
-        // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      });
-
-      if (options.spoilerText) {
-        statusOptions.spoiler_text = options.spoilerText;
-      }
+      status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
       this.checkCancelled(cancellationToken);
-
-      await M.postStatus(status, statusOptions)
-        .then(result => {
-          lastId = result.data.id;
-          let res = result.data as Entity.Status;
-          return this.createPostResponse({ source: res.url });
-        })
-        .catch((err: Error) => {
-          return Promise.reject(this.createPostResponse({ message: err.message }));
-        });
+      try {
+        const result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
+        lastId = result.data.id;
+        if (!source) source = (await M.getStatus(result.data.id)).data.url;
+      } catch (error) {
+        return Promise.reject(this.createPostResponse({ message: error.message }));
+      }
     }
 
-    return this.createPostResponse({});
+    this.checkCancelled(cancellationToken);
+
+    return this.createPostResponse({ source });
   }
 
   async postNotificationSubmission(
@@ -247,57 +177,36 @@ export class MissKey extends Website {
     data: PostData<Submission, MissKeyNotificationOptions>,
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
-    const mInstance = this.getMissKeyInstance(accountData);
     const M = generator(
       'misskey',
       `https://${accountData.website}`,
       accountData.tokenData.access_token,
     );
 
-    const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
+    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-
-    const { options } = data;
-    let status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`;
     const statusOptions: any = {
       sensitive: isSensitive,
-      visibility: options.visibility || 'public',
-      spoiler_text: '',
+      visibility: data.options.visibility || 'public',
     };
-
-    const tags = this.formatTags(data.tags);
-
-    // Update the post content with the Tags if any are specified - for MissKey, we need to append
-    // these onto the post, *IF* there is character count available.
-    if (tags.length > 0) {
-      status += '\n\n';
+    let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
+      data.description
+    }`;
+    if (data.options.spoilerText) {
+      statusOptions.spoiler_text = data.options.spoilerText;
     }
-
-    tags.forEach(tag => {
-      let remain = maxChars - status.length;
-      let tagToInsert = tag;
-      if (remain > tagToInsert.length) {
-        status += ` ${tagToInsert}`;
-      }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-    });
-
-    if (options.spoilerText) {
-      statusOptions.spoiler_text = options.spoilerText;
-    }
+    status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
     this.checkCancelled(cancellationToken);
-
-    await M.postStatus(status, statusOptions)
-      .then(result => {
-        let res = result.data as Entity.Status;
-        return this.createPostResponse({ source: res.url });
-      })
-      .catch((err: Error) => {
-        return Promise.reject(this.createPostResponse({ message: err.message }));
-      });
-    return this.createPostResponse({});
+    try {
+      const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
+      const source = (await M.getStatus(result.id)).data.url;
+      return this.createPostResponse({ source });
+    } catch (error) {
+      return Promise.reject(this.createPostResponse({ message: error.message }));
+    }
   }
 
   formatTags(tags: string[]) {
@@ -374,8 +283,9 @@ export class MissKey extends Website {
         type === FileSubmissionType.IMAGE &&
         (file.height > 4000 || file.width > 4000)
       ) {
-        warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
-           aspect ratio`);
+        warnings.push(
+          `${name} will be scaled down to a maximum size of 4000x4000, while maintaining aspect ratio`,
+        );
       }
     });
 
@@ -384,8 +294,7 @@ export class MissKey extends Website {
       submissionPart.data.visibility != 'public'
     ) {
       warnings.push(
-        `This post won't be listed under any hashtag as it is not public. Only public posts 
-              can be searched by hashtag.`,
+        `This post won't be listed under any hashtag as it is not public. Only public posts can be searched by hashtag.`,
       );
     }
 
