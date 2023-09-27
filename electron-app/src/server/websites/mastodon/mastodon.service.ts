@@ -112,11 +112,12 @@ export class Mastodon extends Website {
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
-    if(instanceInfo?.configuration?.media_attachments) {
-      const maxPixels = file.type === FileSubmissionType.IMAGE 
-        ? instanceInfo.configuration.media_attachments.image_matrix_limit 
-        : instanceInfo.configuration.media_attachments.video_matrix_limit;
-      
+    if (instanceInfo?.configuration?.media_attachments) {
+      const maxPixels =
+        file.type === FileSubmissionType.IMAGE
+          ? instanceInfo.configuration.media_attachments.image_matrix_limit
+          : instanceInfo.configuration.media_attachments.video_matrix_limit;
+
       return {
         maxHeight: Math.round(Math.sqrt(maxPixels * (file.width / file.height))),
         maxWidth: Math.round(Math.sqrt(maxPixels * (file.height / file.width))),
@@ -124,12 +125,12 @@ export class Mastodon extends Website {
           file.type === FileSubmissionType.IMAGE
             ? instanceInfo.configuration.media_attachments.image_size_limit
             : instanceInfo.configuration.media_attachments.video_size_limit,
-      }
+      };
     } else if (instanceInfo?.upload_limit) {
       return {
         maxSize: instanceInfo?.upload_limit,
-      }
-    }  else {
+      };
+    } else {
       return undefined;
     }
   }
@@ -207,11 +208,12 @@ export class Mastodon extends Website {
     }
 
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = 
-      instanceInfo?.configuration?.statuses?.max_media_attachments ?? 
-      instanceInfo?.max_media_attachments ?? 
+    const chunkCount =
+      instanceInfo?.configuration?.statuses?.max_media_attachments ??
+      instanceInfo?.max_media_attachments ??
       (instanceInfo?.upload_limit ? 1000 : 4);
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
+    const maxChars =
+      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const chunks = _.chunk(uploadedMedias, chunkCount);
@@ -335,7 +337,6 @@ export class Mastodon extends Website {
       ),
     ];
 
-
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
@@ -350,9 +351,13 @@ export class Mastodon extends Website {
           type === FileSubmissionType.IMAGE &&
           ImageManipulator.isMimeType(mimetype)
         ) {
-          warnings.push(`${name} will be scaled down to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`);
+          warnings.push(
+            `${name} will be scaled down to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`,
+          );
         } else {
-          problems.push(`This instance limits ${mimetype} to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`);
+          problems.push(
+            `This instance limits ${mimetype} to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`,
+          );
         }
       }
 
@@ -360,7 +365,8 @@ export class Mastodon extends Website {
         scalingOptions &&
         isAutoscaling &&
         type === FileSubmissionType.IMAGE &&
-        scalingOptions.maxWidth && scalingOptions.maxHeight &&
+        scalingOptions.maxWidth &&
+        scalingOptions.maxHeight &&
         (file.height > scalingOptions.maxHeight || file.width > scalingOptions.maxWidth)
       ) {
         warnings.push(
@@ -395,7 +401,8 @@ export class Mastodon extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
+    const maxChars =
+      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
     if (description.length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this instance).`,
