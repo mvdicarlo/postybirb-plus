@@ -133,7 +133,12 @@ export abstract class Website {
   /**
    * Appends the tags to the description if there is enough character count available.
    */
-  appendTags(tags: string[], description: string, limit: number) {
+  appendTags(
+    tags: string[],
+    description: string,
+    limit: number,
+    getLength: (text: string) => number = (text) => text.length,
+  ): string {
     const appendedTags = [];
     const appendToDescription = function (tag?: string): string {
       const suffix = tag ? [...appendedTags, tag] : appendedTags;
@@ -145,7 +150,7 @@ export abstract class Website {
     };
 
     for (const tag of tags) {
-      if (appendToDescription(tag).length <= limit) {
+      if (getLength(appendToDescription(tag)) <= limit) {
         appendedTags.push(tag);
       }
       // Keep looping over all tags even if one of them doesn't fit, we might

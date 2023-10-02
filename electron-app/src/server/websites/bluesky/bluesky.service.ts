@@ -111,6 +111,10 @@ async function fetchHandler(
 
 // End of Polyfill
 
+function getRichTextLength(text: string): number {
+  return new RichText({text}).graphemeLength;
+}
+
 @Injectable()
 export class Bluesky extends Website {
   readonly BASE_URL = '';
@@ -165,6 +169,10 @@ export class Bluesky extends Website {
     ).map(tag => `#${tag}`);
   }
 
+  private appendRichTextTags(tags: string[], description: string): string {
+    return this.appendTags(this.formatTags(tags), description, this.MAX_CHARS, getRichTextLength);
+  }
+
   private async uploadMedia(
     agent: BskyAgent,
     data: BlueskyAccountData,
@@ -215,29 +223,7 @@ export class Bluesky extends Website {
       $type: 'app.bsky.embed.images',
     };
 
-    let status = data.description;
-    let r = new RichText({text: status});
-
-    const tags = this.formatTags(data.tags);
-
-    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append
-    // these onto the post, *IF* there is character count available.
-    if (tags.length > 0) {
-      status += '\n\n';
-    }
-
-    tags.forEach(tag => {
-      let remain = this.MAX_CHARS - status.length;
-      let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`;
-      }
-      if (remain > tagToInsert.length) {
-        status += ` ${tagToInsert}`;
-      }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      r = new RichText({text: status});
-    });
+    const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -284,29 +270,7 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    let status = data.description;
-    let r = new RichText({text: status});
-
-    const tags = this.formatTags(data.tags);
-
-    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append
-    // these onto the post, *IF* there is character count available.
-    if (tags.length > 0) {
-      status += '\n\n';
-    }
-
-    tags.forEach(tag => {
-      let remain = this.MAX_CHARS - r.graphemeLength;
-      let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`;
-      }
-      if (remain > (tagToInsert.length)) {
-        status += ` ${tagToInsert}`;
-      }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      r = new RichText({text: status});
-    });
+    const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
