@@ -134,18 +134,25 @@ export abstract class Website {
    * Appends the tags to the description if there is enough character count available.
    */
   appendTags(tags: string[], description: string, limit: number) {
-    if (!tags.length || description.length + 4 > limit) return description;
-
-    description += '\n\n';
-
-    tags.forEach(tag => {
-      if (description.length + 1 + tag.length < limit) {
-        description += ` ${tag}`;
+    const appendedTags = [];
+    const appendToDescription = function (tag?: string): string {
+      const suffix = tag ? [...appendedTags, tag] : appendedTags;
+      if (suffix.length === 0) {
+        return description;
+      } else {
+        return description + '\n\n' + suffix.join(' ');
       }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-    });
+    };
 
-    return description;
+    for (const tag of tags) {
+      if (appendToDescription(tag).length <= limit) {
+        appendedTags.push(tag);
+      }
+      // Keep looping over all tags even if one of them doesn't fit, we might
+      // find one that's short enough to cram in still.
+    }
+
+    return appendToDescription();
   }
 
   parseDescription(text: string, type?: SubmissionType): string {
