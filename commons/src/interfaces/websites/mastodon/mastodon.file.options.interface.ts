@@ -5,4 +5,5 @@ export interface MastodonFileOptions extends DefaultFileOptions {
   spoilerText?: string;
   visibility: string;
   altText?: string;
+  replyToUrl?: string;
 }

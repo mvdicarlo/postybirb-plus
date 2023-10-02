@@ -222,6 +222,7 @@ export class Mastodon extends Website {
     }`.substring(0, maxChars);
     let lastId = '';
     let source = '';
+    const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
 
     for (let i = 0; i < chunks.length; i++) {
       this.checkCancelled(cancellationToken);
@@ -233,7 +234,10 @@ export class Mastodon extends Website {
 
       if (i !== 0) {
         statusOptions.in_reply_to_id = lastId;
+      } else if (replyToId) {
+        statusOptions.in_reply_to_id = replyToId;
       }
+
       if (data.options.spoilerText) {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
@@ -281,6 +285,11 @@ export class Mastodon extends Website {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
     status = this.appendTags(this.formatTags(data.tags), status, maxChars);
+
+    const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
+    if (replyToId) {
+      statusOptions.in_reply_to_id = replyToId;
+    }
 
     this.checkCancelled(cancellationToken);
     try {
@@ -384,6 +393,8 @@ export class Mastodon extends Website {
       );
     }
 
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
     return { problems, warnings };
   }
 
@@ -392,6 +403,7 @@ export class Mastodon extends Website {
     submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
+    const problems = [];
     const warnings = [];
     const description = this.defaultDescriptionParser(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
@@ -409,6 +421,21 @@ export class Mastodon extends Website {
       );
     }
 
-    return { problems: [], warnings };
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
+    return { problems, warnings };
+  }
+
+  private validateReplyToUrl(problems: string[], url?: string): void {
+    if(url?.trim() && !this.getPostIdFromUrl(url)) {
+      problems.push("Invalid post URL to reply to.");
+    }
+  }
+
+  private getPostIdFromUrl(url: string): string | null {
+    // We expect this to a post URL like https://{instance}/@{user}/{id} or
+    // https://:instance/deck/@{user}/{id}. We grab the id after the @ part.
+    const match = /\/@[^\/]+\/([0-9]+)/.exec(url);
+    return match ? match[1] : null;
   }
 }

@@ -29,6 +29,11 @@ export class MastodonFileOptionsEntity
   @IsString()
   altText?: string;
 
+  @Expose()
+  @IsOptional()
+  @IsString()
+  replyToUrl?: string;
+
   constructor(entity?: Partial<MastodonFileOptions>) {
     super(entity as DefaultFileOptions);
   }

@@ -90,7 +90,10 @@ class MastodonNotificationSubmissionForm extends GenericSubmissionSection<
           <Select.Option value="private">Followers Only</Select.Option>
           <Select.Option value="direct">Mentioned Users Only</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item>,
+      <Form.Item label="Reply To Post URL">
+        <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+      </Form.Item>,
     );
     return elements;
   }
@@ -132,7 +135,10 @@ export class MastodonFileSubmissionForm extends GenericFileSubmissionSection<Mas
           <Select.Option value="private">Followers Only</Select.Option>
           <Select.Option value="direct">Mentioned Users Only</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item>,
+      <Form.Item label="Reply To Post URL">
+        <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+      </Form.Item>,
     );
     return elements;
   }
