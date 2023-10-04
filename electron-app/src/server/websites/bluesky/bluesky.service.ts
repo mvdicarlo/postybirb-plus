@@ -29,6 +29,7 @@ import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtex
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
 import Graphemer from 'graphemer';
+import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
 
 // Start of Polyfill
 
@@ -205,6 +206,8 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
+    const reply = await this.getReplyRef(agent, data.options.replyToUrl);
+
     const files = [data.primary, ...data.additional];
     let uploadedMedias: AppBskyEmbedImages.Image[] = [];
     let fileCount = 0;
@@ -242,6 +245,7 @@ export class Bluesky extends Website {
         facets: rt.facets,
         embed: embeds,
         labels: labelsRecord,
+        ...(reply ? { reply } : {}),
       })
       .catch(err => {
         return Promise.reject(this.createPostResponse({ message: err }));
@@ -270,6 +274,7 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
+    const reply = await this.getReplyRef(agent, data.options.replyToUrl);
     const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
@@ -286,7 +291,8 @@ export class Bluesky extends Website {
     let postResult = await agent.post({
       text: rt.text,
       facets: rt.facets,
-      labels: labelsRecord
+      labels: labelsRecord,
+      ...(reply ? { reply } : {}),
     }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
@@ -367,6 +373,8 @@ export class Bluesky extends Website {
       );
     }
 
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
     return { problems, warnings };
   }
 
@@ -388,6 +396,50 @@ export class Bluesky extends Website {
       );
     }
 
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
     return { problems, warnings };
+  }
+
+  private validateReplyToUrl(problems: string[], url?: string): void {
+    if(url?.trim() && !this.getPostIdFromUrl(url)) {
+      problems.push("Invalid post URL to reply to.");
+    }
+  }
+
+  private async getReplyRef(agent: BskyAgent, url?: string): Promise<ReplyRef | null> {
+    if (!url?.trim()) {
+      return null;
+    }
+
+    const postId = this.getPostIdFromUrl(url);
+    if (!postId) {
+      throw new Error(`Invalid reply to url '${url}'`);
+    }
+
+    // cf. https://atproto.com/blog/create-post#replies
+    const parent = await agent.getPost(postId);
+    const reply = parent.value.reply;
+    const root = reply ? reply.root : parent;
+    return {
+      root: { uri: root.uri, cid: root.cid },
+      parent: { uri: parent.uri, cid: parent.cid },
+    };
+  }
+
+  private getPostIdFromUrl(url: string): { repo: string; rkey: string } | null {
+    // A regular web link like https://bsky.app/profile/{repo}/post/{id}
+    const link = /\/profile\/([^\/]+)\/post\/([a-zA-Z0-9\.\-_~]+)/.exec(url);
+    if (link) {
+      return { repo: link[1], rkey: link[2] };
+    }
+
+    // Protocol link like at://did:plc:{repo}/app.bsky.feed.post/{id}
+    const at = /(did:plc:[a-zA-Z0-9\.\-_~]+)\/.+\.post\/([a-zA-Z0-9\.\-_~]+)/.exec(url);
+    if (at) {
+      return { repo: at[1], rkey: at[2] };
+    }
+
+    return null;
   }
 }
