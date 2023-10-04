@@ -38,16 +38,21 @@ const INFO_KEY = 'INSTANCE INFO';
 
 type MastodonInstanceInfo = {
   configuration: {
-    statuses: {
+    statuses?: {
       max_characters: number;
       max_media_attachments: number;
     };
-    media_attachments: {
+    media_attachments?: {
       supported_mime_types: string[];
       image_size_limit: number;
       video_size_limit: number;
+      image_matrix_limit: number;
+      video_matrix_limit: number;
     };
   };
+  upload_limit?: number; // Pleroma, Akkoma
+  max_toot_chars?: number; // Pleroma, Akkoma
+  max_media_attachments?: number; //Pleroma
 };
 
 @Injectable()
@@ -64,13 +69,26 @@ export class Mastodon extends Website {
     'jpeg',
     'jpg',
     'gif',
-    'swf',
-    'flv',
+    'webp',
+    'avif',
+    'heic',
+    'heif',
     'mp4',
+    'webm',
+    'm4v',
+    'mov',
     'doc',
     'rtf',
     'txt',
     'mp3',
+    'wav',
+    'ogg',
+    'oga',
+    'opus',
+    'aac',
+    'm4a',
+    '3gp',
+    'wma',
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
@@ -94,20 +112,27 @@ export class Mastodon extends Website {
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
-    return instanceInfo?.configuration?.media_attachments
-      ? {
-          maxHeight: 4000,
-          maxWidth: 4000,
-          maxSize:
-            file.type === FileSubmissionType.IMAGE
-              ? instanceInfo.configuration.media_attachments.image_size_limit
-              : instanceInfo.configuration.media_attachments.video_size_limit,
-        }
-      : {
-          maxHeight: 4000,
-          maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300),
-        };
+    if (instanceInfo?.configuration?.media_attachments) {
+      const maxPixels =
+        file.type === FileSubmissionType.IMAGE
+          ? instanceInfo.configuration.media_attachments.image_matrix_limit
+          : instanceInfo.configuration.media_attachments.video_matrix_limit;
+
+      return {
+        maxHeight: Math.round(Math.sqrt(maxPixels * (file.width / file.height))),
+        maxWidth: Math.round(Math.sqrt(maxPixels * (file.height / file.width))),
+        maxSize:
+          file.type === FileSubmissionType.IMAGE
+            ? instanceInfo.configuration.media_attachments.image_size_limit
+            : instanceInfo.configuration.media_attachments.video_size_limit,
+      };
+    } else if (instanceInfo?.upload_limit) {
+      return {
+        maxSize: instanceInfo?.upload_limit,
+      };
+    } else {
+      return undefined;
+    }
   }
 
   // Megaladon api has uploadMedia method, hovewer, it does not work with mastodon
@@ -183,8 +208,12 @@ export class Mastodon extends Website {
     }
 
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo?.configuration?.statuses?.max_media_attachments ?? 4;
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const chunkCount =
+      instanceInfo?.configuration?.statuses?.max_media_attachments ??
+      instanceInfo?.max_media_attachments ??
+      (instanceInfo?.upload_limit ? 1000 : 4);
+    const maxChars =
+      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const chunks = _.chunk(uploadedMedias, chunkCount);
@@ -297,7 +326,7 @@ export class Mastodon extends Website {
 
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
+        `Max description length allowed is ${maxChars} characters (for this instance).`,
       );
     }
 
@@ -308,35 +337,40 @@ export class Mastodon extends Website {
       ),
     ];
 
-    const maxImageSize =
-      instanceInfo?.configuration?.media_attachments?.image_size_limit ?? FileSize.MBtoBytes(50);
-
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
 
-      if (maxImageSize < size) {
+      const scalingOptions = this.getScalingOptions(file, submissionPart.accountId);
+
+      if (scalingOptions && scalingOptions.maxSize < size) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
           ImageManipulator.isMimeType(mimetype)
         ) {
-          warnings.push(`${name} will be scaled down to ${FileSize.BytesToMB(maxImageSize)}MB`);
+          warnings.push(
+            `${name} will be scaled down to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`,
+          );
         } else {
-          problems.push(`Mastodon limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
+          problems.push(
+            `This instance limits ${mimetype} to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`,
+          );
         }
       }
 
-      // Check the image dimensions are not over 4000 x 4000 - this is the Mastodon server max
       if (
+        scalingOptions &&
         isAutoscaling &&
         type === FileSubmissionType.IMAGE &&
-        (file.height > 4000 || file.width > 4000)
+        scalingOptions.maxWidth &&
+        scalingOptions.maxHeight &&
+        (file.height > scalingOptions.maxHeight || file.width > scalingOptions.maxWidth)
       ) {
         warnings.push(
-          `${name} will be scaled down to a maximum size of 4000x4000, while maintaining aspect ratio`,
+          `${name} will be scaled down to a maximum size of ${scalingOptions.maxWidth}x${scalingOptions.maxHeight}, while maintaining aspect ratio`,
         );
       }
     });
@@ -367,10 +401,11 @@ export class Mastodon extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars =
+      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
+        `Max description length allowed is ${maxChars} characters (for this instance).`,
       );
     }
 
