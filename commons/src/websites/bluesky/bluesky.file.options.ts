@@ -19,6 +19,11 @@ export class BlueskyFileOptionsEntity
   @DefaultValue('')
   label_rating: string = '';
 
+  @Expose()
+  @IsOptional()
+  @IsString()
+  replyToUrl?: string;
+
   constructor(entity?: Partial<BlueskyFileOptions>) {
     super(entity as DefaultFileOptions);
   }

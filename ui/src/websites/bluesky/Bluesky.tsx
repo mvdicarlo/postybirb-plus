@@ -62,7 +62,10 @@ BlueskyNotificationOptions
           <Select.Option value={'nudity'}>Adult: Nudity</Select.Option>
           <Select.Option value={'porn'}>Adult: Porn</Select.Option>
         </Select>
-      </Form.Item>,            
+      </Form.Item>,
+      <Form.Item label="Reply To Post URL">
+        <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+      </Form.Item>,
     );
     return elements;
   }
@@ -84,12 +87,15 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
           <Select.Option value={'nudity'}>Adult: Nudity</Select.Option>
           <Select.Option value={'porn'}>Adult: Porn</Select.Option>
         </Select>
-      </Form.Item>,      
+      </Form.Item>,
       <Form.Item label="Alt Text">
         <Input
           value={data.altText}
           onChange={this.handleValueChange.bind(this, 'altText')}
         />
+      </Form.Item>,
+      <Form.Item label="Reply To Post URL">
+        <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
       </Form.Item>,
     );
     return elements;

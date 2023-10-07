@@ -14,6 +14,11 @@ export class BlueskyNotificationOptionsEntity
   @DefaultValue('')
   label_rating: string = '';
 
+  @Expose()
+  @IsOptional()
+  @IsString()
+  replyToUrl?: string;
+
   constructor(entity?: Partial<BlueskyNotificationOptions>) {
     super(entity as DefaultOptions);
   }
