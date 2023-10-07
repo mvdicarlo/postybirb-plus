@@ -30,6 +30,7 @@ import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaint
 import fetch from "node-fetch";
 import Graphemer from 'graphemer';
 import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
+import FormContent from 'src/server/utils/form-content.util';
 
 // Start of Polyfill
 
@@ -321,15 +322,7 @@ export class Bluesky extends Website {
       warnings.push(`Bluesky recommends alt text to be provided`);
     }
 
-    const rt = new RichText({ text: submissionPart.data.description.value });
-    const agent = new BskyAgent({ service: 'https://bsky.social' })
-    rt.detectFacets(agent);
-
-    if (rt.graphemeLength > this.MAX_CHARS) {
-      problems.push(
-        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
-      );
-    }
+    this.validateDescriptionLength(problems, submissionPart, defaultPart);
 
     const files = [
       submission.primary,
@@ -386,19 +379,30 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    const rt = new RichText({ text: submissionPart.data.description.value });
+    this.validateDescriptionLength(problems, submissionPart, defaultPart);
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
+    return { problems, warnings };
+  }
+
+  private validateDescriptionLength(
+    problems: string[],
+    submissionPart: SubmissionPart<BlueskyNotificationOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): void {
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    );
+
+    const rt = new RichText({ text: description });
     const agent = new BskyAgent({ service: 'https://bsky.social' })
     rt.detectFacets(agent);
 
     if (rt.graphemeLength > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     }
-
-    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
-
-    return { problems, warnings };
   }
 
   private validateReplyToUrl(problems: string[], url?: string): void {
