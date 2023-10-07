@@ -319,7 +319,10 @@ export class Bluesky extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (!submissionPart.data.altText) {
-      warnings.push(`Bluesky recommends alt text to be provided`);
+      problems.push(
+        'Bluesky currently always requires alt text to be provided, ' +
+          'even if your settings say otherwise. This is a bug on their side.',
+      );
     }
 
     this.validateDescriptionLength(problems, submissionPart, defaultPart);
