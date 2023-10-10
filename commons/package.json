@@ -11,9 +11,9 @@
   "author": "Michael DiCarlo",
   "license": "ISC",
   "dependencies": {
-    "megalodon": "^6.1.0",
     "@types/node": "^14.11.1",
     "class-transformer": "^0.3.1",
-    "class-validator": "^0.12.2"
+    "class-validator": "^0.12.2",
+    "megalodon": "^6.2.0"
   }
 }
