@@ -207,6 +207,8 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
+    let profile = await agent.getProfile({actor: agent.session.did });
+
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
 
     const files = [data.primary, ...data.additional];
@@ -253,8 +255,14 @@ export class Bluesky extends Website {
       });
 
     if (postResult && postResult.uri) {
+      // Generate a friendly URL
+      const handle = profile.data.handle;
+      const server = "bsky.app"; // Can't use the agent sadly, but this might change later: agent.service.hostname;
+      const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
+
+      let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
       return this.createPostResponse({
-        source: postResult.uri,
+        source: friendlyUrl,
       });
     } else {
       return Promise.reject(this.createPostResponse({ message: 'Unknown error occurred' }));
@@ -274,6 +282,8 @@ export class Bluesky extends Website {
       identifier: accountData.username,
       password: accountData.password,
     });
+
+    let profile = await agent.getProfile({actor: agent.session.did });
 
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
     const status = this.appendRichTextTags(data.tags, data.description);
@@ -301,8 +311,14 @@ export class Bluesky extends Website {
     });
   
     if (postResult && postResult.uri) {
+      // Generate a friendly URL
+      const handle = profile.data.handle;
+      const server = "bsky.app"; // Can't use the agent sadly, but this might change later: agent.service.hostname;
+      const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
+
+      let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
       return this.createPostResponse({
-        source: postResult.uri,
+        source: friendlyUrl,
       });
     } else {
       return Promise.reject(this.createPostResponse({ message: 'Unknown error occurred' }));
