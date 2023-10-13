@@ -231,7 +231,12 @@ export class Itaku extends Website {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
-    const isAutoscaling: boolean = submissionPart.data.autoScale;
+    
+    if (defaultPart.data.description.value.length > 5000) {
+      problems.push(
+        `Max description length allowed is 5000 characters.`,
+      );
+    }
 
     if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 5) {
       problems.push('Requires at least 5 tags.');
