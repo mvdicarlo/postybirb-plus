@@ -69,7 +69,7 @@ export default class FurtasticLogin extends React.Component<LoginDialogProps, St
     return (
       <div className="container mt-6">
         <Form layout="vertical">
-          <Form.Item label="Username" required>
+          <Form.Item label="Username (email address)" required>
             <Input
               className="w-full"
               value={this.state.username}

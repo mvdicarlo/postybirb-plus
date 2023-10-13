@@ -16,7 +16,7 @@
     "axios": "^0.21.4",
     "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
-    "megalodon": "^6.1.0",
+    "megalodon": "^6.2.0",
     "mobx": "^5.15.7",
     "mobx-react": "^6.3.1",
     "postybirb-commons": "file:../commons",
