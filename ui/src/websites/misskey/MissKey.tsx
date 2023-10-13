@@ -114,7 +114,7 @@ export class MissKeyFileSubmissionForm extends GenericFileSubmissionSection<Miss
           onChange={this.handleValueChange.bind(this, 'spoilerText')}
         />
       </Form.Item>,
-      <Form.Item label="Alt Text">
+      <Form.Item label="Fallback Alt Text">
         <Input
           value={data.altText}
           onChange={this.handleValueChange.bind(this, 'altText')}

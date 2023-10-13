@@ -12,6 +12,7 @@ export interface FilePostData<T extends DefaultFileOptions> extends PostData<Fil
 export interface PostFileRecord {
   type: FileSubmissionType;
   file: PostFile;
+  altText: string;
 }
 
 export interface PostFile {

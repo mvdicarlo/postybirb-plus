@@ -42,7 +42,8 @@ import {
   DatePicker,
   Popconfirm,
   Alert,
-  Tooltip
+  Tooltip,
+  Input
 } from 'antd';
 import { Problem } from 'postybirb-commons';
 import { scrollSubmissionStore } from '../../../../stores/scroll-submission.store';
@@ -66,6 +67,7 @@ export interface SubmissionEditFormState {
   thumbnailFileForCrop?: File;
   imageCropperResolve?: (file: File) => void;
   imageCropperReject?: () => void;
+  altTexts: { [key: string]: string };
 }
 
 @inject('loginStatusStore')
@@ -97,7 +99,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     submission: undefined,
     submissionType: SubmissionType.FILE,
     touched: false,
-    showThumbnailCropper: false
+    showThumbnailCropper: false,
+    altTexts: {},
   };
 
   constructor(props: Props) {
@@ -106,12 +109,22 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     SubmissionService.getSubmission(this.id, true)
       .then(({ data }) => {
         this.original = _.cloneDeep(data);
+        const submissionType: SubmissionType = data.submission.type;
+        const altTexts = {};
+        if (submissionType == SubmissionType.FILE) {
+          const submission: FileSubmission = data.submission!;
+          altTexts[submission.primary.location] = submission.primary.altText || '';
+          for (const f of (submission.additional || [])) {
+            altTexts[f.location] = f.altText || '';
+          }
+        }
         this.setState({
           ...this.state,
           ...data,
           loading: false,
           postAt: data.submission.schedule.postAt,
-          submissionType: data.submission.type
+          submissionType,
+          altTexts,
         });
       })
       .catch(() => {
@@ -162,7 +175,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
             .filter(accountId => !this.state.parts[accountId].isNew)
             .map(accountId => this.state.parts[accountId]._id),
           id: this.id,
-          postAt: this.state.postAt
+          postAt: this.state.postAt,
+          altTexts: this.state.altTexts,
         })
           .then(({ data }) => {
             this.original = _.cloneDeep(data);
@@ -507,6 +521,12 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
     ).finally(this.checkProblems);
   }, 1000);
 
+  handleAltTextChange(record: FileRecord, altText: string) {
+    const altTexts = this.state.altTexts;
+    altTexts[record.location] = altText;
+    this.setState({ altTexts, touched: true });
+  }
+
   componentWillUnmount() {
     uiStore.setPendingChanges(false);
   }
@@ -619,7 +639,13 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                         </Upload>
                       }
                       bodyStyle={{ padding: '0' }}
-                    ></Card>
+                    >
+                      <Input
+                        placeholder="Alt text"
+                        value={this.state.altTexts[submission.primary.location]}
+                        onChange={e => this.handleAltTextChange(submission.primary, e.target.value)}
+                      />
+                    </Card>
                     <Card
                       className="flex-1 ml-2 file-card"
                       title="Thumbnail"
@@ -733,6 +759,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                                 onChange={value => this.handleAdditionalIgnoredAccounts(f, value)}
                                 placeholder="Ignored accounts"
                                 maxTagCount={0}
+                              />
+                              <Input
+                                placeholder="Alt text"
+                                value={this.state.altTexts[f.location]}
+                                onChange={e => this.handleAltTextChange(f, e.target.value)}
                               />
                             </Card>
                           );
