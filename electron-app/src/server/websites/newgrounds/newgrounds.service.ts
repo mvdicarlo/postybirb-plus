@@ -16,7 +16,10 @@ import { GifManipulator } from 'src/server/file-manipulation/manipulators/gif.ma
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import {
+  FilePostData,
+  PostFile,
+} from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
@@ -26,6 +29,14 @@ import { v1 } from 'uuid';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import BrowserWindowUtil from 'src/server/utils/browser-window.util';
+
+type NewgroundsPostResponse = {
+  edit_url: string;
+  can_publish: boolean;
+  project_id: number;
+  success: string;
+};
 
 @Injectable()
 export class Newgrounds extends Website {
@@ -109,58 +120,10 @@ export class Newgrounds extends Website {
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
   }
 
-  async postFileSubmission(
-    cancellationToken: CancellationToken,
-    data: FilePostData<NewgroundsFileOptions>,
-  ): Promise<PostResponse> {
-    const page = await Http.get<string>(`${this.BASE_URL}/art/submit/create`, data.part.accountId, {
-      requestOptions: { rejectUnauthorized: false },
-    });
-    this.verifyResponse(page, 'Get page');
-
-    const userkey = HtmlParserUtil.getInputValue(page.body, 'userkey');
-    this.checkCancelled(cancellationToken);
-    const parkFile = await Http.post<{
-      success: boolean;
-      parked_id: string;
-      parked_url: string;
-      errors: string[];
-    }>(`${this.BASE_URL}/parkfile`, data.part.accountId, {
-      type: 'multipart',
-      requestOptions: { json: true, rejectUnauthorized: false },
-      data: {
-        userkey,
-        qquuid: v1(),
-        qqfilename: data.primary.file.options.filename,
-        qqtotalfilesize: data.primary.file.value.length,
-        qqfile: data.primary.file,
-      },
-      headers: {
-        Origin: 'https://www.newgrounds.com',
-        Referer: `https://www.newgrounds.com/art/submit/create`,
-        'Accept-Encoding': 'gzip, deflate, br',
-        Accept: 'application/json',
-        'Content-Type': 'multipart/form-data',
-        TE: 'Trailers',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    });
-
-    console.log(parkFile.body);
-
-    this.verifyResponse(parkFile, 'Verify park');
-    if (!parkFile.body.success) {
-      return Promise.reject(
-        this.createPostResponse({
-          additionalInfo: parkFile.body,
-          message: parkFile.body.errors.join(' '),
-        }),
-      );
-    }
-
-    let thumbfile = data.thumbnail ? data.thumbnail : data.primary.file;
-    if (!data.thumbnail && data.primary.file.options.contentType === 'image/gif') {
-      const frame0 = await GifManipulator.getFrame(data.primary.file.value);
+  private async getThumbnail(thumbnail: PostFile, primary: PostFile): Promise<PostFile> {
+    let thumbfile = thumbnail;
+    if (!thumbnail && primary.options.contentType === 'image/gif') {
+      const frame0 = await GifManipulator.getFrame(primary.value);
       thumbfile = {
         value: frame0,
         options: {
@@ -197,94 +160,195 @@ export class Newgrounds extends Website {
     thumbfile.value = thumb.toPNG();
     thumbfile.options.filename = 'thumbnail.png';
     thumbfile.options.contentType = 'image/png';
+    return thumbfile;
+  }
 
-    const { options } = data;
-    const form: any = {
-      userkey,
-      title: data.title,
-      description: `<p>${data.description}</p>`,
-      thumbnail: thumbfile,
-      cc_commercial: options.commercial ? 'yes' : 'no',
-      cc_modification: options.modification ? 'yes' : 'no',
-      category_id: options.category,
-      nudity: options.nudity,
-      violence: options.violence,
-      language_textual: options.explicitText,
-      adult_themes: options.adultThemes,
-      encoder: 2,
-      thumb_crop_width: width,
-      thumb_crop_height: height,
-      thumb_top_x: 0,
-      thumb_top_y: 0,
-      thumb_animation_frame: 0,
-      'tags[]': this.formatTags(data.tags),
-      parked_id: parkFile.body.parked_id,
-      parked_url: parkFile.body.parked_url,
-    };
+  private checkIsSaved(response: NewgroundsPostResponse): boolean {
+    return response.success === 'saved';
+  }
 
-    console.log(form);
-
-    if (options.creativeCommons) {
-      form.use_creative_commons = '1';
-    }
-
-    if (!options.sketch) {
-      form.public = '1';
-    }
-
-    const newCookies: any = {};
-    parkFile.response.headers['set-cookie'].forEach(cookie => {
-      const cookieParts = cookie.split(';')[0].split('=');
-      return (newCookies[cookieParts[0]] = cookieParts[1]);
+  private cleanUpFailedProject(partition: string, project_id: number, userKey: string) {
+    return Http.post(`${this.BASE_URL}/projects/art/remove/${project_id}`, partition, {
+      type: 'multipart',
+      data: {
+        userkey: userKey,
+      },
     });
+  }
+
+  async postFileSubmission(
+    cancellationToken: CancellationToken,
+    data: FilePostData<NewgroundsFileOptions>,
+  ): Promise<PostResponse> {
+    const userKey: string = await BrowserWindowUtil.runScriptOnPage(
+      data.part.accountId,
+      `${this.BASE_URL}/projects/art/new`,
+      'PHP.get("uek")',
+      300,
+    );
+    if (!userKey) {
+      return Promise.reject(this.createPostResponse({ message: 'Could not get userkey' }));
+    }
+
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ succes: boolean; url: string; errors: string[]; error: string }>(
-      `${this.BASE_URL}/art/submit/create`,
-      undefined,
+    const initRes = await Http.post<NewgroundsPostResponse>(
+      `${this.BASE_URL}/projects/art/new`,
+      data.part.accountId,
       {
         type: 'multipart',
-        data: form,
-        skipCookies: true,
-        requestOptions: {
-          json: true,
-          qsStringifyOptions: { arrayFormat: 'repeat' },
-          rejectUnauthorized: false,
-        },
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          Origin: 'https://www.newgrounds.com',
-          Referer: `https://www.newgrounds.com/art/submit/create`,
-          'Accept-Encoding': 'gzip, deflate, br',
-          Accept: '*',
-          'Content-Type': 'multipart/form-data',
-          TE: 'Trailers',
-          cookie: Object.entries(newCookies)
-            .map(([key, value]) => `${key}=${value}`)
-            .join('; '),
+        requestOptions: { json: true },
+        data: {
+          PHP_SESSION_UPLOAD_PROGRESS: 'projectform',
+          init_project: '1',
+          userkey: userKey,
         },
       },
     );
 
-    if (post.body.url) {
-      return this.createPostResponse({ source: post.body.url });
-    } else {
-      let message = '';
-      try {
-        message = post.body.errors
-          .map(err => {
-            if (err.includes('You must agree to the terms of the submissions agreement.')) {
-              return 'You must first manually post to Newgrounds to accept the terms of the submissions agreement.';
-            }
-            return err;
-          })
-          .join(' ');
-      } catch (err) {
-        message = (cheerio.load(post.body.error) as any).text();
-      }
+    if (!initRes.body.project_id || !this.checkIsSaved(initRes.body)) {
       return Promise.reject(
         this.createPostResponse({
-          additionalInfo: post.body,
-          message,
+          message: 'Could not initialize post to Newgrounds',
+          additionalInfo: initRes.body,
+        }),
+      );
+    }
+
+    const { edit_url, project_id } = initRes.body;
+
+    let thumbfile = await this.getThumbnail(
+      data.thumbnail ? data.thumbnail : data.primary.file,
+      data.primary.file,
+    );
+
+    const primaryBuf = nativeImage.createFromBuffer(data.primary.file.value);
+    const size = primaryBuf.getSize();
+    const fileUploadRes = await Http.post<
+      NewgroundsPostResponse & {
+        linked_icon: number;
+        image: Record<string, unknown>;
+      }
+    >(edit_url, data.part.accountId, {
+      type: 'multipart',
+      data: {
+        userkey: userKey,
+        width: size.width,
+        height: size.height,
+        new_image: data.primary.file,
+        link_icon: '1',
+        cropdata: `{"x":0,"y":45,"width":${size.width},"height":${size.height}}`,
+        thumbnail: thumbfile,
+      },
+      requestOptions: { json: true },
+    });
+
+    if (!fileUploadRes.body.image || !this.checkIsSaved(initRes.body)) {
+      this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Could not upload file to Newgrounds',
+          additionalInfo: fileUploadRes.body,
+        }),
+      );
+    }
+
+    const { linked_icon } = fileUploadRes.body;
+    const linkImageRes = await Http.post<NewgroundsPostResponse>(edit_url, data.part.accountId, {
+      type: 'multipart',
+      data: {
+        userkey: userKey,
+        art_image_sort: `[${linked_icon}]`,
+      },
+      requestOptions: { json: true },
+    });
+
+    if (!this.checkIsSaved(linkImageRes.body)) {
+      this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Could not upload file to Newgrounds',
+          additionalInfo: linkImageRes.body,
+        }),
+      );
+    }
+
+    const { options } = data;
+    const contentUpdateRes = await Http.post<NewgroundsPostResponse>(
+      edit_url,
+      data.part.accountId,
+      {
+        type: 'multipart',
+        requestOptions: { json: true },
+        data: {
+          PHP_SESSION_UPLOAD_PROGRESS: 'projectform',
+          userkey: userKey,
+          encoder: 'quill',
+          title: data.title,
+          'option[longdescription]': this.parseDescription(data.description),
+          'option[tags]': this.formatTags(data.tags).join(','),
+          'option[include_in_portal]': options.sketch ? '0' : '1',
+          'option[use_creative_commons]': options.creativeCommons ? '1' : '0',
+          'option[cc_commercial]': options.commercial ? 'yes' : 'no',
+          'option[cc_modifiable]': options.modification ? 'yes' : 'no',
+          'option[genreid]': options.category,
+          'option[nudity]': options.nudity,
+          'option[violence]': options.violence,
+          'option[language_textual]': options.explicitText,
+          'option[adult_themes]': options.adultThemes,
+        },
+      },
+    );
+
+    if (!this.checkIsSaved(contentUpdateRes.body)) {
+      this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Could not update content',
+          additionalInfo: contentUpdateRes.body,
+        }),
+      );
+    }
+
+    const resKeys = Object.entries(contentUpdateRes.body).filter(([key]) => key.endsWith('_error'));
+    if (resKeys.length > 0) {
+      this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Could not update content:\n' + resKeys.map(([_, value]) => value).join('\n'),
+          additionalInfo: contentUpdateRes.body,
+        }),
+      );
+    }
+
+    this.checkCancelled(cancellationToken);
+    if (contentUpdateRes.body.can_publish) {
+      const publishRes = await Http.post<unknown>(
+        `${this.BASE_URL}/projects/art/${project_id}/publish`,
+        data.part.accountId,
+        {
+          type: 'multipart',
+          data: {
+            userkey: userKey,
+            submit: '1',
+            agree: 'Y',
+            __ng_design: '2015',
+          },
+        },
+      );
+
+      try {
+        this.verifyResponse(publishRes);
+        return this.createPostResponse({ source: publishRes.returnUrl });
+      } catch (err) {
+        this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
+        return Promise.reject(err);
+      }
+    } else {
+      this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Could not publish content. It may be missing data',
+          additionalInfo: contentUpdateRes.body,
         }),
       );
     }
@@ -307,6 +371,10 @@ export class Newgrounds extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
+
+    if (!submissionPart.data.category) {
+      problems.push('Must select a category value.');
+    }
 
     if (!submissionPart.data.nudity) {
       problems.push('Must select a Nudity value.');
