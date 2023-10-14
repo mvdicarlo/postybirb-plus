@@ -66,6 +66,9 @@ export * from './interfaces/websites/mastodon/mastodon.notification.options.inte
 export * from './interfaces/websites/misskey/misskey.account.interface';
 export * from './interfaces/websites/misskey/misskey.file.options.interface';
 export * from './interfaces/websites/misskey/misskey.notification.options.interface';
+export * from './interfaces/websites/pleroma/pleroma.account.interface';
+export * from './interfaces/websites/pleroma/pleroma.file.options.interface';
+export * from './interfaces/websites/pleroma/pleroma.notification.options.interface';
 export * from './interfaces/websites/newgrounds/newgrounds.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.notification.options.interface';

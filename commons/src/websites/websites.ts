@@ -14,6 +14,7 @@ export * from './ko-fi/ko-fi.options';
 export * from './manebooru/manebooru.options';
 export * from './mastodon/mastodon.options';
 export * from './misskey/misskey.options';
+export * from './pleroma/pleroma.options';
 export * from './newgrounds/newgrounds.options';
 export * from './patreon/patreon.options';
 export * from './picarto/picarto.options';
