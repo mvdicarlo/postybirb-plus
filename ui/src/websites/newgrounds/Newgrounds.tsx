@@ -3,7 +3,7 @@ import {
   DefaultOptions,
   FileSubmission,
   NewgroundsFileOptions,
-  Submission
+  Submission,
 } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -21,13 +21,13 @@ export class Newgrounds extends WebsiteImpl {
     <NewgroundsFileSubmissionForm
       key={props.part.accountId}
       ratingOptions={{
-        show: false
+        show: false,
       }}
       tagOptions={{
         show: true,
         options: {
-          maxTags: 12
-        }
+          maxTags: 12,
+        },
       }}
       {...props}
     />
@@ -40,19 +40,17 @@ export class Newgrounds extends WebsiteImpl {
       tagOptions={{
         show: true,
         options: {
-          maxTags: 12
-        }
+          maxTags: 12,
+        },
       }}
       ratingOptions={{
-        show: false
+        show: false,
       }}
     />
   );
 }
 
-export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<
-  NewgroundsFileOptions
-> {
+export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<NewgroundsFileOptions> {
   renderRightForm(data: NewgroundsFileOptions) {
     const elements = super.renderRightForm(data);
     elements.push(
@@ -99,7 +97,21 @@ export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<
           <Radio.Button value="b">Some</Radio.Button>
           <Radio.Button value="a">Lots</Radio.Button>
         </Radio.Group>
-      </Form.Item>
+      </Form.Item>,
+      <Form.Item label="Category">
+        <Radio.Group
+          onChange={this.handleValueChange.bind(this, 'category')}
+          value={data.category}
+          buttonStyle="solid"
+        >
+          <Radio.Button value="4">3D Art</Radio.Button>
+          <Radio.Button value="7">Comic</Radio.Button>
+          <Radio.Button value="3">Fine Art</Radio.Button>
+          <Radio.Button value="1">Illustration</Radio.Button>
+          <Radio.Button value="5">Pixel Art</Radio.Button>
+          <Radio.Button value="6">Other</Radio.Button>
+        </Radio.Group>
+      </Form.Item>,
     );
     return elements;
   }
@@ -134,7 +146,7 @@ export class NewgroundsFileSubmissionForm extends GenericFileSubmissionSection<
         >
           Allow modification
         </Checkbox>
-      </div>
+      </div>,
     );
     return elements;
   }
