@@ -32,6 +32,7 @@ import { SubscribeStarAdult } from './subscribe-star-adult/subscribe-star-adult.
 import { Pixelfed } from './pixelfed/pixelfed.service';
 import { MissKey } from './misskey/misskey.service';
 import { Bluesky } from './bluesky/bluesky.service';
+import { Pleroma } from './pleroma/pleroma.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -71,6 +72,7 @@ export class WebsiteProvider {
     readonly itaku: Itaku,
     readonly picarto: Picarto,
     readonly pixelfed: Pixelfed,
+    readonly pleroma: Pleroma,
   ) {
     // eslint-disable-next-line
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);

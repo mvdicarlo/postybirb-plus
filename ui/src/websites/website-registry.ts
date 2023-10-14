@@ -24,6 +24,7 @@ import { Manebooru } from './manebooru/Manebooru';
 import { Mastodon } from './mastodon/Mastodon';
 import { MissKey } from './misskey/MissKey';
 import { Pillowfort } from './pillowfort/Pillowfort';
+import { Pleroma } from './pleroma/Pleroma';
 import { Telegram } from './telegram/Telegram';
 import { Furbooru } from './furbooru/Furbooru';
 import { Itaku } from './itaku/Itaku';
@@ -59,6 +60,7 @@ export class WebsiteRegistry {
     Pillowfort: new Pillowfort(),
     Pixelfed: new Pixelfed(),
     Pixiv: new Pixiv(),
+    Pleroma: new Pleroma(),
     SoFurry: new SoFurry(),
     SubscribeStar: new SubscribeStar(),
     SubscribeStarAdult: new SubscribeStarAdult(),

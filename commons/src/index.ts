@@ -52,7 +52,6 @@ export * from './interfaces/websites/e621/e621.file.options.interface';
 export * from './interfaces/websites/folder.interface';
 export * from './interfaces/websites/fur-affinity/fur-affinity.file.options.interface';
 export * from './interfaces/websites/fur-affinity/fur-affinity.notification.options.interface';
-export * from './interfaces/websites/furry-life/furry-life.file.options.interface';
 export * from './interfaces/websites/furry-network/furry-network.file.options.interface';
 export * from './interfaces/websites/furry-network/furry-network.notification.options.interface';
 export * from './interfaces/websites/furtastic/furtastic.account.interface';
@@ -67,6 +66,9 @@ export * from './interfaces/websites/mastodon/mastodon.notification.options.inte
 export * from './interfaces/websites/misskey/misskey.account.interface';
 export * from './interfaces/websites/misskey/misskey.file.options.interface';
 export * from './interfaces/websites/misskey/misskey.notification.options.interface';
+export * from './interfaces/websites/pleroma/pleroma.account.interface';
+export * from './interfaces/websites/pleroma/pleroma.file.options.interface';
+export * from './interfaces/websites/pleroma/pleroma.notification.options.interface';
 export * from './interfaces/websites/newgrounds/newgrounds.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.file.options.interface';
 export * from './interfaces/websites/patreon/patreon.notification.options.interface';
@@ -82,7 +84,6 @@ export * from './interfaces/websites/subscribe-star/subscribe-star.notification.
 export * from './interfaces/websites/tumblr/tumblr.account.interface';
 export * from './interfaces/websites/tumblr/tumblr.file.options.interface';
 export * from './interfaces/websites/tumblr/tumblr.notification.options.interface';
-export * from './interfaces/websites/twitter/twitter.file.options.interface';
 export * from './interfaces/websites/username-shortcut.interface';
 export * from './interfaces/websites/weasyl/weasyl.file.options.interface';
 export * from './interfaces/websites/itaku/itaku.file.options.interface';
