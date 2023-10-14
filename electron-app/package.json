@@ -98,7 +98,7 @@
     "@types/set-cookie-parser": "0.0.6",
     "@types/socket.io": "^2.1.12",
     "@types/supertest": "^2.0.11",
-    "electron": "^19.1.9",
+    "electron": "^22.3.21",
     "electron-builder": "^23.6.0",
     "jest": "^26.6.3",
     "supertest": "^6.1.6",
