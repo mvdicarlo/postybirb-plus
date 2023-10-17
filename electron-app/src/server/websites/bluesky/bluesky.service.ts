@@ -29,6 +29,8 @@ import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtex
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
 import Graphemer from 'graphemer';
+import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
+import FormContent from 'src/server/utils/form-content.util';
 
 // Start of Polyfill
 
@@ -111,6 +113,10 @@ async function fetchHandler(
 
 // End of Polyfill
 
+function getRichTextLength(text: string): number {
+  return new RichText({text}).graphemeLength;
+}
+
 @Injectable()
 export class Bluesky extends Website {
   readonly BASE_URL = '';
@@ -165,6 +171,10 @@ export class Bluesky extends Website {
     ).map(tag => `#${tag}`);
   }
 
+  private appendRichTextTags(tags: string[], description: string): string {
+    return this.appendTags(this.formatTags(tags), description, this.MAX_CHARS, getRichTextLength);
+  }
+
   private async uploadMedia(
     agent: BskyAgent,
     data: BlueskyAccountData,
@@ -197,6 +207,10 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
+    let profile = await agent.getProfile({actor: agent.session.did });
+
+    const reply = await this.getReplyRef(agent, data.options.replyToUrl);
+
     const files = [data.primary, ...data.additional];
     let uploadedMedias: AppBskyEmbedImages.Image[] = [];
     let fileCount = 0;
@@ -215,29 +229,7 @@ export class Bluesky extends Website {
       $type: 'app.bsky.embed.images',
     };
 
-    let status = data.description;
-    let r = new RichText({text: status});
-
-    const tags = this.formatTags(data.tags);
-
-    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append
-    // these onto the post, *IF* there is character count available.
-    if (tags.length > 0) {
-      status += '\n\n';
-    }
-
-    tags.forEach(tag => {
-      let remain = this.MAX_CHARS - status.length;
-      let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`;
-      }
-      if (remain > tagToInsert.length) {
-        status += ` ${tagToInsert}`;
-      }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      r = new RichText({text: status});
-    });
+    const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -256,14 +248,21 @@ export class Bluesky extends Website {
         facets: rt.facets,
         embed: embeds,
         labels: labelsRecord,
+        ...(reply ? { reply } : {}),
       })
       .catch(err => {
         return Promise.reject(this.createPostResponse({ message: err }));
       });
 
     if (postResult && postResult.uri) {
+      // Generate a friendly URL
+      const handle = profile.data.handle;
+      const server = "bsky.app"; // Can't use the agent sadly, but this might change later: agent.service.hostname;
+      const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
+
+      let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
       return this.createPostResponse({
-        source: postResult.uri,
+        source: friendlyUrl,
       });
     } else {
       return Promise.reject(this.createPostResponse({ message: 'Unknown error occurred' }));
@@ -284,29 +283,10 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    let status = data.description;
-    let r = new RichText({text: status});
+    let profile = await agent.getProfile({actor: agent.session.did });
 
-    const tags = this.formatTags(data.tags);
-
-    // Update the post content with the Tags if any are specified - for BlueSky (There is no tagging engine yet), we need to append
-    // these onto the post, *IF* there is character count available.
-    if (tags.length > 0) {
-      status += '\n\n';
-    }
-
-    tags.forEach(tag => {
-      let remain = this.MAX_CHARS - r.graphemeLength;
-      let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`;
-      }
-      if (remain > (tagToInsert.length)) {
-        status += ` ${tagToInsert}`;
-      }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      r = new RichText({text: status});
-    });
+    const reply = await this.getReplyRef(agent, data.options.replyToUrl);
+    const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -322,7 +302,8 @@ export class Bluesky extends Website {
     let postResult = await agent.post({
       text: rt.text,
       facets: rt.facets,
-      labels: labelsRecord
+      labels: labelsRecord,
+      ...(reply ? { reply } : {}),
     }).catch(err => {
       return Promise.reject(
           this.createPostResponse({ message: err }),
@@ -330,8 +311,14 @@ export class Bluesky extends Website {
     });
   
     if (postResult && postResult.uri) {
+      // Generate a friendly URL
+      const handle = profile.data.handle;
+      const server = "bsky.app"; // Can't use the agent sadly, but this might change later: agent.service.hostname;
+      const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
+
+      let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
       return this.createPostResponse({
-        source: postResult.uri,
+        source: friendlyUrl,
       });
     } else {
       return Promise.reject(this.createPostResponse({ message: 'Unknown error occurred' }));
@@ -348,18 +335,13 @@ export class Bluesky extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (!submissionPart.data.altText) {
-      warnings.push(`Bluesky recommends alt text to be provided`);
-    }
-
-    const rt = new RichText({ text: submissionPart.data.description.value });
-    const agent = new BskyAgent({ service: 'https://bsky.social' })
-    rt.detectFacets(agent);
-
-    if (rt.graphemeLength > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+        'Bluesky currently always requires alt text to be provided, ' +
+          'even if your settings say otherwise. This is a bug on their side.',
       );
     }
+
+    this.validateDescriptionLength(problems, submissionPart, defaultPart);
 
     const files = [
       submission.primary,
@@ -403,6 +385,8 @@ export class Bluesky extends Website {
       );
     }
 
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
     return { problems, warnings };
   }
 
@@ -414,16 +398,71 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    const rt = new RichText({ text: submissionPart.data.description.value });
+    this.validateDescriptionLength(problems, submissionPart, defaultPart);
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
+    return { problems, warnings };
+  }
+
+  private validateDescriptionLength(
+    problems: string[],
+    submissionPart: SubmissionPart<BlueskyNotificationOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+  ): void {
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    );
+
+    const rt = new RichText({ text: description });
     const agent = new BskyAgent({ service: 'https://bsky.social' })
     rt.detectFacets(agent);
 
     if (rt.graphemeLength > this.MAX_CHARS) {
       problems.push(
-        `Max description length allowed is ${this.MAX_CHARS} graphemes.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     }
+  }
 
-    return { problems, warnings };
+  private validateReplyToUrl(problems: string[], url?: string): void {
+    if(url?.trim() && !this.getPostIdFromUrl(url)) {
+      problems.push("Invalid post URL to reply to.");
+    }
+  }
+
+  private async getReplyRef(agent: BskyAgent, url?: string): Promise<ReplyRef | null> {
+    if (!url?.trim()) {
+      return null;
+    }
+
+    const postId = this.getPostIdFromUrl(url);
+    if (!postId) {
+      throw new Error(`Invalid reply to url '${url}'`);
+    }
+
+    // cf. https://atproto.com/blog/create-post#replies
+    const parent = await agent.getPost(postId);
+    const reply = parent.value.reply;
+    const root = reply ? reply.root : parent;
+    return {
+      root: { uri: root.uri, cid: root.cid },
+      parent: { uri: parent.uri, cid: parent.cid },
+    };
+  }
+
+  private getPostIdFromUrl(url: string): { repo: string; rkey: string } | null {
+    // A regular web link like https://bsky.app/profile/{repo}/post/{id}
+    const link = /\/profile\/([^\/]+)\/post\/([a-zA-Z0-9\.\-_~]+)/.exec(url);
+    if (link) {
+      return { repo: link[1], rkey: link[2] };
+    }
+
+    // Protocol link like at://did:plc:{repo}/app.bsky.feed.post/{id}
+    const at = /(did:plc:[a-zA-Z0-9\.\-_~]+)\/.+\.post\/([a-zA-Z0-9\.\-_~]+)/.exec(url);
+    if (at) {
+      return { repo: at[1], rkey: at[2] };
+    }
+
+    return null;
   }
 }

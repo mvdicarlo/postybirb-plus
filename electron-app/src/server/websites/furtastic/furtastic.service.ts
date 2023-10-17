@@ -12,8 +12,6 @@ import {
   SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -25,13 +23,13 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 
 @Injectable()
 export class Furtastic extends Website {
   readonly BASE_URL: string = 'https://api.furtastic.art';
-  readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webm'];
-  readonly acceptsSourceUrls: boolean = true;
-  readonly defaultDescriptionParser = PlaintextParser.parse;
+  readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webm', 'pdf'];
+  readonly defaultDescriptionParser = MarkdownParser.parse;
   readonly enableAdvertisement: boolean = true;
   readonly acceptsAdditionalFiles: boolean = true;
 
@@ -54,34 +52,6 @@ export class Furtastic extends Website {
 
   getScalingOptions(file: FileRecord): ScalingOptions {
     return { maxSize: FileSize.MBtoBytes(100) };
-  }
-
-  preparseDescription(text: string) {
-    return UsernameParser.replaceText(text, 'ft', '@$1').replace(
-      /<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi,
-      '"$4":$2',
-    );
-  }
-
-  parseDescription(text: string) {
-    text = text.replace(/<b>/gi, '**');
-    text = text.replace(/<i>/gi, '*');
-    text = text.replace(/<u>/gi, '');
-    text = text.replace(/<s>/gi, '~~');
-    text = text.replace(/<\/b>/gi, '**');
-    text = text.replace(/<\/i>/gi, '*');
-    text = text.replace(/<\/u>/gi, '');
-    text = text.replace(/<\/s>/gi, '~~');
-    text = text.replace(/<em>/gi, '*');
-    text = text.replace(/<\/em>/gi, '*');
-    text = text.replace(/<strong>/gi, '**');
-    text = text.replace(/<\/strong>/gi, '**');
-    text = text.replace(
-      /<span style="color:\s*(.*?);*">((.|\n)*?)<\/span>/gim,
-      '$2',
-    );
-    text = text.replace(/<a(.*?)href="(.*?)"(.*?)>(.*?)<\/a>/gi, '[$4]($2)');
-    return super.parseDescription(text);
   }
   
   async postFileSubmission(

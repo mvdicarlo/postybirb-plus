@@ -38,16 +38,21 @@ const INFO_KEY = 'INSTANCE INFO';
 
 type MastodonInstanceInfo = {
   configuration: {
-    statuses: {
+    statuses?: {
       max_characters: number;
       max_media_attachments: number;
     };
-    media_attachments: {
+    media_attachments?: {
       supported_mime_types: string[];
       image_size_limit: number;
       video_size_limit: number;
+      image_matrix_limit: number;
+      video_matrix_limit: number;
     };
   };
+  upload_limit?: number; // Pleroma, Akkoma
+  max_toot_chars?: number; // Pleroma, Akkoma
+  max_media_attachments?: number; //Pleroma
 };
 
 @Injectable()
@@ -64,73 +69,78 @@ export class Mastodon extends Website {
     'jpeg',
     'jpg',
     'gif',
-    'swf',
-    'flv',
+    'webp',
+    'avif',
+    'heic',
+    'heif',
     'mp4',
+    'webm',
+    'm4v',
+    'mov',
     'doc',
     'rtf',
     'txt',
     'mp3',
+    'wav',
+    'ogg',
+    'oga',
+    'opus',
+    'aac',
+    'm4a',
+    '3gp',
+    'wma',
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: MastodonAccountData = data.data;
     if (accountData && accountData.token) {
-      const refresh = await this.refreshToken(accountData);
-      if (refresh) {
-        status.loggedIn = true;
-        status.username = accountData.username;
-        this.getInstanceInfo(data._id, accountData);
-      }
+      await this.getAndStoreInstanceInfo(data._id, accountData);
+
+      status.loggedIn = true;
+      status.username = accountData.username;
     }
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: MastodonAccountData) {
+  private async getAndStoreInstanceInfo(profileId: string, data: MastodonAccountData) {
     const client = generator('mastodon', data.website, data.token);
     const instance = await client.getInstance();
 
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
-  // TBH not entirely sure why this is a thing, but its in the old code so... :shrug:
-  private async refreshToken(data: MastodonAccountData): Promise<boolean> {
-    const M = this.getMastodonInstance(data);
-    return true;
-  }
-
-  private getMastodonInstance(data: MastodonAccountData): Entity.Instance {
-    const client = generator('mastodon', data.website, data.token);
-    client.getInstance().then(res => {
-      return res.data;
-    });
-    return null;
-  }
-
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
-    return instanceInfo?.configuration?.media_attachments
-      ? {
-          maxHeight: 4000,
-          maxWidth: 4000,
-          maxSize:
-            file.type === FileSubmissionType.IMAGE
-              ? instanceInfo.configuration.media_attachments.image_size_limit
-              : instanceInfo.configuration.media_attachments.video_size_limit,
-        }
-      : {
-          maxHeight: 4000,
-          maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300),
-        };
+    if (instanceInfo?.configuration?.media_attachments) {
+      const maxPixels =
+        file.type === FileSubmissionType.IMAGE
+          ? instanceInfo.configuration.media_attachments.image_matrix_limit
+          : instanceInfo.configuration.media_attachments.video_matrix_limit;
+
+      return {
+        maxHeight: Math.round(Math.sqrt(maxPixels * (file.width / file.height))),
+        maxWidth: Math.round(Math.sqrt(maxPixels * (file.height / file.width))),
+        maxSize:
+          file.type === FileSubmissionType.IMAGE
+            ? instanceInfo.configuration.media_attachments.image_size_limit
+            : instanceInfo.configuration.media_attachments.video_size_limit,
+      };
+    } else if (instanceInfo?.upload_limit) {
+      return {
+        maxSize: instanceInfo?.upload_limit,
+      };
+    } else {
+      return undefined;
+    }
   }
 
+  // Megaladon api has uploadMedia method, hovewer, it does not work with mastodon
   private async uploadMedia(
     data: MastodonAccountData,
     file: PostFile,
     altText: string,
-  ): Promise<{ id: string }> {
+  ): Promise<string> {
     const upload = await Http.post<{ id: string; errors: any; url: string }>(
       `${data.website}/api/v2/media`,
       undefined,
@@ -180,7 +190,7 @@ export class Mastodon extends Website {
       );
     }
 
-    return { id: upload.body.id };
+    return upload.body.id;
   }
 
   async postFileSubmission(
@@ -191,85 +201,53 @@ export class Mastodon extends Website {
     const M = generator('mastodon', accountData.website, accountData.token);
 
     const files = [data.primary, ...data.additional];
-    this.checkCancelled(cancellationToken);
-    const uploadedMedias: {
-      id: string;
-    }[] = [];
+    const uploadedMedias: string[] = [];
     for (const file of files) {
+      this.checkCancelled(cancellationToken);
       uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
     }
 
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo
-      ? instanceInfo?.configuration?.statuses?.max_media_attachments
-      : 4;
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const chunkCount =
+      instanceInfo?.configuration?.statuses?.max_media_attachments ??
+      instanceInfo?.max_media_attachments ??
+      (instanceInfo?.upload_limit ? 1000 : 4);
+    const maxChars =
+      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-    const { options } = data;
     const chunks = _.chunk(uploadedMedias, chunkCount);
-    let lastId = undefined;
-    let status = '';
-    let result: Response<Entity.Status>;
+    let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
+      data.description
+    }`.substring(0, maxChars);
+    let lastId = '';
+    let source = '';
+    const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
 
     for (let i = 0; i < chunks.length; i++) {
       this.checkCancelled(cancellationToken);
-
-      let statusOptions: any = {
-        status: '',
+      const statusOptions: any = {
         sensitive: isSensitive,
-        visibility: options.visibility || 'public',
-        spoiler_text: '',
+        visibility: data.options.visibility || 'public',
+        media_ids: chunks[i],
       };
 
-      if (i === 0) {
-        status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${
-          data.description
-        }`.substring(0, maxChars);
-
-        statusOptions = {
-          sensitive: isSensitive,
-          visibility: options.visibility || 'public',
-          media_ids: chunks[i].map(media => media.id),
-          spoiler_text: '',
-        };
-      } else {
-        statusOptions = {
-          sensitive: isSensitive,
-          visibility: options.visibility || 'public',
-          media_ids: chunks[i].map(media => media.id),
-          in_reply_to_id: lastId,
-          spoiler_text: '',
-        };
+      if (i !== 0) {
+        statusOptions.in_reply_to_id = lastId;
+      } else if (replyToId) {
+        statusOptions.in_reply_to_id = replyToId;
       }
 
-      const tags = this.formatTags(data.tags);
-
-      // Update the post content with the Tags if any are specified - for Mastodon, we need to append
-      // these onto the post, *IF* there is character count available.
-      if (tags.length > 0) {
-        status += '\n\n';
+      if (data.options.spoilerText) {
+        statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      tags.forEach(tag => {
-        let remain = maxChars - status.length;
-        let tagToInsert = tag;
-        if (!tag.startsWith('#')) {
-          tagToInsert = `#${tagToInsert}`;
-        }
-        if (remain > tagToInsert.length) {
-          status += ` ${tagToInsert}`;
-        }
-        // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-      });
-
-      if (options.spoilerText) {
-        statusOptions.spoiler_text = options.spoilerText;
-      }
+      status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
       try {
-        result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
-        lastId = result.data.id;
+        const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
+        if (!source) source = result.url;
+        lastId = result.id;
       } catch (err) {
         return Promise.reject(
           this.createPostResponse({
@@ -283,7 +261,7 @@ export class Mastodon extends Website {
 
     this.checkCancelled(cancellationToken);
 
-    return this.createPostResponse({ source: result.data.url });
+    return this.createPostResponse({ source });
   }
 
   async postNotificationSubmission(
@@ -293,49 +271,32 @@ export class Mastodon extends Website {
   ): Promise<PostResponse> {
     const M = generator('mastodon', accountData.website, accountData.token);
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-
-    const { options } = data;
-    let status = `${options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`;
     const statusOptions: any = {
       sensitive: isSensitive,
-      visibility: options.visibility || 'public',
-      spoiler_text: '',
+      visibility: data.options.visibility || 'public',
     };
-
-    const tags = this.formatTags(data.tags);
-
-    // Update the post content with the Tags if any are specified - for Mastodon, we need to append
-    // these onto the post, *IF* there is character count available.
-    if (tags.length > 0) {
-      status += '\n\n';
+    let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
+      data.description
+    }`;
+    if (data.options.spoilerText) {
+      statusOptions.spoiler_text = data.options.spoilerText;
     }
+    status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
-    tags.forEach(tag => {
-      let remain = maxChars - status.length;
-      let tagToInsert = tag;
-      if (!tag.startsWith('#')) {
-        tagToInsert = `#${tagToInsert}`;
-      }
-      if (remain > tagToInsert.length) {
-        status += ` ${tagToInsert}`;
-      }
-      // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-    });
-
-    if (options.spoilerText) {
-      statusOptions.spoiler_text = options.spoilerText;
+    const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
+    if (replyToId) {
+      statusOptions.in_reply_to_id = replyToId;
     }
 
     this.checkCancelled(cancellationToken);
-
     try {
-      const result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
-      return this.createPostResponse({ source: result.data.url });
-    } catch (err) {
-      return Promise.reject(this.createPostResponse({ message: err.message, stack: err.stack }));
+      const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
+      return this.createPostResponse({ source: result.url });
+    } catch (error) {
+      return Promise.reject(this.createPostResponse(error));
     }
   }
 
@@ -370,11 +331,11 @@ export class Mastodon extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
+        `Max description length allowed is ${maxChars} characters (for this instance).`,
       );
     }
 
@@ -385,36 +346,41 @@ export class Mastodon extends Website {
       ),
     ];
 
-    const maxImageSize = instanceInfo
-      ? instanceInfo?.configuration?.media_attachments?.image_size_limit
-      : FileSize.MBtoBytes(50);
-
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
       }
 
-      if (maxImageSize < size) {
+      const scalingOptions = this.getScalingOptions(file, submissionPart.accountId);
+
+      if (scalingOptions && scalingOptions.maxSize < size) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
           ImageManipulator.isMimeType(mimetype)
         ) {
-          warnings.push(`${name} will be scaled down to ${FileSize.BytesToMB(maxImageSize)}MB`);
+          warnings.push(
+            `${name} will be scaled down to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`,
+          );
         } else {
-          problems.push(`Mastodon limits ${mimetype} to ${FileSize.BytesToMB(maxImageSize)}MB`);
+          problems.push(
+            `This instance limits ${mimetype} to ${FileSize.BytesToMB(scalingOptions.maxSize)}MB`,
+          );
         }
       }
 
-      // Check the image dimensions are not over 4000 x 4000 - this is the Mastodon server max
       if (
+        scalingOptions &&
         isAutoscaling &&
         type === FileSubmissionType.IMAGE &&
-        (file.height > 4000 || file.width > 4000)
+        scalingOptions.maxWidth &&
+        scalingOptions.maxHeight &&
+        (file.height > scalingOptions.maxHeight || file.width > scalingOptions.maxWidth)
       ) {
-        warnings.push(`${name} will be scaled down to a maximum size of 4000x4000, while maintaining
-           aspect ratio`);
+        warnings.push(
+          `${name} will be scaled down to a maximum size of ${scalingOptions.maxWidth}x${scalingOptions.maxHeight}, while maintaining aspect ratio`,
+        );
       }
     });
 
@@ -423,10 +389,11 @@ export class Mastodon extends Website {
       submissionPart.data.visibility != 'public'
     ) {
       warnings.push(
-        `This post won't be listed under any hashtag as it is not public. Only public posts 
-              can be searched by hashtag.`,
+        `This post won't be listed under any hashtag as it is not public. Only public posts can be searched by hashtag.`,
       );
     }
+
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
 
     return { problems, warnings };
   }
@@ -436,6 +403,7 @@ export class Mastodon extends Website {
     submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
+    const problems = [];
     const warnings = [];
     const description = this.defaultDescriptionParser(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
@@ -445,13 +413,29 @@ export class Mastodon extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const maxChars =
+      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this Mastodon client).`,
+        `Max description length allowed is ${maxChars} characters (for this instance).`,
       );
     }
 
-    return { problems: [], warnings };
+    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+
+    return { problems, warnings };
+  }
+
+  private validateReplyToUrl(problems: string[], url?: string): void {
+    if(url?.trim() && !this.getPostIdFromUrl(url)) {
+      problems.push("Invalid post URL to reply to.");
+    }
+  }
+
+  private getPostIdFromUrl(url: string): string | null {
+    // We expect this to a post URL like https://{instance}/@{user}/{id} or
+    // https://:instance/deck/@{user}/{id}. We grab the id after the @ part.
+    const match = /\/@[^\/]+\/([0-9]+)/.exec(url);
+    return match ? match[1] : null;
   }
 }

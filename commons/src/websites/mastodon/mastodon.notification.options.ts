@@ -24,6 +24,11 @@ export class MastodonNotificationOptionsEntity
   @DefaultValue('public')
   visibility!: string;
 
+  @Expose()
+  @IsOptional()
+  @IsString()
+  replyToUrl?: string;
+
   constructor(entity?: Partial<MastodonNotificationOptions>) {
     super(entity as DefaultOptions);
   }

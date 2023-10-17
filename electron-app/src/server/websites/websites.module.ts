@@ -12,13 +12,13 @@ import { InkbunnyModule } from './inkbunny/inkbunny.module';
 import { SoFurryModule } from './so-furry/so-furry.module';
 import { E621Module } from './e621/e621.module';
 import { FurAffinityModule } from './fur-affinity/fur-affinity.module';
+import { FurtasticModule } from './furtastic/furtastic.module';
 import { SubscribeStarModule } from './subscribe-star/subscribe-star.module';
 import { HentaiFoundryModule } from './hentai-foundry/hentai-foundry.module';
 import { AryionModule } from './aryion/aryion.module';
 import { CustomModule } from './custom/custom.module';
 import { NewgroundsModule } from './newgrounds/newgrounds.module';
 import { PixivModule } from './pixiv/pixiv.module';
-import { FurryLifeModule } from './furry-life/furry-life.module';
 import { FurryNetworkModule } from './furry-network/furry-network.module';
 import { PatreonModule } from './patreon/patreon.module';
 import { TumblrModule } from './tumblr/tumblr.module';
@@ -26,7 +26,6 @@ import { DeviantArtModule } from './deviant-art/deviant-art.module';
 import { ManebooruModule } from './manebooru/manebooru.module';
 import { MastodonModule } from './mastodon/mastodon.module';
 import { MissKeyModule } from './misskey/misskey.module';
-import { TwitterModule } from './twitter/twitter.module';
 import { PillowfortModule } from './pillowfort/pillowfort.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { FurbooruModule } from './furbooru/furbooru.module';
@@ -50,8 +49,8 @@ import { BlueskyModule } from './bluesky/bluesky.module';
     DiscordModule,
     E621Module,
     FurAffinityModule,
+    FurtasticModule,
     FurbooruModule,
-    FurryLifeModule,
     FurryNetworkModule,
     HentaiFoundryModule,
     InkbunnyModule,
@@ -69,7 +68,6 @@ import { BlueskyModule } from './bluesky/bluesky.module';
     SubscribeStarAdultModule,
     TelegramModule,
     TumblrModule,
-    TwitterModule,
     WeasylModule,
     ItakuModule,
     PicartoModule,

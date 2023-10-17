@@ -16,7 +16,6 @@ import { Aryion } from './aryion/Aryion';
 import { Custom } from './custom/Custom';
 import { Newgrounds } from './newgrounds/Newgrounds';
 import { Pixiv } from './pixiv/Pixiv';
-import { FurryLife } from './furry-life/FurryLife';
 import { FurryNetwork } from './furry-network/FurryNetwork';
 import { Patreon } from './patreon/Patreon';
 import { Tumblr } from './tumblr/Tumblr';
@@ -24,7 +23,6 @@ import { DeviantArt } from './deviant-art/DeviantArt';
 import { Manebooru } from './manebooru/Manebooru';
 import { Mastodon } from './mastodon/Mastodon';
 import { MissKey } from './misskey/MissKey';
-import { Twitter } from './twitter/Twitter';
 import { Pillowfort } from './pillowfort/Pillowfort';
 import { Telegram } from './telegram/Telegram';
 import { Furbooru } from './furbooru/Furbooru';
@@ -66,7 +64,6 @@ export class WebsiteRegistry {
     SubscribeStarAdult: new SubscribeStarAdult(),
     Telegram: new Telegram(),
     Tumblr: new Tumblr(),
-    Twitter: new Twitter(),
     Weasyl: new Weasyl(),
     e621: new e621()
   };

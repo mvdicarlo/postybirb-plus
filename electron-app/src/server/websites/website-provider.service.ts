@@ -16,14 +16,13 @@ import { Aryion } from './aryion/aryion.service';
 import { Custom } from './custom/custom.service';
 import { Newgrounds } from './newgrounds/newgrounds.service';
 import { Pixiv } from './pixiv/pixiv.service';
-import { FurryLife } from './furry-life/furry-life.service';
+import { Furtastic } from './furtastic/furtastic.service';
 import { FurryNetwork } from './furry-network/furry-network.service';
 import { Patreon } from './patreon/patreon.service';
 import { Tumblr } from './tumblr/tumblr.service';
 import { DeviantArt } from './deviant-art/deviant-art.service';
 import { Manebooru } from './manebooru/manebooru.service';
 import { Mastodon } from './mastodon/mastodon.service';
-import { Twitter } from './twitter/twitter.service';
 import { Pillowfort } from './pillowfort/pillowfort.service';
 import { Telegram } from './telegram/telegram.service';
 import { Furbooru } from './furbooru/furbooru.service';
@@ -51,6 +50,7 @@ export class WebsiteProvider {
     readonly sofurry: SoFurry,
     readonly e621: e621,
     readonly furaffinity: FurAffinity,
+    readonly furtastic: Furtastic,
     readonly subscribestar: SubscribeStar,
     readonly subscribestarAdult: SubscribeStarAdult,
     readonly hentaiFoundry: HentaiFoundry,
@@ -65,7 +65,6 @@ export class WebsiteProvider {
     readonly manebooru: Manebooru,
     readonly mastodon: Mastodon,
     readonly misskey: MissKey,
-    readonly twitter: Twitter,
     readonly pillowfort: Pillowfort,
     readonly telegram: Telegram,
     readonly furbooru: Furbooru,

@@ -130,6 +130,36 @@ export abstract class Website {
     return this.parseTags(tags, options);
   }
 
+  /**
+   * Appends the tags to the description if there is enough character count available.
+   */
+  appendTags(
+    tags: string[],
+    description: string,
+    limit: number,
+    getLength: (text: string) => number = (text) => text.length,
+  ): string {
+    const appendedTags = [];
+    const appendToDescription = function (tag?: string): string {
+      const suffix = tag ? [...appendedTags, tag] : appendedTags;
+      if (suffix.length === 0) {
+        return description;
+      } else {
+        return description + '\n\n' + suffix.join(' ');
+      }
+    };
+
+    for (const tag of tags) {
+      if (getLength(appendToDescription(tag)) <= limit) {
+        appendedTags.push(tag);
+      }
+      // Keep looping over all tags even if one of them doesn't fit, we might
+      // find one that's short enough to cram in still.
+    }
+
+    return appendToDescription();
+  }
+
   parseDescription(text: string, type?: SubmissionType): string {
     return this.defaultDescriptionParser(text);
   }
