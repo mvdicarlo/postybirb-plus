@@ -127,7 +127,7 @@ export class Pleroma extends Website {
       };
   }
 
-  private async uploadMedia(
+  public async uploadMedia(
     data: MegalodonAccountData,
     file: PostFile,
     altText: string,

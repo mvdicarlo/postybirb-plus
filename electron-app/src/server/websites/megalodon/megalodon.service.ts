@@ -33,6 +33,9 @@ import { Website } from '../website.base';
 import _ from 'lodash';
 import WaitUtil from 'src/server/utils/wait.util';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
+import * as fs from 'fs';
+import { tmpdir } from 'os';
+import * as path from 'path';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -341,12 +344,49 @@ export abstract class Megalodon extends Website {
     return { problems, warnings };
   }
 
-  private validateReplyToUrl(problems: string[], url?: string): void {
+  validateReplyToUrl(problems: string[], url?: string): void {
     if(url?.trim() && !this.getPostIdFromUrl(url)) {
       problems.push("Invalid post URL to reply to.");
     }
   }
 
   abstract getPostIdFromUrl(url: string): string | null;
+
+  async uploadMedia(
+    data: MegalodonAccountData,
+    file: PostFile,
+    altText: string,
+  ): Promise<{ id: string }> {
+    this.logger.log("Uploading media")
+    const M = generator(this.megalodonService, `https://${data.website}`, data.token);
+
+    // megalodon is odd, and doesnt seem to like the buffer being passed to the upload media call
+    // So lets write the file out to a temp file, then pass that to createReadStream, then that to uploadMedia.
+    // That works .... \o/
+    const tempDir = tmpdir();
+
+    fs.writeFileSync(path.join(tempDir, file.options.filename), file.value);
+
+    const upload = await M.uploadMedia(fs.createReadStream(path.join(tempDir, file.options.filename)), { description: altText });
+
+    this.logger.log(upload)
+
+    fs.unlink(path.join(tempDir, file.options.filename), (err) => { 
+      if (err) {
+        this.logger.error("Unable to remove the temp file", err.stack, err.message);
+      }
+    });
+
+    if (upload.status > 300) {
+      this.logger.log(upload);
+      return Promise.reject(
+        this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
+      );
+    }
+
+    this.logger.log("Image uploaded");
+
+    return { id: upload.data.id };
+  }
 
 }

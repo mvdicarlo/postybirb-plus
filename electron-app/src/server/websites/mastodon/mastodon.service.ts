@@ -33,6 +33,7 @@ import { Website } from '../website.base';
 import _ from 'lodash';
 import WaitUtil from 'src/server/utils/wait.util';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
+import { Megalodon } from '../megalodon/megalodon.service';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -56,14 +57,10 @@ type MastodonInstanceInfo = {
 };
 
 @Injectable()
-export class Mastodon extends Website {
-  constructor(private readonly fileRepository: FileManagerService) {
-    super();
-  }
-  readonly BASE_URL: string;
-  readonly enableAdvertisement = false;
-  readonly acceptsAdditionalFiles = true;
-  readonly defaultDescriptionParser = PlaintextParser.parse;
+export class Mastodon extends Megalodon {
+
+  readonly megalodonService = 'mastodon';
+
   readonly acceptsFiles = [
     'png',
     'jpeg',
@@ -91,25 +88,6 @@ export class Mastodon extends Website {
     'wma',
   ];
 
-  async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    const status: LoginResponse = { loggedIn: false, username: null };
-    const accountData: MegalodonAccountData = data.data;
-    if (accountData && accountData.token) {
-      await this.getAndStoreInstanceInfo(data._id, accountData);
-
-      status.loggedIn = true;
-      status.username = accountData.username;
-    }
-    return status;
-  }
-
-  private async getAndStoreInstanceInfo(profileId: string, data: MegalodonAccountData) {
-    const client = generator('mastodon', data.website, data.token);
-    const instance = await client.getInstance();
-
-    this.storeAccountInformation(profileId, INFO_KEY, instance.data);
-  }
-
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
     if (instanceInfo?.configuration?.media_attachments) {
@@ -135,64 +113,6 @@ export class Mastodon extends Website {
     }
   }
 
-  // Megaladon api has uploadMedia method, hovewer, it does not work with mastodon
-  private async uploadMedia(
-    data: MegalodonAccountData,
-    file: PostFile,
-    altText: string,
-  ): Promise<string> {
-    const upload = await Http.post<{ id: string; errors: any; url: string }>(
-      `${data.website}/api/v2/media`,
-      undefined,
-      {
-        type: 'multipart',
-        data: {
-          file,
-          description: altText,
-        },
-        requestOptions: { json: true },
-        headers: {
-          Accept: '*/*',
-          'User-Agent': 'node-mastodon-client/PostyBirb',
-          Authorization: `Bearer ${data.token}`,
-        },
-      },
-    );
-
-    this.verifyResponse(upload, 'Verify upload');
-
-    // Processing
-    if (upload.response.statusCode === 202 || !upload.body.url) {
-      for (let i = 0; i < 10; i++) {
-        await WaitUtil.wait(4000);
-        const checkUpload = await Http.get<{ id: string; errors: any; url: string }>(
-          `${data.website}/api/v1/media/${upload.body.id}`,
-          undefined,
-          {
-            requestOptions: { json: true },
-            headers: {
-              Accept: '*/*',
-              'User-Agent': 'node-mastodon-client/PostyBirb',
-              Authorization: `Bearer ${data.token}`,
-            },
-          },
-        );
-
-        if (checkUpload.body.url) {
-          break;
-        }
-      }
-    }
-
-    if (upload.body.errors) {
-      return Promise.reject(
-        this.createPostResponse({ additionalInfo: upload.body, message: upload.body.errors }),
-      );
-    }
-
-    return upload.body.id;
-  }
-
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<MastodonFileOptions>,
@@ -201,7 +121,9 @@ export class Mastodon extends Website {
     const M = generator('mastodon', accountData.website, accountData.token);
 
     const files = [data.primary, ...data.additional];
-    const uploadedMedias: string[] = [];
+    const uploadedMedias: {
+      id: string;
+    }[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
       uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
@@ -398,41 +320,7 @@ export class Mastodon extends Website {
     return { problems, warnings };
   }
 
-  validateNotificationSubmission(
-    submission: Submission,
-    submissionPart: SubmissionPart<MastodonNotificationOptions>,
-    defaultPart: SubmissionPart<DefaultOptions>,
-  ): ValidationParts {
-    const problems = [];
-    const warnings = [];
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(
-      submissionPart.accountId,
-      INFO_KEY,
-    );
-    const maxChars =
-      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
-    if (description.length > maxChars) {
-      warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this instance).`,
-      );
-    }
-
-    this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
-
-    return { problems, warnings };
-  }
-
-  private validateReplyToUrl(problems: string[], url?: string): void {
-    if(url?.trim() && !this.getPostIdFromUrl(url)) {
-      problems.push("Invalid post URL to reply to.");
-    }
-  }
-
-  private getPostIdFromUrl(url: string): string | null {
+  getPostIdFromUrl(url: string): string | null {
     // We expect this to a post URL like https://{instance}/@{user}/{id} or
     // https://:instance/deck/@{user}/{id}. We grab the id after the @ part.
     const match = /\/@[^\/]+\/([0-9]+)/.exec(url);
