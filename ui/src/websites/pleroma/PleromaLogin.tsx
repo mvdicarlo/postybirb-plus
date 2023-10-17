@@ -2,13 +2,13 @@ import { Button, Form, Input, message, Spin } from 'antd';
 import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { PleromaAccountData } from 'postybirb-commons';
+import { MegalodonAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 
 import generator, { OAuth } from 'megalodon'
 
-interface State extends PleromaAccountData {
+interface State extends MegalodonAccountData {
   code: string;
   client_id: string;
   client_secret: string;
@@ -76,7 +76,7 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
       usernameClient.verifyAccountCredentials().then((res)=>{
         let website = `https://${this.state.website}`;
         this.state.username = res.data.username;
-        this.state.tokenData = value;
+        this.state.token = value.access_token;
         LoginService.setAccountData(this.props.account._id, this.state ).then(
           () => {
             message.success(`${this.state.website} authenticated.`);

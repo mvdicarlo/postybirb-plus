@@ -5,7 +5,7 @@ import {
   FileRecord,
   FileSubmission,
   FileSubmissionType,
-  PixelfedAccountData,
+  MegalodonAccountData,
   PixelfedFileOptions,
   PostResponse,
   Submission,
@@ -62,7 +62,7 @@ export class Pixelfed extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const accountData: PixelfedAccountData = data.data;
+    const accountData: MegalodonAccountData = data.data;
     if (accountData && accountData.token) {
       const refresh = await this.refreshToken(accountData);
       if (refresh) {
@@ -74,7 +74,7 @@ export class Pixelfed extends Website {
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: PixelfedAccountData) {
+  private async getInstanceInfo(profileId: string, data: MegalodonAccountData) {
     const client = generator('mastodon', data.website, data.token);
     const instance = await client.getInstance();
 
@@ -82,12 +82,12 @@ export class Pixelfed extends Website {
   }
 
   // TBH not entirely sure why this is a thing, but its in the old code so... :shrug:
-  private async refreshToken(data: PixelfedAccountData): Promise<boolean> {
+  private async refreshToken(data: MegalodonAccountData): Promise<boolean> {
     const M = this.getPixelfedInstance(data);
     return true;
   }
 
-  private getPixelfedInstance(data: PixelfedAccountData): Entity.Instance {
+  private getPixelfedInstance(data: MegalodonAccountData): Entity.Instance {
     const client = generator('mastodon', data.website, data.token);
     client.getInstance().then(res => {
       return res.data;
@@ -114,7 +114,7 @@ export class Pixelfed extends Website {
   }
 
   private async uploadMedia(
-    data: PixelfedAccountData,
+    data: MegalodonAccountData,
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
@@ -173,7 +173,7 @@ export class Pixelfed extends Website {
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<PixelfedFileOptions>,
-    accountData: PixelfedAccountData,
+    accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
     const M = generator('mastodon', accountData.website, accountData.token);
 

@@ -2,12 +2,12 @@ import { Button, Form, Input, message, Spin } from 'antd';
 import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { PixelfedAccountData } from 'postybirb-commons';
+import { MegalodonAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { stringify } from 'querystring';
 
-interface State extends PixelfedAccountData {
+interface State extends MegalodonAccountData {
   code: string;
   loading: boolean;
 }

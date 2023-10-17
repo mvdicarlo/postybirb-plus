@@ -5,7 +5,7 @@ import {
   FileRecord,
   FileSubmission,
   FileSubmissionType,
-  PleromaAccountData,
+  MegalodonAccountData,
   PleromaFileOptions,
   PleromaNotificationOptions,
   PostResponse,
@@ -77,8 +77,8 @@ export class Pleroma extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const accountData: PleromaAccountData = data.data;
-    if (accountData && accountData.tokenData) {
+    const accountData: MegalodonAccountData = data.data;
+    if (accountData && accountData.token) {
       const refresh = await this.refreshToken(accountData);
       if (refresh) {
         status.loggedIn = true;
@@ -89,20 +89,20 @@ export class Pleroma extends Website {
     return status;
   }
 
-  private async getInstanceInfo(profileId: string, data: PleromaAccountData) {   
-    const client = generator('pleroma', `https://${data.website}`, data.tokenData.access_token);
+  private async getInstanceInfo(profileId: string, data: MegalodonAccountData) {   
+    const client = generator('pleroma', `https://${data.website}`, data.token); // token => tokenData.access_token
     const instance = await client.getInstance();
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
   // TBH not entirely sure why this is a thing, but its in the old code so... :shrug:
-  private async refreshToken(data: PleromaAccountData): Promise<boolean> {
+  private async refreshToken(data: MegalodonAccountData): Promise<boolean> {
     const M = this.getPleromaInstance(data);
     return true;
   }
 
-  private getPleromaInstance(data: PleromaAccountData) : Entity.Instance {
-    const client = generator('pleroma', `https://${data.website}`, data.tokenData.access_token);
+  private getPleromaInstance(data: MegalodonAccountData) : Entity.Instance {
+    const client = generator('pleroma', `https://${data.website}`, data.token);
     client.getInstance().then((res) => {
       return res.data;
     });
@@ -128,12 +128,12 @@ export class Pleroma extends Website {
   }
 
   private async uploadMedia(
-    data: PleromaAccountData,
+    data: MegalodonAccountData,
     file: PostFile,
     altText: string,
   ): Promise<{ id: string }> {
     this.logger.log("Uploading media")
-    const M = generator('pleroma', `https://${data.website}`, data.tokenData.access_token);
+    const M = generator('pleroma', `https://${data.website}`, data.token);
 
     // megalodon is odd, and doesnt seem to like the buffer being passed to the upload media call
     // So lets write the file out to a temp file, then pass that to createReadStream, then that to uploadMedia.
@@ -168,9 +168,9 @@ export class Pleroma extends Website {
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<PleromaFileOptions>,
-    accountData: PleromaAccountData,
+    accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
-    const M = generator('pleroma', `https://${accountData.website}`, accountData.tokenData.access_token);
+    const M = generator('pleroma', `https://${accountData.website}`, accountData.token);
 
     const files = [data.primary, ...data.additional];
   
@@ -270,10 +270,10 @@ export class Pleroma extends Website {
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, PleromaNotificationOptions>,
-    accountData: PleromaAccountData,
+    accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
     const mInstance = this.getPleromaInstance(accountData);
-    const M = generator('pleroma', `https://${accountData.website}`, accountData.tokenData.access_token);
+    const M = generator('pleroma', `https://${accountData.website}`, accountData.token);
     
     const maxChars = mInstance ? mInstance?.configuration?.statuses?.max_characters : 500;
 
