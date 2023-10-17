@@ -81,34 +81,7 @@ export abstract class Megalodon extends Website {
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
-  // TODO: Refactor
-
-  getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
-    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
-    if (instanceInfo?.configuration?.media_attachments) {
-      const maxPixels =
-        file.type === FileSubmissionType.IMAGE
-          ? instanceInfo.configuration.media_attachments.image_matrix_limit
-          : instanceInfo.configuration.media_attachments.video_matrix_limit;
-
-      return {
-        maxHeight: Math.round(Math.sqrt(maxPixels * (file.width / file.height))),
-        maxWidth: Math.round(Math.sqrt(maxPixels * (file.height / file.width))),
-        maxSize:
-          file.type === FileSubmissionType.IMAGE
-            ? instanceInfo.configuration.media_attachments.image_size_limit
-            : instanceInfo.configuration.media_attachments.video_size_limit,
-      };
-    } else if (instanceInfo?.upload_limit) {
-      return {
-        maxSize: instanceInfo?.upload_limit,
-      };
-    } else {
-      return undefined;
-    }
-  }
-
-  // TODO: Add common uploadMedia code from Pleroma codebase
+  abstract getScalingOptions(file: FileRecord, accountId: string): ScalingOptions;
 
   // TODO: Refactor
 
@@ -120,7 +93,9 @@ export abstract class Megalodon extends Website {
     const M = generator('mastodon', accountData.website, accountData.token);
 
     const files = [data.primary, ...data.additional];
-    const uploadedMedias: string[] = [];
+    const uploadedMedias: {
+        id: string;
+      }[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
       uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));

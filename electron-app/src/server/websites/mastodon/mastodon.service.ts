@@ -51,10 +51,7 @@ type MastodonInstanceInfo = {
       video_matrix_limit: number;
     };
   };
-  upload_limit?: number; // Pleroma, Akkoma
-  max_toot_chars?: number; // Pleroma, Akkoma
-  max_media_attachments?: number; //Pleroma
-};
+}
 
 @Injectable()
 export class Mastodon extends Megalodon {
@@ -104,10 +101,6 @@ export class Mastodon extends Megalodon {
             ? instanceInfo.configuration.media_attachments.image_size_limit
             : instanceInfo.configuration.media_attachments.video_size_limit,
       };
-    } else if (instanceInfo?.upload_limit) {
-      return {
-        maxSize: instanceInfo?.upload_limit,
-      };
     } else {
       return undefined;
     }
@@ -130,18 +123,13 @@ export class Mastodon extends Megalodon {
     }
 
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount =
-      instanceInfo?.configuration?.statuses?.max_media_attachments ??
-      instanceInfo?.max_media_attachments ??
-      (instanceInfo?.upload_limit ? 1000 : 4);
-    const maxChars =
-      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
+    const chunkCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const chunks = _.chunk(uploadedMedias, chunkCount);
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`.substring(0, maxChars);
+    }`.substring(0, this.maxCharLength);
     let lastId = '';
     let source = '';
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
@@ -164,7 +152,7 @@ export class Mastodon extends Megalodon {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      status = this.appendTags(this.formatTags(data.tags), status, maxChars);
+      status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
       try {
         const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
