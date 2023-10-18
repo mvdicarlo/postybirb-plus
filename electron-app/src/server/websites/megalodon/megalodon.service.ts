@@ -41,7 +41,7 @@ export abstract class Megalodon extends Website {
     super();
   }
 
-  readonly megalodonService = 'mastodon'; // Set this as appropriate in your constructor
+  megalodonService: 'mastodon' | 'pleroma' | 'misskey' | 'friendica' = 'mastodon'; // Set this as appropriate in your constructor
   maxCharLength = 500; // Set this off the instance information!
   maxMediaCount = 4; 
 
