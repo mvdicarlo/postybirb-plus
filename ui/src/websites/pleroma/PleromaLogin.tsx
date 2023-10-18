@@ -1,11 +1,9 @@
 import { Button, Form, Input, message, Spin } from 'antd';
-import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { MegalodonAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
-
 import generator, { OAuth } from 'megalodon'
 
 interface State extends MegalodonAccountData {
@@ -22,8 +20,8 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
     loading: true,
     client_id: '',
     client_secret: '',
-    tokenData: null,
-    username: ''
+    username: '',
+    token: ''
   };
 
   private view: any;

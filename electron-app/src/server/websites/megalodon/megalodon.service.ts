@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import generator, { Entity, Response } from 'megalodon';
 import {
   DefaultOptions,
@@ -17,7 +16,6 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
@@ -31,7 +29,6 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { Website } from '../website.base';
 import _ from 'lodash';
-import WaitUtil from 'src/server/utils/wait.util';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
 import * as fs from 'fs';
 import { tmpdir } from 'os';
@@ -45,7 +42,8 @@ export abstract class Megalodon extends Website {
   }
 
   readonly megalodonService = 'mastodon'; // Set this as appropriate in your constructor
-  readonly maxCharLength = 500; // Set this off the instance information!
+  maxCharLength = 500; // Set this off the instance information!
+  maxMediaCount = 4; 
 
   readonly BASE_URL: string;
   readonly enableAdvertisement = false;
@@ -83,37 +81,30 @@ export abstract class Megalodon extends Website {
 
   abstract getScalingOptions(file: FileRecord, accountId: string): ScalingOptions;
 
-  // TODO: Refactor
+  abstract getInstanceSettings(accountId: string);
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<MastodonFileOptions>,
     accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
-    const M = generator('mastodon', accountData.website, accountData.token);
+    this.logger.log("Posting a file")
+    this.getInstanceSettings(data.part.accountId);
+
+    const M = generator(this.megalodonService, accountData.website, accountData.token);
 
     const files = [data.primary, ...data.additional];
-    const uploadedMedias: {
-        id: string;
-      }[] = [];
+    const uploadedMedias: string[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
       uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
     }
 
-    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount =
-      instanceInfo?.configuration?.statuses?.max_media_attachments ??
-      instanceInfo?.max_media_attachments ??
-      (instanceInfo?.upload_limit ? 1000 : 4);
-    const maxChars =
-      instanceInfo?.configuration?.statuses?.max_characters ?? instanceInfo?.max_toot_chars ?? 500;
-
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-    const chunks = _.chunk(uploadedMedias, chunkCount);
+    const chunks = _.chunk(uploadedMedias, this.maxMediaCount);
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`.substring(0, maxChars);
+    }`.substring(0, this.maxCharLength);
     let lastId = '';
     let source = '';
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
@@ -136,7 +127,7 @@ export abstract class Megalodon extends Website {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      status = this.appendTags(this.formatTags(data.tags), status, maxChars);
+      status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
       try {
         const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
@@ -158,16 +149,15 @@ export abstract class Megalodon extends Website {
     return this.createPostResponse({ source });
   }
 
-  // TODO: Refactor
-
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, MastodonNotificationOptions>,
     accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
-    const M = generator('mastodon', accountData.website, accountData.token);
-    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    this.logger.log("Posting a notification")
+    this.getInstanceSettings(data.part.accountId);
+
+    const M = generator(this.megalodonService, accountData.website, accountData.token);
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const statusOptions: any = {
@@ -180,7 +170,7 @@ export abstract class Megalodon extends Website {
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
-    status = this.appendTags(this.formatTags(data.tags), status, maxChars);
+    status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
     if (replyToId) {
@@ -196,27 +186,20 @@ export abstract class Megalodon extends Website {
     }
   }
 
-  // TODO: Make sure this has the strip preceeding space ?
   formatTags(tags: string[]) {
     return this.parseTags(
-      tags
-        .map(tag => tag.replace(/[^a-z0-9]/gi, ' '))
-        .map(tag =>
-          tag
-            .split(' ')
-            .join(''),
-        ),
+      tags.map(tag => tag.replace(/[^a-z0-9]/gi, ' ')).map(tag => tag.split(' ').join('')),
       { spaceReplacer: '_' },
     ).map(tag => `#${tag}`);
   }
-
-  // TODO REFACTOR
 
   validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<MastodonFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
+    this.getInstanceSettings(defaultPart.accountId);
+
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
@@ -225,15 +208,9 @@ export abstract class Megalodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(
-      submissionPart.accountId,
-      INFO_KEY,
-    );
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
-
-    if (description.length > maxChars) {
+    if (description.length > this.maxCharLength) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this instance).`,
+        `Max description length allowed is ${this.maxCharLength} characters.`,
       );
     }
 
@@ -301,6 +278,8 @@ export abstract class Megalodon extends Website {
     submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
+    this.getInstanceSettings(defaultPart.accountId);
+
     const problems = [];
     const warnings = [];
 
@@ -331,9 +310,10 @@ export abstract class Megalodon extends Website {
     data: MegalodonAccountData,
     file: PostFile,
     altText: string,
-  ): Promise<{ id: string }> {
+  ): Promise<string> {
+    //): Promise<{ id: string }> {\
     this.logger.log("Uploading media")
-    const M = generator(this.megalodonService, `https://${data.website}`, data.token);
+    const M = generator(this.megalodonService, data.website, data.token);
 
     // megalodon is odd, and doesnt seem to like the buffer being passed to the upload media call
     // So lets write the file out to a temp file, then pass that to createReadStream, then that to uploadMedia.
@@ -361,7 +341,8 @@ export abstract class Megalodon extends Website {
 
     this.logger.log("Image uploaded");
 
-    return { id: upload.data.id };
+//    return { id: upload.data.id };
+    return upload.data.id;
   }
 
 }

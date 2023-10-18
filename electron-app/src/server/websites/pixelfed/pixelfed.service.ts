@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import generator, { Entity, Response } from 'megalodon';
+import generator, { Entity } from 'megalodon';
 import {
   DefaultOptions,
   FileRecord,
@@ -8,7 +8,6 @@ import {
   MegalodonAccountData,
   PixelfedFileOptions,
   PostResponse,
-  Submission,
   SubmissionPart,
   SubmissionRating,
 } from 'postybirb-commons';
