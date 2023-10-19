@@ -1,4 +1,4 @@
-import generator, { Entity, Response } from 'megalodon';
+import generator, { Entity } from 'megalodon';
 import {
   DefaultOptions,
   FileRecord,
@@ -63,6 +63,7 @@ export abstract class Megalodon extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: MegalodonAccountData = data.data;
+    this.logger.debug(`Login check: ${data._id} = ${accountData.website}`);
     if (accountData && accountData.token) {
       await this.getAndStoreInstanceInfo(data._id, accountData);
 

@@ -48,11 +48,15 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
     }
   }
 
+  private getWebsiteURL(website?: string) {
+    return `https://${website || this.state.website}`;
+  }
+
   private getAuthURL(website: string) {
     let auth_url : string = "";
-
     // Get the Auth URL ... Display it. 
-    const client = generator('pleroma', `https://${website}`);
+    const client = generator('pleroma', this.getWebsiteURL(website));
+    this.state.website = website;
     let opts: any = {
       redirect_uris: `https://localhost:${window['PORT']}/misskey/display/${window.AUTH_ID}`
     }
@@ -67,22 +71,23 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
   }
 
   submit() {
-    const client = generator('pleroma', `https://${this.state.website}`);
+    const website = this.getWebsiteURL();
+    const client = generator('pleroma', website);
     client.fetchAccessToken(this.state.client_id, this.state.client_secret, this.state.code).then((value: OAuth.TokenData) => {
       // Get the username so we have complete data.
-      const usernameClient = generator('pleroma', `https://${this.state.website}`, value.accessToken);
+      const usernameClient = generator('pleroma', website, value.accessToken);
       usernameClient.verifyAccountCredentials().then((res)=>{
-        let website = `https://${this.state.website}`;
         this.state.username = res.data.username;
         this.state.token = value.access_token;
-        LoginService.setAccountData(this.props.account._id, this.state ).then(
+        
+        LoginService.setAccountData(this.props.account._id, { ...this.state, website } ).then(
           () => {
-            message.success(`${this.state.website} authenticated.`);
+            message.success(`${website} authenticated.`);
           });
       });
     })
     .catch((err: Error) => {
-      message.error(`Failed to authenticate ${this.state.website}.`);
+      message.error(`Failed to authenticate ${website}.`);
     })
   }
 
@@ -103,7 +108,7 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
                 onBlur={({ target }) => {
                   const website = target.value.replace(/(https:\/\/|http:\/\/)/, '');
                   this.view.loadURL(this.getAuthURL(website));
-                  this.setState({ website });
+                  this.setState({ website: website });
                 }}
               />
             </Form.Item>

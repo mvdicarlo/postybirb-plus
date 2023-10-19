@@ -1,40 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import generator, { Entity, Response } from 'megalodon'
 import {
-  DefaultOptions,
   FileRecord,
-  FileSubmission,
   FileSubmissionType,
-  MegalodonAccountData,
-  PleromaFileOptions,
-  PleromaNotificationOptions,
-  PostResponse,
-  Submission,
-  SubmissionPart,
-  SubmissionRating,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
-import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import {
-  FilePostData,
-  PostFile,
-} from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
-import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
-import FormContent from 'src/server/utils/form-content.util';
-import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { LoginResponse } from '../interfaces/login-response.interface';
-import { Website } from '../website.base';
 import _ from 'lodash';
-import { FileManagerService } from 'src/server/file-manager/file-manager.service';
-import { Readable } from 'stream';
-import * as fs from 'fs';
-import { tmpdir } from 'os';
-import * as path from 'path';
 import { Megalodon } from '../megalodon/megalodon.service';
 
 const INFO_KEY = 'INSTANCE INFO';
@@ -71,6 +42,7 @@ export class Pleroma extends Megalodon {
   ];
 
   getInstanceSettings(accountId: string) {
+    console.log(this.getAccountInfo(accountId, INFO_KEY));
     const instanceInfo: PleromaInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
 
     this.maxCharLength = instanceInfo?.max_toot_chars ?? 500;
