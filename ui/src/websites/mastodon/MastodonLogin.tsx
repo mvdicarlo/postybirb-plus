@@ -2,11 +2,11 @@ import { Button, Form, Input, message, Spin } from 'antd';
 import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { MastodonAccountData } from 'postybirb-commons';
+import { MegalodonAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 
-interface State extends MastodonAccountData {
+interface State extends MegalodonAccountData {
   code: string;
   loading: boolean;
 }

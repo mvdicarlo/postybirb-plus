@@ -10,37 +10,47 @@ import { Megalodon } from '../megalodon/megalodon.service';
 
 const INFO_KEY = 'INSTANCE INFO';
 
-type PixelfedInstanceInfo = {
+type PleromaInstanceInfo = {
+  upload_limit?: number; // Pleroma, Akkoma
+  max_toot_chars?: number; // Pleroma, Akkoma
+  max_media_attachments?: number; //Pleroma
   configuration: {
-    statuses: {
-      max_characters: number;
-      max_media_attachments: number;
-    };
     media_attachments: {
-      supported_mime_types: string[];
       image_size_limit: number;
       video_size_limit: number;
-    };
-  };
+    };  
+  }
 };
 
 @Injectable()
-export class Pixelfed extends Megalodon {
+export class Pleroma extends Megalodon {
 
-  readonly enableAdvertisement = false;
-  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'flv', 'mp4'];
-
-  readonly megalodonService = 'mastodon'; // At some point will change this when they get Pixelfed support natively
+  readonly acceptsAdditionalFiles = true;
+  megalodonService: 'mastodon' | 'pleroma' | 'misskey' | 'friendica' = 'pleroma';
+  readonly acceptsFiles = [
+    'png',
+    'jpeg',
+    'jpg',
+    'gif',
+    'swf',
+    'flv',
+    'mp4',
+    'doc',
+    'rtf',
+    'txt',
+    'mp3',
+  ];
 
   getInstanceSettings(accountId: string) {
-    const instanceInfo: PixelfedInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
+    console.log(this.getAccountInfo(accountId, INFO_KEY));
+    const instanceInfo: PleromaInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
 
-    this.maxCharLength = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
-    this.maxMediaCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    this.maxCharLength = instanceInfo?.max_toot_chars ?? 500;
+    this.maxMediaCount = instanceInfo?.max_media_attachments ?? 4;
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
-    const instanceInfo: PixelfedInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
+    const instanceInfo: PleromaInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
     return instanceInfo?.configuration?.media_attachments
       ? {
           maxHeight: 4000,
@@ -50,18 +60,18 @@ export class Pixelfed extends Megalodon {
               ? instanceInfo.configuration.media_attachments.image_size_limit
               : instanceInfo.configuration.media_attachments.video_size_limit,
         }
-      : {
+      : {           
           maxHeight: 4000,
           maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300),
-        };
+          maxSize: FileSize.MBtoBytes(16) 
+      };
   }
 
-  // https://{instance}/i/web/post/{id}
   getPostIdFromUrl(url: string): string | null {
-    if (url && url.lastIndexOf('/') > -1) {
-      return url.slice(url.lastIndexOf('/') + 1);
-    } else { 
+    if (url) {
+      const match = url.slice(url.lastIndexOf('/')+1)
+      return match ? match[1] : null;
+    } else {
       return null;
     }
   }

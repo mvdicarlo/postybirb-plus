@@ -14,7 +14,7 @@ import {
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
+import Http, { HttpResponse } from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
   FilePostData,
@@ -180,48 +180,112 @@ export class FurryNetwork extends Website {
     character: string,
     file: PostFile,
     type: string,
-    headers: object,
+    headers: any,
   ) {
-    const chunkSize: number = 524288;
+    const chunkSize: number = 524288 / 2;
     const chunks = _.chunk(file.value, chunkSize);
     const fileType = encodeURIComponent(file.options.contentType);
-    const responses = await Promise.all(
-      chunks.map((chunk, i) => {
-        const upload = {
-          value: Buffer.from(chunk),
-          options: file.options,
-        };
-        return Http.post<any>(
-          `${this.BASE_URL}/api/submission/${character}/${type}/upload?` +
-            `resumableChunkNumber=${i + 1}` +
-            `&resumableChunkSize=${chunkSize}` +
-            `&resumableCurrentChunkSize=${chunk.length}&resumableTotalSize=${
-              file.value.length
-            }&resumableType=${fileType}&resumableIdentifier=${
-              file.value.length
-            }-${encodeURIComponent(
-              file.options.filename.replace('.', ''),
-            )}&resumableFilename=${encodeURIComponent(
-              file.options.filename,
-            )}&resumableRelativePath=${encodeURIComponent(
-              file.options.filename,
-            )}&resumableTotalChunks=${chunks.length}`,
-          profileId,
-          {
-            type: 'multipart',
-            headers,
-            requestOptions: { json: true },
-            data: { file: upload },
-          },
-        );
-      }),
-    );
-
-    const res = responses.find(r => r.body);
-    if (!res.body || !res.body.id) {
-      throw this.createPostResponse({ additionalInfo: res.body });
+    const responses: { body: string; status: number }[] = [];
+    for (let i = 0; i < chunks.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const chunk = chunks[i];
+      const upload = {
+        value: Buffer.from(chunk),
+        options: file.options,
+      };
+      const url =
+        `${this.BASE_URL}/api/submission/${character}/${type}/upload?` +
+        `resumableChunkNumber=${i + 1}` +
+        `&resumableChunkSize=${chunkSize}` +
+        `&resumableCurrentChunkSize=${chunk.length}&resumableTotalSize=${
+          file.value.length
+        }&resumableType=${fileType}&resumableIdentifier=${file.value.length}-${encodeURIComponent(
+          file.options.filename.replace('.', ''),
+        )}&resumableFilename=${encodeURIComponent(
+          file.options.filename,
+        )}&resumableRelativePath=${encodeURIComponent(
+          file.options.filename,
+        )}&resumableTotalChunks=${chunks.length}`;
+      const cmd = `
+      var b64 = '${upload.value.toString('base64')}';
+      var blob = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '${url}', false);
+      xhr.setRequestHeader('Authorization', '${headers.Authorization}');
+      xhr.setRequestHeader("Content-Type", "binary/octet-stream, application/json");
+      xhr.send(blob);
+      var body = xhr.response;
+      Object.assign({}, { body: body, status: xhr.status })`;
+      const create = await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
+        profileId,
+        `${this.BASE_URL}`,
+        cmd,
+      );
+      responses.push(create);
     }
-    return res.body;
+
+    const res = JSON.parse(responses.find(r => r.body).body ?? '{}');
+    if (!res || !res.id) {
+      throw this.createPostResponse({ additionalInfo: res });
+    }
+    return res;
+  }
+
+  async uploadThumbnail(
+    uploadId: string,
+    profileId: string,
+    character: string,
+    file: PostFile,
+    type: string,
+    headers: any,
+  ) {
+    const url =
+      `${this.BASE_URL}/api/submission/${character}/${type}/${uploadId}/thumbnail?` +
+      'resumableChunkNumber=1' +
+      `&resumableChunkSize=${file.value.length}` +
+      `&resumableCurrentChunkSize=${file.value.length}
+      &resumableTotalSize=${file.value.length}
+      &resumableType=${encodeURIComponent(file.options.contentType)}
+      &resumableIdentifier=${file.value.length}-${encodeURIComponent(file.options.filename).replace(
+        '.',
+        '',
+      )}
+      &resumableFilename=${encodeURIComponent(
+        file.options.filename,
+      )}&resumableRelativePath=${encodeURIComponent(file.options.filename)}
+      &resumableTotalChunks=1`;
+    const cmd = `
+      var b64 = '${file.value.toString('base64')}';
+      var blob = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '${url}', false);
+      xhr.setRequestHeader('Authorization', '${headers.Authorization}');
+      xhr.setRequestHeader("Content-Type", "binary/octet-stream, application/json");
+      xhr.send(blob);
+      var body = xhr.response;
+      Object.assign({}, { body: body, status: xhr.status })`;
+    return await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
+      profileId,
+      `${this.BASE_URL}`,
+      cmd,
+    );
+  }
+
+  private async uploadJson(profileId: string, url: string, data: any, headers: any) {
+    const cmd = `
+      var data = ${JSON.stringify(data)};
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '${url}', false);
+      xhr.setRequestHeader('Authorization', '${headers.Authorization}');
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify(data));
+      var body = xhr.response;
+      Object.assign({}, { body: body, status: xhr.status })`;
+    return await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
+      profileId,
+      `${this.BASE_URL}`,
+      cmd,
+    );
   }
 
   async postFileSubmission(
@@ -253,18 +317,14 @@ export class FurryNetwork extends Website {
 
     if (type === 'story') {
       this.checkCancelled(cancellationToken);
-      const post = await Http.post<{ id: number }>(url, data.part.accountId, {
-        type: 'json',
-        data: form,
-        headers,
-        requestOptions: { json: true },
-      });
-
-      this.verifyResponse(post, 'Verify story post');
-      if (post.body.id) {
+      const post = await this.uploadJson(data.part.accountId, url, form, headers);
+      const postBody = JSON.parse(post.body);
+      if (postBody.id && post.status <= 303) {
         return this.createPostResponse({});
       }
-      return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
+      return Promise.reject(
+        this.createPostResponse({ message: post.body, additionalInfo: post.body }),
+      );
     } else {
       this.checkCancelled(cancellationToken);
       const upload = await this.postFileChunks(data.part.accountId, character, file, type, headers);
@@ -285,30 +345,18 @@ export class FurryNetwork extends Website {
       if (post.body.id) {
         if (type === 'multimedia' && data.thumbnail) {
           try {
-            await Http.post(
-              `${this.BASE_URL}/api/submission/${character}/${type}/${upload.id}/thumbnail?` +
-                'resumableChunkNumber=1' +
-                `&resumableChunkSize=${data.thumbnail.value.length}` +
-                `&resumableCurrentChunkSize=${data.thumbnail.value.length}
-            &resumableTotalSize=${data.thumbnail.value.length}
-            &resumableType=${encodeURIComponent(data.thumbnail.options.contentType)}
-            &resumableIdentifier=${data.thumbnail.value.length}-${encodeURIComponent(
-              data.thumbnail.options.filename,
-            ).replace('.', '')}
-            &resumableFilename=${encodeURIComponent(
-              data.thumbnail.options.filename,
-            )}&resumableRelativePath=${encodeURIComponent(data.thumbnail.options.filename)}
-            &resumableTotalChunks=1`,
+            const thumb = await this.uploadThumbnail(
+              upload.id,
               data.part.accountId,
-              {
-                type: 'multipart',
-                headers,
-                data: {
-                  file: data.thumbnail,
-                },
-              },
+              character,
+              data.thumbnail,
+              type,
+              headers,
             );
-          } catch {}
+            console.log(thumb);
+          } catch (err) {
+            console.error(err);
+          }
         }
 
         return this.createPostResponse({ source: `${this.BASE_URL}/${type}/${post.body.id}` });
@@ -336,25 +384,16 @@ export class FurryNetwork extends Website {
     };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ id: number }>(
-      `${this.BASE_URL}/api/journal`,
-      data.part.accountId,
-      {
-        type: 'json',
-        data: form,
-        requestOptions: { json: true },
-        headers: {
-          Authorization: `Bearer ${accountData.access_token}`,
-        },
-      },
-    );
-
-    this.verifyResponse(post, 'Verify post');
-    if (post.body.id) {
+    const post = await this.uploadJson(data.part.accountId, `${this.BASE_URL}/api/journal`, form, {
+      Authorization: `Bearer ${accountData.access_token}`,
+    });
+    const postBody = JSON.parse(post.body);
+    if (postBody.id && post.status <= 303) {
       return this.createPostResponse({});
     }
-
-    return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
+    return Promise.reject(
+      this.createPostResponse({ message: post.body, additionalInfo: post.body }),
+    );
   }
 
   private getContentType(type: FileSubmissionType, isGIF: boolean): any {

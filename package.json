@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.1.31",
+  "version": "3.1.32",
   "description": "PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly..",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "release:linux": "node create-signer.js && npm run make && cd electron-app && yarn run release:linux",
     "release:osx": "npm run make && cd electron-app && yarn run release:osx",
     "contribute": "npm ci --ignore-scripts && run-p --silent --print-name ci:** && run-p build:**",
-    "contribute:debug": "npm ci --ignore-scripts && run-p --print-name ci:** && --print-label run-p build:**",
+    "contribute:debug": "npm ci --ignore-scripts && run-p --print-name ci:** && run-p build:**",
     "ci:commons": "cd commons && npm ci --no-audit&& npm run build",
     "ci:app": "cd electron-app && npm ci --no-audit",
     "ci:ui": "cd ui && npm ci --no-audit --no-fund --no-deprecate",

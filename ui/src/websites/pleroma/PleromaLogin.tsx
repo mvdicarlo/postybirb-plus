@@ -1,24 +1,27 @@
 import { Button, Form, Input, message, Spin } from 'antd';
-import Axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { MegalodonAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
-import { stringify } from 'querystring';
+import generator, { OAuth } from 'megalodon'
 
 interface State extends MegalodonAccountData {
   code: string;
+  client_id: string;
+  client_secret: string;
   loading: boolean;
 }
 
-export default class PixelfedLogin extends React.Component<LoginDialogProps, State> {
+export default class PleromaLogin extends React.Component<LoginDialogProps, State> {
   state: State = {
-    username: '',
-    token: '',
-    website: 'Pixelfed.social',
+    website: 'pleroma.io',
     code: '',
-    loading: true
+    loading: true,
+    client_id: '',
+    client_secret: '',
+    username: '',
+    token: ''
   };
 
   private view: any;
@@ -39,60 +42,53 @@ export default class PixelfedLogin extends React.Component<LoginDialogProps, Sta
       view.addEventListener('did-stop-loading', () => {
         if (this.state.loading) this.setState({ loading: false });
       });
-      // view.addEventListener('did-start-navigation', (url, isInPlace, isMainFrame, frameProcessId, frameRoutingId) => {
-      // });
-
-      view.addEventListener('did-redirect-navigation', (url, isInPlace, isMainframe, frameProcessId, frameRoutingId) => {
-        if (url.url.includes("urn:ietf:wg:oauth:2.0:oob")) {
-          // We have a token ! 
-          this.setState({ code: url.url.replace("urn:ietf:wg:oauth:2.0:oob?code=", "") });
-        }
-      });
-      
-      view.addEventListener('will-redirect', (event, url, isInPlace, isMainFrame, frameProcessId, frameRoutingId) => {
-        console.log(url);
-      });
-      
-      view.allowpopups = false;
+      view.allowpopups = true;
       view.partition = `persist:${this.props.account._id}`;
-      view.src = this.getAuthURL();
+      this.getAuthURL(this.state.website);
     }
-  }
-
-  private getAuthURL(website?: string): string {
-    return `${window.AUTH_SERVER_URL}/Mastodon/v2/authorize?website=${encodeURIComponent(
-      this.getWebsiteURL(website)
-    )}`;
   }
 
   private getWebsiteURL(website?: string) {
     return `https://${website || this.state.website}`;
   }
 
+  private getAuthURL(website: string) {
+    let auth_url : string = "";
+    // Get the Auth URL ... Display it. 
+    const client = generator('pleroma', this.getWebsiteURL(website));
+    this.state.website = website;
+    let opts: any = {
+      redirect_uris: `https://localhost:${window['PORT']}/misskey/display/${window.AUTH_ID}`
+    }
+    client.registerApp('PostyBirb', opts )
+      .then(appData => {
+        this.state.client_id = appData.clientId;
+        this.state.client_secret = appData.clientSecret;
+        this.state.username = appData.name;
+        auth_url = appData.url || "Error - no auth url";
+        this.view.src = auth_url;
+      });
+  }
+
   submit() {
     const website = this.getWebsiteURL();
-    Axios.post<{ success: boolean; error: string; data: { token: string; username: string } }>(
-      `${window.AUTH_SERVER_URL}/Mastodon/v2/authorize/`,
-      {
-        website,
-        code: this.state.code
-      },
-      { responseType: 'json' }
-    )
-      .then(({ data }) => {
-        if (data.success) {
-          LoginService.setAccountData(this.props.account._id, { ...data.data, website }).then(
-            () => {
-              message.success(`${website} authenticated.`);
-            }
-          );
-        } else {
-          message.error(data.error);
-        }
-      })
-      .catch(() => {
-        message.error(`Failed to authenticate ${website}.`);
+    const client = generator('pleroma', website);
+    client.fetchAccessToken(this.state.client_id, this.state.client_secret, this.state.code).then((value: OAuth.TokenData) => {
+      // Get the username so we have complete data.
+      const usernameClient = generator('pleroma', website, value.accessToken);
+      usernameClient.verifyAccountCredentials().then((res)=>{
+        this.state.username = res.data.username;
+        this.state.token = value.access_token;
+        
+        LoginService.setAccountData(this.props.account._id, { ...this.state, website } ).then(
+          () => {
+            message.success(`${website} authenticated.`);
+          });
       });
+    })
+    .catch((err: Error) => {
+      message.error(`Failed to authenticate ${website}.`);
+    })
   }
 
   isValid(): boolean {
@@ -112,7 +108,7 @@ export default class PixelfedLogin extends React.Component<LoginDialogProps, Sta
                 onBlur={({ target }) => {
                   const website = target.value.replace(/(https:\/\/|http:\/\/)/, '');
                   this.view.loadURL(this.getAuthURL(website));
-                  this.setState({ website });
+                  this.setState({ website: website });
                 }}
               />
             </Form.Item>

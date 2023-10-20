@@ -24,6 +24,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { PostData } from '../../submission/post/interfaces/post-data.interface';
+import FormContent from "../../utils/form-content.util";
 
 @Injectable()
 export class Artconomy extends Website {
@@ -249,6 +250,13 @@ export class Artconomy extends Website {
           'clothing/accessories, ' +
           'relationships depicted',
       );
+    }
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    )
+
+    if (description.length > 2000) {
+      problems.push('Description must be 2000 characters or fewer.')
     }
 
     const maxMB = 99;
