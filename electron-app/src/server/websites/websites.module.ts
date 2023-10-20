@@ -26,6 +26,7 @@ import { DeviantArtModule } from './deviant-art/deviant-art.module';
 import { ManebooruModule } from './manebooru/manebooru.module';
 import { MastodonModule } from './mastodon/mastodon.module';
 import { MissKeyModule } from './misskey/misskey.module';
+import { PleromaModule } from './pleroma/pleroma.module';
 import { PillowfortModule } from './pillowfort/pillowfort.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { FurbooruModule } from './furbooru/furbooru.module';
@@ -58,6 +59,7 @@ import { BlueskyModule } from './bluesky/bluesky.module';
     ManebooruModule,
     MastodonModule,
     MissKeyModule,
+    PleromaModule,
     NewgroundsModule,
     PatreonModule,
     PiczelModule,
