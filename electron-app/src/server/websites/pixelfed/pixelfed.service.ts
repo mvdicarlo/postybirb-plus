@@ -59,6 +59,10 @@ export class Pixelfed extends Megalodon {
 
   // https://{instance}/i/web/post/{id}
   getPostIdFromUrl(url: string): string | null {
-    return url.slice(url.lastIndexOf('/') + 1);
+    if (url && url.lastIndexOf('/') > -1) {
+      return url.slice(url.lastIndexOf('/') + 1);
+    } else { 
+      return null;
+    }
   }
 }
