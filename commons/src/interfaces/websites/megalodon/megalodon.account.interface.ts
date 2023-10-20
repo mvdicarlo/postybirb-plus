@@ -1,4 +1,4 @@
-export interface MastodonAccountData {
+export interface MegalodonAccountData {
   token: string;
   website: string;
   username: string;
