@@ -137,9 +137,44 @@ export abstract class Website {
     tags: string[],
     description: string,
     limit: number,
-    getLength: (text: string) => number = (text) => text.length,
+    getLength: (text: string) => number = text => text.length,
   ): string {
+    return this.doAppendTags(tags, description, limit, getLength).result;
+  }
+
+  validateAppendTags(
+    warnings: string[],
+    tags: string[],
+    description: string,
+    limit: number,
+    getLength: (text: string) => number = text => text.length,
+  ): void {
+    const { appendedTags, skippedTags } = this.doAppendTags(tags, description, limit, getLength);
+    const skippedCount = skippedTags.length;
+    if (skippedCount !== 0) {
+      const appendedCount = appendedTags.length;
+      if (appendedCount === 0) {
+        warnings.push(`Can't fit any tags. Reduce description length to be able to include them.`);
+      } else {
+        const totalCount = appendedCount + skippedCount;
+        warnings.push(
+          `Can only fit ${appendedCount} out of ${totalCount} tags. ` +
+            `Reduce description length to be able to include more. ` +
+            `Skipped tags: ${skippedTags.join(', ')}. ` +
+            `Included tags: ${appendedTags.join(', ')}`,
+        );
+      }
+    }
+  }
+
+  private doAppendTags(
+    tags: string[],
+    description: string,
+    limit: number,
+    getLength: (text: string) => number = text => text.length,
+  ): { result: string; appendedTags: string[]; skippedTags: string[] } {
     const appendedTags = [];
+    const skippedTags = [];
     const appendToDescription = function (tag?: string): string {
       const suffix = tag ? [...appendedTags, tag] : appendedTags;
       if (suffix.length === 0) {
@@ -152,12 +187,15 @@ export abstract class Website {
     for (const tag of tags) {
       if (getLength(appendToDescription(tag)) <= limit) {
         appendedTags.push(tag);
+      } else {
+        skippedTags.push(tag);
       }
       // Keep looping over all tags even if one of them doesn't fit, we might
       // find one that's short enough to cram in still.
     }
 
-    return appendToDescription();
+    const result = appendToDescription();
+    return { result, appendedTags, skippedTags };
   }
 
   parseDescription(text: string, type?: SubmissionType): string {

@@ -213,6 +213,13 @@ export abstract class Megalodon extends Website {
       warnings.push(
         `Max description length allowed is ${this.maxCharLength} characters.`,
       );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        this.maxCharLength,
+      );
     }
 
     const files = [
@@ -291,6 +298,13 @@ export abstract class Megalodon extends Website {
     if (description.length > this.maxCharLength) {
       warnings.push(
         `Max description length allowed is ${this.maxCharLength} characters.`,
+      );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        this.maxCharLength,
       );
     }
 
