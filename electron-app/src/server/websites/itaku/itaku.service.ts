@@ -232,7 +232,11 @@ export class Itaku extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
     
-    if (defaultPart.data.description.value.length > 5000) {
+    const description = this.defaultDescriptionParser(
+      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
+    );
+
+    if (description.length > 5000) {
       problems.push(
         `Max description length allowed is 5000 characters.`,
       );
@@ -272,6 +276,12 @@ export class Itaku extends Website {
 
     if (!description) {
       problems.push('Description required');
+    }
+
+    if (description.length > 5000) {
+      problems.push(
+        `Max description length allowed is 5000 characters.`,
+      );
     }
 
     return { problems, warnings };
