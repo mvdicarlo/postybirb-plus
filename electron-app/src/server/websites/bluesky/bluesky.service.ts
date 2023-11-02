@@ -341,7 +341,7 @@ export class Bluesky extends Website {
       );
     }
 
-    this.validateDescriptionLength(problems, submissionPart, defaultPart);
+    this.validateDescription(problems, warnings, submissionPart, defaultPart);
 
     const files = [
       submission.primary,
@@ -398,14 +398,15 @@ export class Bluesky extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    this.validateDescriptionLength(problems, submissionPart, defaultPart);
+    this.validateDescription(problems, warnings, submissionPart, defaultPart);
     this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
 
     return { problems, warnings };
   }
 
-  private validateDescriptionLength(
+  private validateDescription(
     problems: string[],
+    warnings: string[],
     submissionPart: SubmissionPart<BlueskyNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): void {
@@ -420,6 +421,14 @@ export class Bluesky extends Website {
     if (rt.graphemeLength > this.MAX_CHARS) {
       problems.push(
         `Max description length allowed is ${this.MAX_CHARS} characters.`,
+      );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        this.MAX_CHARS,
+        getRichTextLength,
       );
     }
   }

@@ -246,6 +246,13 @@ export class MissKey extends Website {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        maxChars
+      );
     }
 
     const files = [
@@ -319,6 +326,13 @@ export class MissKey extends Website {
     if (description.length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+      );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        maxChars
       );
     }
 

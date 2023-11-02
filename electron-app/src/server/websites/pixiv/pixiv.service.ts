@@ -142,16 +142,15 @@ export class Pixiv extends Website {
       const json = JSON.parse(post);
       if (!json.error) {
         return this.createPostResponse({});
-      } else {
-        return Promise.reject(
-          this.createPostResponse({
-            additionalInfo: post,
-            message: JSON.stringify(json),
-          }),
-        );
-      }
-    } catch {}
-    return Promise.reject(this.createPostResponse({ additionalInfo: post }));
+      } else throw json;
+    } catch (error) {
+      return Promise.reject(
+        this.createPostResponse({
+          additionalInfo: post,
+          message: error && error instanceof Error ? error + '' : JSON.stringify(error),
+        }),
+      );
+    }
   }
 
   private async postSpecial(partitionId: string, data: any, headers: any, files: PostFile[]) {

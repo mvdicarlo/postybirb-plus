@@ -76,7 +76,10 @@ export abstract class Megalodon extends Website {
   private async getAndStoreInstanceInfo(profileId: string, data: MegalodonAccountData) {
     const client = generator(this.megalodonService, data.website, data.token);
     const instance = await client.getInstance();
-
+    this.logger.debug("*************");
+    this.logger.debug(`Account ID ${profileId}`);
+    this.logger.debug(instance.data);
+    this.logger.debug("*************");
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
@@ -199,7 +202,7 @@ export abstract class Megalodon extends Website {
     submissionPart: SubmissionPart<MastodonFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
-    this.getInstanceSettings(defaultPart.accountId);
+    this.getInstanceSettings(submissionPart.accountId);
 
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -212,6 +215,13 @@ export abstract class Megalodon extends Website {
     if (description.length > this.maxCharLength) {
       warnings.push(
         `Max description length allowed is ${this.maxCharLength} characters.`,
+      );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        this.maxCharLength,
       );
     }
 
@@ -279,7 +289,7 @@ export abstract class Megalodon extends Website {
     submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
-    this.getInstanceSettings(defaultPart.accountId);
+    this.getInstanceSettings(submissionPart.accountId);
 
     const problems = [];
     const warnings = [];
@@ -291,6 +301,13 @@ export abstract class Megalodon extends Website {
     if (description.length > this.maxCharLength) {
       warnings.push(
         `Max description length allowed is ${this.maxCharLength} characters.`,
+      );
+    } else {
+      this.validateAppendTags(
+        warnings,
+        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        description,
+        this.maxCharLength,
       );
     }
 

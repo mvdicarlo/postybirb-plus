@@ -143,12 +143,16 @@ export class Patreon extends Website {
   }
 
   private async getCSRF(profileId: string): Promise<string> {
-    const page = await BrowserWindowUtil.getPage(profileId, `${this.BASE_URL}`, true);
-    const match = page.match(/csrfSignature = "(.*?)"/);
-    if (!match) {
+    const csrf = await BrowserWindowUtil.runScriptOnPage<string>(
+      profileId,
+      `${this.BASE_URL}`,
+      'window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.csrfSignature',
+      100,
+    );
+    if (!csrf) {
       throw new Error('No CSRF Token found.');
     }
-    return match[1];
+    return csrf;
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
