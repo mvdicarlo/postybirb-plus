@@ -120,17 +120,20 @@ export class Newgrounds extends Website {
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
   }
 
-  private async getThumbnail(thumbnail: PostFile, primary: PostFile): Promise<PostFile> {
-    let thumbfile = thumbnail;
+  private async getThumbnail(
+    thumbnail: PostFile | undefined,
+    primary: PostFile,
+  ): Promise<PostFile> {
+    let thumbfile: PostFile = {
+      value: thumbnail?.value ?? primary.value,
+      options: {
+        filename: 'thumbnail.png',
+        contentType: 'image/png',
+      },
+    };
     if (!thumbnail && primary.options.contentType === 'image/gif') {
       const frame0 = await GifManipulator.getFrame(primary.value);
-      thumbfile = {
-        value: frame0,
-        options: {
-          filename: 'thumbnail.png',
-          contentType: 'image/png',
-        },
-      };
+      thumbfile.value = frame0;
     }
 
     const scalePx = 600;
@@ -158,8 +161,6 @@ export class Newgrounds extends Website {
     }
 
     thumbfile.value = thumb.toPNG();
-    thumbfile.options.filename = 'thumbnail.png';
-    thumbfile.options.contentType = 'image/png';
     return thumbfile;
   }
 
@@ -215,12 +216,7 @@ export class Newgrounds extends Website {
     }
 
     const { edit_url, project_id } = initRes.body;
-
-    let thumbfile = await this.getThumbnail(
-      data.thumbnail ? data.thumbnail : data.primary.file,
-      data.primary.file,
-    );
-
+    const thumbfile = await this.getThumbnail(data.thumbnail, data.primary.file);
     const primaryBuf = nativeImage.createFromBuffer(data.primary.file.value);
     const size = primaryBuf.getSize();
     const fileUploadRes = await Http.post<
