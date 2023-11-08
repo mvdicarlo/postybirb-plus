@@ -28,6 +28,15 @@ export class DescriptionParser {
     private settings: SettingsService,
   ) {
     this.websiteDescriptionShortcuts = websitesService.getUsernameShortcuts();
+    this.websiteDescriptionShortcuts = {
+      ...this.websiteDescriptionShortcuts,
+      twitter: [ // injects legacy twitter shortcut back in
+        {
+          key: 'tw',
+          url: 'https://twitter.com/$1',
+        },
+      ],
+    };
   }
 
   public async parse(
