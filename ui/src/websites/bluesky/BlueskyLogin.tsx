@@ -79,7 +79,7 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
                   description={
                     <div>
                       Or if you are using custom domain, make sure to include full username, e.g.
-                      domain.ext or
+                      domain.ext, handle.domain.ext
                     </div>
                   }
                 />
