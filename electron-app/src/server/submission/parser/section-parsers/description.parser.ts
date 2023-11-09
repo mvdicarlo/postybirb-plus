@@ -8,6 +8,7 @@ import FormContent from 'src/server/utils/form-content.util';
 import { Website } from 'src/server/websites/website.base';
 import { WebsitesService } from 'src/server/websites/websites.service';
 import SubmissionPartEntity from '../../submission-part/models/submission-part.entity';
+import { ParserService } from '../parser.service';
 
 interface ShortcutData {
   originalText: string;
@@ -26,6 +27,7 @@ export class DescriptionParser {
     private customShortcuts: CustomShortcutService,
     private websitesService: WebsitesService,
     private settings: SettingsService,
+    private readonly parserService: ParserService
   ) {
     this.websiteDescriptionShortcuts = websitesService.getUsernameShortcuts();
     this.websiteDescriptionShortcuts = {
@@ -52,6 +54,7 @@ export class DescriptionParser {
 
     if (description.length) {
       // Insert {default}, {title}, {tags} shortcuts
+      let tags = await this.parserService.parseTags(website, defaultPart, websitePart);
       description = this.insertDefaultShortcuts(description, [
         {
           name: 'default',
@@ -64,8 +67,7 @@ export class DescriptionParser {
         {
           name: 'tags',
           content:
-            defaultPart.data.tags.value.map(t => '#' + t).join(' ') ??
-            websitePart.data.tags.value.map(t => '#' + t).join(' ') ??
+            tags.map(t => '#' + t).join(' ') ??
             '',
         },
       ]);
