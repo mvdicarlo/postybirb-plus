@@ -39,6 +39,7 @@ export class DefaultOptionsEntity implements DefaultOptions {
     this.tags = {
       value: [],
       extendDefault: true,
+      appendTags: true
     };
 
     this.description = {

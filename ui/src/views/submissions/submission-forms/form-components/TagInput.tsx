@@ -12,6 +12,7 @@ export interface TagOptions {
   minTags?: number;
   mode?: 'count' | 'length';
   maxLength?: number;
+  showDisableAppending?: boolean;
 }
 
 interface Props {
@@ -39,12 +40,14 @@ export default class TagInput extends React.Component<Props, State> {
 
   private data: TagData = {
     extendDefault: true,
-    value: []
+    value: [],
+    appendTags: true
   };
 
   options: TagOptions = {
     maxTags: 200,
-    mode: 'count'
+    mode: 'count',
+    showDisableAppending: false
   };
 
   constructor(props: Props) {
@@ -61,6 +64,11 @@ export default class TagInput extends React.Component<Props, State> {
 
   changeExtendDefault = (checked: boolean) => {
     this.data.extendDefault = checked;
+    this.update();
+  };
+
+  changeShowDisableAppending = (checked: boolean) => {
+    this.data.appendTags = checked;
     this.update();
   };
 
@@ -85,6 +93,7 @@ export default class TagInput extends React.Component<Props, State> {
   update() {
     this.props.onChange({
       extendDefault: this.data.extendDefault,
+      appendTags: this.data.appendTags,
       value: this.filterTags(this.data.value)
     });
   }
@@ -123,6 +132,19 @@ export default class TagInput extends React.Component<Props, State> {
       </div>
     );
 
+    const appendSwitch = this.options.showDisableAppending ? (
+      <div>
+        <span className="mr-2">
+          <Switch
+            size="small"
+            checked={this.props.defaultValue.appendTags}
+            onChange={this.changeShowDisableAppending}
+          />
+        </span>
+        <span>Append tags to Description</span>
+      </div>      
+    ) : null
+
     const selectOptions = _.uniq([
       ...(this.state.suggestions || []),
       ...(this.props.defaultValue.value || [])
@@ -134,6 +156,7 @@ export default class TagInput extends React.Component<Props, State> {
     return (
       <Form.Item label={this.props.label} required={!!this.options.minTags}>
         {tagSwitch}
+        {appendSwitch}
         <div className="flex">
           <Select
             mode="tags"

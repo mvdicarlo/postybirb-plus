@@ -131,7 +131,9 @@ export abstract class Megalodon extends Website {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
+      if (data.options.tags.appendTags) {
+        status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
+      }
 
       try {
         const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
@@ -174,7 +176,10 @@ export abstract class Megalodon extends Website {
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
-    status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
+
+    if (data.options.tags.appendTags) {
+      status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
+    }
 
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
     if (replyToId) {
@@ -217,12 +222,14 @@ export abstract class Megalodon extends Website {
         `Max description length allowed is ${this.maxCharLength} characters.`,
       );
     } else {
-      this.validateAppendTags(
-        warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
-        description,
-        this.maxCharLength,
-      );
+      if (submissionPart.data.tags.appendTags) {
+        this.validateAppendTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          this.maxCharLength,
+        );
+      }
     }
 
     const files = [
@@ -303,12 +310,14 @@ export abstract class Megalodon extends Website {
         `Max description length allowed is ${this.maxCharLength} characters.`,
       );
     } else {
-      this.validateAppendTags(
-        warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
-        description,
-        this.maxCharLength,
-      );
+      if (submissionPart.data.tags.appendTags) {
+        this.validateAppendTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          this.maxCharLength,
+        );
+      }
     }
 
     this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);

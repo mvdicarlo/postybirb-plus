@@ -9,7 +9,6 @@ import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
-import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
 import PixelfedLogin from './PixelfedLogin';
@@ -34,7 +33,7 @@ export class Pixelfed extends WebsiteImpl {
           { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
-      tagOptions={{ show: true }}
+      tagOptions={{ show: true, options: { showDisableAppending: true } }}
       hideThumbnailOptions={true}
     />
   );

@@ -28,7 +28,6 @@ import { Website } from '../website.base';
 import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
-import Graphemer from 'graphemer';
 import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
 import FormContent from 'src/server/utils/form-content.util';
 
@@ -229,7 +228,10 @@ export class Bluesky extends Website {
       $type: 'app.bsky.embed.images',
     };
 
-    const status = this.appendRichTextTags(data.tags, data.description);
+    let status = data.description;
+    if (data.options.tags.appendTags) {
+      status = this.appendRichTextTags(data.tags, data.description);
+    }
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -286,7 +288,10 @@ export class Bluesky extends Website {
     let profile = await agent.getProfile({actor: agent.session.did });
 
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
-    const status = this.appendRichTextTags(data.tags, data.description);
+    let status = data.description;
+    if (data.options.tags.appendTags) {
+      status = this.appendRichTextTags(data.tags, data.description);
+    }
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -423,13 +428,15 @@ export class Bluesky extends Website {
         `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     } else {
-      this.validateAppendTags(
-        warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
-        description,
-        this.MAX_CHARS,
-        getRichTextLength,
-      );
+      if (submissionPart.data.tags.appendTags) {
+        this.validateAppendTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          this.MAX_CHARS,
+          getRichTextLength,
+        );
+      }
     }
   }
 

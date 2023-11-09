@@ -28,7 +28,7 @@ export class Bluesky extends WebsiteImpl {
     <BlueskyFileSubmissionForm
       key={props.part.accountId}
       {...props}
-      tagOptions={{ show: true }}
+      tagOptions={{ show: true, options: { showDisableAppending: true } }}
       hideThumbnailOptions={true}
     />
   );
@@ -39,7 +39,7 @@ export class Bluesky extends WebsiteImpl {
     <BlueskyNotificationSubmissionForm
       key={props.part.accountId}
       {...props}
-      tagOptions={{ show: true }}
+      tagOptions={{ show: true, options: { showDisableAppending: true } }}
     />
   );
 }

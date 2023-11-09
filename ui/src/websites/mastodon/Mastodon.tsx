@@ -35,7 +35,7 @@ export class Mastodon extends WebsiteImpl {
           { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
-      tagOptions={{ show: true }}
+      tagOptions={{ show: true, options: { showDisableAppending: true } }}
       hideThumbnailOptions={true}
     />
   );
@@ -53,7 +53,7 @@ export class Mastodon extends WebsiteImpl {
           { name: 'Sensitive', value: SubmissionRating.ADULT }
         ]
       }}
-      tagOptions={{ show: true }}
+      tagOptions={{ show: true, options: { showDisableAppending: true } }}
     />
   );
 }

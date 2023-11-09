@@ -140,7 +140,7 @@ class TagGroupInput extends React.Component<TagGroup, TagGroupInputState> {
               hideExtend={true}
               hideExtra={true}
               hideTagGroup={true}
-              defaultValue={{ extendDefault: false, value: this.state.tagGroup.tags! }}
+              defaultValue={{ extendDefault: false, value: this.state.tagGroup.tags!, appendTags: true }}
             />
           </Card>
         </Spin>

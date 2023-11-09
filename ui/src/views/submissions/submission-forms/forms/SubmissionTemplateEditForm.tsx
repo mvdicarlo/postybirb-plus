@@ -41,7 +41,8 @@ class SubmissionTemplateEditForm extends React.Component<Props, SubmissionTempla
   private defaultOptions: DefaultOptions = {
     tags: {
       extendDefault: false,
-      value: []
+      value: [],
+      appendTags: true
     },
     description: {
       overwriteDefault: false,

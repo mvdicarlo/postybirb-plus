@@ -77,7 +77,8 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   private defaultOptions: DefaultOptions = {
     tags: {
       extendDefault: false,
-      value: []
+      value: [],
+      appendTags: true
     },
     description: {
       overwriteDefault: false,
