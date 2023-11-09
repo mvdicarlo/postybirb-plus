@@ -67,7 +67,7 @@ export class DescriptionParser {
         {
           name: 'tags',
           content:
-            tags.map(t => '#' + t).join(' ') ??
+           website.formatTags(tags) ??
             '',
         },
       ]);

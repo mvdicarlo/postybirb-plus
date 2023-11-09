@@ -126,7 +126,7 @@ export abstract class Website {
       .map(tag => tag.replace(/\s/g, options.spaceReplacer).trim());
   }
 
-  protected formatTags(tags: string[], options?: TagParseOptions): any {
+  formatTags(tags: string[], options?: TagParseOptions): any {
     return this.parseTags(tags, options);
   }
 
