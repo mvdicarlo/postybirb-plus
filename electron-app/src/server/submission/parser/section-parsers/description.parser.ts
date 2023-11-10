@@ -66,9 +66,7 @@ export class DescriptionParser {
         },
         {
           name: 'tags',
-          content:
-           website.formatTags(tags) ??
-            '',
+          content: (website.formatTags(tags) ?? '').toString().replaceAll(",", " ")
         },
       ]);
 
