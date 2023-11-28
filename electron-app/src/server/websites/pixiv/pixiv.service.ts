@@ -175,8 +175,10 @@ export class Pixiv extends Website {
         }
       });
 
-      files.forEach(file => {
+      files.forEach((file, i) => {
         form.append('files[]', file.value, file.options);
+        form.append(`imageOrder[${i}][type]`, 'newFile');
+        form.append(`imageOrder[${i}][fileKey]: `, `${i}`);
       });
 
       await win.loadURL(this.BASE_URL);
@@ -194,7 +196,7 @@ export class Pixiv extends Website {
         ].join('\n'),
       };
 
-      await win.loadURL(`${this.BASE_URL}/ajax/work/create/illust`, opts);
+      await win.loadURL(`${this.BASE_URL}/ajax/work/create/illustration`, opts);
       return await win.webContents.executeJavaScript('document.body.innerText');
     } catch (err) {
       return Promise.reject(this.createPostResponse({ additionalInfo: err }));
