@@ -54,6 +54,7 @@ export class DeviantArt extends Website {
     'swf',
     'tiff',
     'tif',
+    'gif',
   ];
   readonly refreshInterval = 10 * 60000;
   readonly usernameShortcuts = [

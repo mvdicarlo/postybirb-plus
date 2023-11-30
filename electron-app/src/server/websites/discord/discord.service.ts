@@ -31,7 +31,17 @@ export class Discord extends Website {
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
-  readonly defaultDescriptionParser = MarkdownParser.parse;
+  readonly defaultDescriptionParser = (html: string) => {
+    const markdown = MarkdownParser.parse(html).replace(
+      // Matches [url](text)
+      /\[([^\]]+)\]\(([^\)]+)\)/g,
+
+      // Due to discord bug [linkhere](linkhere) will be displayed
+      // as is but we expect it to be clickable link
+      (original, url, text) => (url === text ? url : original),
+    );
+    return markdown;
+  };
 
   readonly usernameShortcuts = [];
 
