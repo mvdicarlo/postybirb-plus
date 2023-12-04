@@ -329,7 +329,6 @@ export abstract class Megalodon extends Website {
     file: PostFile,
     altText: string,
   ): Promise<string> {
-    //): Promise<{ id: string }> {\
     this.logger.log("Uploading media")
     const M = generator(this.megalodonService, data.website, data.token);
 
@@ -341,9 +340,6 @@ export abstract class Megalodon extends Website {
     fs.writeFileSync(path.join(tempDir, file.options.filename), file.value);
 
     const upload = await M.uploadMedia(fs.createReadStream(path.join(tempDir, file.options.filename)), { description: altText });
-
-    this.logger.log(upload)
-
     fs.unlink(path.join(tempDir, file.options.filename), (err) => { 
       if (err) {
         this.logger.error("Unable to remove the temp file", err.stack, err.message);
@@ -358,8 +354,6 @@ export abstract class Megalodon extends Website {
     }
 
     this.logger.log("Image uploaded");
-
-//    return { id: upload.data.id };
     return upload.data.id;
   }
 
