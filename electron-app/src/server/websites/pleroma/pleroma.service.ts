@@ -45,7 +45,7 @@ export class Pleroma extends Megalodon {
     console.log(this.getAccountInfo(accountId, INFO_KEY));
     const instanceInfo: PleromaInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
 
-    this.maxCharLength = instanceInfo?.max_toot_chars ?? 500;
+    this.MAX_CHARS = instanceInfo?.max_toot_chars ?? 500;
     // Setting the default number to a high value; older Pleroma and all Akkoma instances don't limit.
     this.maxMediaCount = instanceInfo?.max_media_attachments ?? 20; 
   }

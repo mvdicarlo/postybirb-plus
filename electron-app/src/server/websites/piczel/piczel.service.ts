@@ -28,6 +28,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 @Injectable()
 export class Piczel extends Website {
   readonly BASE_URL: string = 'https://piczel.tv';
+  readonly MAX_CHARS: number = -1; // No Limit
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = true;
 

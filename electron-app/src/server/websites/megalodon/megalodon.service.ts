@@ -42,10 +42,10 @@ export abstract class Megalodon extends Website {
   }
 
   megalodonService: 'mastodon' | 'pleroma' | 'misskey' | 'friendica' = 'mastodon'; // Set this as appropriate in your constructor
-  maxCharLength = 500; // Set this off the instance information!
   maxMediaCount = 4; 
 
   readonly BASE_URL: string;
+  MAX_CHARS: number = 500;
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
@@ -108,7 +108,7 @@ export abstract class Megalodon extends Website {
     const chunks = _.chunk(uploadedMedias, this.maxMediaCount);
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`.substring(0, this.maxCharLength);
+    }`.substring(0, this.MAX_CHARS);
     let lastId = '';
     let source = '';
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
@@ -130,8 +130,6 @@ export abstract class Megalodon extends Website {
       if (data.options.spoilerText) {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
-
-      status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
       try {
         const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
@@ -174,7 +172,6 @@ export abstract class Megalodon extends Website {
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
-    status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
     if (replyToId) {
@@ -212,16 +209,16 @@ export abstract class Megalodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > this.maxCharLength) {
+    if (description.length > this.MAX_CHARS) {
       warnings.push(
-        `Max description length allowed is ${this.maxCharLength} characters.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        this.maxCharLength,
+        this.MAX_CHARS,
       );
     }
 
@@ -298,16 +295,16 @@ export abstract class Megalodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > this.maxCharLength) {
+    if (description.length > this.MAX_CHARS) {
       warnings.push(
-        `Max description length allowed is ${this.maxCharLength} characters.`,
+        `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        this.maxCharLength,
+        this.MAX_CHARS,
       );
     }
 
@@ -354,6 +351,7 @@ export abstract class Megalodon extends Website {
     }
 
     this.logger.log("Image uploaded");
+
     return upload.data.id;
   }
 

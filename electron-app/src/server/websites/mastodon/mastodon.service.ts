@@ -60,7 +60,7 @@ export class Mastodon extends Megalodon {
   getInstanceSettings(accountId: string) {
     const instanceInfo: MastodonInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
 
-    this.maxCharLength = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    this.MAX_CHARS = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
     this.maxMediaCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
   }
 

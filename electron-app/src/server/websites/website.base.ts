@@ -37,6 +37,7 @@ export abstract class Website {
 
   abstract readonly BASE_URL: string;
   abstract readonly acceptsFiles: string[];
+  abstract MAX_CHARS: number;
 
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
@@ -126,57 +127,53 @@ export abstract class Website {
       .map(tag => tag.replace(/\s/g, options.spaceReplacer).trim());
   }
 
-  protected formatTags(tags: string[], options?: TagParseOptions): any {
+  formatTags(tags: string[], options?: TagParseOptions): any {
     return this.parseTags(tags, options);
   }
 
-  /**
-   * Appends the tags to the description if there is enough character count available.
-   */
-  appendTags(
-    tags: string[],
-    description: string,
-    limit: number,
-    getLength: (text: string) => number = text => text.length,
-  ): string {
-    return this.doAppendTags(tags, description, limit, getLength).result;
-  }
-
-  validateAppendTags(
+  validateInsertTags(
     warnings: string[],
     tags: string[],
     description: string,
     limit: number,
     getLength: (text: string) => number = text => text.length,
   ): void {
-    const { appendedTags, skippedTags } = this.doAppendTags(tags, description, limit, getLength);
+    const { includedTags, skippedTags } = this.calculateFittingTags(tags, description, limit, getLength);
     const skippedCount = skippedTags.length;
     if (skippedCount !== 0) {
-      const appendedCount = appendedTags.length;
-      if (appendedCount === 0) {
+      const includedCount = includedTags.length;
+      if (includedCount === 0) {
         warnings.push(`Can't fit any tags. Reduce description length to be able to include them.`);
       } else {
-        const totalCount = appendedCount + skippedCount;
+        const totalCount = includedCount + skippedCount;
         warnings.push(
-          `Can only fit ${appendedCount} out of ${totalCount} tags. ` +
+          `Can only fit ${includedCount} out of ${totalCount} tags. ` +
             `Reduce description length to be able to include more. ` +
             `Skipped tags: ${skippedTags.join(', ')}. ` +
-            `Included tags: ${appendedTags.join(', ')}`,
+            `Included tags: ${includedTags.join(', ')}`,
         );
       }
     }
   }
 
-  private doAppendTags(
+  generateTagsString(
+    tags: string[],
+    description: string,
+  ) : string {
+    const { includedTags } = this.calculateFittingTags(tags, description, this.MAX_CHARS);
+    return this.formatTags(includedTags).join(' ') ?? ''
+  }
+
+  private calculateFittingTags(
     tags: string[],
     description: string,
     limit: number,
     getLength: (text: string) => number = text => text.length,
-  ): { result: string; appendedTags: string[]; skippedTags: string[] } {
-    const appendedTags = [];
+  ): { includedTags: string[]; skippedTags: string[] } {
+    const includedTags = [];
     const skippedTags = [];
     const appendToDescription = function (tag?: string): string {
-      const suffix = tag ? [...appendedTags, tag] : appendedTags;
+      const suffix = tag ? [...includedTags, tag] : includedTags;
       if (suffix.length === 0) {
         return description;
       } else {
@@ -186,7 +183,7 @@ export abstract class Website {
 
     for (const tag of tags) {
       if (getLength(appendToDescription(tag)) <= limit) {
-        appendedTags.push(tag);
+        includedTags.push(tag);
       } else {
         skippedTags.push(tag);
       }
@@ -194,8 +191,7 @@ export abstract class Website {
       // find one that's short enough to cram in still.
     }
 
-    const result = appendToDescription();
-    return { result, appendedTags, skippedTags };
+    return { includedTags, skippedTags };
   }
 
   parseDescription(text: string, type?: SubmissionType): string {

@@ -29,6 +29,7 @@ import { Website } from '../website.base';
 export class Picarto extends Website {
   BASE_URL: string = 'https://picarto.tv';
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif'];
+  readonly MAX_CHARS: number = -1; // No Limit
   acceptsAdditionalFiles: boolean = true;
   refreshBeforePost: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;

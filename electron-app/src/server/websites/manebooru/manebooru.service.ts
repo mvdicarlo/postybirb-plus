@@ -28,6 +28,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class Manebooru extends Website {
   BASE_URL: string = 'https://manebooru.art';
+  readonly MAX_CHARS: number = -1; // No Limit
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'svg', 'gif', 'webm'];
   acceptsSourceUrls: boolean = true;
   enableAdvertisement: boolean = false;

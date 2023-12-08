@@ -36,6 +36,7 @@ import _ from 'lodash';
 export class SubscribeStarAdult extends Website {
   readonly BASE_URL = 'https://www.subscribestar.adult';
   readonly acceptsAdditionalFiles = true;
+  readonly MAX_CHARS: number = -1; // No Limit
   readonly enableAdvertisement: boolean = false;
   readonly usernameShortcuts = [
     // {

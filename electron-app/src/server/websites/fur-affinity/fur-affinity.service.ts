@@ -36,6 +36,7 @@ import _ from 'lodash';
 export class FurAffinity extends Website {
   readonly BASE_URL = 'https://www.furaffinity.net';
   readonly waitBetweenPostsInterval = 70000;
+  readonly MAX_CHARS: number = -1; // No limit
   readonly defaultDescriptionParser = BBCodeParser.parse;
   readonly usernameShortcuts = [
     {

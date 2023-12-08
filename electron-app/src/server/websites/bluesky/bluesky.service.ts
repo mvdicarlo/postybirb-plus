@@ -171,10 +171,6 @@ export class Bluesky extends Website {
     ).map(tag => `#${tag}`);
   }
 
-  private appendRichTextTags(tags: string[], description: string): string {
-    return this.appendTags(this.formatTags(tags), description, this.MAX_CHARS, getRichTextLength);
-  }
-
   private async uploadMedia(
     agent: BskyAgent,
     data: BlueskyAccountData,
@@ -229,8 +225,6 @@ export class Bluesky extends Website {
       $type: 'app.bsky.embed.images',
     };
 
-    const status = this.appendRichTextTags(data.tags, data.description);
-
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
       labelsRecord = {
@@ -239,7 +233,7 @@ export class Bluesky extends Website {
       };
     }
 
-    const rt = new RichText({ text: status });
+    const rt = new RichText({ text: data.description });
     await rt.detectFacets(agent);
 
     let postResult = await agent
@@ -286,7 +280,6 @@ export class Bluesky extends Website {
     let profile = await agent.getProfile({actor: agent.session.did });
 
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
-    const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -296,7 +289,7 @@ export class Bluesky extends Website {
       };
     }
 
-    const rt = new RichText({ text: status });
+    const rt = new RichText({ text: data.description });
     await rt.detectFacets(agent);
     
     let postResult = await agent.post({
@@ -423,13 +416,15 @@ export class Bluesky extends Website {
         `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     } else {
-      this.validateAppendTags(
-        warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
-        description,
-        this.MAX_CHARS,
-        getRichTextLength,
-      );
+      if (description.toLowerCase().indexOf('{tags}') > -1) {
+        this.validateInsertTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          this.MAX_CHARS,
+          getRichTextLength,
+        );
+      }
     }
   }
 

@@ -53,6 +53,7 @@ export class MissKey extends Website {
   readonly BASE_URL: string;
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
+  MAX_CHARS: number = -1; // No Limit
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsFiles = [
     'png',
@@ -131,13 +132,13 @@ export class MissKey extends Website {
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
     const chunkCount = instanceInfo?.configuration?.statuses?.max_media_attachments ?? 4;
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    this.MAX_CHARS = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const chunks = _.chunk(uploadedMedias, chunkCount);
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`.substring(0, maxChars);
+    }`.substring(0, this.MAX_CHARS);
     let lastId = '';
     let source = '';
 
@@ -154,8 +155,6 @@ export class MissKey extends Website {
       if (data.options.spoilerText) {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
-
-      status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
       this.checkCancelled(cancellationToken);
       try {
@@ -184,7 +183,7 @@ export class MissKey extends Website {
     );
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    this.MAX_CHARS = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const statusOptions: any = {
@@ -197,7 +196,6 @@ export class MissKey extends Website {
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
-    status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
     this.checkCancelled(cancellationToken);
     try {
@@ -240,18 +238,18 @@ export class MissKey extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    this.MAX_CHARS = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
 
-    if (description.length > maxChars) {
+    if (description.length > this.MAX_CHARS) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+        `Max description length allowed is ${this.MAX_CHARS} characters (for this MissKey client).`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        maxChars
+        this.MAX_CHARS
       );
     }
 
@@ -322,17 +320,17 @@ export class MissKey extends Website {
       submissionPart.accountId,
       INFO_KEY,
     );
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
-    if (description.length > maxChars) {
+    this.MAX_CHARS = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    if (description.length > this.MAX_CHARS) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+        `Max description length allowed is ${this.MAX_CHARS} characters (for this MissKey client).`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        maxChars
+        this.MAX_CHARS
       );
     }
 

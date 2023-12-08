@@ -29,6 +29,7 @@ import FormContent from "../../utils/form-content.util";
 @Injectable()
 export class Artconomy extends Website {
   readonly BASE_URL: string = 'https://artconomy.com';
+  readonly MAX_CHARS: number = 2000;
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',
@@ -255,7 +256,7 @@ export class Artconomy extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     )
 
-    if (description.length > 2000) {
+    if (description.length > this.MAX_CHARS) {
       problems.push('Description must be 2000 characters or fewer.')
     }
 

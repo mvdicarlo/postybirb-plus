@@ -35,6 +35,7 @@ export class SubscribeStar extends Website {
   readonly BASE_URL = 'https://www.subscribestar.com';
   readonly acceptsAdditionalFiles = true;
   readonly enableAdvertisement: boolean = false;
+  readonly MAX_CHARS: number = -1; // No Limit
   readonly usernameShortcuts = [
     {
       key: 'ss',

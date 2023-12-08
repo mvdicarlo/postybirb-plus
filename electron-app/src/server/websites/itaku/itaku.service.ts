@@ -32,6 +32,7 @@ import _ from 'lodash';
 @Injectable()
 export class Itaku extends Website {
   BASE_URL: string = 'https://itaku.ee';
+  readonly MAX_CHARS: number = 5000;
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp4', 'mov', 'webm'];
   acceptsAdditionalFiles: boolean = false;
   readonly defaultDescriptionParser = PlaintextParser.parse;
@@ -236,7 +237,7 @@ export class Itaku extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > 5000) {
+    if (description.length > this.MAX_CHARS) {
       problems.push(
         `Max description length allowed is 5000 characters.`,
       );
@@ -278,7 +279,7 @@ export class Itaku extends Website {
       problems.push('Description required');
     }
 
-    if (description.length > 5000) {
+    if (description.length > this.MAX_CHARS) {
       problems.push(
         `Max description length allowed is 5000 characters.`,
       );
