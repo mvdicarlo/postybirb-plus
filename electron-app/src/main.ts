@@ -12,13 +12,12 @@ import {
 } from 'electron';
 import WindowStateKeeper from 'electron-window-state';
 import { enableSleep } from './app/power-save';
-import * as nodeUtil from 'node:util';
 import * as util from './app/utils';
 import { initialize as initializeRemote, enable as enableRemote } from '@electron/remote/main';
 import { session } from 'electron';
 
 initializeRemote();
-nodeUtil;
+
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
   app.quit();
