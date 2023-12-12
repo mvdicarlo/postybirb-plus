@@ -28,12 +28,21 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
+const portIndex = process.argv.findIndex((arg) => arg === '-p' || arg === '--port') + 1;
 process.env.PORT =
-  process.argv.find(arg => arg === '-p' || arg === '--port') || process.env.PORT || '9247';
-global.AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'https://postybirb-auth.azurewebsites.net';
-global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
-global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
-global.BASE_DIRECTORY = path.join(app.getPath('documents'), 'PostyBirb');
+  portIndex && !isNaN(Number(process.argv[portIndex]))
+    ? process.argv[portIndex]
+    : process.env.PORT || '9247';
+
+global.AUTH_SERVER_URL = 'https://postybirb-auth.azurewebsites.net';
+global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
+global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');
+
+const baseIndex = process.argv.findIndex((arg) => arg === '--directory') + 1;
+const defaultBase = path.join(app.getPath('documents'), 'PostyBirb');
+global.BASE_DIRECTORY =
+  baseIndex && process.argv[baseIndex] ? process.argv[baseIndex] : defaultBase;
+
 global.CHILD_PROCESS_IDS = [];
 
 if (global.DEBUG_MODE) {
