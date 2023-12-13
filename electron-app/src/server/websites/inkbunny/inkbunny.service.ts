@@ -29,7 +29,7 @@ import { InkbunnyAccountData } from './inkbunny-account.interface';
 @Injectable()
 export class Inkbunny extends Website {
   readonly BASE_URL: string = 'https://inkbunny.net';
-  readonly MAX_CHARS: number = -1; // No Limit
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = [
     'png',
     'jpeg',

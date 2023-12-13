@@ -28,7 +28,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class Aryion extends Website {
   readonly BASE_URL = 'https://aryion.com';
-  readonly MAX_CHARS: number = -1; // No limit
+  readonly MAX_CHARS: number = undefined; // No limit
   readonly defaultDescriptionParser = BBCodeParser.parse;
   readonly usernameShortcuts = [
     {

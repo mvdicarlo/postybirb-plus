@@ -28,7 +28,7 @@ import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown
 @Injectable()
 export class Furtastic extends Website {
   readonly BASE_URL: string = 'https://api.furtastic.art';
-  readonly MAX_CHARS: number = -1; // No Limit
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webm', 'pdf'];
   readonly defaultDescriptionParser = MarkdownParser.parse;
   readonly enableAdvertisement: boolean = true;

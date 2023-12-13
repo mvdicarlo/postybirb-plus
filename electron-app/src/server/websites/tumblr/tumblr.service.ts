@@ -33,7 +33,7 @@ export class Tumblr extends Website {
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp3', 'mp4'];
   readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;
-  readonly MAX_CHARS: number = -1; // No Limit
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly usernameShortcuts = [
     {
       key: 'tu',

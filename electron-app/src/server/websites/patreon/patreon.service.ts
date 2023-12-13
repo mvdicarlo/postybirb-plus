@@ -42,7 +42,7 @@ import Http from 'src/server/http/http.util';
 export class Patreon extends Website {
   readonly BASE_URL = 'https://www.patreon.com';
   readonly acceptsAdditionalFiles = true;
-  readonly MAX_CHARS: number = -1; // No Limit
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly refreshBeforePost: boolean = true;
   readonly waitBetweenPostsInterval = 90_000;
   readonly enableAdvertisement: boolean = false;

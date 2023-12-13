@@ -33,7 +33,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 @Injectable()
 export class Weasyl extends Website {
   readonly BASE_URL: string = 'https://www.weasyl.com';
-  readonly MAX_CHARS: number = -1; // No Limit
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = ['jpg', 'jpeg', 'png', 'gif', 'md', 'txt', 'pdf', 'swf', 'mp3'];
   readonly usernameShortcuts = [
     {
