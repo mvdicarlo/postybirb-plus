@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   FileRecord,
   FileSubmissionType,
+  MegalodonInstanceSettings,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import FileSize from 'src/server/utils/filesize.util';
@@ -35,8 +36,11 @@ export class Pixelfed extends Megalodon {
   getInstanceSettings(accountId: string) {
     const instanceInfo: PixelfedInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
 
-    this.MAX_CHARS = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
-    this.maxMediaCount = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+    let result = new MegalodonInstanceSettings();
+    result.maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    result.maxImages = instanceInfo ? instanceInfo?.configuration?.statuses?.max_media_attachments : 4;
+
+    return result;
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {

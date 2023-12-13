@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   FileRecord,
   FileSubmissionType,
+  MegalodonInstanceSettings,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import FileSize from 'src/server/utils/filesize.util';
