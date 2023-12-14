@@ -34,6 +34,7 @@ import { FileManagerService } from 'src/server/file-manager/file-manager.service
 import * as fs from 'fs';
 import { tmpdir } from 'os';
 import * as path from 'path';
+import SubmissionPartEntity from 'src/server/submission/submission-part/models/submission-part.entity';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -82,6 +83,16 @@ export abstract class Megalodon extends Website {
     this.logger.debug(instance.data);
     this.logger.debug("*************");
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
+  }
+
+  generateTagsString(
+    tags: string[],
+    description: string,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
+  ) : string {
+    const instanceSettings = this.getInstanceSettings(websitePart.accountId);
+    const { includedTags } = this.calculateFittingTags(tags, description, instanceSettings.maxChars);
+    return this.formatTags(includedTags).join(' ') ?? ''
   }
 
   abstract getScalingOptions(file: FileRecord, accountId: string): ScalingOptions;
@@ -158,7 +169,7 @@ export abstract class Megalodon extends Website {
     accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
     this.logger.log("Posting a notification")
-    this.getInstanceSettings(data.part.accountId);
+    // this.getInstanceSettings(data.part.accountId); // Unnecessary call ? 
 
     const M = generator(this.megalodonService, accountData.website, accountData.token);
 

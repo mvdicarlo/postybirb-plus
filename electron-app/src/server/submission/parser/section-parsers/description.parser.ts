@@ -66,7 +66,7 @@ export class DescriptionParser {
         },
         {
           name: 'tags',
-          content: website.generateTagsString(tags, description),
+          content: website.generateTagsString(tags, description, websitePart),
         },
       ]);
 

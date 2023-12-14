@@ -25,6 +25,7 @@ import { ValidationParts } from 'src/server/submission/validator/interfaces/vali
 import { FallbackInformation } from './interfaces/fallback-information.interface';
 import { LoginResponse } from './interfaces/login-response.interface';
 import { ScalingOptions } from './interfaces/scaling-options.interface';
+import SubmissionPartEntity from '../submission/submission-part/models/submission-part.entity';
 
 interface TagParseOptions {
   spaceReplacer: string;
@@ -159,12 +160,13 @@ export abstract class Website {
   generateTagsString(
     tags: string[],
     description: string,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
   ) : string {
     const { includedTags } = this.calculateFittingTags(tags, description, this.MAX_CHARS);
     return this.formatTags(includedTags).join(' ') ?? ''
   }
 
-  private calculateFittingTags(
+  protected calculateFittingTags(
     tags: string[],
     description: string,
     limit: number,
