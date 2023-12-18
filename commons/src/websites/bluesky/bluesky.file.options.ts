@@ -20,6 +20,11 @@ export class BlueskyFileOptionsEntity
   label_rating: string = '';
 
   @Expose()
+  @IsString()
+  @DefaultValue('')
+  threadgate: string = '';
+
+  @Expose()
   @IsOptional()
   @IsString()
   replyToUrl?: string;

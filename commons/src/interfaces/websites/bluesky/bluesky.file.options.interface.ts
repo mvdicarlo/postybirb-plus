@@ -4,4 +4,5 @@ export interface BlueskyFileOptions extends DefaultFileOptions {
   altText?: string;
   label_rating: string;
   replyToUrl?: string;
+  threadgate: string;
 }
