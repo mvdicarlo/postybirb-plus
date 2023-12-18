@@ -25,7 +25,7 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
+import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText, AppBskyFeedThreadgate} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
 import Graphemer from 'graphemer';
@@ -311,6 +311,23 @@ export class Bluesky extends Website {
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
+
+      // After the post has been made, check to see if we need to set a ThreadGate; these are the options to control who can reply to your post, and need additional calls
+      let threadGateRecord: (AppBskyFeedThreadgate.MentionRule | AppBskyFeedThreadgate.FollowingRule | AppBskyFeedThreadgate.ListRule)[] = [];
+      switch (data.options.threadgate) {
+        case "mention":
+          // threadGateRecord = {$type: 'app.bsky.feed.threadgate#mentionRule'};
+          break;
+        case "following":
+          break;
+        case "nobody":
+          break;
+        case "mention,following":
+          break;      
+        default: // Nothing needed - default
+          break;
+      } 
+
       return this.createPostResponse({
         source: friendlyUrl,
       });
