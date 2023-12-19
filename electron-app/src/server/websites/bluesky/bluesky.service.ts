@@ -263,7 +263,7 @@ export class Bluesky extends Website {
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
 
       // After the post has been made, check to see if we need to set a ThreadGate; these are the options to control who can reply to your post, and need additional calls
-      if (data.options.threadgate != "") {
+      if (data.options.threadgate !== "") {
         this.createThreadgate(agent, postResult.uri, data.options.threadgate);
       }
 
