@@ -12,6 +12,7 @@ import {
   Submission,
   SubmissionPart,
   SubmissionRating,
+  MegalodonInstanceSettings,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
@@ -132,13 +133,13 @@ export class MissKey extends Website {
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
     const chunkCount = instanceInfo?.configuration?.statuses?.max_media_attachments ?? 4;
-    this.MAX_CHARS = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const chunks = _.chunk(uploadedMedias, chunkCount);
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`.substring(0, this.MAX_CHARS);
+    }`.substring(0, maxChars);
     let lastId = '';
     let source = '';
 
@@ -183,7 +184,7 @@ export class MissKey extends Website {
     );
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    this.MAX_CHARS = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
     const statusOptions: any = {
@@ -192,7 +193,7 @@ export class MissKey extends Website {
     };
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`;
+    }`.substring(0, maxChars);
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
@@ -234,22 +235,19 @@ export class MissKey extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(
-      submissionPart.accountId,
-      INFO_KEY,
-    );
-    this.MAX_CHARS = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
-    if (description.length > this.MAX_CHARS) {
+    if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${this.MAX_CHARS} characters (for this MissKey client).`,
+        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );
     } else {
       this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        this.MAX_CHARS
+        maxChars
       );
     }
 
@@ -316,21 +314,18 @@ export class MissKey extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(
-      submissionPart.accountId,
-      INFO_KEY,
-    );
-    this.MAX_CHARS = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
-    if (description.length > this.MAX_CHARS) {
+    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${this.MAX_CHARS} characters (for this MissKey client).`,
+        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );
     } else {
       this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        this.MAX_CHARS
+        maxChars
       );
     }
 
