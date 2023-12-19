@@ -169,7 +169,6 @@ export abstract class Megalodon extends Website {
     accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
     this.logger.log("Posting a notification")
-    // this.getInstanceSettings(data.part.accountId); // Unnecessary call ? 
 
     const M = generator(this.megalodonService, accountData.website, accountData.token);
 
