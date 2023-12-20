@@ -25,10 +25,9 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
+import { BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, ComAtprotoLabelDefs, BlobRef, RichText, AppBskyFeedThreadgate, AtUri } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
-import Graphemer from 'graphemer';
 import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
 import FormContent from 'src/server/utils/form-content.util';
 
@@ -42,6 +41,12 @@ interface FetchHandlerResponse {
   headers: Record<string, string>;
   body: ArrayBuffer | undefined;
 }
+
+type ThreadgateSetting =
+  | {type: 'nobody'}
+  | {type: 'mention'}
+  | {type: 'following'}
+  | {type: 'list'; list: string};
 
 async function fetchHandler(
   reqUri: string,
@@ -256,12 +261,53 @@ export class Bluesky extends Website {
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
+
+      // After the post has been made, check to see if we need to set a ThreadGate; these are the options to control who can reply to your post, and need additional calls
+      if (data.options.threadgate !== "") {
+        this.createThreadgate(agent, postResult.uri, data.options.threadgate);
+      }
+
       return this.createPostResponse({
         source: friendlyUrl,
       });
     } else {
       return Promise.reject(this.createPostResponse({ message: 'Unknown error occurred' }));
     }
+  }
+
+  createThreadgate(
+    agent: BskyAgent,
+    postUri: string,
+    fromPostThreadGate: string,
+  ) {
+    let allow: (
+      | AppBskyFeedThreadgate.MentionRule
+      | AppBskyFeedThreadgate.FollowingRule
+      | AppBskyFeedThreadgate.ListRule
+    )[] = []
+
+    switch (fromPostThreadGate) {
+      case "mention":
+        allow.push({$type: 'app.bsky.feed.threadgate#mentionRule'});
+        break;
+      case "following":
+        allow.push({$type: 'app.bsky.feed.threadgate#followingRule'});
+        break;
+      case "mention,following":
+        allow.push({$type: 'app.bsky.feed.threadgate#followingRule'});
+        allow.push({$type: 'app.bsky.feed.threadgate#mentionRule'});
+        break;      
+      default: // Leave the array empty and this sets no one - nobody mode
+        break;
+    } 
+
+    const postUrip = new AtUri(postUri)
+    agent.api.app.bsky.feed.threadgate.create(
+      {repo: agent.session!.did, rkey: postUrip.rkey},
+      {post: postUri, createdAt: new Date().toISOString(), allow},
+    ).finally(() => {
+      return;
+    })
   }
 
   async postNotificationSubmission(
@@ -311,6 +357,12 @@ export class Bluesky extends Website {
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
+
+      // After the post has been made, check to see if we need to set a ThreadGate; these are the options to control who can reply to your post, and need additional calls
+      if (data.options.threadgate != "") {
+        this.createThreadgate(agent, postResult.uri, data.options.threadgate);
+      }
+
       return this.createPostResponse({
         source: friendlyUrl,
       });
