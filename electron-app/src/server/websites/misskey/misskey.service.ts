@@ -12,6 +12,7 @@ import {
   Submission,
   SubmissionPart,
   SubmissionRating,
+  MegalodonInstanceSettings,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
@@ -53,6 +54,7 @@ export class MissKey extends Website {
   readonly BASE_URL: string;
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
+  MAX_CHARS: number = -1; // No Limit
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly acceptsFiles = [
     'png',
@@ -157,8 +159,6 @@ export class MissKey extends Website {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      status = this.appendTags(this.formatTags(data.tags), status, maxChars);
-
       this.checkCancelled(cancellationToken);
       try {
         const result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
@@ -195,11 +195,10 @@ export class MissKey extends Website {
     };
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`;
+    }`.substring(0, maxChars);
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
-    status = this.appendTags(this.formatTags(data.tags), status, maxChars);
 
     this.checkCancelled(cancellationToken);
     try {
@@ -238,18 +237,15 @@ export class MissKey extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(
-      submissionPart.accountId,
-      INFO_KEY,
-    );
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
     if (description.length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
@@ -320,17 +316,14 @@ export class MissKey extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(
-      submissionPart.accountId,
-      INFO_KEY,
-    );
-    const maxChars = instanceInfo ? instanceInfo?.configuration?.statuses?.max_characters : 500;
+    const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
+    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
     if (description.length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,

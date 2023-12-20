@@ -28,6 +28,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class Derpibooru extends Website {
   BASE_URL: string = 'https://derpibooru.org';
+  MAX_CHARS: number = -1; // No limit
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'svg', 'gif', 'webm'];
   acceptsSourceUrls: boolean = true;
   enableAdvertisement: boolean = false;

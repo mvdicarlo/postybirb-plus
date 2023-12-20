@@ -28,6 +28,7 @@ import { DiscordAccountData } from './discord.account.interface';
 @Injectable()
 export class Discord extends Website {
   readonly BASE_URL: string = '';
+  readonly MAX_CHARS: number = 2000;
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
@@ -163,7 +164,7 @@ export class Discord extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > 2000) {
+    if (description.length > this.MAX_CHARS) {
       warnings.push('Max description length allowed is 2,000 characters.');
     }
 
@@ -182,7 +183,7 @@ export class Discord extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > 2000) {
+    if (description.length > this.MAX_CHARS) {
       warnings.push('Max description length allowed is 2,000 characters.');
     }
 

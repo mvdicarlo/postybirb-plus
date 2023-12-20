@@ -42,7 +42,7 @@ export class ParserService {
     private readonly fileManipulator: FileManipulationService,
     websitesService: WebsitesService,
   ) {
-    this.descriptionParser = new DescriptionParser(customShortcuts, websitesService, settings);
+    this.descriptionParser = new DescriptionParser(customShortcuts, websitesService, settings, this);
   }
 
   public async parse(

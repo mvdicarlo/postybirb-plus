@@ -102,3 +102,6 @@ export * from './models/default-file-options.entity';
 // Website Option Entities
 import * as WebsiteOptions from './websites/websites';
 export { WebsiteOptions };
+
+// Doesn't really fit :P
+export * from './websites/megalodon/megalodon.instancesettings';

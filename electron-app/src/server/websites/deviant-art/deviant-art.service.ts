@@ -42,6 +42,7 @@ interface DeviantArtFolder {
 @Injectable()
 export class DeviantArt extends Website {
   readonly BASE_URL = 'https://www.deviantart.com';
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles = [
     'jpeg',
     'jpg',

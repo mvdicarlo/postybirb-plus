@@ -11,6 +11,7 @@ import {
   Submission,
   SubmissionPart,
   SubmissionRating,
+  MegalodonInstanceSettings,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
@@ -33,6 +34,7 @@ import { FileManagerService } from 'src/server/file-manager/file-manager.service
 import * as fs from 'fs';
 import { tmpdir } from 'os';
 import * as path from 'path';
+import SubmissionPartEntity from 'src/server/submission/submission-part/models/submission-part.entity';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -42,10 +44,10 @@ export abstract class Megalodon extends Website {
   }
 
   megalodonService: 'mastodon' | 'pleroma' | 'misskey' | 'friendica' = 'mastodon'; // Set this as appropriate in your constructor
-  maxCharLength = 500; // Set this off the instance information!
-  maxMediaCount = 4; 
+  maxMediaCount = undefined; 
 
   readonly BASE_URL: string;
+  MAX_CHARS: number = undefined;
   readonly enableAdvertisement = false;
   readonly acceptsAdditionalFiles = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
@@ -83,9 +85,19 @@ export abstract class Megalodon extends Website {
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 
+  generateTagsString(
+    tags: string[],
+    description: string,
+    websitePart: SubmissionPartEntity<DefaultOptions>,
+  ) : string {
+    const instanceSettings = this.getInstanceSettings(websitePart.accountId);
+    const { includedTags } = this.calculateFittingTags(tags, description, instanceSettings.maxChars);
+    return this.formatTags(includedTags).join(' ') ?? ''
+  }
+
   abstract getScalingOptions(file: FileRecord, accountId: string): ScalingOptions;
 
-  abstract getInstanceSettings(accountId: string);
+  abstract getInstanceSettings(accountId: string) : MegalodonInstanceSettings;
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
@@ -93,7 +105,7 @@ export abstract class Megalodon extends Website {
     accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
     this.logger.log("Posting a file")
-    this.getInstanceSettings(data.part.accountId);
+    const instanceSettings = this.getInstanceSettings(data.part.accountId);
 
     const M = generator(this.megalodonService, accountData.website, accountData.token);
 
@@ -107,10 +119,10 @@ export abstract class Megalodon extends Website {
     }
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-    const chunks = _.chunk(uploadedMedias, this.maxMediaCount);
+    const chunks = _.chunk(uploadedMedias, instanceSettings.maxImages);
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
-    }`.substring(0, this.maxCharLength);
+    }`.substring(0, instanceSettings.maxChars);
     let lastId = '';
     let source = '';
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
@@ -132,8 +144,6 @@ export abstract class Megalodon extends Website {
       if (data.options.spoilerText) {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
-
-      status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
       try {
         const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
@@ -161,7 +171,6 @@ export abstract class Megalodon extends Website {
     accountData: MegalodonAccountData,
   ): Promise<PostResponse> {
     this.logger.log("Posting a notification")
-    this.getInstanceSettings(data.part.accountId);
 
     const M = generator(this.megalodonService, accountData.website, accountData.token);
 
@@ -176,7 +185,6 @@ export abstract class Megalodon extends Website {
     if (data.options.spoilerText) {
       statusOptions.spoiler_text = data.options.spoilerText;
     }
-    status = this.appendTags(this.formatTags(data.tags), status, this.maxCharLength);
 
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);
     if (replyToId) {
@@ -204,7 +212,7 @@ export abstract class Megalodon extends Website {
     submissionPart: SubmissionPart<MastodonFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
-    this.getInstanceSettings(submissionPart.accountId);
+    const instanceSettings = this.getInstanceSettings(submissionPart.accountId);
 
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -214,16 +222,16 @@ export abstract class Megalodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > this.maxCharLength) {
+    if (description.length > instanceSettings.maxChars) {
       warnings.push(
-        `Max description length allowed is ${this.maxCharLength} characters.`,
+        `Max description length allowed is ${instanceSettings.maxChars} characters.`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        this.maxCharLength,
+        instanceSettings.maxChars,
       );
     }
 
@@ -291,7 +299,7 @@ export abstract class Megalodon extends Website {
     submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
-    this.getInstanceSettings(submissionPart.accountId);
+    const instanceSettings = this.getInstanceSettings(submissionPart.accountId);
 
     const problems = [];
     const warnings = [];
@@ -300,16 +308,16 @@ export abstract class Megalodon extends Website {
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
 
-    if (description.length > this.maxCharLength) {
+    if (description.length > instanceSettings.maxChars) {
       warnings.push(
-        `Max description length allowed is ${this.maxCharLength} characters.`,
+        `Max description length allowed is ${instanceSettings.maxChars} characters.`,
       );
     } else {
-      this.validateAppendTags(
+      this.validateInsertTags(
         warnings,
         this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
-        this.maxCharLength,
+        instanceSettings.maxChars,
       );
     }
 
@@ -356,6 +364,7 @@ export abstract class Megalodon extends Website {
     }
 
     this.logger.log("Image uploaded");
+
     return upload.data.id;
   }
 

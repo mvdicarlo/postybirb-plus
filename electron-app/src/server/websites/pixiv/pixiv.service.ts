@@ -36,6 +36,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class Pixiv extends Website {
   readonly BASE_URL = 'https://www.pixiv.net';
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
   readonly waitBetweenPostsInterval = 60_000 * 5;
   readonly defaultDescriptionParser = PlaintextParser.parse;

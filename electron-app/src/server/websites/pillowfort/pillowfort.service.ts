@@ -34,6 +34,7 @@ import { Website } from '../website.base';
 export class Pillowfort extends Website {
   readonly BASE_URL = 'https://www.pillowfort.social';
   readonly acceptsAdditionalFiles = true;
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
   readonly usernameShortcuts = [
     {
