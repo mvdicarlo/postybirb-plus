@@ -120,7 +120,9 @@ export class MissKey extends Website {
     const uploadedMedias: string[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      const upload = await M.uploadMedia(file.file.value, { description: data.options.altText });
+      const upload = await M.uploadMedia(file.file.value, {
+        description: file.altText || data.options.altText,
+      });
       if (upload.status > 300) {
         return Promise.reject(
           this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),

@@ -215,8 +215,9 @@ export class Bluesky extends Website {
     let uploadedMedias: AppBskyEmbedImages.Image[] = [];
     let fileCount = 0;
     for (const file of files) {
-      const ref = await this.uploadMedia(agent, accountData, file.file, data.options.altText);
-      const image: AppBskyEmbedImages.Image = { image: ref, alt: data.options.altText };
+      const altText = file.altText || data.options.altText;
+      const ref = await this.uploadMedia(agent, accountData, file.file, altText);
+      const image: AppBskyEmbedImages.Image = { image: ref, alt: altText };
       uploadedMedias.push(image);
       fileCount++;
       if (fileCount == this.MAX_MEDIA) {
@@ -334,7 +335,13 @@ export class Bluesky extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (!submissionPart.data.altText) {
+    const files = [
+      submission.primary,
+      ...(submission.additional || []).filter(
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+      ),
+    ];
+    if (!submissionPart.data.altText && files.some(f => !f.altText)) {
       problems.push(
         'Bluesky currently always requires alt text to be provided, ' +
           'even if your settings say otherwise. This is a bug on their side.',
@@ -342,13 +349,6 @@ export class Bluesky extends Website {
     }
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
-
-    const files = [
-      submission.primary,
-      ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
-      ),
-    ];
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;

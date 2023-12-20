@@ -13,4 +13,5 @@ export interface FileRecord {
   type: FileSubmissionType;
   ignoredAccounts?: string[];
   buffer?: Buffer;
+  altText?: string;
 }

@@ -101,7 +101,9 @@ export abstract class Megalodon extends Website {
     const uploadedMedias: string[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      uploadedMedias.push(await this.uploadMedia(accountData, file.file, data.options.altText));
+      uploadedMedias.push(
+        await this.uploadMedia(accountData, file.file, file.altText || data.options.altText),
+      );
     }
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;

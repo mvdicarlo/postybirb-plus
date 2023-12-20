@@ -546,6 +546,17 @@ export class SubmissionService {
     if (!postAt) {
       submissionToUpdate.schedule.isScheduled = false;
     }
+
+    if (submissionToUpdate.type === SubmissionType.FILE && update.altTexts) {
+      const fileSubmission = submissionToUpdate as FileSubmissionEntity;
+      for (const fileRecord of [fileSubmission.primary, ...(fileSubmission.additional || [])]) {
+        const altText = update.altTexts[fileRecord.location];
+        if (altText !== undefined && altText != fileRecord.altText) {
+          fileRecord.altText = altText;
+        }
+      }
+    }
+
     await this.repository.update(submissionToUpdate);
 
     await Promise.all(removedParts.map(partId => this.partService.removeSubmissionPart(partId)));

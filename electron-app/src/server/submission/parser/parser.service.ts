@@ -186,6 +186,7 @@ export class ParserService {
           filename: this.parseFileName(file.name),
         },
       },
+      altText: file.altText || '',
     };
   }
 
