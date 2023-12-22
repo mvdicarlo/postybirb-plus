@@ -63,9 +63,23 @@ BlueskyNotificationOptions
           <Select.Option value={'porn'}>Adult: Porn</Select.Option>
         </Select>
       </Form.Item>,
+      <Form.Item label="Who can reply?">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.threadgate}
+          onChange={this.setValue.bind(this, 'threadgate')}
+        >
+          <Select.Option value={''}>Everybody</Select.Option>
+          <Select.Option value={'nobody'}>Nobody</Select.Option>
+          <Select.Option value={'mention'}>Mentioned Users</Select.Option>
+          <Select.Option value={'following'}>Followed Users</Select.Option>   
+          <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>     
+        </Select>
+      </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
-      </Form.Item>,
+      </Form.Item>
     );
     return elements;
   }
@@ -88,6 +102,20 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
           <Select.Option value={'porn'}>Adult: Porn</Select.Option>
         </Select>
       </Form.Item>,
+      <Form.Item label="Who can reply?">
+      <Select
+        {...GenericSelectProps}
+        className="w-full"
+        value={data.threadgate}
+        onChange={this.setValue.bind(this, 'threadgate')}
+      >
+        <Select.Option value={''}>Everybody</Select.Option>
+        <Select.Option value={'nobody'}>Nobody</Select.Option>
+        <Select.Option value={'mention'}>Mentioned Users</Select.Option>
+        <Select.Option value={'following'}>Followed Users</Select.Option>   
+        <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>     
+      </Select>                  
+    </Form.Item>,
       <Form.Item label="Alt Text">
         <Input
           value={data.altText}

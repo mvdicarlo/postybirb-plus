@@ -29,6 +29,7 @@ import _ from 'lodash';
 @Injectable()
 export class HentaiFoundry extends Website {
   readonly BASE_URL = 'https://www.hentai-foundry.com';
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'svg', 'gif'];
   readonly defaultDescriptionParser = BBCodeParser.parse;
   readonly usernameShortcuts = [

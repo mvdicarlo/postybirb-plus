@@ -29,6 +29,7 @@ import _ from 'lodash';
 @Injectable()
 export class KoFi extends Website {
   readonly BASE_URL: string = 'https://ko-fi.com';
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif'];
   readonly acceptsAdditionalFiles: boolean = true;
 

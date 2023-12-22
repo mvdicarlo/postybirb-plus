@@ -29,6 +29,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class e621 extends Website {
   readonly BASE_URL: string = 'https://e621.net';
+  readonly MAX_CHARS: number = undefined; // No limit
   readonly acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webm'];
   readonly acceptsSourceUrls: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;

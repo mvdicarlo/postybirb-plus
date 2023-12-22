@@ -25,10 +25,9 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {  BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, AppBskyRichtextFacet, ComAtprotoLabelDefs, BlobRef, RichText} from '@atproto/api';
+import { BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, ComAtprotoLabelDefs, BlobRef, RichText, AppBskyFeedThreadgate, AtUri } from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from "node-fetch";
-import Graphemer from 'graphemer';
 import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
 import FormContent from 'src/server/utils/form-content.util';
 
@@ -42,6 +41,12 @@ interface FetchHandlerResponse {
   headers: Record<string, string>;
   body: ArrayBuffer | undefined;
 }
+
+type ThreadgateSetting =
+  | {type: 'nobody'}
+  | {type: 'mention'}
+  | {type: 'following'}
+  | {type: 'list'; list: string};
 
 async function fetchHandler(
   reqUri: string,
@@ -171,10 +176,6 @@ export class Bluesky extends Website {
     ).map(tag => `#${tag}`);
   }
 
-  private appendRichTextTags(tags: string[], description: string): string {
-    return this.appendTags(this.formatTags(tags), description, this.MAX_CHARS, getRichTextLength);
-  }
-
   private async uploadMedia(
     agent: BskyAgent,
     data: BlueskyAccountData,
@@ -215,8 +216,9 @@ export class Bluesky extends Website {
     let uploadedMedias: AppBskyEmbedImages.Image[] = [];
     let fileCount = 0;
     for (const file of files) {
-      const ref = await this.uploadMedia(agent, accountData, file.file, data.options.altText);
-      const image: AppBskyEmbedImages.Image = { image: ref, alt: data.options.altText };
+      const altText = file.altText || data.options.altText;
+      const ref = await this.uploadMedia(agent, accountData, file.file, altText);
+      const image: AppBskyEmbedImages.Image = { image: ref, alt: altText };
       uploadedMedias.push(image);
       fileCount++;
       if (fileCount == this.MAX_MEDIA) {
@@ -229,8 +231,6 @@ export class Bluesky extends Website {
       $type: 'app.bsky.embed.images',
     };
 
-    const status = this.appendRichTextTags(data.tags, data.description);
-
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
       labelsRecord = {
@@ -239,7 +239,7 @@ export class Bluesky extends Website {
       };
     }
 
-    const rt = new RichText({ text: status });
+    const rt = new RichText({ text: data.description });
     await rt.detectFacets(agent);
 
     let postResult = await agent
@@ -261,12 +261,53 @@ export class Bluesky extends Website {
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
+
+      // After the post has been made, check to see if we need to set a ThreadGate; these are the options to control who can reply to your post, and need additional calls
+      if (data.options.threadgate !== "") {
+        this.createThreadgate(agent, postResult.uri, data.options.threadgate);
+      }
+
       return this.createPostResponse({
         source: friendlyUrl,
       });
     } else {
       return Promise.reject(this.createPostResponse({ message: 'Unknown error occurred' }));
     }
+  }
+
+  createThreadgate(
+    agent: BskyAgent,
+    postUri: string,
+    fromPostThreadGate: string,
+  ) {
+    let allow: (
+      | AppBskyFeedThreadgate.MentionRule
+      | AppBskyFeedThreadgate.FollowingRule
+      | AppBskyFeedThreadgate.ListRule
+    )[] = []
+
+    switch (fromPostThreadGate) {
+      case "mention":
+        allow.push({$type: 'app.bsky.feed.threadgate#mentionRule'});
+        break;
+      case "following":
+        allow.push({$type: 'app.bsky.feed.threadgate#followingRule'});
+        break;
+      case "mention,following":
+        allow.push({$type: 'app.bsky.feed.threadgate#followingRule'});
+        allow.push({$type: 'app.bsky.feed.threadgate#mentionRule'});
+        break;      
+      default: // Leave the array empty and this sets no one - nobody mode
+        break;
+    } 
+
+    const postUrip = new AtUri(postUri)
+    agent.api.app.bsky.feed.threadgate.create(
+      {repo: agent.session!.did, rkey: postUrip.rkey},
+      {post: postUri, createdAt: new Date().toISOString(), allow},
+    ).finally(() => {
+      return;
+    })
   }
 
   async postNotificationSubmission(
@@ -286,7 +327,6 @@ export class Bluesky extends Website {
     let profile = await agent.getProfile({actor: agent.session.did });
 
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
-    const status = this.appendRichTextTags(data.tags, data.description);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -296,7 +336,7 @@ export class Bluesky extends Website {
       };
     }
 
-    const rt = new RichText({ text: status });
+    const rt = new RichText({ text: data.description });
     await rt.detectFacets(agent);
     
     let postResult = await agent.post({
@@ -317,6 +357,12 @@ export class Bluesky extends Website {
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
+
+      // After the post has been made, check to see if we need to set a ThreadGate; these are the options to control who can reply to your post, and need additional calls
+      if (data.options.threadgate != "") {
+        this.createThreadgate(agent, postResult.uri, data.options.threadgate);
+      }
+
       return this.createPostResponse({
         source: friendlyUrl,
       });
@@ -334,7 +380,13 @@ export class Bluesky extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (!submissionPart.data.altText) {
+    const files = [
+      submission.primary,
+      ...(submission.additional || []).filter(
+        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
+      ),
+    ];
+    if (!submissionPart.data.altText && files.some(f => !f.altText)) {
       problems.push(
         'Bluesky currently always requires alt text to be provided, ' +
           'even if your settings say otherwise. This is a bug on their side.',
@@ -342,13 +394,6 @@ export class Bluesky extends Website {
     }
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
-
-    const files = [
-      submission.primary,
-      ...(submission.additional || []).filter(
-        f => !f.ignoredAccounts!.includes(submissionPart.accountId),
-      ),
-    ];
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
@@ -423,13 +468,15 @@ export class Bluesky extends Website {
         `Max description length allowed is ${this.MAX_CHARS} characters.`,
       );
     } else {
-      this.validateAppendTags(
-        warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
-        description,
-        this.MAX_CHARS,
-        getRichTextLength,
-      );
+      if (description.toLowerCase().indexOf('{tags}') > -1) {
+        this.validateInsertTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          this.MAX_CHARS,
+          getRichTextLength,
+        );
+      }
     }
   }
 

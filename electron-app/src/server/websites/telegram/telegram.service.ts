@@ -40,6 +40,7 @@ import _ = require('lodash');
 export class Telegram extends Website {
   readonly BASE_URL: string;
   readonly acceptsFiles: string[] = [];
+  readonly MAX_CHARS: number = undefined; // No Limit
   private readonly instances: Record<string, MTProto> = {};
   private authData: Record<string, { phone_code_hash: string; phone_number: string }> = {};
   public acceptsAdditionalFiles = true;

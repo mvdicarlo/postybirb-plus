@@ -38,6 +38,7 @@ import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 @Injectable()
 export class SoFurry extends Website {
   readonly BASE_URL: string = 'https://www.sofurry.com';
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3', 'mp4'];
   readonly usernameShortcuts = [
     {

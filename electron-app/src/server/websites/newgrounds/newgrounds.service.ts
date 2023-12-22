@@ -42,6 +42,7 @@ type NewgroundsPostResponse = {
 export class Newgrounds extends Website {
   readonly BASE_URL: string = 'https://www.newgrounds.com';
   readonly acceptsFiles = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
+  readonly MAX_CHARS: number = undefined; // No Limit
   readonly usernameShortcuts = [
     {
       key: 'ng',

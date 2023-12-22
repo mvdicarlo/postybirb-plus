@@ -24,6 +24,7 @@ import { Website } from '../website.base';
 @Injectable()
 export class Custom extends Website {
   readonly BASE_URL: string = '';
+  readonly MAX_CHARS: number = undefined; // No limit
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
 

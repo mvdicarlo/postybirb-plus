@@ -5,4 +5,5 @@ export interface SubmissionUpdate {
   parts: SubmissionPart<any>[];
   removedParts: string[]; // list of SubmissionPart ids
   postAt?: number;
+  altTexts: { [key: string]: string };
 }

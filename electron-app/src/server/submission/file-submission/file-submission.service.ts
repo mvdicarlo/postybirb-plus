@@ -213,6 +213,7 @@ export class FileSubmissionService {
       ignoredAccounts: [],
       height: 0,
       width: 0,
+      altText: '',
     };
 
     if (file.mimetype.includes('image/jpeg') || file.mimetype.includes('image/png')) {

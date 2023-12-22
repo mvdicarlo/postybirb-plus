@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.1.35",
+  "version": "3.1.36",
   "description": "(ClientServer) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "main": "dist/main.js",
   "author": "Michael DiCarlo",
@@ -37,7 +37,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@atproto/api": "^0.6.4",
+    "@atproto/api": "^0.7.4",
     "@electron/remote": "^2.0.8",
     "@mtproto/core": "^6.3.0",
     "@nestjs/common": "^7.6.18",
