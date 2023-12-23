@@ -282,7 +282,7 @@ export class Newgrounds extends Website {
           encoder: 'quill',
           title: data.title,
           'option[longdescription]': this.parseDescription(data.description),
-          'option[tags]': this.formatTags(data.tags).join(','),
+          'option[tags]': this.formatTags(data.tags),
           'option[include_in_portal]': options.sketch ? '0' : '1',
           'option[use_creative_commons]': options.creativeCommons ? '1' : '0',
           'option[cc_commercial]': options.commercial ? 'yes' : 'no',
@@ -351,13 +351,13 @@ export class Newgrounds extends Website {
     }
   }
 
-  formatTags(tags: string[]): any {
+  formatTags(tags: string[]): string {
     return super
-      .formatTags(tags, { spaceReplacer: '-' })
+      .parseTags(tags, { spaceReplacer: '-' })
       .map(tag => {
         return tag.replace(/(\(|\)|:|#|;|\]|\[|')/g, '').replace(/_/g, '-');
       })
-      .slice(0, 12);
+      .slice(0, 12).join(',');
   }
 
   validateFileSubmission(

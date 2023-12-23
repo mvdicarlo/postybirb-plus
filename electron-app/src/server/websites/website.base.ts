@@ -128,8 +128,8 @@ export abstract class Website {
       .map(tag => tag.replace(/\s/g, options.spaceReplacer).trim());
   }
 
-  formatTags(tags: string[], options?: TagParseOptions): any {
-    return this.parseTags(tags, options);
+  formatTags(tags: string[], options?: TagParseOptions): string {
+    return this.parseTags(tags, options).join(', ').trim();
   }
 
   validateInsertTags(
@@ -162,8 +162,22 @@ export abstract class Website {
     description: string,
     websitePart: SubmissionPartEntity<DefaultOptions>,
   ) : string {
+    this.logger.debug(`Max Char Count: ${this.MAX_CHARS}`);
+    if (this.MAX_CHARS === undefined) {
+      this.logger.debug(`generateTagsString: tags contains ${tags.length} items`);
+      console.log(tags);
+      let t = this.parseTags(tags);
+      if (t.length > 0) { 
+        return this.formatTags(t); 
+      }
+      return '';
+    }
+
     const { includedTags } = this.calculateFittingTags(tags, description, this.MAX_CHARS);
-    return this.formatTags(includedTags).join(' ') ?? ''
+  
+    this.logger.debug(`generateTagsString: includedTags contains ${includedTags.length} items`);
+    console.log(includedTags);
+    return this.formatTags(includedTags) ?? ''
   }
 
   protected calculateFittingTags(

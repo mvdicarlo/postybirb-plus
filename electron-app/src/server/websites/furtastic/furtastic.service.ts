@@ -115,8 +115,8 @@ export class Furtastic extends Website {
     }
   }
 
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(' ').trim();
+  formatTags(tags: string[]): string {
+    return super.formatTags(tags);
   }
 
   transformAccountData(data: FurtasticAccountData) {

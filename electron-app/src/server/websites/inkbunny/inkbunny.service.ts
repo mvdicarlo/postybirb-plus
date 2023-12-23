@@ -219,8 +219,8 @@ export class Inkbunny extends Website {
     });
   }
 
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(',').trim();
+  formatTags(tags: string[]): string {
+    return super.parseTags(tags).join(',').trim();
   }
 
   transformAccountData(data: InkbunnyAccountData) {

@@ -139,9 +139,9 @@ export class HentaiFoundry extends Website {
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
   }
 
-  formatTags(tags: string[]) {
+  formatTags(tags: string[]): string {
     const maxLength = 500;
-    const t = super.formatTags(tags);
+    const t = super.parseTags(tags)
     let tagString = t.join(', ').trim();
 
     return tagString.length > maxLength

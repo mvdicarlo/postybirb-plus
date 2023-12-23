@@ -418,9 +418,9 @@ export class FurryNetwork extends Website {
     }
   }
 
-  formatTags(tags: string[]) {
+  formatTags(tags: string[]): string {
     return super
-      .formatTags(tags, { spaceReplacer: '-', maxLength: 30, minLength: 3 })
+      .parseTags(tags, { spaceReplacer: '-', maxLength: 30, minLength: 3 })
       .map(tag =>
         tag
           .replace(/(\(|\)|:|#|;|\]|\[|\.|')/g, '')
@@ -428,7 +428,7 @@ export class FurryNetwork extends Website {
           .replace(/\?/g, 'unknown'),
       )
       .filter(tag => tag.length >= 3)
-      .slice(0, 30);
+      .slice(0, 30).join(' ');
   }
 
   validateFileSubmission(

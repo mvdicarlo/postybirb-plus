@@ -92,7 +92,7 @@ export abstract class Megalodon extends Website {
   ) : string {
     const instanceSettings = this.getInstanceSettings(websitePart.accountId);
     const { includedTags } = this.calculateFittingTags(tags, description, instanceSettings.maxChars);
-    return this.formatTags(includedTags).join(' ') ?? ''
+    return this.formatTags(includedTags) ?? ''
   }
 
   abstract getScalingOptions(file: FileRecord, accountId: string): ScalingOptions;
@@ -200,11 +200,11 @@ export abstract class Megalodon extends Website {
     }
   }
 
-  formatTags(tags: string[]) {
+  formatTags(tags: string[]): string {
     return this.parseTags(
       tags.map(tag => tag.replace(/[^a-z0-9]/gi, ' ')).map(tag => tag.split(' ').join('')),
       { spaceReplacer: '_' },
-    ).map(tag => `#${tag}`);
+    ).map(tag => `#${tag}`).join(' ');
   }
 
   validateFileSubmission(
@@ -229,7 +229,7 @@ export abstract class Megalodon extends Website {
     } else {
       this.validateInsertTags(
         warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        this.parseTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
         instanceSettings.maxChars,
       );
@@ -315,7 +315,7 @@ export abstract class Megalodon extends Website {
     } else {
       this.validateInsertTags(
         warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        this.parseTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
         instanceSettings.maxChars,
       );

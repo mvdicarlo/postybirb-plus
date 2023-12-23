@@ -227,7 +227,7 @@ export class Picarto extends Website {
             schedule_publishing_time: '',
             schedule_publishing_timezone: '',
             software: data.options.softwares.join(','),
-            tags: this.formatTags(data.tags).join(','),
+            tags: this.formatTags(data.tags),
             title: data.title,
             variations: variations.join(','),
             visibility: data.options.visibility,
@@ -252,11 +252,11 @@ export class Picarto extends Website {
     return this.createPostResponse({});
   }
 
-  formatTags(tags: string[]) {
+  formatTags(tags: string[]): string {
     return super
-      .formatTags(tags, { spaceReplacer: '_', maxLength: 30, minLength: 1 })
+      .parseTags(tags, { spaceReplacer: '_', maxLength: 30, minLength: 1 })
       .filter(tag => tag.length >= 1)
-      .slice(0, 30);
+      .slice(0, 30).join(',');
   }
 
   validateFileSubmission(

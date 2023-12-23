@@ -164,11 +164,11 @@ export class Bluesky extends Website {
     };
   }
 
-  formatTags(tags: string[]) {
+  formatTags(tags: string[]): string {
     return this.parseTags(
       tags.map(tag => tag.replace(/[^a-z0-9]/gi, ' ')).map(tag => tag.split(' ').join('')),
       { spaceReplacer: '_' },
-    ).map(tag => `#${tag}`);
+    ).map(tag => `#${tag}`).join(' ');
   }
 
   private async uploadMedia(
@@ -419,7 +419,7 @@ export class Bluesky extends Website {
       if (description.toLowerCase().indexOf('{tags}') > -1) {
         this.validateInsertTags(
           warnings,
-          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          this.parseTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
           description,
           this.MAX_CHARS,
           getRichTextLength,

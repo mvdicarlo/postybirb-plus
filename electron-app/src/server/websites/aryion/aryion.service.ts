@@ -128,7 +128,7 @@ export class Aryion extends Website {
       file: postFile,
       thumb: data.thumbnail,
       desc: data.description,
-      tags: this.formatTags(data.tags)
+      tags: this.parseTags(data.tags)
         .filter(f => !f.match(/^vore$/i))
         .filter(f => !f.match(/^non-vore$/i))
         .join('\n'),

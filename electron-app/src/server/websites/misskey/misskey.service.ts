@@ -210,7 +210,7 @@ export class MissKey extends Website {
     }
   }
 
-  formatTags(tags: string[]) {
+  formatTags(tags: string[]): string {
     return this.parseTags(
       tags
         .map(tag => tag.replace(/[^a-z0-9]/gi, ' '))
@@ -221,7 +221,7 @@ export class MissKey extends Website {
             .join(''),
         ),
       { spaceReplacer: '_' },
-    ).map(tag => `#${tag}`);
+    ).map(tag => `#${tag}`).join (' ');
   }
 
   validateFileSubmission(
@@ -247,7 +247,7 @@ export class MissKey extends Website {
     } else {
       this.validateInsertTags(
         warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        this.parseTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
         maxChars
       );
@@ -325,7 +325,7 @@ export class MissKey extends Website {
     } else {
       this.validateInsertTags(
         warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+        this.parseTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
         description,
         maxChars
       );

@@ -175,11 +175,11 @@ export class DeviantArt extends Website {
     return text.replace(/<p/gm, '<div').replace(/<\/p>/gm, '</div>').replace(/\n/g, '<br>');
   }
 
-  formatTags(tags: string[]): string[] {
+  formatTags(tags: string[]): string {
     tags = super.parseTags(tags);
     if (tags.length > this.MAX_TAGS) {
-      return tags.slice(0, this.MAX_TAGS - 1);
-    } else return tags;
+      return tags.slice(0, this.MAX_TAGS - 1).join(' ');
+    } else return tags.join(' ');
   }
 
   async postFileSubmission(
@@ -194,7 +194,7 @@ export class DeviantArt extends Website {
       artist_comments: data.description,
     };
 
-    this.formatTags(data.tags)
+    this.parseTags(data.tags)
       .map(t => t.replace(/\//g, '_'))
       .forEach((t, i) => {
         uploadForm[`tags[${i}]`] = t;

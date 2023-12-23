@@ -312,8 +312,8 @@ export class Weasyl extends Website {
     this.accountInformation.set(id, { folders: convertedFolders });
   }
 
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(' ');
+  formatTags(tags: string[]): string {
+    return super.formatTags(tags);
   }
 
   validateFileSubmission(
