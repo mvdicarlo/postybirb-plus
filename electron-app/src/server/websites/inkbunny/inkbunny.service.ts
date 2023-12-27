@@ -156,7 +156,7 @@ export class Inkbunny extends Website {
       submission_id: upload.body.submission_id,
       title: data.title,
       desc: data.description,
-      keywords: this.formatTags(data.tags),
+      keywords: this.formatTags(data.tags).join(',').trim(),
     };
 
     const ratings = this.getRating(data.rating);
@@ -217,10 +217,6 @@ export class Inkbunny extends Website {
     return tags.map(tag => {
       return tag.trim().replace(/\s/gm, '_').replace(/\\/gm, '/');
     });
-  }
-
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(',').trim();
   }
 
   transformAccountData(data: InkbunnyAccountData) {

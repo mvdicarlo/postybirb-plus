@@ -98,7 +98,7 @@ export class Pillowfort extends Website {
       title: data.title,
       content: `<p>${data.description}</p>`,
       privacy: data.options.privacy,
-      tags: this.formatTags(data.tags),
+      tags: this.formatTags(data.tags).join(', '),
       commit: 'Submit',
     };
 
@@ -160,7 +160,7 @@ export class Pillowfort extends Website {
       title: data.title,
       content: `<p>${data.description}</p>`,
       privacy: data.options.privacy,
-      tags: this.formatTags(data.tags),
+      tags: this.formatTags(data.tags).join(', '),
       commit: 'Submit',
     };
 
@@ -189,7 +189,7 @@ export class Pillowfort extends Website {
   }
 
   formatTags(tags: string[]) {
-    return tags.join(', ');
+    return tags;
   }
 
   validateFileSubmission(

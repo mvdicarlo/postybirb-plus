@@ -92,7 +92,7 @@ export class e621 extends Website {
     const form: any = {
       login: accountData.username,
       api_key: accountData.key,
-      'upload[tag_string]': this.formatTags(data.tags),
+      'upload[tag_string]': this.formatTags(data.tags).join(' ').trim(),
       'upload[file]': data.primary.file,
       'upload[rating]': this.getRating(data.rating),
       'upload[description]': data.description,
@@ -142,10 +142,6 @@ export class e621 extends Website {
       default:
         return 's';
     }
-  }
-
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(' ').trim();
   }
 
   transformAccountData(data: e621AccountData) {

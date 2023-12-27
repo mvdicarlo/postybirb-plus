@@ -119,7 +119,7 @@ export class Weasyl extends Website {
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
-      tags: this.formatTags(data.tags),
+      tags: this.formatTags(data.tags).join(' '),
     };
 
     this.checkCancelled(cancellationToken);
@@ -162,7 +162,7 @@ export class Weasyl extends Website {
       title: data.title,
       rating: this.convertRating(data.rating),
       content: data.description,
-      tags: this.formatTags(data.tags),
+      tags: this.formatTags(data.tags).join(' '),
       submitfile: postFile,
       redirect: url,
     };
@@ -313,7 +313,7 @@ export class Weasyl extends Website {
   }
 
   formatTags(tags: string[]) {
-    return super.formatTags(tags).join(' ');
+    return super.formatTags(tags);
   }
 
   validateFileSubmission(

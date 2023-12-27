@@ -128,7 +128,7 @@ export abstract class Website {
       .map(tag => tag.replace(/\s/g, options.spaceReplacer).trim());
   }
 
-  formatTags(tags: string[], options?: TagParseOptions): any {
+  formatTags(tags: string[], options?: TagParseOptions): string[] {
     return this.parseTags(tags, options);
   }
 
@@ -139,7 +139,12 @@ export abstract class Website {
     limit: number,
     getLength: (text: string) => number = text => text.length,
   ): void {
-    const { includedTags, skippedTags } = this.calculateFittingTags(tags, description, limit, getLength);
+    const { includedTags, skippedTags } = this.calculateFittingTags(
+      tags,
+      description,
+      limit,
+      getLength,
+    );
     const skippedCount = skippedTags.length;
     if (skippedCount !== 0) {
       const includedCount = includedTags.length;
@@ -161,9 +166,18 @@ export abstract class Website {
     tags: string[],
     description: string,
     websitePart: SubmissionPartEntity<DefaultOptions>,
-  ) : string {
+  ): string {
     const { includedTags } = this.calculateFittingTags(tags, description, this.MAX_CHARS);
-    return this.formatTags(includedTags).join(' ') ?? ''
+    const formattedTags = this.formatTags(includedTags);
+    if (Array.isArray(formattedTags)) {
+      return formattedTags.join(' ');
+    }
+
+    if (typeof formattedTags === 'string') {
+      return formattedTags;
+    }
+
+    return '';
   }
 
   protected calculateFittingTags(

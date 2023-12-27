@@ -61,7 +61,7 @@ export class Furtastic extends Website {
     accountData: FurtasticAccountData,
   ): Promise<PostResponse> {
     const form: any = {
-      tags: this.formatTags(data.tags),
+      tags: this.formatTags(data.tags).join(' ').trim(),
       'file[0]': data.primary.file,
       rating: this.getRating(data.rating),
       description: data.description,
@@ -113,10 +113,6 @@ export class Furtastic extends Website {
       default:
         return 'safe';
     }
-  }
-
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(' ').trim();
   }
 
   transformAccountData(data: FurtasticAccountData) {

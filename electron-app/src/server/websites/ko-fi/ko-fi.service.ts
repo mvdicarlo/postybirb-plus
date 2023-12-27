@@ -160,10 +160,6 @@ export class KoFi extends Website {
     return this.createPostResponse({});
   }
 
-  formatTags(tags: string[]) {
-    return super.formatTags(tags).join(',');
-  }
-
   validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<KoFiFileOptions>,
