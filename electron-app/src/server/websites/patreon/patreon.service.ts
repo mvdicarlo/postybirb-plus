@@ -138,6 +138,12 @@ export class Patreon extends Website {
         if (rule.attributes.access_rule_type === 'public') {
           tiers.find(t => t.value === '-1').value = rule.id;
         }
+        if (rule.attributes.access_rule_type === 'patrons') {
+          tiers.push({
+            value: rule.id,
+            label: 'Patrons Only',
+          });
+        }
       });
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
