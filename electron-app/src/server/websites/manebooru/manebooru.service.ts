@@ -121,7 +121,7 @@ export class Manebooru extends Website {
         custom: 'document.body.querySelectorAll("form")[3]',
       })),
       _method: 'post',
-      'image[tag_input]': this.formatTags(tags),
+      'image[tag_input]': this.formatTags(tags).join(', ').trim(),
       'image[image]': data.primary.file,
       'image[description]': data.description,
       'image[source_url]': data.options.source || data.sources[0] || '',
@@ -138,7 +138,7 @@ export class Manebooru extends Website {
   }
 
   formatTags(tags: string[]) {
-    return tags.join(', ').trim();
+    return tags;
   }
 
   validateFileSubmission(

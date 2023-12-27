@@ -277,7 +277,7 @@ export class FurAffinity extends Website {
     const form: any = {
       key: HtmlParserUtil.getInputValue(part2.body.split('"submit-finalize"').pop(), 'key'),
       title: data.title,
-      keywords: this.formatTags(data.tags),
+      keywords: this.getFormTags(data.tags),
       message: data.description,
       rating: this.getRating(data.rating),
       create_folder_name: '',
@@ -346,7 +346,7 @@ export class FurAffinity extends Website {
     return this.createPostResponse({ source: post.returnUrl.replace('?upload-successful', '') });
   }
 
-  formatTags(tags: string[]): string {
+  getFormTags(tags: string[]): string {
     const maxLength = 250;
     tags = super.parseTags(tags).map(tag => tag.replace(/(\/|\\)/gm, '_'));
     const filteredTags = tags.filter(tag => tag.length >= 3);

@@ -138,6 +138,12 @@ export class Patreon extends Website {
         if (rule.attributes.access_rule_type === 'public') {
           tiers.find(t => t.value === '-1').value = rule.id;
         }
+        if (rule.attributes.access_rule_type === 'patrons') {
+          tiers.push({
+            value: rule.id,
+            label: 'Patrons Only',
+          });
+        }
       });
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, tiers);
@@ -277,7 +283,18 @@ export class Patreon extends Website {
     const link = create.data.id;
 
     // Tags
-    const formattedTags = this.formatTags(data.tags);
+    const formattedTags = this.formatTags(data.tags)
+      .map(tag => {
+        return {
+          type: 'post_tag',
+          id: `user_defined;${tag}`,
+          attributes: {
+            value: tag,
+            cardinality: 1,
+          },
+        };
+      })
+      .slice(0, 50);
     const relationshipTags = formattedTags.map(tag => {
       return {
         id: tag.id,
@@ -428,7 +445,18 @@ export class Patreon extends Website {
     }
 
     // Tags
-    const formattedTags = this.formatTags(data.tags);
+    const formattedTags = this.formatTags(data.tags)
+      .map(tag => {
+        return {
+          type: 'post_tag',
+          id: `user_defined;${tag}`,
+          attributes: {
+            value: tag,
+            cardinality: 1,
+          },
+        };
+      })
+      .slice(0, 50);
     const relationshipTags = formattedTags.map(tag => {
       return {
         id: tag.id,
@@ -607,20 +635,8 @@ export class Patreon extends Website {
     }
   }
 
-  formatTags(tags: string[]): any {
-    tags = tags.filter(tag => tag.length <= 25);
-    return tags
-      .map(tag => {
-        return {
-          type: 'post_tag',
-          id: `user_defined;${tag}`,
-          attributes: {
-            value: tag,
-            cardinality: 1,
-          },
-        };
-      })
-      .slice(0, 50);
+  formatTags(tags: string[]): string[] {
+    return tags.filter(tag => tag.length <= 25);
   }
 
   validateFileSubmission(

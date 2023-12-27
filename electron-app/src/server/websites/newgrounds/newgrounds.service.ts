@@ -351,7 +351,7 @@ export class Newgrounds extends Website {
     }
   }
 
-  formatTags(tags: string[]): any {
+  formatTags(tags: string[]): string[] {
     return super
       .formatTags(tags, { spaceReplacer: '-' })
       .map(tag => {

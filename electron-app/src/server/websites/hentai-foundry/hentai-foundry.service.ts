@@ -96,7 +96,7 @@ export class HentaiFoundry extends Website {
       'Pictures[fileupload]': data.primary.file,
       'Pictures[submissionPolicyAgree]': '1',
       yt0: 'Create',
-      'Pictures[edit_tags]': this.formatTags(data.tags),
+      'Pictures[edit_tags]': this.formatTags(data.tags).join(', '),
       'Pictures[is_scrap]': options.scraps ? '1' : '0',
       'Pictures[comments_type]': options.disableComments ? '-1' : '0',
       'Pictures[categoryHier]': options.category || '',
@@ -149,8 +149,7 @@ export class HentaiFoundry extends Website {
           .substring(0, maxLength)
           .split(', ')
           .filter(tag => tag.length >= 3)
-          .join(', ')
-      : tagString;
+      : t;
   }
 
   validateFileSubmission(
