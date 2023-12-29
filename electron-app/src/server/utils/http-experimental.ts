@@ -282,9 +282,8 @@ export class HttpExperimental {
     url: string,
     options: PostOptions | BinaryPostOptions,
     crOptions: ClientRequestConstructorOptions,
-    cloudFlareSafe: boolean = false,
   ): Promise<HttpResponse<T>> {
-    return HttpExperimental.postLike('post', url, options, crOptions, cloudFlareSafe);
+    return HttpExperimental.postLike('post', url, options, crOptions);
   }
 
   /**
@@ -310,14 +309,9 @@ export class HttpExperimental {
     url: string,
     options: PostOptions | BinaryPostOptions,
     crOptions: ClientRequestConstructorOptions,
-    cloudFlareSafe: boolean = false,
   ): Promise<HttpResponse<T>> {
     if (!net.isOnline()) {
       return Promise.reject(new Error('No internet connection.'));
-    }
-
-    if (cloudFlareSafe) {
-      return HttpExperimental.performBrowserWindowRequest<T>(url, options, crOptions);
     }
 
     return new Promise((resolve, reject) => {
@@ -333,6 +327,14 @@ export class HttpExperimental {
       req.setHeader('Content-Type', contentType);
       req.write(buffer);
       req.end();
+    }).then((response: HttpResponse<T>) => {
+      const { body } = response;
+      if (typeof body === 'string' && HttpExperimental.isOnCloudFlareChallengePage(body)) {
+        console.log('Cloudflare detected. Attempting to bypass...');
+        return HttpExperimental.performBrowserWindowPostRequest<T>(url, options, crOptions);
+      }
+
+      return response;
     });
   }
 
@@ -350,33 +352,7 @@ export class HttpExperimental {
 
     try {
       await window.loadURL(url);
-      let html = await window.webContents.executeJavaScript(
-        'document.body.parentElement.innerHTML',
-      );
-
-      if (HttpExperimental.isOnCloudFlareChallengePage(html)) {
-        await HttpExperimental.awaitCloudFlareChallengePage(window);
-        html = await window.webContents.executeJavaScript('document.body.parentElement.innerHTML');
-      }
-
-      const text = await window.webContents.executeJavaScript('document.body.innerText');
-      const pageUrl = await window.webContents.executeJavaScript('window.location.href');
-
-      let rValue = html;
-      if (text.startsWith('{') && text.endsWith('}')) {
-        try {
-          rValue = JSON.parse(text);
-        } catch (err) {
-          console.error(url, text, err);
-        }
-      }
-
-      return Promise.resolve({
-        body: rValue as any as T,
-        statusCode: 200,
-        statusMessage: 'OK',
-        responseUrl: pageUrl,
-      });
+      return HttpExperimental.handleCloudFlareChallengePage<T>(window);
     } catch (err) {
       console.error(err);
       return Promise.reject(err);
@@ -385,7 +361,7 @@ export class HttpExperimental {
     }
   }
 
-  private static async performBrowserWindowRequest<T>(
+  private static async performBrowserWindowPostRequest<T>(
     url: string,
     options: PostOptions | BinaryPostOptions,
     crOptions: ClientRequestConstructorOptions,
@@ -412,18 +388,7 @@ export class HttpExperimental {
           },
         ],
       });
-      // TODO check what is inside of the window and decide what to do (e.g. cloudflare challenge)
-      const text = await window.webContents.executeJavaScript('document.body.innerText');
-      const html = await window.webContents.executeJavaScript(
-        'document.body.parentElement.innerHTML',
-      );
-      const pageUrl = await window.webContents.executeJavaScript('window.location.href');
-      return Promise.resolve({
-        body: text as any as T,
-        statusCode: 200,
-        statusMessage: 'OK',
-        responseUrl: pageUrl,
-      });
+      return HttpExperimental.handleCloudFlareChallengePage<T>(window);
     } catch (err) {
       console.error(err);
       return Promise.reject(err);
@@ -470,6 +435,36 @@ export class HttpExperimental {
       setTimeout(() => {
         resolve();
       }, interval);
+    });
+  }
+
+  private static async handleCloudFlareChallengePage<T>(
+    window: BrowserWindow,
+  ): Promise<HttpResponse<T>> {
+    let html = await window.webContents.executeJavaScript('document.body.parentElement.innerHTML');
+
+    if (HttpExperimental.isOnCloudFlareChallengePage(html)) {
+      await HttpExperimental.awaitCloudFlareChallengePage(window);
+      html = await window.webContents.executeJavaScript('document.body.parentElement.innerHTML');
+    }
+
+    const text = await window.webContents.executeJavaScript('document.body.innerText');
+    const pageUrl = await window.webContents.executeJavaScript('window.location.href');
+
+    let rValue = html;
+    if (text.startsWith('{') && text.endsWith('}')) {
+      try {
+        rValue = JSON.parse(text);
+      } catch (err) {
+        console.error(pageUrl, text, err);
+      }
+    }
+
+    return Promise.resolve({
+      body: rValue as any as T,
+      statusCode: 200,
+      statusMessage: 'OK',
+      responseUrl: pageUrl,
     });
   }
 }
