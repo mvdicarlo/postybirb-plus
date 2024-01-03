@@ -123,8 +123,6 @@ export class SubscribeStar extends Website {
     xhr.responseText
     `;
 
-    console.log(cmd);
-
     const upload = await BrowserWindowUtil.runScriptOnPage<string>(
       partition,
       `${this.BASE_URL}`,

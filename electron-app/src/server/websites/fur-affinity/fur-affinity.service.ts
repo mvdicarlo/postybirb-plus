@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
+import _ from 'lodash';
 import {
   DefaultOptions,
   FileRecord,
@@ -17,7 +18,6 @@ import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { BBCodeParser } from 'src/server/description-parsing/bbcode/bbcode.parser';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
-import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
@@ -25,12 +25,12 @@ import { ValidationParts } from 'src/server/submission/validator/interfaces/vali
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import HtmlParserUtil from 'src/server/utils/html-parser.util';
+import { HttpExperimental } from 'src/server/utils/http-experimental';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import _ from 'lodash';
 
 @Injectable()
 export class FurAffinity extends Website {
@@ -67,7 +67,9 @@ export class FurAffinity extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(`${this.BASE_URL}/controls/submissions`, data._id);
+    const res = await HttpExperimental.get<string>(`${this.BASE_URL}/controls/submissions`, {
+      partition: data._id,
+    });
     if (res.body.includes('logout-link')) {
       status.loggedIn = true;
       const $ = cheerio.load(res.body);
@@ -132,8 +134,10 @@ export class FurAffinity extends Website {
     cancellationToken: CancellationToken,
     data: PostData<Submission, FurAffinityNotificationOptions>,
   ): Promise<PostResponse> {
-    const page = await Http.get<string>(`${this.BASE_URL}/controls/journal`, data.part.accountId);
-    this.verifyResponse(page, 'Check control');
+    const page = await HttpExperimental.get<string>(`${this.BASE_URL}/controls/journal`, {
+      partition: data.part.accountId,
+    });
+    this.verifyResponseExperimental(page, 'Check control');
     const form: any = {
       key: HtmlParserUtil.getInputValue(
         page.body.split('action="/controls/journal/"').pop(),
@@ -151,18 +155,15 @@ export class FurAffinity extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(
-      `${this.BASE_URL}/controls/journal/`,
-      data.part.accountId,
-      {
-        type: 'multipart',
-        data: form,
-      },
-    );
+    const post = await HttpExperimental.post<string>(`${this.BASE_URL}/controls/journal/`, {
+      partition: data.part.accountId,
+      type: 'multipart',
+      data: form,
+    });
 
-    this.verifyResponse(post, 'Post');
+    this.verifyResponseExperimental(post, 'Post');
     if (post.body.includes('journal-title')) {
-      return this.createPostResponse({ source: post.returnUrl });
+      return this.createPostResponse({ source: post.responseUrl });
     }
 
     return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
@@ -229,15 +230,15 @@ export class FurAffinity extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<FurAffinityFileOptions>,
   ): Promise<PostResponse> {
-    const part1 = await Http.get<string>(`${this.BASE_URL}/submit/`, data.part.accountId, {
+    const part1 = await HttpExperimental.get<string>(`${this.BASE_URL}/submit/`, {
+      partition: data.part.accountId,
       headers: {
-        Host: 'www.furaffinity.net',
         Referer: 'https://www.furaffinity.net/submit/',
       },
     });
 
     this.checkCancelled(cancellationToken);
-    this.verifyResponse(part1, 'Part 1');
+    this.verifyResponseExperimental(part1, 'Part 1');
 
     let err = this.processForError(part1.body);
     if (err) {
@@ -258,16 +259,16 @@ export class FurAffinity extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-    const part2 = await Http.post<string>(`${this.BASE_URL}/submit/upload`, data.part.accountId, {
+    const part2 = await HttpExperimental.post<string>(`${this.BASE_URL}/submit/upload`, {
+      partition: data.part.accountId,
       type: 'multipart',
       data: part2Form,
       headers: {
-        Host: 'www.furaffinity.net',
         Referer: 'https://www.furaffinity.net/submit',
       },
     });
 
-    this.verifyResponse(part2, 'Part 2');
+    this.verifyResponseExperimental(part2, 'Part 2');
     err = this.processForError(part2.body);
     if (err) {
       return Promise.reject(this.createPostResponse({ message: err, additionalInfo: part2.body }));
@@ -303,17 +304,17 @@ export class FurAffinity extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(`${this.BASE_URL}/submit/finalize`, data.part.accountId, {
+    const post = await HttpExperimental.post<string>(`${this.BASE_URL}/submit/finalize`, {
+      partition: data.part.accountId,
       type: 'multipart',
       data: form,
-      requestOptions: { qsStringifyOptions: { arrayFormat: 'repeat' } },
     });
 
-    this.verifyResponse(post, 'Finalize');
+    this.verifyResponseExperimental(post, 'Finalize');
 
     const { body } = post;
 
-    if (!post.returnUrl.includes('?upload-successful')) {
+    if (!post.responseUrl.includes('?upload-successful')) {
       err = this.processForError(body);
       if (err) {
         return Promise.reject(this.createPostResponse({ message: err, additionalInfo: body }));
@@ -324,26 +325,7 @@ export class FurAffinity extends Website {
       );
     }
 
-    try {
-      if (data.primary.type === FileSubmissionType.IMAGE && options.reupload) {
-        const submissionId = HtmlParserUtil.getInputValue(body, 'submission_ids[]');
-        await Http.post(
-          `${this.BASE_URL}/controls/submissions/changesubmission/${submissionId}`,
-          data.part.accountId,
-          {
-            type: 'multipart',
-            data: {
-              update: 'yes', // always seems to be 'yes'
-              newsubmission: data.primary.file,
-            },
-          },
-        );
-      }
-    } catch (e) {
-      this.logger.error('File Reupload Failure', e);
-    }
-
-    return this.createPostResponse({ source: post.returnUrl.replace('?upload-successful', '') });
+    return this.createPostResponse({ source: post.responseUrl.replace('?upload-successful', '') });
   }
 
   getFormTags(tags: string[]): string {

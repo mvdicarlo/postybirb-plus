@@ -199,14 +199,6 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
         </Checkbox>
       </div>,
       <div>
-        <Checkbox
-          checked={data.reupload}
-          onChange={this.handleCheckedChange.bind(this, 'reupload')}
-        >
-          Reupload better quality image
-        </Checkbox>
-      </div>,
-      <div>
         <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
           Send to scraps
         </Checkbox>

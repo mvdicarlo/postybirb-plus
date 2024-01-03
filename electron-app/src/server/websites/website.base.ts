@@ -26,6 +26,7 @@ import { FallbackInformation } from './interfaces/fallback-information.interface
 import { LoginResponse } from './interfaces/login-response.interface';
 import { ScalingOptions } from './interfaces/scaling-options.interface';
 import SubmissionPartEntity from '../submission/submission-part/models/submission-part.entity';
+import { HttpResponse as ExperimentalHttpResponse } from 'src/server/utils/http-experimental';
 
 interface TagParseOptions {
   spaceReplacer: string;
@@ -245,6 +246,24 @@ export abstract class Website {
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     return { problems: [], warnings: [] };
+  }
+
+  protected verifyResponseExperimental(
+    response: ExperimentalHttpResponse<any>,
+    info?: string,
+  ): void {
+    if (response.statusCode > 303) {
+      throw this.createPostResponse({
+        error: response.body || response.statusCode,
+        additionalInfo: `${info ? `${info}\n\n` : ''}${
+          response.body
+            ? typeof response.body === 'object'
+              ? JSON.stringify(response.body, null, 1)
+              : response.body
+            : ''
+        }`,
+      });
+    }
   }
 
   protected verifyResponse(response: HttpResponse<any>, info?: string): void {

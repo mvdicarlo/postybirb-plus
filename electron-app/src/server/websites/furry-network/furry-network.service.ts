@@ -354,7 +354,6 @@ export class FurryNetwork extends Website {
               type,
               headers,
             );
-            console.log(thumb);
           } catch (err) {
             console.error(err);
           }

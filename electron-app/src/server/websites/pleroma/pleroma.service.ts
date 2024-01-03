@@ -43,7 +43,6 @@ export class Pleroma extends Megalodon {
   ];
 
   getInstanceSettings(accountId: string) {
-    console.log(this.getAccountInfo(accountId, INFO_KEY));
     const instanceInfo: PleromaInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
 
     let result = new MegalodonInstanceSettings();
