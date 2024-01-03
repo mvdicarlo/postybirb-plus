@@ -42,7 +42,7 @@ interface BinaryPostOptions extends HttpOptions {
   data: Buffer;
 }
 
-interface HttpResponse<T> {
+export interface HttpResponse<T> {
   body: T;
   statusCode: number;
   statusMessage: string;
@@ -146,6 +146,11 @@ export class HttpExperimental {
         const form = new FormData();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.entries(data).forEach(([key, value]: [string, any]) => {
+          if (value === undefined || value === null) {
+            form.append(key, '');
+            return;
+          }
+
           if (value.options && value.value) {
             form.append(key, value.value, value.options);
           } else if (Array.isArray(value)) {
@@ -281,9 +286,9 @@ export class HttpExperimental {
   static async post<T>(
     url: string,
     options: PostOptions | BinaryPostOptions,
-    crOptions: ClientRequestConstructorOptions,
+    crOptions?: ClientRequestConstructorOptions,
   ): Promise<HttpResponse<T>> {
-    return HttpExperimental.postLike('post', url, options, crOptions);
+    return HttpExperimental.postLike('post', url, options, crOptions ?? {});
   }
 
   /**
@@ -299,9 +304,9 @@ export class HttpExperimental {
   static patch<T>(
     url: string,
     options: PostOptions,
-    crOptions: ClientRequestConstructorOptions,
+    crOptions?: ClientRequestConstructorOptions,
   ): Promise<HttpResponse<T>> {
-    return HttpExperimental.postLike('patch', url, options, crOptions);
+    return HttpExperimental.postLike('patch', url, options, crOptions ?? {});
   }
 
   private static postLike<T>(

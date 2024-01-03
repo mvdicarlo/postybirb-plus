@@ -160,7 +160,6 @@ export class SoFurry extends Website {
 
   fallbackFileParser(html: string): FallbackInformation {
     const t = HTMLFormatParser.parse(html);
-    console.log(t);
     return { text: this.parseDescription(html), type: 'text/plain', extension: 'txt' };
   }
 
