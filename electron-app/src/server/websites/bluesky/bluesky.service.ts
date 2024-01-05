@@ -476,6 +476,9 @@ export class Bluesky extends Website {
           this.MAX_CHARS,
           getRichTextLength,
         );
+      } else {
+        warnings.push(`You have not inserted the {tags} shortcut in your description; 
+          tags will not be inserted in your post`)
       }
     }
   }
