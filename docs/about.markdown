@@ -19,7 +19,7 @@ You can find the source code for Jekyll at GitHub:
 [jekyll-organization]: https://github.com/jekyll
 -->
 ## Open Source
- PostyBirb's code is open source and can be found here (current branch is PB-Next)
+PostyBirb's code is open source and can be found [here](https://github.com/mvdicarlo/postybirb-plus).
 
 ## Why Did I Make PostyBirb?
 A common complaint that I have heard is that it is annoying/tedious to post a single submission to many websites. Furthermore, a friend complained how annoying it was posting a piece of writing to multiple websites as well, having to remember all of the rules such as tag formatting. So I figured I would try to alleviate the burden on creators by making uploading a submission to multiple websites less of a time sink.
