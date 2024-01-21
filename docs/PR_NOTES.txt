@@ -1,0 +1,3 @@
+If you are serving this site from outside the pb repo and in a new one:
+In _config.yml:
+- change the base url to not be /docs/
