@@ -3,6 +3,13 @@ layout: page
 title: Downloads
 permalink: /downloads/
 ---
+
+## Download PostyBirb+ 3.X
+PostyBirb+ is the most current version of the app. V2 is lacking support. [Differences between 3.X and 2.X are found here.](https://www.postybirb.com/whats-new-in-30-postybirb.html)
+- [Windows](https://github.com/mvdicarlo/postybirb-plus/releases/download/v3.1.37/postybirb-plus-setup-3.1.37.exe)
+- [MAC/OSX](https://github.com/mvdicarlo/postybirb-plus/releases/download/v3.1.37/postybirb-plus-3.1.37.dmg)
+- [Linux](https://github.com/mvdicarlo/postybirb-plus/releases/download/v3.1.37/postybirb-plus-3.1.37-x86_64.AppImage)
+
 ## Open Source
 PostyBirb's code is open source and can be found [here](https://github.com/mvdicarlo/postybirb-plus).
 
