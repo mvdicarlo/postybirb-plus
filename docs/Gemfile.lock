@@ -261,6 +261,7 @@ GEM
     unf_ext (0.0.9.1-x64-mingw-ucrt)
     unicode-display_width (1.8.0)
     uri (0.13.0)
+    webrick (1.8.1)
 
 PLATFORMS
   x64-mingw-ucrt
@@ -273,6 +274,7 @@ DEPENDENCIES
   tzinfo (~> 1.2)
   tzinfo-data
   wdm (~> 0.1.1)
+  webrick (~> 1.8)
 
 BUNDLED WITH
    2.3.10
