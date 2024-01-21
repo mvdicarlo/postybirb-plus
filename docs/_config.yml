@@ -21,10 +21,11 @@
 title: Postybirb+
 # email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Remake of PostyBirb using React and NestJS 
+  Remake of PostyBirb using React and NestJS --
+  https://github.com/mvdicarlo/postybirb-plus
 baseurl: "/docs" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: mvdicarlo
+# twitter_username: mvdicarlo
 github_username:  mvdicarlo
 
 # Build settings
