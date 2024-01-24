@@ -59,7 +59,11 @@ export class HentaiFoundry extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(50) };
+    return { 
+      maxHeight: 1100,
+      maxWidth: 1100,
+      maxSize: FileSize.MBtoBytes(50)
+    };
   }
 
   async postNotificationSubmission(
@@ -170,16 +174,36 @@ export class HentaiFoundry extends Website {
     }
 
     const { type, size, name } = submission.primary;
-    let maxMB: number = 50;
-    if (FileSize.MBtoBytes(maxMB) < size) {
-      if (
-        isAutoscaling &&
-        type === FileSubmissionType.IMAGE &&
-        ImageManipulator.isMimeType(submission.primary.mimetype)
-      ) {
-        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
+
+    const scalingOptions = this.getScalingOptions(submission.primary);
+
+    if (
+      type === FileSubmissionType.IMAGE &&
+      ImageManipulator.isMimeType(submission.primary.mimetype)
+    ) {
+      if (isAutoscaling) { 
+        // Do we want to push it under a px size too
+        if (scalingOptions.maxWidth &&
+            scalingOptions.maxHeight &&
+            (submission.primary.height > scalingOptions.maxHeight || submission.primary.width > scalingOptions.maxWidth)) {
+              warnings.push(`${name} will be scaled down to a max of 1100x1100`);
+            }
+
+        if (FileSize.MBtoBytes(scalingOptions.maxSize) < size) {
+          // Images will *always* be scaled under 50MB
+          warnings.push(`${name} will be scaled down to ${scalingOptions.maxSize}MB`);
+        }
       } else {
-        problems.push(`Hentai Foundry limits ${submission.primary.mimetype} to ${maxMB}MB`);
+        if (scalingOptions.maxWidth &&
+            scalingOptions.maxHeight &&
+            (submission.primary.height > scalingOptions.maxHeight || submission.primary.width > scalingOptions.maxWidth)) {
+              warnings.push(`${name} will be manually moderated unless you rescale it below 1100x1100`);
+            }
+
+        if (FileSize.MBtoBytes(scalingOptions.maxSize) < size) {
+          // Images will *always* be scaled under 50MB
+          problems.push(`${name} must be under ${scalingOptions.maxSize}MB`);
+        }  
       }
     }
 
