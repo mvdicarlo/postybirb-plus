@@ -273,7 +273,7 @@ export class Telegram extends Website {
       offset_peer: {
         _: 'inputPeerEmpty',
       },
-      limit: 100,
+      limit: 200,
     });
 
     const channels: Folder[] = chats
@@ -526,7 +526,7 @@ export class Telegram extends Website {
       );
       submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(`Channel (${f}) not found.`);
+          problems.push(this.channelNotFound(f));
         }
       });
     } else {
@@ -564,7 +564,7 @@ export class Telegram extends Website {
 
       if (FileSize.MBtoBytes(10) < size && type !== FileSubmissionType.IMAGE) {
         warnings.push(
-          `${name} will show in channel as Unknown Track but still will be available.`,
+          `${name} will show in channel as Unknown Track but still will be available to download.`,
         );
       }
     });
@@ -588,7 +588,9 @@ export class Telegram extends Website {
       );
       submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(`Channel (${f}) not found.`);
+          problems.push(
+            this.channelNotFound(f),
+          );
         }
       });
     } else {
@@ -604,6 +606,10 @@ export class Telegram extends Website {
     }
 
     return { problems, warnings };
+  }
+
+  private channelNotFound(f: string) {
+    return `Channel (${f}) not found. PostyBirb requests latest 200 chats and then filters them to include only those where you can send medias. If you have a lot of active chats you will not see inactive channels. To fix this, simply post something in the channel.`;
   }
 }
 
