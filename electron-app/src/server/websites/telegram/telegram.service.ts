@@ -609,7 +609,7 @@ export class Telegram extends Website {
   }
 
   private channelNotFound(f: string) {
-    return `Channel (${f}) not found. PostyBirb requests latest 200 chats and then filters them to include only those where you can send medias. If you have a lot of active chats you will not see inactive channels. To fix this, simply post something in the channel.`;
+    return `Channel (${f}) not found. To fix this, simply post something in the channel. PostyBirb requests latest 200 chats and then filters them to include only those where you can send media. If you have a lot of active chats, PostyBirb will be not able to view inactive channels.`;
   }
 }
 
