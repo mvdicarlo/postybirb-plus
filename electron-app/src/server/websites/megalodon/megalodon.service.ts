@@ -227,12 +227,17 @@ export abstract class Megalodon extends Website {
         `Max description length allowed is ${instanceSettings.maxChars} characters.`,
       );
     } else {
-      this.validateInsertTags(
-        warnings,
-        this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
-        description,
-        instanceSettings.maxChars,
-      );
+      if (description.toLowerCase().indexOf('{tags}') > -1) {
+        this.validateInsertTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          instanceSettings.maxChars,
+        );
+      } else {
+        warnings.push(`You have not inserted the {tags} shortcut in your description; 
+          tags will not be inserted in your post`)
+      }
     }
 
     const files = [

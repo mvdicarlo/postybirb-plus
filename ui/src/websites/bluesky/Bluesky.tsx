@@ -67,7 +67,7 @@ BlueskyNotificationOptions
         <Select
           {...GenericSelectProps}
           className="w-full"
-          value={data.threadgate}
+          value={data.threadgate || ''}
           onChange={this.setValue.bind(this, 'threadgate')}
         >
           <Select.Option value={''}>Everybody</Select.Option>
@@ -106,7 +106,7 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
       <Select
         {...GenericSelectProps}
         className="w-full"
-        value={data.threadgate}
+        value={data.threadgate || ''}
         onChange={this.setValue.bind(this, 'threadgate')}
       >
         <Select.Option value={''}>Everybody</Select.Option>
@@ -116,7 +116,7 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
         <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>     
       </Select>                  
     </Form.Item>,
-      <Form.Item label="Alt Text">
+      <Form.Item label="Fallback Alt Text">
         <Input
           value={data.altText}
           onChange={this.handleValueChange.bind(this, 'altText')}
