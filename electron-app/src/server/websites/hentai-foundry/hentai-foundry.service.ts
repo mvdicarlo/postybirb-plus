@@ -60,9 +60,9 @@ export class HentaiFoundry extends Website {
 
   getScalingOptions(file: FileRecord): ScalingOptions {
     return { 
-      maxHeight: 1100,
-      maxWidth: 1100,
-      maxSize: FileSize.MBtoBytes(50)
+      maxHeight: 1500,
+      maxWidth: 1500,
+      maxSize: FileSize.MBtoBytes(2)
     };
   }
 
@@ -186,22 +186,20 @@ export class HentaiFoundry extends Website {
         if (scalingOptions.maxWidth &&
             scalingOptions.maxHeight &&
             (submission.primary.height > scalingOptions.maxHeight || submission.primary.width > scalingOptions.maxWidth)) {
-              warnings.push(`${name} will be scaled down to a max of 1100x1100`);
+              warnings.push(`${name} will be scaled down to a max of 1500x1500`);
             }
 
         if (FileSize.MBtoBytes(scalingOptions.maxSize) < size) {
-          // Images will *always* be scaled under 50MB
           warnings.push(`${name} will be scaled down to ${scalingOptions.maxSize}MB`);
         }
       } else {
         if (scalingOptions.maxWidth &&
             scalingOptions.maxHeight &&
             (submission.primary.height > scalingOptions.maxHeight || submission.primary.width > scalingOptions.maxWidth)) {
-              warnings.push(`${name} will be manually moderated unless you rescale it below 1100x1100`);
+              warnings.push(`${name} will be manually moderated unless you rescale it below 1500x1500`);
             }
 
         if (FileSize.MBtoBytes(scalingOptions.maxSize) < size) {
-          // Images will *always* be scaled under 50MB
           problems.push(`${name} must be under ${scalingOptions.maxSize}MB`);
         }  
       }
