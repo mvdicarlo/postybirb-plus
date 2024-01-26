@@ -14,6 +14,7 @@ import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
 import MissKeyLogin from './MissKeyLogin';
+import SpoilerTextInput from '../../views/submissions/submission-forms/form-components/SpoilerTextInput';
 
 export class MissKey extends WebsiteImpl {
   internalName: string = 'MissKey';
@@ -72,12 +73,12 @@ class MissKeyNotificationSubmissionForm extends GenericSubmissionSection<
           Use title
         </Checkbox>
       </div>,
-      <Form.Item label="Spoiler Text">
-        <Input
-          value={data.spoilerText}
-          onChange={this.handleValueChange.bind(this, 'spoilerText')}
-        />
-      </Form.Item>,
+      <SpoilerTextInput
+        overwriteDefault={data.spoilerTextOverwrite}
+        spoilerText={data.spoilerText}
+        onChangeOverwriteDefault={this.setValue.bind(this, 'spoilerTextOverwrite')}
+        onChangeSpoilerText={this.setValue.bind(this, 'spoilerText')}
+      ></SpoilerTextInput>,
       <Form.Item label="Post Visibility">
         <Select
           {...GenericSelectProps}
@@ -108,12 +109,12 @@ export class MissKeyFileSubmissionForm extends GenericFileSubmissionSection<Miss
           Use title
         </Checkbox>
       </div>,
-      <Form.Item label="Spoiler Text">
-        <Input
-          value={data.spoilerText}
-          onChange={this.handleValueChange.bind(this, 'spoilerText')}
-        />
-      </Form.Item>,
+      <SpoilerTextInput
+        overwriteDefault={data.spoilerTextOverwrite}
+        spoilerText={data.spoilerText}
+        onChangeOverwriteDefault={this.setValue.bind(this, 'spoilerTextOverwrite')}
+        onChangeSpoilerText={this.setValue.bind(this, 'spoilerText')}
+      ></SpoilerTextInput>,
       <Form.Item label="Fallback Alt Text">
         <Input
           value={data.altText}

@@ -155,8 +155,8 @@ export class MissKey extends Website {
       if (i !== 0) {
         statusOptions.in_reply_to_id = lastId;
       }
-      if (data.options.spoilerText) {
-        statusOptions.spoiler_text = data.options.spoilerText;
+      if (data.spoilerText) {
+        statusOptions.spoiler_text = data.spoilerText;
       }
 
       this.checkCancelled(cancellationToken);
@@ -196,8 +196,8 @@ export class MissKey extends Website {
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
     }`.substring(0, maxChars);
-    if (data.options.spoilerText) {
-      statusOptions.spoiler_text = data.options.spoilerText;
+    if (data.spoilerText) {
+      statusOptions.spoiler_text = data.spoilerText;
     }
 
     this.checkCancelled(cancellationToken);
