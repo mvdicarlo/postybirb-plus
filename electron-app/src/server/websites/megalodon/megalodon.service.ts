@@ -141,8 +141,8 @@ export abstract class Megalodon extends Website {
         statusOptions.in_reply_to_id = replyToId;
       }
 
-      if (data.options.spoilerText) {
-        statusOptions.spoiler_text = data.options.spoilerText;
+      if (data.spoilerText) {
+        statusOptions.spoiler_text = data.spoilerText;
       }
 
       try {
@@ -182,8 +182,8 @@ export abstract class Megalodon extends Website {
     let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
       data.description
     }`;
-    if (data.options.spoilerText) {
-      statusOptions.spoiler_text = data.options.spoilerText;
+    if (data.spoilerText) {
+      statusOptions.spoiler_text = data.spoilerText;
     }
 
     const replyToId = this.getPostIdFromUrl(data.options.replyToUrl);

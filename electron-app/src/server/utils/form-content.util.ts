@@ -20,4 +20,20 @@ export default class FormContent {
       ? _.get(websiteDescription, 'value', '')
       : _.get(defaultDescription, 'value', '');
   }
+
+  static getSpoilerText(
+    defaultData: { spoilerText?: string },
+    partData: { spoilerText?: string; spoilerTextOverwrite?: boolean },
+  ): string {
+    const partSpoilerText = partData.spoilerText || '';
+    const overwrite =
+      partData.spoilerTextOverwrite === undefined
+        ? partSpoilerText.trim() !== ''
+        : partData.spoilerTextOverwrite;
+    if (overwrite) {
+      return partSpoilerText;
+    } else {
+      return defaultData.spoilerText || '';
+    }
+  }
 }
