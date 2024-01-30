@@ -225,9 +225,17 @@ export class FurryNetwork extends Website {
       responses.push(create);
     }
 
-    const res = JSON.parse(responses.find(r => r.body).body ?? '{}');
+    const { body } = responses.find(r => r.body);
+    if (body.startsWith('<')) {
+      throw this.createPostResponse({
+        error: 'HTML response instead of json, check logs for additional info',
+        additionalInfo: body,
+      });
+    }
+
+    const res = JSON.parse(body || '{}');
     if (!res || !res.id) {
-      throw this.createPostResponse({ additionalInfo: res });
+      throw this.createPostResponse({ error: 'unexpected response type.', additionalInfo: res });
     }
     return res;
   }
