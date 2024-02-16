@@ -4,7 +4,7 @@ import SubmissionUtil from '../../../utils/submission.util';
 import moment from 'moment';
 import { Submission } from 'postybirb-commons';
 import { SubmissionPackage } from 'postybirb-commons';
-import { Calendar, Button, List, Badge, message } from 'antd';
+import { Calendar, Button, List, Badge, message, Popconfirm } from 'antd';
 import { ScheduledSubmissionListItem } from './ScheduledSubmissionListItem';
 
 interface Props {
@@ -81,14 +81,20 @@ export default class ScheduledSubmissions extends React.Component<Props> {
           <List
             header={
               <div>
-                <Button
-                  type="danger"
-                  block
-                  disabled={!this.props.submissions.length}
-                  onClick={this.unscheduleAll.bind(this)}
+                <Popconfirm
+                  title="Are you sure to unschedule all items?"
+                  onConfirm={this.unscheduleAll.bind(this)}
+                  okText="Yes"
+                  cancelText="No"
                 >
-                  Unschedule All
-                </Button>
+                  <Button
+                    type="danger"
+                    block
+                    disabled={!this.props.submissions.length}
+                  >
+                    Unschedule All
+                  </Button>
+                </Popconfirm>
               </div>
             }
             dataSource={this.props.submissions.sort(
