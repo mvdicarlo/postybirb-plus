@@ -300,13 +300,13 @@ export class FurAffinity extends Website {
     }
 
     if (options.folders) {
-      form['folder_ids[]'] = options.folders;
+      form['folder_ids'] = options.folders;
     }
 
     this.checkCancelled(cancellationToken);
     const post = await HttpExperimental.post<string>(`${this.BASE_URL}/submit/finalize`, {
       partition: data.part.accountId,
-      type: 'multipart',
+      type: 'urlencoded',
       data: form,
     });
 
