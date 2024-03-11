@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.1.38",
+  "version": "3.1.40",
   "description": "(ClientServer) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "main": "dist/main.js",
   "author": "Michael DiCarlo",
