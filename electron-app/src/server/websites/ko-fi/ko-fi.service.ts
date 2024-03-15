@@ -118,7 +118,7 @@ export class KoFi extends Website {
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ success: boolean }>(
+    const post = await Http.post<{ success: boolean } | string>(
       `${this.BASE_URL}/Gallery/AddGalleryItem`,
       data.part.accountId,
       {
@@ -147,11 +147,15 @@ export class KoFi extends Website {
       },
     );
 
-    let json = post.body || { success: false };
-    if (!json.success) {
+    // For some reason post.body can be \u0000\u0007\u0000{"success":true}\u0003
+    const success =
+      (typeof post.body === 'object' && post.body.success) ||
+      (typeof post.body === 'string' && post.body.includes(JSON.stringify({ success: true })));
+
+    if (!success) {
       return Promise.reject(
         this.createPostResponse({
-          message: 'Unknown error when posting',
+          message: 'Post did not success',
           additionalInfo: post.body,
         }),
       );

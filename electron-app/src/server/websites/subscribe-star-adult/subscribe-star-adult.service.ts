@@ -132,7 +132,7 @@ export class SubscribeStarAdult extends Website {
     xhr.open('POST', '/posts.json', false);
     xhr.setRequestHeader("X-CSRF-Token", document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1]);
     xhr.send(fd);
-    xhr.responseText
+    return xhr.responseText
     `;
 
     const upload = await BrowserWindowUtil.runScriptOnPage<string>(
@@ -167,7 +167,7 @@ export class SubscribeStarAdult extends Website {
     xhr.open('POST', '${url}', false);
     xhr.setRequestHeader("X-CSRF-Token", document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1]);
     xhr.send(fd);
-    xhr.responseText
+    return xhr.responseText
     `;
 
     const upload = await BrowserWindowUtil.runScriptOnPage<string>(
@@ -250,7 +250,7 @@ export class SubscribeStarAdult extends Website {
         return out;
       }
       
-      getInfo();
+      return getInfo();
     `,
     );
 
