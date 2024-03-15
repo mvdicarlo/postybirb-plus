@@ -20,6 +20,11 @@ export class MissKeyNotificationOptionsEntity
   spoilerText?: string;
 
   @Expose()
+  @IsBoolean()
+  @IsOptional()
+  spoilerTextOverwrite?: boolean;
+
+  @Expose()
   @IsString()
   @DefaultValue('public')
   visibility!: string;

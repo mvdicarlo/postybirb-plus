@@ -16,7 +16,12 @@ export class PleromaFileOptionsEntity extends DefaultFileOptionsEntity
   @IsOptional()
   @IsString()
   spoilerText?: string;
-  
+
+  @Expose()
+  @IsBoolean()
+  @IsOptional()
+  spoilerTextOverwrite?: boolean;
+
   @Expose()
   @IsString()
   @DefaultValue('public')

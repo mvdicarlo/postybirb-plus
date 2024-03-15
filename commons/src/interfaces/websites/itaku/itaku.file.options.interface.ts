@@ -5,4 +5,5 @@ export interface ItakuFileOptions extends DefaultFileOptions {
   visibility: string;
   shareOnFeed: boolean;
   spoilerText?: string;
+  spoilerTextOverwrite?: boolean;
 }

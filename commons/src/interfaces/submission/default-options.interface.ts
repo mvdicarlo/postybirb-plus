@@ -7,6 +7,7 @@ export interface DefaultOptions {
   tags: TagData;
   description: DescriptionData;
   rating?: SubmissionRating | string;
+  spoilerText?: string;
   sources: string[];
 }
 
