@@ -185,7 +185,7 @@ export class Newgrounds extends Website {
     const userKey: string = await BrowserWindowUtil.runScriptOnPage(
       data.part.accountId,
       `${this.BASE_URL}/projects/art/new`,
-      'PHP.get("uek")',
+      'return PHP.get("uek")',
       300,
     );
     if (!userKey) {
