@@ -10,6 +10,7 @@ import {
   BlueskyAccountData,
   BlueskyFileOptions,
   BlueskyNotificationOptions,
+  SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
@@ -25,9 +26,19 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { BskyAgent, stringifyLex, jsonToLex, AppBskyEmbedImages, ComAtprotoLabelDefs, BlobRef, RichText, AppBskyFeedThreadgate, AtUri } from '@atproto/api';
+import {
+  BskyAgent,
+  stringifyLex,
+  jsonToLex,
+  AppBskyEmbedImages,
+  ComAtprotoLabelDefs,
+  BlobRef,
+  RichText,
+  AppBskyFeedThreadgate,
+  AtUri,
+} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
 import FormContent from 'src/server/utils/form-content.util';
 
@@ -43,10 +54,10 @@ interface FetchHandlerResponse {
 }
 
 type ThreadgateSetting =
-  | {type: 'nobody'}
-  | {type: 'mention'}
-  | {type: 'following'}
-  | {type: 'list'; list: string};
+  | { type: 'nobody' }
+  | { type: 'mention' }
+  | { type: 'following' }
+  | { type: 'list'; list: string };
 
 async function fetchHandler(
   reqUri: string,
@@ -119,7 +130,7 @@ async function fetchHandler(
 // End of Polyfill
 
 function getRichTextLength(text: string): number {
-  return new RichText({text}).graphemeLength;
+  return new RichText({ text }).graphemeLength;
 }
 
 @Injectable()
@@ -208,7 +219,7 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    let profile = await agent.getProfile({actor: agent.session.did });
+    let profile = await agent.getProfile({ actor: agent.session.did });
 
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
 
@@ -257,7 +268,7 @@ export class Bluesky extends Website {
     if (postResult && postResult.uri) {
       // Generate a friendly URL
       const handle = profile.data.handle;
-      const server = "bsky.app"; // Can't use the agent sadly, but this might change later: agent.service.hostname;
+      const server = 'bsky.app'; // Can't use the agent sadly, but this might change later: agent.service.hostname;
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
@@ -275,39 +286,37 @@ export class Bluesky extends Website {
     }
   }
 
-  createThreadgate(
-    agent: BskyAgent,
-    postUri: string,
-    fromPostThreadGate: string,
-  ) {
+  createThreadgate(agent: BskyAgent, postUri: string, fromPostThreadGate: string) {
     let allow: (
       | AppBskyFeedThreadgate.MentionRule
       | AppBskyFeedThreadgate.FollowingRule
       | AppBskyFeedThreadgate.ListRule
-    )[] = []
+    )[] = [];
 
     switch (fromPostThreadGate) {
-      case "mention":
-        allow.push({$type: 'app.bsky.feed.threadgate#mentionRule'});
+      case 'mention':
+        allow.push({ $type: 'app.bsky.feed.threadgate#mentionRule' });
         break;
-      case "following":
-        allow.push({$type: 'app.bsky.feed.threadgate#followingRule'});
+      case 'following':
+        allow.push({ $type: 'app.bsky.feed.threadgate#followingRule' });
         break;
-      case "mention,following":
-        allow.push({$type: 'app.bsky.feed.threadgate#followingRule'});
-        allow.push({$type: 'app.bsky.feed.threadgate#mentionRule'});
-        break;      
+      case 'mention,following':
+        allow.push({ $type: 'app.bsky.feed.threadgate#followingRule' });
+        allow.push({ $type: 'app.bsky.feed.threadgate#mentionRule' });
+        break;
       default: // Leave the array empty and this sets no one - nobody mode
         break;
-    } 
+    }
 
-    const postUrip = new AtUri(postUri)
-    agent.api.app.bsky.feed.threadgate.create(
-      {repo: agent.session!.did, rkey: postUrip.rkey},
-      {post: postUri, createdAt: new Date().toISOString(), allow},
-    ).finally(() => {
-      return;
-    })
+    const postUrip = new AtUri(postUri);
+    agent.api.app.bsky.feed.threadgate
+      .create(
+        { repo: agent.session!.did, rkey: postUrip.rkey },
+        { post: postUri, createdAt: new Date().toISOString(), allow },
+      )
+      .finally(() => {
+        return;
+      });
   }
 
   async postNotificationSubmission(
@@ -324,7 +333,7 @@ export class Bluesky extends Website {
       password: accountData.password,
     });
 
-    let profile = await agent.getProfile({actor: agent.session.did });
+    let profile = await agent.getProfile({ actor: agent.session.did });
 
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
 
@@ -338,22 +347,22 @@ export class Bluesky extends Website {
 
     const rt = new RichText({ text: data.description });
     await rt.detectFacets(agent);
-    
-    let postResult = await agent.post({
-      text: rt.text,
-      facets: rt.facets,
-      labels: labelsRecord,
-      ...(reply ? { reply } : {}),
-    }).catch(err => {
-      return Promise.reject(
-          this.createPostResponse({ message: err }),
-      );
-    });
-  
+
+    let postResult = await agent
+      .post({
+        text: rt.text,
+        facets: rt.facets,
+        labels: labelsRecord,
+        ...(reply ? { reply } : {}),
+      })
+      .catch(err => {
+        return Promise.reject(this.createPostResponse({ message: err }));
+      });
+
     if (postResult && postResult.uri) {
       // Generate a friendly URL
       const handle = profile.data.handle;
-      const server = "bsky.app"; // Can't use the agent sadly, but this might change later: agent.service.hostname;
+      const server = 'bsky.app'; // Can't use the agent sadly, but this might change later: agent.service.hostname;
       const postId = postResult.uri.slice(postResult.uri.lastIndexOf('/') + 1);
 
       let friendlyUrl = `https://${server}/profile/${handle}/post/${postId}`;
@@ -392,6 +401,8 @@ export class Bluesky extends Website {
           'even if your settings say otherwise. This is a bug on their side.',
       );
     }
+
+    this.validateRating(submissionPart, defaultPart, warnings);
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
 
@@ -445,8 +456,30 @@ export class Bluesky extends Website {
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
     this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
+    this.validateRating(submissionPart, defaultPart, warnings);
 
     return { problems, warnings };
+  }
+
+  private validateRating(
+    submissionPart: SubmissionPart<BlueskyFileOptions | BlueskyNotificationOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+    warnings: string[],
+  ) {
+    // Since bluesky rating is not mapped as other sited do
+    // we should add warning, so users will not post unlabeled images
+    const rating = submissionPart.data.rating || defaultPart.data.rating;
+    if (rating) {
+      // Dont really want to make warning for undefined rating
+      // This is handled by default part validator
+      if (!submissionPart.data.label_rating && rating !== SubmissionRating.GENERAL) {
+        warnings.push(
+          `Make sure that the Default rating '${
+            rating ?? SubmissionRating.GENERAL
+          }' matches Bluesky Label Rating.`,
+        );
+      }
+    }
   }
 
   private validateDescription(
@@ -460,13 +493,11 @@ export class Bluesky extends Website {
     );
 
     const rt = new RichText({ text: description });
-    const agent = new BskyAgent({ service: 'https://bsky.social' })
+    const agent = new BskyAgent({ service: 'https://bsky.social' });
     rt.detectFacets(agent);
 
     if (rt.graphemeLength > this.MAX_CHARS) {
-      problems.push(
-        `Max description length allowed is ${this.MAX_CHARS} characters.`,
-      );
+      problems.push(`Max description length allowed is ${this.MAX_CHARS} characters.`);
     } else {
       if (description.toLowerCase().indexOf('{tags}') > -1) {
         this.validateInsertTags(
@@ -478,14 +509,14 @@ export class Bluesky extends Website {
         );
       } else {
         warnings.push(`You have not inserted the {tags} shortcut in your description; 
-          tags will not be inserted in your post`)
+          tags will not be inserted in your post`);
       }
     }
   }
 
   private validateReplyToUrl(problems: string[], url?: string): void {
-    if(url?.trim() && !this.getPostIdFromUrl(url)) {
-      problems.push("Invalid post URL to reply to.");
+    if (url?.trim() && !this.getPostIdFromUrl(url)) {
+      problems.push('Invalid post URL to reply to.');
     }
   }
 
