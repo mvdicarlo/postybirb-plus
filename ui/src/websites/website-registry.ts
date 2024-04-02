@@ -32,6 +32,7 @@ import { Picarto } from './picarto/Picarto';
 import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 import { Pixelfed } from './pixelfed/Pixelfed';
 import { Bluesky } from './bluesky/Bluesky';
+import { Twitter } from './twitter/Twitter';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -67,7 +68,8 @@ export class WebsiteRegistry {
     Telegram: new Telegram(),
     Tumblr: new Tumblr(),
     Weasyl: new Weasyl(),
-    e621: new e621()
+    e621: new e621(),
+    Twitter: new Twitter(),
   };
 
   static getAllAsArray() {

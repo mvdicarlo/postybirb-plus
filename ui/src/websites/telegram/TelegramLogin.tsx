@@ -85,7 +85,7 @@ export default class TelegramLogin extends React.Component<LoginDialogProps, Sta
             extra={
               <div>
                 <BrowserLink url="https://core.telegram.org/myapp">
-                  You must create you own app configuration <Icon type="link" />
+                  You must create your own app configuration <Icon type="link" />
                 </BrowserLink>
               </div>
             }
