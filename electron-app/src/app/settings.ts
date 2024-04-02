@@ -1,5 +1,5 @@
 /* tslint:disable: no-console no-var-requires */
-import { app } from 'electron';
+import { app, dialog } from 'electron';
 import { Settings } from 'postybirb-commons';
 const fs = require('fs-extra');
 const path = require('path');
@@ -9,8 +9,7 @@ const util = require('./utils');
 
 const settingsPath = path.join(global.BASE_DIRECTORY, 'data', 'settings.json');
 fs.ensureFileSync(settingsPath);
-const adapter = new FileSync(settingsPath);
-const settings = low(adapter);
+const settings = init();
 const settingDefaults: Settings = {
   advertise: true,
   emptyQueueOnFailedPost: true,
@@ -34,3 +33,19 @@ if (!settings.getState().useHardwareAcceleration || util.isLinux()) {
 }
 
 global.settingsDB = settings;
+
+function init() {
+  try {
+    const adapter = new FileSync(settingsPath);
+    return low(adapter);
+  } catch (e) {
+    console.error('Error initializing settings database', e);
+    fs.removeSync(settingsPath);
+    dialog.showErrorBox(
+      'Settings were corrupted',
+      'Settings could not be loaded and had to be reset.',
+    );
+    const adapter = new FileSync(settingsPath);
+    return low(adapter);
+  }
+}
