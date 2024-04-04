@@ -35,6 +35,7 @@ import { PicartoModule } from './picarto/picarto.module';
 import { PixelfedModule } from './pixelfed/pixelfed.module';
 import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-adult.module';
 import { BlueskyModule } from './bluesky/bluesky.module';
+import { TwitterModule } from './twitter/twitter.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -74,6 +75,7 @@ import { BlueskyModule } from './bluesky/bluesky.module';
     ItakuModule,
     PicartoModule,
     PixelfedModule,
+    TwitterModule,
   ],
 })
 export class WebsitesModule {}
