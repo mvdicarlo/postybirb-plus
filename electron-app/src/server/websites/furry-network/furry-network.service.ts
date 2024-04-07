@@ -216,7 +216,7 @@ export class FurryNetwork extends Website {
       xhr.setRequestHeader("Content-Type", "binary/octet-stream, application/json");
       xhr.send(blob);
       var body = xhr.response;
-      Object.assign({}, { body: body, status: xhr.status })`;
+      return Object.assign({}, { body: body, status: xhr.status })`;
       const create = await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
         profileId,
         `${this.BASE_URL}`,
@@ -272,7 +272,7 @@ export class FurryNetwork extends Website {
       xhr.setRequestHeader("Content-Type", "binary/octet-stream, application/json");
       xhr.send(blob);
       var body = xhr.response;
-      Object.assign({}, { body: body, status: xhr.status })`;
+      return Object.assign({}, { body: body, status: xhr.status })`;
     return await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
       profileId,
       `${this.BASE_URL}`,
@@ -289,7 +289,7 @@ export class FurryNetwork extends Website {
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(JSON.stringify(data));
       var body = xhr.response;
-      Object.assign({}, { body: body, status: xhr.status })`;
+      return Object.assign({}, { body: body, status: xhr.status })`;
     return await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
       profileId,
       `${this.BASE_URL}`,

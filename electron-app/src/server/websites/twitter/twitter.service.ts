@@ -59,6 +59,13 @@ export class Twitter extends Website {
     return UsernameParser.replaceText(text, 'tw', '@$1');
   }
 
+  formatTags(tags: string[]) {
+    return this.parseTags(
+      tags.map(tag => tag.replace(/[^a-z0-9]/gi, ' ')).map(tag => tag.split(' ').join('')),
+      { spaceReplacer: '_' },
+    ).map(tag => `#${tag}`);
+  }
+
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: TwitterAccountData = data.data;
@@ -149,6 +156,18 @@ export class Twitter extends Website {
       warnings.push(
         `Approximated description may surpass 280 character limit (${description.length})`,
       );
+    } else {
+      if (description.toLowerCase().indexOf('{tags}') > -1) {
+        this.validateInsertTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          280,
+        );
+      } else {
+        warnings.push(`You have not inserted the {tags} shortcut in your description; 
+          tags will not be inserted in your post`)
+      }
     }
 
     const files = [
@@ -200,6 +219,18 @@ export class Twitter extends Website {
       warnings.push(
         `Approximated description may surpass 280 character limit (${description.length})`,
       );
+    } else {
+      if (description.toLowerCase().indexOf('{tags}') > -1) {
+        this.validateInsertTags(
+          warnings,
+          this.formatTags(FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags)),
+          description,
+          280,
+        );
+      } else {
+        warnings.push(`You have not inserted the {tags} shortcut in your description; 
+          tags will not be inserted in your post`)
+      }
     }
 
     return { problems: [], warnings };

@@ -68,7 +68,7 @@ export default class BrowserWindowUtil {
     return BrowserWindowUtil.runScriptOnPage<string>(
       partition,
       url,
-      html ? 'document.body.parentElement.innerHTML' : 'document.body.innerText',
+      html ? 'return document.body.parentElement.innerHTML' : 'return document.body.innerText',
       wait,
     );
   }
@@ -84,9 +84,23 @@ export default class BrowserWindowUtil {
       if (wait) {
         await WaitUtil.wait(wait);
       }
-      const page = await bw.webContents.executeJavaScript(script);
+
+      // Using promise to handle errors. See more: https://github.com/electron/electron/pull/11158
+      const page = await bw.webContents.executeJavaScript(`
+      (function() {
+        try {
+          ${script}
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      })()`);
       return page;
     } catch (err) {
+      if (typeof err === 'object' && err && typeof err.message === 'string') {
+        err.message =
+          'Failed to run script on page: ' + err.message + '\n\nscript:\n' + script + '\n';
+      }
+
       bw.destroy();
       throw err;
     } finally {

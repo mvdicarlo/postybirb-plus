@@ -134,12 +134,10 @@ export class TwitterAPIService {
             }),
           );
       } catch (err) {
-        this.logger.error(
-          err.map(e => e.message).join('\n'),
-          err.stack,
-          'Failed to upload files to Twitter',
-        );
-        return new ApiResponse({ error: err.map(e => e.message).join('\n') });
+        this.logger.error(err, err.stack, 'Failed to upload files to Twitter');
+        return new ApiResponse({
+          error: Array.isArray(err) ? err.map(e => e.message).join('\n') : err,
+        });
       }
 
       const ids = _.chunk(mediaIds, 4);
@@ -194,7 +192,7 @@ export class TwitterAPIService {
     } catch (err) {
       this.logger.error(err, '', 'Failed to post');
       return new ApiResponse({
-        error: err.map(e => e.message).join('\n'),
+        error: Array.isArray(err) ? err.map(e => e.message).join('\n') : err,
       });
     }
   }

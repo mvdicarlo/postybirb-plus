@@ -86,7 +86,7 @@ export class Patreon extends Website {
         relationships: any;
         type: string;
       }[];
-    }>(data._id, `${this.BASE_URL}/membership`, 'window.patreon.bootstrap.creator', 1000);
+    }>(data._id, `${this.BASE_URL}/membership`, 'return window.patreon.bootstrap.creator', 1000);
 
     if (body.data) {
       status.loggedIn = true;
@@ -153,7 +153,7 @@ export class Patreon extends Website {
     const csrf = await BrowserWindowUtil.runScriptOnPage<string>(
       profileId,
       `${this.BASE_URL}`,
-      'window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.csrfSignature',
+      'return window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.csrfSignature',
       100,
     );
     if (!csrf) {
@@ -228,7 +228,7 @@ export class Patreon extends Website {
     xhr.setRequestHeader("Content-Type", "application/vnd.api+json");
     xhr.send(JSON.stringify(data));
     var body = xhr.response;
-    Object.assign({}, { body: body, status: xhr.status })`;
+    return Object.assign({}, { body: body, status: xhr.status })`;
     const create = await BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
       profileId,
       `${this.BASE_URL}`,
@@ -252,7 +252,7 @@ export class Patreon extends Website {
     xhr.setRequestHeader("Content-Type", "application/vnd.api+json");
     xhr.send(JSON.stringify(data));
     var body = xhr.response;
-    Object.assign({}, { body: body, status: xhr.status })`;
+    return Object.assign({}, { body: body, status: xhr.status })`;
     return BrowserWindowUtil.runScriptOnPage<{ body: string; status: number }>(
       profileId,
       `${this.BASE_URL}/posts/${id}/edit`,
@@ -581,7 +581,7 @@ export class Patreon extends Website {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', dest, false);
     xhr.send(fd);
-    Object.assign({}, { body: body, status: xhr.status, response: xhr.response })`;
+    return Object.assign({}, { body: body, status: xhr.status, response: xhr.response })`;
     const upload = await BrowserWindowUtil.runScriptOnPage<{
       body: any;
       status: number;
@@ -619,7 +619,7 @@ export class Patreon extends Website {
     xhr.open('POST', '/api/posts/${link}/attachments?json-api-version=1.0', false);
     xhr.setRequestHeader("X-CSRF-Signature", "${csrf}");
     xhr.send(fd);
-    xhr.status`;
+    return xhr.status`;
 
     const upload = await BrowserWindowUtil.runScriptOnPage<number>(
       profileId,
