@@ -1,7 +1,6 @@
 const MTProtoClass = require('@mtproto/core');
 import { MTProto } from '@mtproto/core';
 import { Injectable } from '@nestjs/common';
-import cheerio from 'cheerio';
 import {
   DefaultOptions,
   FileRecord,
@@ -35,6 +34,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
+import { TelegramDescription } from './telegram-description.parser';
 
 @Injectable()
 export class Telegram extends Website {
@@ -273,7 +273,7 @@ export class Telegram extends Website {
       offset_peer: {
         _: 'inputPeerEmpty',
       },
-      limit: 200,
+      limit: 400,
     });
 
     const channels: Folder[] = chats
@@ -284,7 +284,7 @@ export class Telegram extends Website {
         if (
           c.creator ||
           c.admin_rights?.post_messages ||
-          // Reverted means that user can send media
+          // False means that user can send media
           c.default_banned_rights?.send_media === false
         )
           return true;
@@ -588,9 +588,7 @@ export class Telegram extends Website {
       );
       submissionPart.data.channels.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(
-            this.channelNotFound(f),
-          );
+          problems.push(this.channelNotFound(f));
         }
       });
     } else {
@@ -609,7 +607,7 @@ export class Telegram extends Website {
   }
 
   private channelNotFound(f: string) {
-    return `Channel (${f}) not found. To fix this, simply post something in the channel. PostyBirb requests latest 200 chats and then filters them to include only those where you can send media. If you have a lot of active chats, PostyBirb will be not able to view inactive channels.`;
+    return `Channel (${f}) not found. To fix this, simply post something in the channel. PostyBirb requests latest 400 chats and then filters them to include only those where you can send media. If you have a lot of active chats, PostyBirb will be not able to view inactive channels.`;
   }
 }
 
@@ -639,73 +637,4 @@ interface SendMessageResponse {
   updates: { _: 'updateNewChannelMessage'; id: number; peer_id: { channel_id: number } }[];
 }
 
-type TelegramEntityParser = ({ node, output }: { node: cheerio.TagElement; output: string }) => any;
 
-// Maybe move to parsers folder?
-class TelegramDescription {
-  private static parsers: Record<string, TelegramEntityParser> = {};
-  public static entity(type: string, tags: string[], parse?: TelegramEntityParser) {
-    if (!parse) {
-      parse = ({ node, output }) => {
-        return {
-          _: `messageEntity${type}`,
-          offset: output.length,
-          length: 0,
-        };
-      };
-    }
-    for (const tag of tags) this.parsers[tag] = parse;
-    return parse;
-  }
-
-  public static fromHTML(html: string) {
-    let output = '';
-    let entities: { _: string; offset: number; length: number }[] = [];
-
-    const parseNodes = (doc: cheerio.Element[] | ReturnType<typeof $>, parent: number | null) => {
-      for (const node of doc) {
-        if (node.type === 'tag') {
-          if (node.name === 'br') {
-            output += '\n';
-          } else {
-            const parser = TelegramDescription.parsers[node.name];
-            let index = null;
-            if (parser) {
-              index = entities.push(parser({ node, output })) - 1;
-            }
-
-            // Recurse parse other nodes
-            if (node.children.length) parseNodes(node.children, index);
-          }
-        } else if (node.type === 'text') {
-          output += node.data;
-        }
-      }
-
-      // Set actual length of parent element if needed
-      if (parent) {
-        entities[parent].length = output.length - entities[parent].offset;
-      }
-    };
-
-    const $ = cheerio.load('');
-    parseNodes($(html), null);
-
-    return { description: output, entities };
-  }
-}
-
-TelegramDescription.entity('Bold', ['b', 'strong']);
-TelegramDescription.entity('Underline', ['u', 'ins']);
-TelegramDescription.entity('Strike', ['s', 'strike', 'del']);
-TelegramDescription.entity('Italic', ['i', 'em']);
-TelegramDescription.entity('Code', ['code']);
-TelegramDescription.entity('Pre', ['pre']);
-TelegramDescription.entity('TextUrl', ['a'], ({ node, output }) => {
-  return {
-    _: 'messageEntityTextUrl',
-    offset: output.length,
-    lenght: 0,
-    url: node.attribs.href,
-  };
-});
