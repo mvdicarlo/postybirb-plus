@@ -260,7 +260,7 @@ export class Artconomy extends Website {
       problems.push('Description must be 2000 characters or fewer.')
     }
 
-    const maxMB = 99;
+    const maxMB = 49;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {

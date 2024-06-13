@@ -35,6 +35,7 @@ import * as fs from 'fs';
 import { tmpdir } from 'os';
 import * as path from 'path';
 import SubmissionPartEntity from 'src/server/submission/submission-part/models/submission-part.entity';
+import WaitUtil from 'src/server/utils/wait.util';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -145,18 +146,35 @@ export abstract class Megalodon extends Website {
         statusOptions.spoiler_text = data.options.spoilerText;
       }
 
-      try {
-        const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
-        if (!source) source = result.url;
-        lastId = result.id;
-      } catch (err) {
-        return Promise.reject(
-          this.createPostResponse({
-            message: err.message,
-            stack: err.stack,
-            additionalInfo: { chunkNumber: i },
-          }),
-        );
+      // Mastodon may return a 422 error if the media is still processing,
+      // unfortunately without a clear indicator that this is the case. So we
+      // retry a few times when we get that status back, with increasing delays.
+      let attempts = 0;
+      const max_attempts = 5;
+      while (true) {
+        try {
+          ++attempts;
+          const ms = attempts * attempts * 1000;
+          this.logger.log(`Waiting for ${ms}ms for media to process`);
+          await WaitUtil.wait(ms);
+          const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
+          if (!source) source = result.url;
+          lastId = result.id;
+          break;
+        } catch (err) {
+          if (err?.response?.status === 422 && attempts < max_attempts) {
+            this.logger.warn(`Retrying after 422 error, attempt ${attempts}/${max_attempts}`);
+            continue;
+          } else {
+            return Promise.reject(
+              this.createPostResponse({
+                message: err.message,
+                stack: err.stack,
+                additionalInfo: { chunkNumber: i },
+              }),
+            );
+          }
+        }
       }
     }
 

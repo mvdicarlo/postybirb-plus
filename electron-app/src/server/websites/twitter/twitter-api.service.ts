@@ -110,7 +110,7 @@ export class TwitterAPIService {
       // possibly_sensitive: data.rating !== 'general',
     };
 
-    tweet.text = (tweet?.text || '').replace(/@(\w+)/g, '@/$1');
+    tweet.text = (tweet?.text || '');
 
     let mediaIds = [];
     if (data.files.length) {
