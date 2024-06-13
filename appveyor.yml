@@ -6,7 +6,6 @@ branches:
   - master
 skip_tags: true
 image:
-  - Visual Studio 2019
   - Ubuntu
 
 # cache:
@@ -18,8 +17,8 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - sh: nvm install lts
-  - sh: nvm use lts
+  - sh: nvm install --lts
+  - sh: nvm use --lts
   - yarn
 
 build_script:
