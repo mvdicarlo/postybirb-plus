@@ -62,6 +62,9 @@ export default class DefaultFormSection extends React.Component<
             <Radio.Button value={SubmissionRating.EXTREME}>Extreme</Radio.Button>
           </Radio.Group>
         </Form.Item>
+        <Form.Item label="Content Warning">
+          <Input value={data.spoilerText} onChange={this.handleChange.bind(this, 'spoilerText')} />
+        </Form.Item>
         <TagInput
           onChange={this.handleTagChange.bind(this)}
           defaultValue={data.tags}

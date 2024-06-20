@@ -14,6 +14,7 @@ import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSectio
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
 import { WebsiteImpl } from '../website.base';
+import SpoilerTextInput from '../../views/submissions/submission-forms/form-components/SpoilerTextInput';
 
 export class Itaku extends WebsiteImpl {
   internalName: string = 'Itaku';
@@ -214,13 +215,13 @@ export class ItakuFileSubmissionForm extends GenericFileSubmissionSection<ItakuF
           Share on feed
         </Checkbox>
       </div>,
-      <Form.Item label="Content Warning">
-        <Input
-          value={data.spoilerText}
-          onChange={this.handleValueChange.bind(this, 'spoilerText')}
-          maxLength={30}
-        />
-      </Form.Item>
+      <SpoilerTextInput
+        overwriteDefault={data.spoilerTextOverwrite}
+        spoilerText={data.spoilerText}
+        onChangeOverwriteDefault={this.setValue.bind(this, 'spoilerTextOverwrite')}
+        onChangeSpoilerText={this.setValue.bind(this, 'spoilerText')}
+        maxLength={30}
+      ></SpoilerTextInput>,
     );
     return elements;
   }

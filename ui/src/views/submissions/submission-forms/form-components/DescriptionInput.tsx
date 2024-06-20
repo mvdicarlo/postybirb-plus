@@ -181,6 +181,13 @@ export default class DescriptionInput extends React.Component<Props, State> {
                           Inserts the website tags or the default tags separated by ' #'
                         </span>
                       </li>
+                      <li>
+                        <code>{'{cw}'}</code>
+                        <span className="mx-1">-</span>
+                        <span>
+                          Inserts the content warning
+                        </span>
+                      </li>
                     </ul>
                   </div>
                 }

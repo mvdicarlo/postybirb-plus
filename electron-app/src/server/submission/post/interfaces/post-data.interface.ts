@@ -11,4 +11,5 @@ export interface PostData<T extends Submission, K extends DefaultOptions> {
   submission: T;
   tags: string[];
   title: string;
+  spoilerText: string;
 }

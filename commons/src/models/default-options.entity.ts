@@ -30,6 +30,10 @@ export class DefaultOptionsEntity implements DefaultOptions {
   @IsOptional()
   rating?: SubmissionRating | string;
 
+  @Expose()
+  @IsOptional()
+  spoilerText?: string;
+
   @IsArray()
   sources: string[];
 
