@@ -16,7 +16,11 @@ import UserAccountEntity from 'src/server/account/models/user-account.entity';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
+import {
+  FilePostData,
+  PostFile,
+  PostFileRecord,
+} from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
@@ -34,7 +38,7 @@ export class Itaku extends Website {
   BASE_URL: string = 'https://itaku.ee';
   readonly MAX_CHARS: number = 5000;
   acceptsFiles: string[] = ['jpeg', 'jpg', 'png', 'gif', 'webp', 'mp4', 'mov', 'webm'];
-  acceptsAdditionalFiles: boolean = false;
+  acceptsAdditionalFiles: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly usernameShortcuts = [
     {
@@ -130,6 +134,33 @@ export class Itaku extends Website {
     data: FilePostData<ItakuFileOptions>,
     accountData: any,
   ): Promise<PostResponse> {
+    const files = [data.primary, ...data.additional];
+    const haveMultipleFiles = files.length > 1;
+    const imageIds = [];
+    for (const file of files) {
+      this.checkCancelled(cancellationToken);
+      const body = await this.postImage(data, file, haveMultipleFiles);
+      if (body.id) {
+        imageIds.push(body.id);
+      } else {
+        return Promise.reject(this.createPostResponse({ additionalInfo: body }));
+      }
+    }
+
+    if (haveMultipleFiles) {
+      return this.makePost(data, imageIds);
+    } else {
+      return this.createPostResponse({
+        source: `${this.BASE_URL}/images/${imageIds[0]}`,
+      });
+    }
+  }
+
+  async postImage(
+    data: FilePostData<ItakuFileOptions>,
+    fileRecord: PostFileRecord,
+    haveMultipleFiles: boolean,
+  ): Promise<any> {
     const postData: any = {
       title: data.title,
       description: data.description,
@@ -137,10 +168,9 @@ export class Itaku extends Website {
       maturity_rating: this.convertRating(data.rating),
       tags: JSON.stringify(data.tags.map(tag => ({ name: tag }))),
       visibility: data.options.visibility,
-      image: data.primary.file,
     };
 
-    if (data.options.shareOnFeed) {
+    if (!haveMultipleFiles && data.options.shareOnFeed) {
       postData.add_to_feed = 'true';
     }
 
@@ -148,15 +178,13 @@ export class Itaku extends Website {
       postData.content_warning = data.options.spoilerText;
     }
 
-    if (data.primary.type === FileSubmissionType.IMAGE) {
-      postData.image = data.primary.file;
+    if (fileRecord.type === FileSubmissionType.IMAGE) {
+      postData.image = fileRecord.file;
     } else {
-      postData.video = data.primary.file;
+      postData.video = fileRecord.file;
     }
 
-    this.checkCancelled(cancellationToken);
-
-    const post = await Http.post<{ id: number }>(
+    const post = await Http.post<{ id?: number }>(
       `${this.BASE_URL}/api/galleries/${
         data.primary.type === FileSubmissionType.IMAGE ? 'images' : 'videos'
       }/`,
@@ -174,12 +202,7 @@ export class Itaku extends Website {
     );
 
     this.verifyResponse(post);
-    if (!post.body.id) {
-      return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
-    }
-    return this.createPostResponse({
-      source: `${this.BASE_URL}/images/${post.body.id}`,
-    });
+    return post.body;
   }
 
   async postNotificationSubmission(
@@ -187,11 +210,19 @@ export class Itaku extends Website {
     data: PostData<Submission, ItakuNotificationOptions>,
     accountData: any,
   ): Promise<PostResponse> {
+    this.checkCancelled(cancellationToken);
+    return this.makePost(data, []);
+  }
+
+  async makePost(
+    data: PostData<Submission, ItakuFileOptions | ItakuNotificationOptions>,
+    imageIds: number[],
+  ): Promise<PostResponse> {
     const postData: any = {
       title: data.title,
       content: data.description,
       folders: data.options.folders,
-      gallery_images: [],
+      gallery_images: imageIds,
       maturity_rating: this.convertRating(data.rating),
       tags: data.tags.map(tag => ({ name: tag })),
       visibility: data.options.visibility,
@@ -200,8 +231,6 @@ export class Itaku extends Website {
     if (data.options.spoilerText) {
       postData.content_warning = data.options.spoilerText;
     }
-
-    this.checkCancelled(cancellationToken);
 
     const post = await Http.post<{ id: number }>(
       `${this.BASE_URL}/api/posts/`,
@@ -232,7 +261,7 @@ export class Itaku extends Website {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
-    
+
     const description = this.defaultDescriptionParser(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
@@ -257,6 +286,10 @@ export class Itaku extends Website {
       warnings.push(`${name} will be scaled down to 10MB`);
     } else if (type === FileSubmissionType.VIDEO && FileSize.MBtoBytes(500) < size) {
       problems.push(`Itaku limits ${submission.primary.mimetype} to 500MB`);
+    }
+
+    if (submission.additional?.length && !submissionPart.data.shareOnFeed) {
+      problems.push(`Posting multiple images requires share on feed to be enabled`);
     }
 
     return { problems, warnings };
