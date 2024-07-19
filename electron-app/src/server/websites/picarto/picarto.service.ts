@@ -100,7 +100,12 @@ export class Picarto extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(15) };
+    // Max 4K image size for non member users
+    return { 
+      maxHeight: 3840, 
+      maxWidth: 2160,
+      maxSize: FileSize.MBtoBytes(15) 
+    };
   }
 
   private getRating(rating: SubmissionRating): string {
