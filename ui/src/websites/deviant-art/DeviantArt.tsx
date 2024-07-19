@@ -5,7 +5,7 @@ import {
   DeviantArtFileOptions,
   FileSubmission,
   Folder,
-  Submission
+  Submission,
 } from 'postybirb-commons';
 import React from 'react';
 import WebsiteService from '../../services/website.service';
@@ -14,55 +14,47 @@ import { WebsiteSectionProps } from '../form-sections/website-form-section.inter
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
 import GenericSubmissionSection from '../generic/GenericSubmissionSection';
-import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
-import { DeviantArtLogin } from './DeviantArtLogin';
 
 export class DeviantArt extends WebsiteImpl {
-         internalName: string = 'DeviantArt';
-         name: string = 'Deviant Art';
-         supportsAdditionalFiles: boolean = false;
-         supportsTags: boolean = true;
-         loginUrl: string = '';
+  internalName: string = 'DeviantArt';
+  name: string = 'Deviant Art';
+  supportsAdditionalFiles: boolean = false;
+  supportsTags: boolean = true;
+  loginUrl: string = 'https://www.deviantart.com/users/login';
 
-         LoginDialog = (props: LoginDialogProps) => <DeviantArtLogin {...props} />;
+  FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, DeviantArtFileOptions>) => (
+    <DeviantArtFileSubmissionForm
+      key={props.part.accountId}
+      tagOptions={{ show: true, options: { maxLength: 30, mode: 'count' } }}
+      hideThumbnailOptions={true}
+      {...props}
+    />
+  );
 
-         FileSubmissionForm = (
-           props: WebsiteSectionProps<FileSubmission, DeviantArtFileOptions>
-         ) => (
-           <DeviantArtFileSubmissionForm
-             key={props.part.accountId}
-             tagOptions={{ show: true, options: { maxLength: 30, mode: 'count' } }}
-             hideThumbnailOptions={true}
-             {...props}
-           />
-         );
-
-         NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
-           <GenericSubmissionSection
-             key={props.part.accountId}
-             tagOptions={{ show: false }}
-             ratingOptions={{ show: false }}
-             {...props}
-           />
-         );
-       }
+  NotificationSubmissionForm = (props: WebsiteSectionProps<Submission, DefaultOptions>) => (
+    <GenericSubmissionSection
+      key={props.part.accountId}
+      tagOptions={{ show: false }}
+      ratingOptions={{ show: false }}
+      {...props}
+    />
+  );
+}
 
 interface DeviantArtFileSubmissionState {
   folders: Folder[];
 }
 
-export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
-  DeviantArtFileOptions
-> {
+export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<DeviantArtFileOptions> {
   state: DeviantArtFileSubmissionState = {
-    folders: []
+    folders: [],
   };
 
   constructor(props: SubmissionSectionProps<FileSubmission, DeviantArtFileOptions>) {
     super(props);
     this.state = {
-      folders: []
+      folders: [],
     };
 
     WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
@@ -72,7 +64,7 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
             this.setState({ folders: data });
           }
         }
-      }
+      },
     );
   }
 
@@ -94,31 +86,16 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
           ))}
         </Select>
       </Form.Item>,
-      <Form.Item label="Mature Category">
+      <Form.Item label="Allow modifications of your work">
         <Select
           {...GenericSelectProps}
           className="w-full"
-          value={data.matureClassification}
-          onChange={this.setValue.bind(this, 'matureClassification')}
-          mode="multiple"
+          value={data.allowModifications}
+          onSelect={this.setValue.bind(this, 'allowModifications')}
         >
-          <Select.Option value="nudity">Nudity</Select.Option>
-          <Select.Option value="sexual">Sexual Themes</Select.Option>
-          <Select.Option value="gore">Gore/Violence</Select.Option>
-          <Select.Option value="language">Strong Language</Select.Option>
-          <Select.Option value="ideology">Ideology</Select.Option>
-        </Select>
-      </Form.Item>,
-      <Form.Item label="Mature Content">
-        <Select
-          {...GenericSelectProps}
-          className="w-full"
-          value={data.matureLevel}
-          onSelect={this.setValue.bind(this, 'matureLevel')}
-        >
-          <Select.Option value="">None</Select.Option>
-          <Select.Option value="moderate">Moderate</Select.Option>
-          <Select.Option value="strict">Strict</Select.Option>
+          <Select.Option value="yes">Yes</Select.Option>
+          <Select.Option value="no">No</Select.Option>
+          <Select.Option value="share">Share alike</Select.Option>
         </Select>
       </Form.Item>,
       <Form.Item label="Display Resolution">
@@ -137,7 +114,7 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
           <Select.Option value="6">1280px</Select.Option>
           <Select.Option value="7">1600px</Select.Option>
         </Select>
-      </Form.Item>
+      </Form.Item>,
     );
     return elements;
   }
@@ -146,8 +123,16 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
     const elements = super.renderLeftForm(data);
     elements.push(
       <div>
-        <Checkbox checked={data.feature} onChange={this.handleCheckedChange.bind(this, 'feature')}>
-          Feature
+        <Checkbox checked={data.noAI} onChange={this.handleCheckedChange.bind(this, 'noAI')}>
+          No AI
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.isAIGenerated}
+          onChange={this.handleCheckedChange.bind(this, 'isAIGenerated')}
+        >
+          Created using AI tools
         </Checkbox>
       </div>,
       <div>
@@ -160,10 +145,18 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
       </div>,
       <div>
         <Checkbox
-          checked={data.critique}
-          onChange={this.handleCheckedChange.bind(this, 'critique')}
+          checked={data.isCreativeCommons}
+          onChange={this.handleCheckedChange.bind(this, 'isCreativeCommons')}
         >
-          Critique
+          Creative commons license
+        </Checkbox>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.isCommercialUse}
+          onChange={this.handleCheckedChange.bind(this, 'isCommercialUse')}
+        >
+          Allow commercial uses of your work
         </Checkbox>
       </div>,
       <div>
@@ -178,7 +171,7 @@ export class DeviantArtFileSubmissionForm extends GenericFileSubmissionSection<
         <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
           Send to scraps
         </Checkbox>
-      </div>
+      </div>,
     );
     return elements;
   }
