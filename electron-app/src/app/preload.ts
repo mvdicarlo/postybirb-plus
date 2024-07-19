@@ -3,7 +3,6 @@ import { clipboard, dialog, shell, session, app, getCurrentWindow } from '@elect
 
 // Authorizers
 const Tumblr = require('./authorizers/tumblr.auth');
-const DeviantArt = require('./authorizers/deviant-art.auth');
 
 const _setImmediate = setImmediate;
 const _clearImmediate = clearImmediate;
@@ -53,6 +52,5 @@ process.once('loaded', () => {
   kill: () => app.quit(),
   auth: {
     Tumblr,
-    DeviantArt,
   },
 };

@@ -20,7 +20,7 @@ export class Itaku extends WebsiteImpl {
   loginUrl: string = 'https://itaku.ee';
   name: string = 'Itaku';
   supportsTags: boolean = true;
-  supportsAdditionalFiles: boolean = false;
+  supportsAdditionalFiles: boolean = true;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, ItakuFileOptions>) => (
     <ItakuFileSubmissionForm

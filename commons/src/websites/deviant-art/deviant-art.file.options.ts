@@ -12,17 +12,7 @@ export class DeviantArtFileOptionsEntity
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
-  feature!: boolean;
-
-  @Expose()
-  @IsBoolean()
-  @DefaultValue(false)
   disableComments!: boolean;
-
-  @Expose()
-  @IsBoolean()
-  @DefaultValue(false)
-  critique!: boolean;
 
   @Expose()
   @IsBoolean()
@@ -35,24 +25,44 @@ export class DeviantArtFileOptionsEntity
   folders!: string[];
 
   @Expose()
-  @IsArray()
-  @DefaultValue([])
-  matureClassification!: string[];
-
-  @Expose()
   @IsString()
-  @DefaultValue('')
-  matureLevel!: string;
-
-  @Expose()
-  @IsString()
-  @DefaultValue('0')
+  @DefaultValue(0)
   displayResolution!: string;
 
   @Expose()
   @IsBoolean()
   @DefaultValue(false)
   scraps!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  isMature!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  isAIGenerated!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(true)
+  noAI!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  isCreativeCommons!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  isCommercialUse!: boolean;
+
+  @Expose()
+  @IsString()
+  @DefaultValue('no')
+  allowModifications!: string;
 
   constructor(entity?: Partial<DeviantArtFileOptions>) {
     super(entity as DefaultFileOptions);
