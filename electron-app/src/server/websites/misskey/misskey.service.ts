@@ -228,19 +228,16 @@ export class MissKey extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<MissKeyFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
     const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
 
-    if (description.length > maxChars) {
+    if (this.stripTagsShortcut(description).length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );
@@ -310,15 +307,13 @@ export class MissKey extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<MissKeyNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const warnings = [];
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
     const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
-    if (description.length > maxChars) {
+    if (this.stripTagsShortcut(description).length > maxChars) {
       warnings.push(
         `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
       );

@@ -9,23 +9,30 @@ import { SubmissionType } from 'postybirb-commons';
 import { ValidationParts } from './interfaces/validation-parts.interface';
 import { Website } from 'src/server/websites/website.base';
 import FileSubmissionEntity from '../file-submission/models/file-submission.entity';
+import { ParserService } from '../parser/parser.service';
 
 @Injectable()
 export class ValidatorService {
-  constructor(private readonly websiteProvider: WebsiteProvider) {}
+  constructor(
+    private readonly websiteProvider: WebsiteProvider,
+    private readonly parserService: ParserService,
+  ) {}
 
-  validateParts(submission: Submission, parts: Array<SubmissionPart<any>>): Problems {
+  async validateParts(
+    submission: Submission,
+    parts: Array<SubmissionPart<any>>,
+  ): Promise<Problems> {
     const defaultPart: SubmissionPart<DefaultOptions> = parts.find(p => p.isDefault);
     const websiteProblems: Problems = {};
-    parts
-      .filter(p => !p.isDefault)
-      .forEach(p => {
+    for (const p of parts) {
+      if (!p.isDefault) {
         websiteProblems[p.accountId] = {
-          ...this.validatePart(submission, p, defaultPart),
+          ...(await this.validatePart(submission, p, defaultPart)),
           website: p.website,
           accountId: p.accountId,
         };
-      });
+      }
+    }
 
     return {
       [defaultPart.accountId]: {
@@ -37,22 +44,35 @@ export class ValidatorService {
     };
   }
 
-  private validatePart(
+  private async validatePart(
     submission: Submission,
     part: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): ValidationParts {
+  ): Promise<ValidationParts> {
     const website: Website = this.websiteProvider.getWebsiteModule(part.website);
     const parsedPart = this.parsePart(part, defaultPart);
+    const description = await this.parserService.parseDescription(
+      website,
+      defaultPart,
+      part,
+      submission.type,
+      false,
+    );
     switch (submission.type) {
       case SubmissionType.FILE:
         return website.validateFileSubmission(
           submission as FileSubmissionEntity,
           parsedPart,
           defaultPart,
+          description,
         );
       case SubmissionType.NOTIFICATION:
-        return website.validateNotificationSubmission(submission, parsedPart, defaultPart);
+        return website.validateNotificationSubmission(
+          submission,
+          parsedPart,
+          defaultPart,
+          description,
+        );
     }
   }
 

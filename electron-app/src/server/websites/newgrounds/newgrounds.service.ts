@@ -364,6 +364,7 @@ export class Newgrounds extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<NewgroundsFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

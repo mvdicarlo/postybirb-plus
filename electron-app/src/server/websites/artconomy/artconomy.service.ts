@@ -225,6 +225,7 @@ export class Artconomy extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<ArtconomyFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -252,11 +253,8 @@ export class Artconomy extends Website {
           'relationships depicted',
       );
     }
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    )
 
-    if (description.length > this.MAX_CHARS) {
+    if (this.stripTagsShortcut(description).length > this.MAX_CHARS) {
       problems.push('Description must be 2000 characters or fewer.')
     }
 

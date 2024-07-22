@@ -227,6 +227,7 @@ export class Inkbunny extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<InkbunnyFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

@@ -320,6 +320,7 @@ export class Weasyl extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<WeasylFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

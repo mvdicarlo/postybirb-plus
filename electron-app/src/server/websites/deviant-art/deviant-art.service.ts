@@ -351,6 +351,7 @@ export class DeviantArt extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<DeviantArtFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

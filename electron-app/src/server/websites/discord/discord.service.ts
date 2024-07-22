@@ -138,6 +138,7 @@ export class Discord extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<DiscordFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -160,11 +161,7 @@ export class Discord extends Website {
       }
     });
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > this.MAX_CHARS) {
+    if (this.stripTagsShortcut(description).length > this.MAX_CHARS) {
       warnings.push('Max description length allowed is 2,000 characters.');
     }
 
@@ -175,15 +172,12 @@ export class Discord extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<DiscordNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > this.MAX_CHARS) {
+    if (this.stripTagsShortcut(description).length > this.MAX_CHARS) {
       warnings.push('Max description length allowed is 2,000 characters.');
     }
 

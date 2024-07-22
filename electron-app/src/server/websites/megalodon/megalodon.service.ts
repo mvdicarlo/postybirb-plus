@@ -229,6 +229,7 @@ export abstract class Megalodon extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<MastodonFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const instanceSettings = this.getInstanceSettings(submissionPart.accountId);
 
@@ -236,14 +237,8 @@ export abstract class Megalodon extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > instanceSettings.maxChars) {
-      warnings.push(
-        `Max description length allowed is ${instanceSettings.maxChars} characters.`,
-      );
+    if (this.stripTagsShortcut(description).length > instanceSettings.maxChars) {
+      warnings.push(`Max description length allowed is ${instanceSettings.maxChars} characters.`);
     } else {
       if (description.toLowerCase().indexOf('{tags}') > -1) {
         this.validateInsertTags(
@@ -321,20 +316,15 @@ export abstract class Megalodon extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<MastodonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const instanceSettings = this.getInstanceSettings(submissionPart.accountId);
 
     const problems = [];
     const warnings = [];
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > instanceSettings.maxChars) {
-      warnings.push(
-        `Max description length allowed is ${instanceSettings.maxChars} characters.`,
-      );
+    if (this.stripTagsShortcut(description).length > instanceSettings.maxChars) {
+      warnings.push(`Max description length allowed is ${instanceSettings.maxChars} characters.`);
     } else {
       this.validateInsertTags(
         warnings,
