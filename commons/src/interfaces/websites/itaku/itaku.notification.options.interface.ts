@@ -4,4 +4,5 @@ export interface ItakuNotificationOptions extends DefaultOptions {
   folders: string[];
   visibility: string;
   spoilerText?: string;
+  spoilerTextOverwrite?: boolean;
 }

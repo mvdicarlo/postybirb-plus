@@ -174,8 +174,8 @@ export class Itaku extends Website {
       postData.add_to_feed = 'true';
     }
 
-    if (data.options.spoilerText) {
-      postData.content_warning = data.options.spoilerText;
+    if (data.spoilerText) {
+      postData.content_warning = data.spoilerText;
     }
 
     if (fileRecord.type === FileSubmissionType.IMAGE) {
@@ -256,7 +256,7 @@ export class Itaku extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<any>,
+    submissionPart: SubmissionPart<ItakuFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -288,6 +288,11 @@ export class Itaku extends Website {
 
     if (submission.additional?.length && !submissionPart.data.shareOnFeed) {
       problems.push(`Posting multiple images requires share on feed to be enabled`);
+    }
+
+    const spoilerText = FormContent.getSpoilerText(defaultPart.data, submissionPart.data);
+    if (spoilerText.length > 30) {
+      problems.push(`Max content warning length allowed is 30 characters`);
     }
 
     return { problems, warnings };

@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsArray, IsString, IsOptional } from 'class-validator';
+import { IsArray, IsString, IsOptional, IsBoolean } from 'class-validator';
 import { DefaultOptions } from '../../interfaces/submission/default-options.interface';
 import { ItakuNotificationOptions } from '../../interfaces/websites/itaku/itaku.notification.options.interface';
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
@@ -23,6 +23,11 @@ export class ItakuNotificationOptionsEntity
   @IsString()
   @IsOptional()
   spoilerText?: string;
+
+  @Expose()
+  @IsBoolean()
+  @IsOptional()
+  spoilerTextOverwrite?: boolean;
 
   constructor(entity?: Partial<ItakuNotificationOptions>) {
     super(entity as DefaultOptions);

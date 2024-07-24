@@ -68,6 +68,7 @@ export class ParserService {
       submission,
       tags,
       title: this.getTitle(submission, defaultPart, websitePart),
+      spoilerText: this.getSpoilerText(defaultPart, websitePart),
     };
 
     if (this.isFileSubmission(submission)) {
@@ -125,6 +126,22 @@ export class ParserService {
     websitePart: SubmissionPartEntity<any>,
   ): string {
     return (websitePart.data.title || defaultPart.data.title || submission.title).substring(0, 160);
+  }
+
+  private getSpoilerText(
+    defaultPart: SubmissionPartEntity<DefaultOptions>,
+    websitePart: SubmissionPartEntity<any>,
+  ): string {
+    const overwrite = websitePart.data.spoilerTextOverwrite;
+    const defaultSpoilerText = defaultPart.data.spoilerText || '';
+    const websiteSpoilerText = `${websitePart.data.spoilerText || ''}`;
+    if (overwrite === undefined) {
+      return websiteSpoilerText.trim() === '' ? defaultSpoilerText : websiteSpoilerText;
+    } else if (overwrite) {
+      return websiteSpoilerText;
+    } else {
+      return defaultSpoilerText;
+    }
   }
 
   private isFileSubmission(submission: Submission): submission is FileSubmission {
