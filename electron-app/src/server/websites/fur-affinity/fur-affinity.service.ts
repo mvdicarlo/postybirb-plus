@@ -350,6 +350,7 @@ export class FurAffinity extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<FurAffinityFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

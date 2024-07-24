@@ -163,6 +163,7 @@ export class Aryion extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<AryionFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

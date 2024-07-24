@@ -442,6 +442,7 @@ export class FurryNetwork extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<FurryNetworkFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -506,6 +507,7 @@ export class FurryNetwork extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<FurryNetworkNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems = [];
     const warnings = [];

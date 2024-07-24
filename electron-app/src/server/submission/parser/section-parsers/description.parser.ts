@@ -1,4 +1,9 @@
-import { DefaultOptions, SubmissionType, UsernameShortcut } from 'postybirb-commons';
+import {
+  DefaultOptions,
+  SubmissionPart,
+  SubmissionType,
+  UsernameShortcut,
+} from 'postybirb-commons';
 import { CustomShortcutService } from 'src/server/custom-shortcut/custom-shortcut.service';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
 import { AdInsertParser } from 'src/server/description-parsing/miscellaneous/ad.parser';
@@ -43,9 +48,10 @@ export class DescriptionParser {
 
   public async parse(
     website: Website,
-    defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<DefaultOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+    websitePart: SubmissionPart<DefaultOptions>,
     type: SubmissionType,
+    generateTags: boolean = true,
   ): Promise<string> {
     let description = FormContent.getDescription(
       defaultPart.data.description,
@@ -53,8 +59,7 @@ export class DescriptionParser {
     ).trim();
 
     if (description.length) {
-      // Insert {default}, {title}, {tags}, {cw} shortcuts
-      let tags = await this.parserService.parseTags(website, defaultPart, websitePart);
+      // Insert {default}, {title}, {cw} shortcuts
       description = this.insertDefaultShortcuts(description, [
         {
           name: 'default',
@@ -63,10 +68,6 @@ export class DescriptionParser {
         {
           name: 'title',
           content: defaultPart.data.title ?? websitePart.data.title ?? '',
-        },
-        {
-          name: 'tags',
-          content: website.generateTagsString(tags, description, websitePart),
         },
         {
           name: 'cw',
@@ -108,6 +109,21 @@ export class DescriptionParser {
     }
 
     description = website.postParseDescription(description, type);
+
+    // Insert {tags} shortcut if desired. Happens at the end, since tags will
+    // get cut off if they're too long instead of failing the submission. In
+    // case we're validating, we leave the shortcut standing, since the
+    // validation code will act upon its presence.
+    if (generateTags) {
+      const tags = await this.parserService.parseTags(website, defaultPart, websitePart);
+      description = this.insertDefaultShortcuts(description, [
+        {
+          name: 'tags',
+          content: website.generateTagsString(tags, description, websitePart),
+        },
+      ]);
+    }
+
     return description.trim();
   }
 

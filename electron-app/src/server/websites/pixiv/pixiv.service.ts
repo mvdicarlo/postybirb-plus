@@ -310,6 +310,7 @@ export class Pixiv extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<PixivFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

@@ -513,6 +513,7 @@ export class Telegram extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<TelegramFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -533,11 +534,9 @@ export class Telegram extends Website {
       problems.push('No channel(s) selected.');
     }
 
-    const { description } = TelegramDescription.fromHTML(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > 4096) {
+    if (
+      TelegramDescription.fromHTML(this.stripTagsShortcut(description)).description.length > 4096
+    ) {
       warnings.push('Max description length allowed is 4,096 characters.');
     }
 

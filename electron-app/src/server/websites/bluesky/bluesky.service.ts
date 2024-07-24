@@ -384,6 +384,7 @@ export class Bluesky extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<BlueskyFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -404,7 +405,7 @@ export class Bluesky extends Website {
 
     this.validateRating(submissionPart, defaultPart, warnings);
 
-    this.validateDescription(problems, warnings, submissionPart, defaultPart);
+    this.validateDescription(problems, warnings, submissionPart, defaultPart, description);
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
@@ -450,11 +451,12 @@ export class Bluesky extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<BlueskyNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    this.validateDescription(problems, warnings, submissionPart, defaultPart);
+    this.validateDescription(problems, warnings, submissionPart, defaultPart, description);
     this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
     this.validateRating(submissionPart, defaultPart, warnings);
 
@@ -487,12 +489,9 @@ export class Bluesky extends Website {
     warnings: string[],
     submissionPart: SubmissionPart<BlueskyNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): void {
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    const rt = new RichText({ text: description });
+    const rt = new RichText({ text: this.stripTagsShortcut(description) });
     const agent = new BskyAgent({ service: 'https://bsky.social' });
     rt.detectFacets(agent);
 

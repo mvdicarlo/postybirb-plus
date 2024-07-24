@@ -160,6 +160,7 @@ export class HentaiFoundry extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<HentaiFoundryFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
