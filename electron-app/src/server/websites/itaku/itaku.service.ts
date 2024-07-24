@@ -166,7 +166,7 @@ export class Itaku extends Website {
       description: data.description,
       sections: JSON.stringify(data.options.folders),
       maturity_rating: this.convertRating(data.rating),
-      tags: JSON.stringify(data.tags.map(tag => ({ name: tag }))),
+      tags: JSON.stringify(data.tags.map(tag => ({ name: tag.substring(0, 59) }))),
       visibility: data.options.visibility,
     };
 
@@ -224,7 +224,7 @@ export class Itaku extends Website {
       folders: data.options.folders,
       gallery_images: imageIds,
       maturity_rating: this.convertRating(data.rating),
-      tags: data.tags.map(tag => ({ name: tag })),
+      tags: data.tags.map(tag => ({ name: tag.substring(0, 59) })),
       visibility: data.options.visibility,
     };
 
@@ -267,9 +267,7 @@ export class Itaku extends Website {
     );
 
     if (description.length > this.MAX_CHARS) {
-      problems.push(
-        `Max description length allowed is 5000 characters.`,
-      );
+      problems.push(`Max description length allowed is 5000 characters.`);
     }
 
     if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 5) {
@@ -313,9 +311,7 @@ export class Itaku extends Website {
     }
 
     if (description.length > this.MAX_CHARS) {
-      problems.push(
-        `Max description length allowed is 5000 characters.`,
-      );
+      problems.push(`Max description length allowed is 5000 characters.`);
     }
 
     return { problems, warnings };
