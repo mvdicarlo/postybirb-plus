@@ -26,6 +26,11 @@ export class ItakuFileOptionsEntity extends DefaultFileOptionsEntity implements 
   @IsOptional()
   spoilerText?: string;
 
+  @Expose()
+  @IsBoolean()
+  @IsOptional()
+  spoilerTextOverwrite?: boolean;
+
   constructor(entity?: Partial<ItakuFileOptions>) {
     super(entity as DefaultFileOptions);
   }

@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus",
-  "version": "3.1.44",
+  "version": "3.1.45",
   "description": "(ClientServer) PostyBirb is an application that helps artists post art and other multimedia to multiple websites more quickly.",
   "main": "dist/main.js",
   "author": "Michael DiCarlo",
@@ -47,6 +47,7 @@
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/websockets": "^7.6.18",
     "@types/node": "^16.10.2",
+    "async-mutex": "^0.5.0",
     "chardet": "^0.8.0",
     "cheerio": "^1.0.0-rc.10",
     "class-transformer": "^0.3.1",

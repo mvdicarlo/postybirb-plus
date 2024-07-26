@@ -32,6 +32,7 @@ export class FileManipulationService {
         buffer,
         mimeType,
       );
+      this.logger.debug('Acquired Image Manipulator');
 
       try {
         let skipRescale = false;
@@ -48,8 +49,6 @@ export class FileManipulationService {
           if (maxSize < im.getHeight() || maxSize < im.getWidth()) {
             const scaled = await im.resize(maxSize).getData();
             newBuffer = scaled.buffer;
-            const newIm = await this.imageManipulationPool.getImageManipulator(newBuffer, mimeType);
-            newIm.destroy();
 
             if (newBuffer.length > targetSize) {
               this.logger.debug(
@@ -91,6 +90,7 @@ export class FileManipulationService {
         }
       } finally {
         im.destroy();
+        this.logger.debug('Released Image Manipulator');
       }
     }
 

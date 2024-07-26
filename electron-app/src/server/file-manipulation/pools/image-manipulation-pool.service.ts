@@ -3,6 +3,7 @@ import os from 'os';
 import ImageManipulator from '../manipulators/image.manipulator';
 import { UiNotificationService } from 'src/server/notification/ui-notification/ui-notification.service';
 import { NotificationType } from 'src/server/notification/enums/notification-type.enum';
+import { Mutex } from 'async-mutex';
 
 interface QueuedWaiter {
   resolve: (im: ImageManipulator) => void;
@@ -20,38 +21,45 @@ export class ImageManipulationPoolService {
   private inUse: ImageManipulator[] = [];
   private readonly MAX_COUNT: number = Math.min(os.cpus().length, 4);
   private hasAlerted: boolean = false;
+  private readonly mutex = new Mutex();
 
   constructor(private readonly uiNotificationService: UiNotificationService) {}
 
   getImageManipulator(data: Buffer, type: string): Promise<ImageManipulator> {
     return new Promise(async resolve => {
-      if (data.length > ImageManipulator.DEFERRED_LIMIT) {
-        if (this.inUse.length < this.MAX_COUNT) {
-          const im = await ImageManipulator.build(data, type as any);
-          this.inUse.push(im);
-          resolve(im.onDestroy(this.onDestroyCallback.bind(this)));
-          this.logger.debug(`Pool Size = ${this.inUse.length} of ${this.MAX_COUNT}`);
-        } else {
-          this.logger.debug('Queueing Image Manipulator');
-          this.queue.push({
-            resolve,
-            arguments: {
-              data,
-              type,
-            },
-          });
+      // mutex is used to ensure that the pool size is not exceeded when rapidly called
+      const release = await this.mutex.acquire();
+      try {
+        if (data.length > ImageManipulator.DEFERRED_LIMIT) {
+          if (this.inUse.length < this.MAX_COUNT) {
+            const im = await ImageManipulator.build(data, type as any);
+            this.inUse.push(im);
+            resolve(im.onDestroy(this.onDestroyCallback.bind(this)));
+            this.logger.debug(`Pool Size = ${this.inUse.length} of ${this.MAX_COUNT}`);
+          } else {
+            this.logger.debug('Queueing Image Manipulator');
+            this.queue.push({
+              resolve,
+              arguments: {
+                data,
+                type,
+              },
+            });
 
-          if (!this.hasAlerted) {
-            this.hasAlerted = true;
-            this.uiNotificationService.createUINotification(
-              NotificationType.INFO,
-              0,
-              'PostyBirb is currently processing many image files. This may affect the time it takes to create or post image based submissions.',
-            );
+            if (!this.hasAlerted) {
+              this.hasAlerted = true;
+              this.uiNotificationService.createUINotification(
+                NotificationType.INFO,
+                0,
+                'PostyBirb is currently processing many image files. This may affect the time it takes to create or post image based submissions.',
+              );
+            }
           }
+        } else {
+          resolve(await ImageManipulator.build(data, type as any));
         }
-      } else {
-        resolve(await ImageManipulator.build(data, type as any));
+      } finally {
+        release();
       }
     });
   }

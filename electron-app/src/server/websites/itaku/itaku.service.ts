@@ -166,7 +166,7 @@ export class Itaku extends Website {
       description: data.description,
       sections: JSON.stringify(data.options.folders),
       maturity_rating: this.convertRating(data.rating),
-      tags: JSON.stringify(data.tags.map(tag => ({ name: tag }))),
+      tags: JSON.stringify(data.tags.map(tag => ({ name: tag.substring(0, 59) }))),
       visibility: data.options.visibility,
     };
 
@@ -174,8 +174,8 @@ export class Itaku extends Website {
       postData.add_to_feed = 'true';
     }
 
-    if (data.options.spoilerText) {
-      postData.content_warning = data.options.spoilerText;
+    if (data.spoilerText) {
+      postData.content_warning = data.spoilerText;
     }
 
     if (fileRecord.type === FileSubmissionType.IMAGE) {
@@ -224,7 +224,7 @@ export class Itaku extends Website {
       folders: data.options.folders,
       gallery_images: imageIds,
       maturity_rating: this.convertRating(data.rating),
-      tags: data.tags.map(tag => ({ name: tag })),
+      tags: data.tags.map(tag => ({ name: tag.substring(0, 59) })),
       visibility: data.options.visibility,
     };
 
@@ -256,7 +256,7 @@ export class Itaku extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<any>,
+    submissionPart: SubmissionPart<ItakuFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -267,9 +267,7 @@ export class Itaku extends Website {
     );
 
     if (description.length > this.MAX_CHARS) {
-      problems.push(
-        `Max description length allowed is 5000 characters.`,
-      );
+      problems.push(`Max description length allowed is 5000 characters.`);
     }
 
     if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 5) {
@@ -290,6 +288,11 @@ export class Itaku extends Website {
 
     if (submission.additional?.length && !submissionPart.data.shareOnFeed) {
       problems.push(`Posting multiple images requires share on feed to be enabled`);
+    }
+
+    const spoilerText = FormContent.getSpoilerText(defaultPart.data, submissionPart.data);
+    if (spoilerText.length > 30) {
+      problems.push(`Max content warning length allowed is 30 characters`);
     }
 
     return { problems, warnings };
@@ -313,9 +316,7 @@ export class Itaku extends Website {
     }
 
     if (description.length > this.MAX_CHARS) {
-      problems.push(
-        `Max description length allowed is 5000 characters.`,
-      );
+      problems.push(`Max description length allowed is 5000 characters.`);
     }
 
     return { problems, warnings };

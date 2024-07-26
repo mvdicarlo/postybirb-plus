@@ -73,7 +73,7 @@ export class DeviantArt extends Website {
 
       const csrf = res.body.match(/window.__CSRF_TOKEN__ = '(.*)'/)?.[1];
       if (csrf) {
-        this.getFolders(data._id, status.username);
+        await this.getFolders(data._id, status.username);
       } else {
         this.logger.warn('Could not find CSRF token for DeviantArt to retrieve folders.');
       }
@@ -86,7 +86,11 @@ export class DeviantArt extends Website {
     try {
       const csrf = await this.getCSRF(profileId);
       const res = await Http.get<{ results: DeviantArtFolder[] }>(
-        `${this.BASE_URL}/_puppy/dashared/gallection/folders?offset=0&limit=250&type=gallery&with_all_folder=true&with_permissions=true&username=${username}&da_minor_version=20230710&csrf_token=${csrf}`,
+        `${
+          this.BASE_URL
+        }/_puppy/dashared/gallection/folders?offset=0&limit=250&type=gallery&with_all_folder=true&with_permissions=true&username=${encodeURIComponent(
+          username,
+        )}&da_minor_version=20230710&csrf_token=${csrf}`,
         profileId,
         {
           requestOptions: { json: true },
@@ -170,7 +174,9 @@ export class DeviantArt extends Website {
       data.part.accountId,
       this.BASE_URL,
       `
-        var blocksFromHTML = Draft.convertFromHTML(\`${data.description || '<div></div>'}\`);
+        var blocksFromHTML = Draft.convertFromHTML(\`${
+          data.description.replace(/`/g, '&#96;') || '<div></div>'
+        }\`);
         var x = Draft.ContentState.createFromBlockArray(
             blocksFromHTML.contentBlocks,
             blocksFromHTML.entityMap,
@@ -276,7 +282,9 @@ export class DeviantArt extends Website {
       data.part.accountId,
       this.BASE_URL,
       `
-        var blocksFromHTML = Draft.convertFromHTML(\`${data.description || '<div></div>'}\`);
+        var blocksFromHTML = Draft.convertFromHTML(\`${
+          data.description.replace(/`/g, '&#96;') || '<div></div>'
+        }\`);
         var x = Draft.ContentState.createFromBlockArray(
             blocksFromHTML.contentBlocks,
             blocksFromHTML.entityMap,
