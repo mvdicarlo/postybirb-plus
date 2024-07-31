@@ -71,7 +71,6 @@
     "node-forge": "^0.10.0",
     "parse5": "^5.1.1",
     "postybirb-commons": "file:../commons",
-    "react-native-fs": "^2.20.0",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "rxjs": "^6.6.7",
