@@ -18,6 +18,7 @@
     "build:linux": "electron-builder -l",
     "build:osx": "electron-builder -m",
     "build:windows": "electron-builder -w",
+    "build:rehash": "node hasher.js",
     "build:release": "export $(cat .env | xargs) && electron-builder -mwl -p always",
     "release:windows": "electron-builder -w -p always",
     "release:linux": "electron-builder -l -p always",
@@ -108,7 +109,8 @@
     "ts-jest": "^26.5.6",
     "ts-loader": "^8.3.0",
     "ts-node": "^9.0.0",
-    "tsconfig-paths": "^3.11.0"
+    "tsconfig-paths": "^3.11.0",
+    "yaml": "^2.5.0"
   },
   "build": {
     "appId": "com.lemonynade.postybirb.plus",

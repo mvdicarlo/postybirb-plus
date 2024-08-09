@@ -1,8 +1,12 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { version } = require('./package.json');
+const { parse, stringify } = require('yaml');
 
-const YOUR_FILE_PATH = '.\\release\\postybirb-plus-3.1.45.exe';  //  POPULATE THIS
+const BASE_PATH = path.join(__dirname, 'release');
+const SETUP_PATH = path.join(BASE_PATH, `postybirb-plus-setup-${version}.exe`);
+const YAML_PATH = path.join(BASE_PATH, `latest.yml`);
 
 function hashFile(file, algorithm = 'sha512', encoding = 'base64', options) {
   return new Promise((resolve, reject) => {
@@ -13,27 +17,24 @@ function hashFile(file, algorithm = 'sha512', encoding = 'base64', options) {
       Object.assign({}, options, {
         highWaterMark: 1024 * 1024,
         /* better to use more memory but hash faster */
-      })
+      }),
     )
       .on('error', reject)
       .on('end', () => {
         hash.end();
-        console.log('hash done');
-        console.log(hash.read());
         resolve(hash.read());
       })
-      .pipe(
-        hash,
-        {
-          end: false,
-        }
-      );
+      .pipe(hash, {
+        end: false,
+      });
   });
 }
 
-const installerPath = path.resolve(
-  __dirname,
-  YOUR_FILE_PATH
-);
-
-hashFile(installerPath);
+hashFile(SETUP_PATH).then(hash => {
+  console.log(hash);
+  const yaml = parse(fs.readFileSync(YAML_PATH, 'utf8'));
+  yaml.sha512 = hash;
+  yaml.files[0].sha512 = hash;
+  console.log(stringify(yaml));
+  fs.writeFileSync(YAML_PATH, stringify(yaml));
+});
