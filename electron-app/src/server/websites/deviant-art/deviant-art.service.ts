@@ -28,6 +28,7 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { writeFile } from 'fs';
 
 interface DeviantArtFolder {
   description: string;
@@ -77,7 +78,7 @@ export class DeviantArt extends Website {
       } else {
         this.logger.warn('Could not find CSRF token for DeviantArt to retrieve folders.');
       }
-    }
+    } else this.logger.warn('Body includes login url, unlogging.');
 
     return status;
   }
@@ -207,7 +208,7 @@ export class DeviantArt extends Website {
       subject_tags: '_empty',
       tags: this.formatTags(data.tags),
       tierids: '_empty',
-      title: data.title,
+      title: this.truncateTitle(data.title),
       csrf_token: await this.getCSRF(data.part.accountId),
     };
 
@@ -347,6 +348,12 @@ export class DeviantArt extends Website {
     return this.createPostResponse({ source: publish.body.deviation.url });
   }
 
+  private titleLimit = 50;
+  private truncateTitle(title: string) {
+    const newTitle = title.substring(0, this.titleLimit);
+    return { title: newTitle, exceedsLimit: newTitle !== title };
+  }
+
   validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<DeviantArtFileOptions>,
@@ -356,9 +363,11 @@ export class DeviantArt extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const title = submissionPart.data.title || defaultPart.data.title || submission.title;
-    if (title.length > 50) {
-      warnings.push(`Title will be truncated to 50 characters: ${title.substring(0, 50)}`);
+    const { title, exceedsLimit } = this.truncateTitle(
+      submissionPart.data.title || defaultPart.data.title || submission.title,
+    );
+    if (exceedsLimit) {
+      warnings.push(`Title will be truncated to ${this.titleLimit} characters: ${title}`);
     }
 
     if (submissionPart.data.folders && submissionPart.data.folders.length) {
