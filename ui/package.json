@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus-ui",
-  "version": "3.1.45",
+  "version": "3.1.46",
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
@@ -25,6 +25,7 @@
     "react-cropper": "^1.3.0",
     "react-dom": "^16.14.0",
     "react-hotkeys": "^2.0.0",
+    "react-intl": "^3.4.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.2.0",
     "sanitize-html": "^1.27.5",
@@ -33,6 +34,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-scripts build && shx mv build ../electron-app",
+    "build:legacy": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-scripts --openssl-legacy-provider build && shx mv build ../electron-app",
     "build:clean": "rimraf ../electron-app/build",
     "build:style": "npm run build:tailwind && npm run build:themes",
     "build:tailwind": "tailwind build src/styles/index.css -o public/styles/tailwind.css",

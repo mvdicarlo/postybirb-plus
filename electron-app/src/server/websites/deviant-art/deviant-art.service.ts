@@ -23,12 +23,12 @@ import { ValidationParts } from 'src/server/submission/validator/interfaces/vali
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
+import { HttpExperimental } from 'src/server/utils/http-experimental';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { writeFile } from 'fs';
 
 interface DeviantArtFolder {
   description: string;
@@ -67,18 +67,14 @@ export class DeviantArt extends Website {
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(this.BASE_URL, data._id);
-    if (!res.body.includes('https://www.deviantart.com/users/login')) {
+    const res = await HttpExperimental.get<string>(this.BASE_URL, { partition: data._id });
+    const cookies = await Http.getWebsiteCookies(data._id, this.BASE_URL);
+    const userInfoCookie = cookies.find(c => c.name === 'userinfo');
+    if (userInfoCookie) {
       status.loggedIn = true;
-      status.username = res.body.match(/data-username="(\w+)"/)[1];
-
-      const csrf = res.body.match(/window.__CSRF_TOKEN__ = '(.*)'/)?.[1];
-      if (csrf) {
-        await this.getFolders(data._id, status.username);
-      } else {
-        this.logger.warn('Could not find CSRF token for DeviantArt to retrieve folders.');
-      }
-    } else this.logger.warn('Body includes login url, unlogging.');
+      status.username = JSON.parse(decodeURIComponent(userInfoCookie.value).split(';')[1]).username;
+      await this.getFolders(data._id, status.username);
+    }
 
     return status;
   }
@@ -86,16 +82,13 @@ export class DeviantArt extends Website {
   private async getFolders(profileId: string, username: string) {
     try {
       const csrf = await this.getCSRF(profileId);
-      const res = await Http.get<{ results: DeviantArtFolder[] }>(
+      const res = await HttpExperimental.get<{ results: DeviantArtFolder[] }>(
         `${
           this.BASE_URL
         }/_puppy/dashared/gallection/folders?offset=0&limit=250&type=gallery&with_all_folder=true&with_permissions=true&username=${encodeURIComponent(
           username,
         )}&da_minor_version=20230710&csrf_token=${csrf}`,
-        profileId,
-        {
-          requestOptions: { json: true },
-        },
+        { partition: profileId },
       );
       const folders: Folder[] = [];
       res.body.results.forEach((f: DeviantArtFolder) => {
@@ -127,7 +120,7 @@ export class DeviantArt extends Website {
   }
 
   private async getCSRF(profileId: string) {
-    const url = await Http.get<string>(this.BASE_URL, profileId);
+    const url = await HttpExperimental.get<string>(this.BASE_URL, { partition: profileId });
     return url.body.match(/window.__CSRF_TOKEN__ = '(.*)'/)?.[1];
   }
 
@@ -136,7 +129,7 @@ export class DeviantArt extends Website {
     data: FilePostData<DeviantArtFileOptions>,
     accountData: DeviantArtAccountData,
   ): Promise<PostResponse> {
-    const fileUpload = await Http.post<{
+    const fileUpload = await HttpExperimental.post<{
       deviationId: number;
       status: string;
       stashId: number;
@@ -144,7 +137,8 @@ export class DeviantArt extends Website {
       size: number;
       cursor: string;
       title: string;
-    }>(`${this.BASE_URL}/_puppy/dashared/deviation/submit/upload/deviation`, data.part.accountId, {
+    }>(`${this.BASE_URL}/_puppy/dashared/deviation/submit/upload/deviation`, {
+      partition: data.part.accountId,
       type: 'multipart',
       data: {
         upload_file: data.primary.file,
@@ -153,7 +147,6 @@ export class DeviantArt extends Website {
         da_minor_version: '20230710',
         csrf_token: await this.getCSRF(data.part.accountId),
       },
-      requestOptions: { json: true },
     });
 
     if (fileUpload.body.status !== 'success') {
@@ -248,18 +241,18 @@ export class DeviantArt extends Website {
       );
     }
 
-    const publish = await Http.post<{
+    const publish = await HttpExperimental.post<{
       status: string;
       url: string;
       deviationId: number;
-    }>(`${this.BASE_URL}/_puppy/dashared/deviation/publish`, data.part.accountId, {
+    }>(`${this.BASE_URL}/_puppy/dashared/deviation/publish`, {
+      partition: data.part.accountId,
       type: 'json',
       data: {
         stashid: fileUpload.body.deviationId,
         da_minor_version: 20230710,
         csrf_token: await this.getCSRF(data.part.accountId),
       },
-      requestOptions: { json: true },
     });
 
     if (publish.body.status !== 'success') {
@@ -300,15 +293,15 @@ export class DeviantArt extends Website {
       title: data.title,
     };
 
-    const create = await Http.post<{
+    const create = await HttpExperimental.post<{
       deviation: {
         deviationId: number;
         url: string;
       };
-    }>(`${this.BASE_URL}/_napi/shared_api/journal/create`, data.part.accountId, {
+    }>(`${this.BASE_URL}/_napi/shared_api/journal/create`, {
+      partition: data.part.accountId,
       type: 'json',
       data: form,
-      requestOptions: { json: true },
     });
 
     if (!create.body.deviation?.deviationId) {
@@ -320,12 +313,13 @@ export class DeviantArt extends Website {
       );
     }
 
-    const publish = await Http.post<{
+    const publish = await HttpExperimental.post<{
       deviation: {
         deviationId: number;
         url: string;
       };
-    }>(`${this.BASE_URL}/_puppy/dashared/journal/publish`, data.part.accountId, {
+    }>(`${this.BASE_URL}/_puppy/dashared/journal/publish`, {
+      partition: data.part.accountId,
       type: 'json',
       data: {
         deviationid: create.body.deviation.deviationId,
@@ -333,7 +327,6 @@ export class DeviantArt extends Website {
         csrf_token: await this.getCSRF(data.part.accountId),
         featured: true,
       },
-      requestOptions: { json: true },
     });
 
     if (!publish.body.deviation?.deviationId) {
@@ -378,7 +371,7 @@ export class DeviantArt extends Website {
       );
       submissionPart.data.folders.forEach(f => {
         if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(`Folder (${f}) not found.`);
+          warnings.push(`Folder (${f}) not found.`);
         }
       });
     }
