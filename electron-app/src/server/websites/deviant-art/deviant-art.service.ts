@@ -161,9 +161,9 @@ export class DeviantArt extends Website {
     this.checkCancelled(cancellationToken);
     const mature =
       data.options.isMature ||
-      data.options.rating === SubmissionRating.ADULT ||
-      data.options.rating === SubmissionRating.MATURE ||
-      data.options.rating === SubmissionRating.EXTREME;
+      data.rating === SubmissionRating.ADULT ||
+      data.rating === SubmissionRating.MATURE ||
+      data.rating === SubmissionRating.EXTREME;
     const description = await BrowserWindowUtil.runScriptOnPage<string>(
       data.part.accountId,
       this.BASE_URL,
@@ -201,7 +201,7 @@ export class DeviantArt extends Website {
       subject_tags: '_empty',
       tags: this.formatTags(data.tags),
       tierids: '_empty',
-      title: this.truncateTitle(data.title),
+      title: this.truncateTitle(data.title).title,
       csrf_token: await this.getCSRF(data.part.accountId),
     };
 
