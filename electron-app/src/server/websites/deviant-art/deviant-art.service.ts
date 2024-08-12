@@ -201,7 +201,7 @@ export class DeviantArt extends Website {
       subject_tags: '_empty',
       tags: this.formatTags(data.tags),
       tierids: '_empty',
-      title: this.truncateTitle(data.title),
+      title: this.truncateTitle(data.title).title,
       csrf_token: await this.getCSRF(data.part.accountId),
     };
 
