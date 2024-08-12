@@ -30,6 +30,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
+import WaitUtil from 'src/server/utils/wait.util';
 
 type NewgroundsPostResponse = {
   edit_url: string;
@@ -270,31 +271,47 @@ export class Newgrounds extends Website {
     }
 
     const { options } = data;
-    const contentUpdateRes = await Http.post<NewgroundsPostResponse>(
-      edit_url,
-      data.part.accountId,
-      {
+    // Sets the description
+    let contentUpdateRes = await Http.post<NewgroundsPostResponse>(edit_url, data.part.accountId, {
+      type: 'multipart',
+      requestOptions: { json: true },
+      data: {
+        PHP_SESSION_UPLOAD_PROGRESS: 'projectform',
+        userkey: userKey,
+        encoder: 'quill',
+        'option[longdescription]': this.parseDescription(data.description),
+      },
+    });
+
+    const updateProps = {
+      title: data.title,
+      'option[tags]': this.formatTags(data.tags).join(','),
+      'option[include_in_portal]': options.sketch ? '0' : '1',
+      'option[use_creative_commons]': options.creativeCommons ? '1' : '0',
+      'option[cc_commercial]': options.commercial ? 'yes' : 'no',
+      'option[cc_modifiable]': options.modification ? 'yes' : 'no',
+      'option[genreid]': options.category,
+      'option[nudity]': options.nudity,
+      'option[violence]': options.violence,
+      'option[language_textual]': options.explicitText,
+      'option[adult_themes]': options.adultThemes,
+    };
+
+    for (const [key, value] of Object.entries(updateProps)) {
+      // Mimicks the behavior of the website by sending the data as a form is interacted with
+      // Sending all at once appears to cause the server to miss fields
+      await WaitUtil.wait(1000);
+      contentUpdateRes = await Http.post<NewgroundsPostResponse>(edit_url, data.part.accountId, {
         type: 'multipart',
         requestOptions: { json: true },
         data: {
           PHP_SESSION_UPLOAD_PROGRESS: 'projectform',
           userkey: userKey,
-          encoder: 'quill',
-          title: data.title,
-          'option[longdescription]': this.parseDescription(data.description),
-          'option[tags]': this.formatTags(data.tags).join(','),
-          'option[include_in_portal]': options.sketch ? '0' : '1',
-          'option[use_creative_commons]': options.creativeCommons ? '1' : '0',
-          'option[cc_commercial]': options.commercial ? 'yes' : 'no',
-          'option[cc_modifiable]': options.modification ? 'yes' : 'no',
-          'option[genreid]': options.category,
-          'option[nudity]': options.nudity,
-          'option[violence]': options.violence,
-          'option[language_textual]': options.explicitText,
-          'option[adult_themes]': options.adultThemes,
+          [key]: value,
         },
-      },
-    );
+      });
+      console.log(key, value, contentUpdateRes.body);
+    }
 
     if (!this.checkIsSaved(contentUpdateRes.body)) {
       this.cleanUpFailedProject(data.part.accountId, initRes.body.project_id, userKey);
