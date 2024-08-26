@@ -33,12 +33,14 @@ import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 import { Pixelfed } from './pixelfed/Pixelfed';
 import { Bluesky } from './bluesky/Bluesky';
 import { Twitter } from './twitter/Twitter';
+import { Cohost } from './cohost/Cohost';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
     Artconomy: new Artconomy(),
     Aryion: new Aryion(),
     Bluesky: new Bluesky(),
+    Cohost: new Cohost(),
     Custom: new Custom(),
     Derpibooru: new Derpibooru(),
     DeviantArt: new DeviantArt(),
