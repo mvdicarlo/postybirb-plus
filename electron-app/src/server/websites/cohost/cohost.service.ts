@@ -32,6 +32,7 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import _ from 'lodash';
 import cheerio from 'cheerio';
+import { CohostFileOptionsEntity } from 'postybirb-commons/lib/websites/cohost/cohost.file.options';
 
 @Injectable()
 export class Cohost extends Website {
@@ -93,7 +94,6 @@ export class Cohost extends Website {
     cancellationToken: CancellationToken,
     data: PostData<Submission, CohostFileOptions | CohostNotificationOptions>,
   ): Promise<PostResponse> {
-    const filePostData = (data as FilePostData<CohostFileOptions>).primary ? (data as FilePostData<CohostFileOptions>) : null;
     var pageName = encodeURIComponent(this.page_name);
 
     const postData: any = {
@@ -111,7 +111,6 @@ export class Cohost extends Website {
 
     this.checkCancelled(cancellationToken);
 
-
     // first create a draft
     const draft = await Http.post<{ postId: number }>(
       `${this.BASE_URL}/api/v1/project/${pageName}/posts`, undefined, {
@@ -126,73 +125,77 @@ export class Cohost extends Website {
       },
     );
 
+    // if we're posting images
+    if ((data as FilePostData<CohostFileOptions>).primary) {
+      const filePostData = (data as FilePostData<CohostFileOptions>);
 
-    // upload attachments
-    var arr = [filePostData.primary, ...filePostData.additional];
-    for (var i in arr) {
-      // start
-      this.checkCancelled(cancellationToken);
-      const attachment = await Http.post<{
-        attachmentId: Number,
-        url: string,
-        requiredFields: Array<any>,
-      }>(
-        `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/start`, undefined, {
-          type: 'json',
-          data: {
-            "filename": arr[i].file.options.filename,
-            "content_type": arr[i].file.options.contentType,
-            "content_length": arr[i].file.value.byteLength
+      // upload attachments
+      var arr = [filePostData.primary, ...filePostData.additional];
+      for (var i in arr) {
+        // start
+        this.checkCancelled(cancellationToken);
+        const attachment = await Http.post<{
+          attachmentId: Number,
+          url: string,
+          requiredFields: Array<any>,
+        }>(
+          `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/start`, undefined, {
+            type: 'json',
+            data: {
+              "filename": arr[i].file.options.filename,
+              "content_type": arr[i].file.options.contentType,
+              "content_length": arr[i].file.value.byteLength
+            },
+            requestOptions: {
+              json: true,
+            },
+            headers: {
+              "Cookie": this.cookie
+            }
           },
-          requestOptions: {
-            json: true,
+        );
+  
+        // continue
+        this.checkCancelled(cancellationToken);
+        const upload = await Http.post(
+          `${attachment.body.url}`, undefined, {
+            type: 'multipart',
+            data: {
+              ...attachment.body.requiredFields,
+              file: arr[i].file
+            },
+            headers: {
+              "Cookie": this.cookie
+            }
           },
-          headers: {
-            "Cookie": this.cookie
-          }
-        },
-      );
-
-      // continue
-      this.checkCancelled(cancellationToken);
-      const upload = await Http.post(
-        `${attachment.body.url}`, undefined, {
-          type: 'multipart',
-          data: {
-            ...attachment.body.requiredFields,
-            file: arr[i].file
+        );
+  
+        // finish
+        this.checkCancelled(cancellationToken);
+        const res = await Http.post<{
+          attachmentId: string,
+          url: string,
+        }>(
+          `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/finish/${attachment.body.attachmentId}`, undefined, {
+            type: 'json',
+            data: {},
+            requestOptions: {
+              json: true,
+            },
+            headers: {
+              "Cookie": this.cookie
+            }
           },
-          headers: {
-            "Cookie": this.cookie
-          }
-        },
-      );
-
-      // finish
-      this.checkCancelled(cancellationToken);
-      const res = await Http.post<{
-        attachmentId: string,
-        url: string,
-      }>(
-        `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/finish/${attachment.body.attachmentId}`, undefined, {
-          type: 'json',
-          data: {},
-          requestOptions: {
-            json: true,
-          },
-          headers: {
-            "Cookie": this.cookie
-          }
-        },
-      );
-
-      postData.blocks.push({
-          "type": "attachment", "attachment": {
-            "fileURL": res.body.url,
-            "attachmentId": res.body.attachmentId,
-            "altText": arr[i].altText
-          }
-      });
+        );
+  
+        postData.blocks.push({
+            "type": "attachment", "attachment": {
+              "fileURL": res.body.url,
+              "attachmentId": res.body.attachmentId,
+              "altText": arr[i].altText
+            }
+        });
+      }
     }
 
     // update the draft and publish
