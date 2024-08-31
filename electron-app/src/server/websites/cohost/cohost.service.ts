@@ -22,11 +22,10 @@ import {
 } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
-import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
-import { GenericAccountProp } from '../generic/generic-account-props.enum';
+import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
@@ -40,8 +39,11 @@ export class Cohost extends Website {
   readonly MAX_CHARS: number = 5000;
   acceptsFiles: string[] = ['jpeg', 'jpg', 'jfif', 'png', 'pjpeg', 'pjp', 'gif', 'webp', 'svg', 'aac', 'm4a', 'm4b', 'flac', 'mp3', 'mpega', 'mp2', 'wav'];
   acceptsAdditionalFiles: boolean = true;
+
   page_name: string = "";
   cookie: any;
+  cohostPlus: boolean;
+
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly usernameShortcuts = [
     {
@@ -61,6 +63,7 @@ export class Cohost extends Website {
       const $ = cheerio.load(res.body);
       status.username = $('input[type=email]').attr('value');
       this.page_name = $("*[id*=headlessui] img[alt]").attr("alt");
+      this.cohostPlus = res.body.includes("manage your subscription");
     }
     return status;
   }
@@ -231,7 +234,7 @@ export class Cohost extends Website {
   coPlusMB: number = 10;
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(this.coPlusMB) };
+    return { maxSize: FileSize.MBtoBytes(this.cohostPlus ? this.coPlusMB : this.maxMB) };
   }
 
   validateFileSubmission(
@@ -241,6 +244,7 @@ export class Cohost extends Website {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
+    const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     const description = this.defaultDescriptionParser(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
@@ -256,15 +260,20 @@ export class Cohost extends Website {
       problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
-    if (FileSize.MBtoBytes(this.maxMB) < size) {
-      warnings.push(`Cohost limits all attachments to ${this.maxMB}MB unless you have cohost Plus!`);
-    }
-    if (FileSize.MBtoBytes(this.coPlusMB) < size) {
-      problems.push(`Cohost limits all attachments to ${this.coPlusMB}MB`);
+    var accountMaxMB = this.cohostPlus ? this.coPlusMB : this.maxMB;
+
+    if (FileSize.MBtoBytes(accountMaxMB) < size) {
+      if (isAutoscaling &&
+          type === FileSubmissionType.IMAGE &&
+          ImageManipulator.isMimeType(submission.primary.mimetype)) {
+        warnings.push(`${name} will be scaled down to ${accountMaxMB}MB.`);
+      } else {
+        problems.push(`Your account's attachment upload limit is ${accountMaxMB}MB.`);
+      }
     }
 
     if (submission.additional?.length > 4) {
-      problems.push(`Cohost only supports four attachments in a single post.`);
+      problems.push(`Cohost only supports up to four attachments in a single post.`);
     }
 
     return { problems, warnings };
