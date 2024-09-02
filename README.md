@@ -67,7 +67,7 @@ npm run start
 
 To build production vesrion of the PostyBirb, use the following:
 ```
-NODE_OPTIONS=--openssl-legacy-provider npm run build
+npm run build
 ```
 
 Please not that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run build` 
