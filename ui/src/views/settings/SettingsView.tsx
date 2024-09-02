@@ -231,6 +231,16 @@ export default class SettingsView extends React.Component<Props> {
                 onChange={value => this.updateSetting('quitOnClose', value)}
               />
             </Form.Item>
+            <p>
+              To use scheduling feature, this settings <strong>must be</strong> disabled.
+              <br />
+              PostyBirb cannot post scheduled posts if the app was closed with this setting.
+              <br />
+              <strong>
+                Any changes to these settings will require you to restart the application (Use quit
+                in the tray or force kill process).
+              </strong>
+            </p>
           </Collapse.Panel>
           <Collapse.Panel header="Remote" key="remote">
             <p>

@@ -16,12 +16,13 @@ React code that handles UI of the application displayed in the desktop applicati
 To set up a local copy of PostyBirb for development:
 
 1. clone this repository and `cd` into it.
-2. ```npm run contribute``` to install dependencies in every folder
+2. `npm run contribute` to install dependencies in every folder
+
+Please not that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run contribute` 
+instead
 
 <details>
   <summary>INSTALL TROUBLESHOOTING</summary>
-
-  _Temporary until react-scripts will be replaced with vite_
 
   ### Common
   If something does not work and you can't determine where error happened (since there is 3 parallel scripts) run `npm run contribute:debug`
@@ -52,7 +53,7 @@ Error: error:0308010C:digital envelope routines::unsupported
     
   </details>
 
-To fix this error, replace `react-scripts build` with `react-scripts --openssl-legacy-provider build`
+To fix this error, use `NODE_OPTIONS=--openssl-legacy-provider` before any npm command.
  
 </details>
 
@@ -60,6 +61,23 @@ To fix this error, replace `react-scripts build` with `react-scripts --openssl-l
 
 ```
 npm run start
+```
+
+## Building
+
+To build production vesrion of the PostyBirb, use the following:
+```
+NODE_OPTIONS=--openssl-legacy-provider npm run build
+```
+
+Please not that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run build` 
+instead
+
+And then, depending on your build target, use this command:
+```
+cd electron-app && yarn run release:windows
+cd electron-app && yarn run release:linux
+cd electron-app && yarn run release:osx
 ```
 
 ## Contribution Guide
