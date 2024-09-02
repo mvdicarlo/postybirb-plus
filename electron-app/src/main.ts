@@ -1,15 +1,6 @@
 /* tslint:disable: no-console no-var-requires */
 import path from 'path';
-import {
-  app,
-  BrowserWindow,
-  Menu,
-  nativeImage,
-  nativeTheme,
-  Tray,
-  Notification,
-  webContents,
-} from 'electron';
+import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification } from 'electron';
 import WindowStateKeeper from 'electron-window-state';
 import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
@@ -128,7 +119,8 @@ async function initialize() {
     const menu = Menu.buildFromTemplate(require('./app/menu'));
     Menu.setApplicationMenu(menu);
     const image = buildAppImage();
-    global.tray = buildTray(image); // force to stay in memory
+    if (!global.settingsDB.getState().quitOnClose) global.tray = buildTray(image); // force to stay in memory is not quitting on close
+
     initializedOnce = true;
     shouldDisplayWindow = global.settingsDB.getState().openWindowOnStartup;
   }
@@ -185,24 +177,25 @@ function createWindow() {
   }
 
   mainWindow.webContents.on('new-window', event => event.preventDefault());
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-    if (global.tray && util.isWindows()) {
-      clearTimeout(backgroundAlertTimeout);
-      if (!hasNotifiedAboutBackground) {
-        backgroundAlertTimeout = setTimeout(() => {
-          hasNotifiedAboutBackground = true;
-          const notification = new Notification({
-            title: 'PostyBirb',
-            icon,
-            body: 'PostyBirb will continue in the background.',
-            silent: true,
-          });
-          notification.show();
-        }, 750);
+  if (!global.settingsDB.getState().quitOnClose)
+    mainWindow.on('closed', () => {
+      mainWindow = null;
+      if (global.tray && util.isWindows()) {
+        clearTimeout(backgroundAlertTimeout);
+        if (!hasNotifiedAboutBackground) {
+          backgroundAlertTimeout = setTimeout(() => {
+            hasNotifiedAboutBackground = true;
+            const notification = new Notification({
+              title: 'PostyBirb',
+              icon,
+              body: 'PostyBirb will continue in the background.',
+              silent: true,
+            });
+            notification.show();
+          }, 750);
+        }
       }
-    }
-  });
+    });
 
   mainWindow.loadFile(path.join(__dirname, '../build/index.html')).then(() => {
     loader.hide();

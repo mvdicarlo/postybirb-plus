@@ -225,6 +225,12 @@ export default class SettingsView extends React.Component<Props> {
                 onChange={value => this.updateSetting('openWindowOnStartup', value)}
               />
             </Form.Item>
+            <Form.Item label="Force quit on close">
+              <Switch
+                checked={settings.quitOnClose}
+                onChange={value => this.updateSetting('quitOnClose', value)}
+              />
+            </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Remote" key="remote">
             <p>

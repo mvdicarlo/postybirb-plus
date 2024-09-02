@@ -24,6 +24,7 @@ const settingDefaults: Settings = {
   silentNotification: false,
   defaultTagSearchProvider: 'none',
   proxy: '',
+  quitOnClose: false,
 };
 settings.defaults(settingDefaults).write();
 

@@ -1,18 +1,15 @@
+/* eslint-disable no-var */
+// Using let or const does not makes variable global.
 import lowdb from 'lowdb';
 
 declare global {
-  namespace NodeJS {
-    interface Global {
-      CHILD_PROCESS_IDS: number[];
-      AUTH_ID: string;
-      AUTH_SERVER_URL: string;
-      BASE_DIRECTORY: string;
-      DEBUG_MODE: boolean;
-      SERVER_ONLY_MODE: boolean;
-      settingsDB: lowdb.LowdbSync<any>;
-      tray: any;
-      showApp: () => void;
-    }
-  }
+  var CHILD_PROCESS_IDS: number[];
+  var AUTH_ID: string;
+  var AUTH_SERVER_URL: string;
+  var BASE_DIRECTORY: string;
+  var DEBUG_MODE: boolean;
+  var SERVER_ONLY_MODE: boolean;
+  var settingsDB: lowdb.LowdbSync<any>;
+  var tray: any;
+  var showApp: () => void;
 }
-export default global;
