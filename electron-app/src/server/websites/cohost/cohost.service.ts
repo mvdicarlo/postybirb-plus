@@ -12,14 +12,9 @@ import {
   SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server/account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
-import {
-  FilePostData,
-  PostFile,
-  PostFileRecord,
-} from 'src/server/submission/post/interfaces/file-post-data.interface';
+import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
@@ -31,7 +26,6 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import _ from 'lodash';
 import cheerio from 'cheerio';
-import { CohostFileOptionsEntity } from 'postybirb-commons/lib/websites/cohost/cohost.file.options';
 
 @Injectable()
 export class Cohost extends Website {
@@ -39,15 +33,11 @@ export class Cohost extends Website {
   readonly MAX_CHARS: number = 5000;
   acceptsFiles: string[] = ['jpeg', 'jpg', 'jfif', 'png', 'pjpeg', 'pjp', 'gif', 'webp', 'svg', 'aac', 'm4a', 'm4b', 'flac', 'mp3', 'mpega', 'mp2', 'wav'];
   acceptsAdditionalFiles: boolean = true;
+  maxUploadMB: number = 5;
 
-  page_name: string = "";
-  cookie: any;
-  cohostPlus: boolean;
-
-  readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly usernameShortcuts = [
     {
-      key: 'co',
+      key: 'ch',
       url: 'https://cohost.org/$1',
     },
   ];
@@ -55,15 +45,14 @@ export class Cohost extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await Http.get<string>(`${this.BASE_URL}/rc/user/settings`, data._id);
-    this.cookie = (await Http.getWebsiteCookies(data._id, this.BASE_URL))[0];
-    this.cookie = `${this.cookie.name}=${this.cookie.value}`;
     
     if (res.body.includes('change password')) {
       status.loggedIn = true;
       const $ = cheerio.load(res.body);
       status.username = $('input[type=email]').attr('value');
-      this.page_name = $("*[id*=headlessui] img[alt]").attr("alt");
-      this.cohostPlus = res.body.includes("manage your subscription");
+
+      const pageName = $("*[id*=headlessui] img[alt]").attr("alt");
+      this.storeAccountInformation(data._id, "pagename", pageName);
     }
     return status;
   }
@@ -97,7 +86,10 @@ export class Cohost extends Website {
     cancellationToken: CancellationToken,
     data: PostData<Submission, CohostFileOptions | CohostNotificationOptions>,
   ): Promise<PostResponse> {
-    var pageName = encodeURIComponent(this.page_name);
+    const pageName = encodeURIComponent(this.getAccountInfo(data.part.accountId, "pagename"));
+
+    const res = await Http.get<string>(`${this.BASE_URL}/rc/user/settings`, data.part.accountId);
+    this.verifyResponse(res);
 
     const postData: any = {
       postState: 0,
@@ -116,25 +108,24 @@ export class Cohost extends Website {
 
     // first create a draft
     const draft = await Http.post<{ postId: number }>(
-      `${this.BASE_URL}/api/v1/project/${pageName}/posts`, undefined, {
+      `${this.BASE_URL}/api/v1/project/${pageName}/posts`, data.part.accountId, {
         type: 'json',
         data: postData,
         requestOptions: {
           json: true,
-        },
-        headers: {
-          "Cookie": this.cookie
         }
       },
     );
+    
+    this.verifyResponse(draft);
 
     // if we're posting images
     if ((data as FilePostData<CohostFileOptions>).primary) {
       const filePostData = (data as FilePostData<CohostFileOptions>);
 
       // upload attachments
-      var arr = [filePostData.primary, ...filePostData.additional];
-      for (var i in arr) {
+      const arr = [filePostData.primary, ...filePostData.additional];
+      for (let file of arr) {
         // start
         this.checkCancelled(cancellationToken);
         const attachment = await Http.post<{
@@ -142,36 +133,34 @@ export class Cohost extends Website {
           url: string,
           requiredFields: Array<any>,
         }>(
-          `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/start`, undefined, {
+          `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/start`, data.part.accountId, {
             type: 'json',
             data: {
-              "filename": arr[i].file.options.filename,
-              "content_type": arr[i].file.options.contentType,
-              "content_length": arr[i].file.value.byteLength
+              "filename": file.file.options.filename,
+              "content_type": file.file.options.contentType,
+              "content_length": file.file.value.byteLength
             },
             requestOptions: {
               json: true,
-            },
-            headers: {
-              "Cookie": this.cookie
             }
           },
         );
+    
+        this.verifyResponse(attachment);
   
         // continue
         this.checkCancelled(cancellationToken);
         const upload = await Http.post(
-          `${attachment.body.url}`, undefined, {
+          `${attachment.body.url}`, data.part.accountId, {
             type: 'multipart',
             data: {
               ...attachment.body.requiredFields,
-              file: arr[i].file
-            },
-            headers: {
-              "Cookie": this.cookie
+              file: file.file
             }
           },
         );
+    
+        this.verifyResponse(upload);
   
         // finish
         this.checkCancelled(cancellationToken);
@@ -179,23 +168,23 @@ export class Cohost extends Website {
           attachmentId: string,
           url: string,
         }>(
-          `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/finish/${attachment.body.attachmentId}`, undefined, {
+          `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}/attach/finish/${attachment.body.attachmentId}`,
+          data.part.accountId, {
             type: 'json',
             data: {},
             requestOptions: {
               json: true,
-            },
-            headers: {
-              "Cookie": this.cookie
             }
           },
         );
+    
+        this.verifyResponse(res);
   
         postData.blocks.push({
             "type": "attachment", "attachment": {
               "fileURL": res.body.url,
               "attachmentId": res.body.attachmentId,
-              "altText": arr[i].altText
+              "altText": file.altText
             }
         });
       }
@@ -210,14 +199,11 @@ export class Cohost extends Website {
 
     this.checkCancelled(cancellationToken);
     const post = await Http.put<{ postId: number }>(
-      `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}`, undefined, {
+      `${this.BASE_URL}/api/v1/project/${pageName}/posts/${draft.body.postId}`, data.part.accountId, {
         type: 'json',
         data: postData,
         requestOptions: {
           json: true,
-        },
-        headers: {
-          "Cookie": this.cookie
         }
       },
     );
@@ -230,11 +216,8 @@ export class Cohost extends Website {
     return this.createPostResponse({ source: `${this.BASE_URL}/posts/${post.body.postId}` });
   }
 
-  maxMB: number = 5;
-  coPlusMB: number = 10;
-
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(this.cohostPlus ? this.coPlusMB : this.maxMB) };
+    return { maxSize: FileSize.MBtoBytes(this.maxUploadMB) };
   }
 
   validateFileSubmission(
@@ -246,9 +229,7 @@ export class Cohost extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
+    const description = FormContent.getDescription(defaultPart.data.description, submissionPart.data.description);
 
     if (description.length > this.MAX_CHARS) {
       problems.push(`Max description length allowed is 5000 characters.`);
@@ -260,15 +241,13 @@ export class Cohost extends Website {
       problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
     }
 
-    var accountMaxMB = this.cohostPlus ? this.coPlusMB : this.maxMB;
-
-    if (FileSize.MBtoBytes(accountMaxMB) < size) {
+    if (FileSize.MBtoBytes(this.maxUploadMB) < size) {
       if (isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
           ImageManipulator.isMimeType(submission.primary.mimetype)) {
-        warnings.push(`${name} will be scaled down to ${accountMaxMB}MB.`);
+        warnings.push(`${name} will be scaled down to ${this.maxUploadMB}MB.`);
       } else {
-        problems.push(`Your account's attachment upload limit is ${accountMaxMB}MB.`);
+        problems.push(`Cohost's upload limit is ${this.maxUploadMB}MB.`);
       }
     }
 
@@ -287,10 +266,7 @@ export class Cohost extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    const description = PlaintextParser.parse(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-      23,
-    );
+    const description = FormContent.getDescription(defaultPart.data.description, submissionPart.data.description);
 
     if (!description) {
       problems.push('Description required');
