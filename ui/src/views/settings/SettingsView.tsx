@@ -225,14 +225,14 @@ export default class SettingsView extends React.Component<Props> {
                 onChange={value => this.updateSetting('openWindowOnStartup', value)}
               />
             </Form.Item>
-            <Form.Item label="Force quit on close">
+            <Form.Item label="Quit PostyBirb on close">
               <Switch
                 checked={settings.quitOnClose}
                 onChange={value => this.updateSetting('quitOnClose', value)}
               />
             </Form.Item>
             <p>
-              To use scheduling feature, this settings <strong>must be</strong> disabled.
+              It is recommended to <strong>be disabled</strong> when using scheduled posts.
               <br />
               PostyBirb cannot post scheduled posts if the app was closed with this setting.
               <br />

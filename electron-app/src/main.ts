@@ -177,25 +177,25 @@ function createWindow() {
   }
 
   mainWindow.webContents.on('new-window', event => event.preventDefault());
-  if (!global.settingsDB.getState().quitOnClose)
-    mainWindow.on('closed', () => {
-      mainWindow = null;
-      if (global.tray && util.isWindows()) {
-        clearTimeout(backgroundAlertTimeout);
-        if (!hasNotifiedAboutBackground) {
-          backgroundAlertTimeout = setTimeout(() => {
-            hasNotifiedAboutBackground = true;
-            const notification = new Notification({
-              title: 'PostyBirb',
-              icon,
-              body: 'PostyBirb will continue in the background.',
-              silent: true,
-            });
-            notification.show();
-          }, 750);
-        }
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+    if (!global.settingsDB.getState().quitOnClose && global.tray && util.isWindows()) {
+      clearTimeout(backgroundAlertTimeout);
+
+      if (!hasNotifiedAboutBackground) {
+        backgroundAlertTimeout = setTimeout(() => {
+          hasNotifiedAboutBackground = true;
+          const notification = new Notification({
+            title: 'PostyBirb',
+            icon,
+            body: 'PostyBirb will continue in the background.',
+            silent: true,
+          });
+          notification.show();
+        }, 750);
       }
-    });
+    }
+  });
 
   mainWindow.loadFile(path.join(__dirname, '../build/index.html')).then(() => {
     loader.hide();
