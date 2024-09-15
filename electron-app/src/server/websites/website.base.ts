@@ -27,6 +27,7 @@ import { LoginResponse } from './interfaces/login-response.interface';
 import { ScalingOptions } from './interfaces/scaling-options.interface';
 import SubmissionPartEntity from '../submission/submission-part/models/submission-part.entity';
 import { HttpResponse as ExperimentalHttpResponse } from 'src/server/utils/http-experimental';
+import { DescriptionParser } from '../submission/parser/section-parsers/description.parser';
 
 interface TagParseOptions {
   spaceReplacer: string;
@@ -166,7 +167,7 @@ export abstract class Website {
   generateTagsString(
     tags: string[],
     description: string,
-    websitePart: SubmissionPartEntity<DefaultOptions>,
+    websitePart: SubmissionPart<DefaultOptions>,
   ): string {
     const { includedTags } = this.calculateFittingTags(tags, description, this.MAX_CHARS);
     const formattedTags = this.formatTags(includedTags);
@@ -189,17 +190,13 @@ export abstract class Website {
   ): { includedTags: string[]; skippedTags: string[] } {
     const includedTags = [];
     const skippedTags = [];
-    const appendToDescription = function (tag?: string): string {
-      const suffix = tag ? [...includedTags, tag] : includedTags;
-      if (suffix.length === 0) {
-        return description;
-      } else {
-        return description + '\n\n' + suffix.join(' ');
-      }
+    const insertIntoDescription = function (tag?: string): string {
+      const insertion = tag ? [...includedTags, tag] : includedTags;
+      return description.replace('{tags}', insertion.join(' '));
     };
 
     for (const tag of tags) {
-      if (getLength(appendToDescription(tag)) <= limit) {
+      if (getLength(insertIntoDescription(tag)) <= limit) {
         includedTags.push(tag);
       } else {
         skippedTags.push(tag);
@@ -223,6 +220,12 @@ export abstract class Website {
     return text || '';
   }
 
+  protected stripTagsShortcut(description: string): string {
+    return description.indexOf('{tags}') === -1
+      ? description
+      : description.replace('{tags}', '').trim();
+  }
+
   protected storeAccountInformation(profileId: string, key: string, value: any): void {
     this.accountInformation.set(profileId, {
       ...this.accountInformation.get(profileId),
@@ -238,12 +241,14 @@ export abstract class Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts;
 
   validateNotificationSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     return { problems: [], warnings: [] };
   }

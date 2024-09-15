@@ -211,6 +211,7 @@ export class SoFurry extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<SoFurryFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

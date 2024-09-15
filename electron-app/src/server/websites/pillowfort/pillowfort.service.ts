@@ -196,6 +196,7 @@ export class Pillowfort extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<PillowfortFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

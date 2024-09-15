@@ -258,15 +258,12 @@ export class Itaku extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<ItakuFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    const description = this.defaultDescriptionParser(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > this.MAX_CHARS) {
+    if (this.stripTagsShortcut(description).length > this.MAX_CHARS) {
       problems.push(`Max description length allowed is 5000 characters.`);
     }
 
@@ -302,20 +299,16 @@ export class Itaku extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<ItakuNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
-
-    const description = PlaintextParser.parse(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-      23,
-    );
 
     if (!description) {
       problems.push('Description required');
     }
 
-    if (description.length > this.MAX_CHARS) {
+    if (this.stripTagsShortcut(description).length > this.MAX_CHARS) {
       problems.push(`Max description length allowed is 5000 characters.`);
     }
 

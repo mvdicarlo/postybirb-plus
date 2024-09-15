@@ -360,6 +360,7 @@ export class SubscribeStarAdult extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<SubscribeStarFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -420,6 +421,7 @@ export class SubscribeStarAdult extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<SubscribeStarNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

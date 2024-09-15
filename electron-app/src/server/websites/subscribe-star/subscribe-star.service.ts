@@ -348,6 +348,7 @@ export class SubscribeStar extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<SubscribeStarFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -408,6 +409,7 @@ export class SubscribeStar extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<SubscribeStarNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

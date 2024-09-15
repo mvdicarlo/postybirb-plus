@@ -151,6 +151,7 @@ export class Custom extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<DefaultFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

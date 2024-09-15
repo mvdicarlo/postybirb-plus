@@ -268,6 +268,7 @@ export class Picarto extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<PicartoFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
