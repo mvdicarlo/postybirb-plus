@@ -30,6 +30,23 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
+import { generateJSON } from '@tiptap/html';
+import { Text } from '@tiptap/extension-text';
+import { Document } from '@tiptap/extension-document';
+import { Paragraph } from '@tiptap/extension-paragraph';
+import { Bold } from '@tiptap/extension-bold';
+import { Italic } from '@tiptap/extension-italic';
+import { Strike } from '@tiptap/extension-strike';
+import { Underline } from '@tiptap/extension-underline';
+import { HardBreak } from '@tiptap/extension-hard-break';
+import { Blockquote } from '@tiptap/extension-blockquote';
+import TextAlign from '@tiptap/extension-text-align';
+import Color from '@tiptap/extension-color';
+import TextStyle from '@tiptap/extension-text-style';
+import Heading from '@tiptap/extension-heading';
+import HorizontalRule from '@tiptap/extension-horizontal-rule';
+import Link from '@tiptap/extension-link';
+
 interface DeviantArtFolder {
   description: string;
   folderId: string;
@@ -161,23 +178,9 @@ export class DeviantArt extends Website {
     this.checkCancelled(cancellationToken);
     const mature =
       data.options.isMature ||
-      data.rating === SubmissionRating.ADULT ||
-      data.rating === SubmissionRating.MATURE ||
-      data.rating === SubmissionRating.EXTREME;
-    const description = await BrowserWindowUtil.runScriptOnPage<string>(
-      data.part.accountId,
-      this.BASE_URL,
-      `
-        var blocksFromHTML = Draft.convertFromHTML(\`${
-          data.description.replace(/`/g, '&#96;') || '<div></div>'
-        }\`);
-        var x = Draft.ContentState.createFromBlockArray(
-            blocksFromHTML.contentBlocks,
-            blocksFromHTML.entityMap,
-          )
-        return JSON.stringify(Draft.convertToRaw(x))
-      `,
-    );
+      data.options.rating === SubmissionRating.ADULT ||
+      data.options.rating === SubmissionRating.MATURE ||
+      data.options.rating === SubmissionRating.EXTREME;
 
     const updateBody: any = {
       allow_comments: data.options.disableComments ? false : true,
@@ -185,7 +188,7 @@ export class DeviantArt extends Website {
       deviationid: fileUpload.body.deviationId,
       da_minor_version: 20230710,
       display_resolution: 0,
-      editorRaw: description,
+      editorRaw: this.htmlToEditorRawDescription(data.description),
       editor_v3: '',
       galleryids: data.options.folders,
       is_ai_generated: data.options.isAIGenerated ?? false,
@@ -241,6 +244,20 @@ export class DeviantArt extends Website {
       );
     }
 
+    this.logger.debug(
+      {
+        update: update.body,
+        fileUpload: fileUpload.body,
+        data: {
+          stashid: update.body.deviationId,
+          da_minor_version: 20230710,
+          csrf_token: await this.getCSRF(data.part.accountId),
+        },
+        EQ: update.body.deviationId === fileUpload.body.stashId,
+      },
+      'Publish',
+    );
+
     const publish = await HttpExperimental.post<{
       status: string;
       url: string;
@@ -249,7 +266,7 @@ export class DeviantArt extends Website {
       partition: data.part.accountId,
       type: 'json',
       data: {
-        stashid: fileUpload.body.deviationId,
+        stashid: update.body.deviationId,
         da_minor_version: 20230710,
         csrf_token: await this.getCSRF(data.part.accountId),
       },
@@ -272,24 +289,11 @@ export class DeviantArt extends Website {
     accountData: DeviantArtAccountData,
   ): Promise<PostResponse> {
     this.checkCancelled(cancellationToken);
-    const description = await BrowserWindowUtil.runScriptOnPage<string>(
-      data.part.accountId,
-      this.BASE_URL,
-      `
-        var blocksFromHTML = Draft.convertFromHTML(\`${
-          data.description.replace(/`/g, '&#96;') || '<div></div>'
-        }\`);
-        var x = Draft.ContentState.createFromBlockArray(
-            blocksFromHTML.contentBlocks,
-            blocksFromHTML.entityMap,
-          )
-        return JSON.stringify(Draft.convertToRaw(x))
-      `,
-    );
+
     const form: any = {
       csrf_token: await this.getCSRF(data.part.accountId),
       da_minor_version: 20230710,
-      editorRaw: description,
+      editorRaw: this.htmlToEditorRawDescription(data.description),
       title: data.title,
     };
 
@@ -342,6 +346,18 @@ export class DeviantArt extends Website {
   }
 
   private titleLimit = 50;
+  private htmlToEditorRawDescription(description: string) {
+    const document = generateJSON(
+      description.replace(/`/g, '&#96;') || '<div></div>',
+      this.extensions,
+    );
+    this.logger.debug({ document }, 'Html to raw editor');
+    return JSON.stringify({
+      version: 1,
+      document,
+    });
+  }
+
   private truncateTitle(title: string) {
     const newTitle = title.substring(0, this.titleLimit);
     return { title: newTitle, exceedsLimit: newTitle !== title };
@@ -410,4 +426,54 @@ export class DeviantArt extends Website {
 
     return { problems, warnings };
   }
+
+  private extensions = [
+    Text,
+    Document,
+    Paragraph,
+    Bold,
+    Italic,
+    Strike,
+    Underline,
+    HardBreak,
+    Blockquote,
+    Color,
+    TextStyle,
+    Heading,
+    HorizontalRule.configure({
+      HTMLAttributes: {
+        'data-ruler': '1',
+      },
+    }),
+    Link.configure({
+      openOnClick: false,
+      autolink: true,
+      linkOnPaste: true,
+      protocols: ['https', 'http', 'mailto'],
+      validate(url) {
+        return /^(#|http|mailto)/.test(url);
+      },
+      HTMLAttributes: {
+        rel: 'noopener noreferrer nofollow ugc',
+        target: '_blank',
+      },
+    }),
+    TextAlign.extend({
+      name: 'da-text-align',
+      addCommands() {
+        const parentCommands = this.parent?.();
+        return {
+          unsetTextAlign: parentCommands?.unsetTextAlign,
+          setTextAlign: alignment => object => {
+            if (!parentCommands || !parentCommands.setTextAlign) {
+              return false;
+            }
+            return parentCommands.setTextAlign(alignment)(object);
+          },
+        };
+      },
+    }).configure({
+      types: ['heading', 'paragraph'],
+    }),
+  ];
 }
