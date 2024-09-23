@@ -60,6 +60,8 @@ interface DeviantArtFolder {
 export class DeviantArt extends Website {
   readonly BASE_URL = 'https://www.deviantart.com';
   readonly MAX_CHARS: number = undefined; // No Limit
+  readonly defaultDescriptionParser = (html: string) => html;
+  readonly skipHtmlStandardization = true;
   readonly acceptsFiles = [
     'jpeg',
     'jpg',
@@ -347,6 +349,10 @@ export class DeviantArt extends Website {
 
   private titleLimit = 50;
   private htmlToEditorRawDescription(description: string) {
+    description = description.replace(
+      '<br /><br /><p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>',
+      '<p></p><p></p><p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>',
+    );
     const document = generateJSON(
       description.replace(/`/g, '&#96;') || '<div></div>',
       this.extensions,
