@@ -41,6 +41,7 @@ export abstract class Website {
   abstract readonly acceptsFiles: string[];
   abstract MAX_CHARS: number;
 
+  readonly skipHtmlStandardization: boolean = false;
   readonly acceptsAdditionalFiles: boolean = false;
   readonly acceptsSourceUrls: boolean = false;
   readonly accountInformation: Map<string, any> = new Map();

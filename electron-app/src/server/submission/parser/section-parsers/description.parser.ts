@@ -86,7 +86,9 @@ export class DescriptionParser {
       description = await this.parseCustomDescriptionShortcuts(description);
 
       // Standardize HTML
-      description = HTMLFormatParser.parse(description);
+      if (!website.skipHtmlStandardization) {
+        description = HTMLFormatParser.parse(description);
+      }
 
       // Run preparser (allows formatting of shortcuts before anything else runs)
       description = website.preparseDescription(description, type);

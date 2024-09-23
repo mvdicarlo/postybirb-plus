@@ -15,4 +15,5 @@ export interface Settings {
   silentNotification: boolean;
   defaultTagSearchProvider: TagSearchProviders;
   proxy: string;
+  quitOnClose: boolean;
 }
