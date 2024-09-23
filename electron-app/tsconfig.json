@@ -8,6 +8,7 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "skipLibCheck": true, // Because of da editor (tiptap) using too new ts features
     "esModuleInterop": true,
     "target": "es2017",
     "sourceMap": false,
