@@ -246,55 +246,39 @@ export class Telegram extends Website {
   }
 
   private async loadChannels(profileId: string, appId: string) {
-    const { chats } = await this.callApi<{
-      chats: {
-        _: string;
-        creator: boolean;
-        access_hash: string;
-        title: string;
-        id: number;
-        left: boolean;
-        deactivated: boolean;
-        /**
-         * Reverted default user rights.
-         */
-        default_banned_rights: {
-          /**
-           * So false means that the user
-           * actually can send the media
-           */
-          send_media: boolean;
-        };
-        admin_rights: {
-          post_messages: boolean;
-        };
-      }[];
-    }>(appId, 'messages.getDialogs', {
-      offset_peer: {
-        _: 'inputPeerEmpty',
-      },
+    const { chats } = await this.callApi<Dialogs>(appId, 'messages.getDialogs', {
+      offset_peer: { _: 'inputPeerEmpty' },
       limit: 400,
     });
 
-    const channels: Folder[] = chats
-      .filter(c => {
-        // Skip forbidden chats
-        if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
+    const channels: Folder[] = [];
+    for (const chat of chats) {
+      if (!this.canSendMediaInChat(chat)) continue;
 
-        if (
-          c.creator ||
-          c.admin_rights?.post_messages ||
-          // False means that user can send media
-          c.default_banned_rights?.send_media === false
-        )
-          return true;
-      })
-      .map(c => ({
-        label: c.title,
-        value: `${c.id}-${c.access_hash}`,
-      }));
+      const id = chat.id.toString();
+      const value = chat.access_hash ? `${id}-${chat.access_hash}` : id;
+      if (!channels.some(e => e.value !== value)) {
+        channels.push({
+          label: chat.title,
+          value: value,
+        });
+      }
+    }
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
+  }
+
+  private canSendMediaInChat(chat: Chat) {
+    // Cannot in forbidden chats
+    if (chat.left || chat.deactivated || !['channel', 'chat'].includes(chat._)) return false;
+
+    if (
+      chat.creator ||
+      chat.admin_rights?.post_messages ||
+      // False means that user can send media
+      chat.default_banned_rights?.send_media === false
+    )
+      return true;
   }
 
   transformAccountData(data: object): object {
@@ -388,12 +372,8 @@ export class Telegram extends Website {
 
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
-      const [channel_id, access_hash] = channel.split('-');
-      const peer = {
-        _: 'inputPeerChannel',
-        channel_id,
-        access_hash,
-      };
+      const peer = this.getPeer(channel);
+
       if (files.length === 1) {
         response = await this.callApi(appId, `messages.sendMedia`, {
           random_id: Date.now(),
@@ -482,24 +462,34 @@ export class Telegram extends Website {
 
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
-      const [channel_id, access_hash] = channel.split('-');
-      const peer = {
-        _: 'inputPeerChannel',
-        channel_id,
-        access_hash,
-      };
+
       response = await this.callApi(accountData.appId, 'messages.sendMessage', {
         random_id: Date.now(),
         message: description,
         entities: entities,
         silent: data.options.silent,
-        peer,
+        peer: this.getPeer(channel),
       });
 
-      await WaitUtil.wait(2000);
+      await WaitUtil.wait(1000);
     }
 
     return this.createPostResponse({ source: this.getSourceFromResponse(response) });
+  }
+
+  private getPeer(channel: string) {
+    const [chat_id, access_hash] = channel.split('-');
+    const peer = access_hash
+      ? {
+          _: 'inputPeerChannel',
+          channel_id: chat_id,
+          access_hash,
+        }
+      : {
+          _: 'inputPeerChat',
+          chat_id,
+        };
+    return peer;
   }
 
   private getSourceFromResponse(response: SendMessageResponse) {
@@ -637,4 +627,29 @@ interface SendMessageResponse {
   updates: { _: 'updateNewChannelMessage'; id: number; peer_id: { channel_id: number } }[];
 }
 
+interface Chat {
+  _: string;
+  creator: boolean;
+  access_hash: string;
+  title: string;
+  id: number;
+  left: boolean;
+  deactivated: boolean;
+  /**
+   * Reverted default user rights.
+   */
+  default_banned_rights: {
+    /**
+     * So false means that the user
+     * actually can send the media
+     */
+    send_media: boolean;
+  };
+  admin_rights: {
+    post_messages: boolean;
+  };
+}
 
+interface Dialogs {
+  chats: Chat[];
+}
