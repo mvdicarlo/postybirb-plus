@@ -363,7 +363,7 @@ export class DeviantArt extends Website {
     return `'${title}' is not an valid title. Deviation title can only contain A-Z, a-z, 0-9, space and the following characters: _$!?:.,' +-=~\`@#%^*[]()/{}\\|`;
   }
 
-  private titleRegex = /^[A-Za-z0-9\s_$!?:.,'+\-=~`@#%^*\[\]()\/\{\}\\|]+$/g;
+  private titleRegex = /^[A-Za-z0-9\s_$!?:.,'+\-=~`@#%^*\[\]()\/\{\}\\|]*$/g;
 
   private truncateTitle(title: string) {
     const newTitle = title.substring(0, this.titleLimit);
