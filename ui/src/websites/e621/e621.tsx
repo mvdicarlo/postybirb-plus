@@ -1,6 +1,6 @@
 import { Form, Input } from 'antd';
 import _ from 'lodash';
-import { e621FileOptions, FileSubmission, SubmissionPart } from 'postybirb-commons';
+import { e621FileOptions, FileSubmission, SubmissionPart, SubmissionRating } from 'postybirb-commons';
 import React from 'react';
 import { SubmissionSectionProps } from '../../views/submissions/submission-forms/interfaces/submission-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
@@ -25,6 +25,23 @@ export class e621 extends WebsiteImpl {
       tagOptions={{
         show: true,
         searchProvider: e621TagSearchProvider
+      }}
+      ratingOptions={{
+        show: true,
+        ratings: [
+          {
+            value: SubmissionRating.GENERAL,
+            name: 'Safe'
+          },
+          {
+            value: SubmissionRating.MATURE,
+            name: 'Questionable'
+          },
+          {
+            value: SubmissionRating.ADULT,
+            name: 'Explicit'
+          }
+        ]
       }}
       key={props.part.accountId}
       {...props}
