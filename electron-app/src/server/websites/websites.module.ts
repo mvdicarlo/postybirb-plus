@@ -36,6 +36,7 @@ import { PixelfedModule } from './pixelfed/pixelfed.module';
 import { SubscribeStarAdultModule } from './subscribe-star-adult/subscribe-star-adult.module';
 import { BlueskyModule } from './bluesky/bluesky.module';
 import { TwitterModule } from './twitter/twitter.module';
+import { CohostModule } from './cohost/cohost.module';
 
 @Module({
   controllers: [WebsitesController],
@@ -45,6 +46,7 @@ import { TwitterModule } from './twitter/twitter.module';
     ArtconomyModule,
     AryionModule,
     BlueskyModule,
+    CohostModule,
     CustomModule,
     DerpibooruModule,
     DeviantArtModule,
