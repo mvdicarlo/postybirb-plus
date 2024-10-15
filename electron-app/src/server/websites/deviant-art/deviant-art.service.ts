@@ -364,9 +364,17 @@ export class DeviantArt extends Website {
     });
   }
 
+  private invalidTitleMessage(title: string) {
+    // Taken from api error message
+    return `'${title}' is not an valid title. Deviation title can only contain A-Z, a-z, 0-9, space and the following characters: _$!?:.,' +-=~\`@#%^*[]()/{}\\|`;
+  }
+
+  private titleRegex = /^[A-Za-z0-9\s_$!?:.,'+\-=~`@#%^*\[\]()\/\{\}\\|]*$/g;
+
   private truncateTitle(title: string) {
     const newTitle = title.substring(0, this.titleLimit);
-    return { title: newTitle, exceedsLimit: newTitle !== title };
+    const isValid = this.titleRegex.test(title);
+    return { title: newTitle, exceedsLimit: newTitle !== title, isValid };
   }
 
   validateFileSubmission(
@@ -378,11 +386,14 @@ export class DeviantArt extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const { title, exceedsLimit } = this.truncateTitle(
+    const { title, exceedsLimit, isValid } = this.truncateTitle(
       submissionPart.data.title || defaultPart.data.title || submission.title,
     );
     if (exceedsLimit) {
       warnings.push(`Title will be truncated to ${this.titleLimit} characters: ${title}`);
+    }
+    if (!isValid) {
+      problems.push(this.invalidTitleMessage(title));
     }
 
     if (submissionPart.data.folders && submissionPart.data.folders.length) {
