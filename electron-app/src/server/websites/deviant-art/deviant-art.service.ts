@@ -84,6 +84,8 @@ export class DeviantArt extends Website {
   ];
   private readonly MAX_TAGS = 30;
 
+  private titleLimit = 50;
+
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const res = await HttpExperimental.get<string>(this.BASE_URL, { partition: data._id });
@@ -180,9 +182,9 @@ export class DeviantArt extends Website {
     this.checkCancelled(cancellationToken);
     const mature =
       data.options.isMature ||
-      data.options.rating === SubmissionRating.ADULT ||
-      data.options.rating === SubmissionRating.MATURE ||
-      data.options.rating === SubmissionRating.EXTREME;
+      data.rating === SubmissionRating.ADULT ||
+      data.rating === SubmissionRating.MATURE ||
+      data.rating === SubmissionRating.EXTREME;
 
     const updateBody: any = {
       allow_comments: data.options.disableComments ? false : true,
@@ -347,7 +349,6 @@ export class DeviantArt extends Website {
     return this.createPostResponse({ source: publish.body.deviation.url });
   }
 
-  private titleLimit = 50;
   private htmlToEditorRawDescription(description: string) {
     description = description.replace(
       '<br /><br /><p><a href="http://www.postybirb.com">Posted using PostyBirb</a></p>',
@@ -357,16 +358,21 @@ export class DeviantArt extends Website {
       description.replace(/`/g, '&#96;') || '<div></div>',
       this.extensions,
     );
-    this.logger.debug({ document }, 'Html to raw editor');
     return JSON.stringify({
       version: 1,
       document,
     });
   }
 
+  private invalidTitleMessage(title: string) {
+    // Taken from api error message
+    return `'${title}' is not an valid title. Deviation title can only contain A-Z, a-z, 0-9, space and the following characters: _$!?:.,' +-=~\`@#%^*[]()/{}\\|`;
+  }
+
   private truncateTitle(title: string) {
     const newTitle = title.substring(0, this.titleLimit);
-    return { title: newTitle, exceedsLimit: newTitle !== title };
+    const isValid = /^[A-Za-z0-9\s_$!?:.,'+\-=~`@#%^*\[\]()\/\{\}\\|]*$/g.test(title);
+    return { title: newTitle, exceedsLimit: newTitle !== title, isValid };
   }
 
   validateFileSubmission(
@@ -378,11 +384,14 @@ export class DeviantArt extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const { title, exceedsLimit } = this.truncateTitle(
+    const { title, exceedsLimit, isValid } = this.truncateTitle(
       submissionPart.data.title || defaultPart.data.title || submission.title,
     );
     if (exceedsLimit) {
       warnings.push(`Title will be truncated to ${this.titleLimit} characters: ${title}`);
+    }
+    if (!isValid) {
+      problems.push(this.invalidTitleMessage(title));
     }
 
     if (submissionPart.data.folders && submissionPart.data.folders.length) {
