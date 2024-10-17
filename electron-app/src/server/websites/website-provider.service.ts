@@ -34,6 +34,7 @@ import { MissKey } from './misskey/misskey.service';
 import { Bluesky } from './bluesky/bluesky.service';
 import { Pleroma } from './pleroma/pleroma.service';
 import { Twitter } from './twitter/twitter.service';
+import { Cohost } from './cohost/cohost.service';
 
 @Injectable()
 export class WebsiteProvider {
@@ -75,6 +76,7 @@ export class WebsiteProvider {
     readonly pixelfed: Pixelfed,
     readonly pleroma: Pleroma,
     readonly twitter: Twitter,
+    readonly cohost: Cohost,
   ) {
     // eslint-disable-next-line
     this.websiteModules = [...arguments].filter(arg => arg instanceof Website);

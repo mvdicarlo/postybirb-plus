@@ -30,3 +30,4 @@ export * from './itaku/itaku.options';
 export * from './pixelfed/pixelfed.options';
 export * from './bluesky/bluesky.options';
 export * from './twitter/twitter.options';
+export * from './cohost/cohost.options';
