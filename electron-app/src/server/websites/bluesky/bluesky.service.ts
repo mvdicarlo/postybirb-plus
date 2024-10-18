@@ -182,7 +182,9 @@ export class Bluesky extends Website {
 
   formatTags(tags: string[]) {
     return this.parseTags(
-      tags.map(tag => tag.replace(/[^a-z0-9]/gi, ' ')).map(tag => tag.split(' ').join('')),
+      tags
+        .map(tag => tag.replace(/[^\p{Letter}\p{Number}]/giu, ' '))
+        .map(tag => tag.split(' ').join('')),
       { spaceReplacer: '_' },
     ).map(tag => `#${tag}`);
   }
