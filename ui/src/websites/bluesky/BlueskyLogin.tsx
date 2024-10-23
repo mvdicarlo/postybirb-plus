@@ -3,7 +3,13 @@ import React from 'react';
 import { BlueskyAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
-import { BskyAgent } from '@atproto/api';
+import fetch from 'node-fetch';
+import FormData from 'form-data';
+// HACK: The atproto library contains some kind of invalid typescript
+// declaration in @atproto/api, so we can't include directly from it. Rummaging
+// around in the dist files directly works though.
+// This hack is also present in bluesky.website.service.ts.
+import { BskyAgent } from '@atproto/api/dist/bsky-agent';
 
 interface State extends BlueskyAccountData {
   loading: boolean;
@@ -25,7 +31,16 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
   }
 
   submit() {
-    const agent = new BskyAgent({ service: 'https://bsky.social' });
+    // HACK: The atproto library makes a half-hearted attempt at supporting Node
+    // by letting you specify a fetch handler, but then uses Headers and
+    // FormData unconditionally anyway, with no way to change that behavior.
+    // Patching them into the global namespace is ugly, but it works.
+    // This hack is also present in bluesky.website.service.ts.
+    globalThis.FormData = FormData as any;
+    globalThis.Headers = fetch.Headers;
+    globalThis.Request = fetch.Request;
+    globalThis.Response = fetch.Response;
+    const agent = new BskyAgent({ service: 'https://bsky.social', fetch });
 
     agent
       .login({
