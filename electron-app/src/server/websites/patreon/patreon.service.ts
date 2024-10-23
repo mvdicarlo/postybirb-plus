@@ -643,6 +643,7 @@ export class Patreon extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<PatreonFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -690,6 +691,7 @@ export class Patreon extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<PatreonNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems = [];
     const warnings = [];

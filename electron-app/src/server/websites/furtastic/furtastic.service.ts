@@ -125,6 +125,7 @@ export class Furtastic extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

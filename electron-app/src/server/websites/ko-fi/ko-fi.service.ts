@@ -168,6 +168,7 @@ export class KoFi extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<KoFiFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];

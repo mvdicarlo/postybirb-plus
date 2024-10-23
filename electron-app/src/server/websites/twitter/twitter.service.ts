@@ -142,17 +142,13 @@ export class Twitter extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<TwitterFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    const description = PlaintextParser.parse(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-      23,
-    );
-
-    if (description.length > 280) {
+    if (this.stripTagsShortcut(description).length > 280) {
       warnings.push(
         `Approximated description may surpass 280 character limit (${description.length})`,
       );
@@ -207,15 +203,11 @@ export class Twitter extends Website {
     submission: Submission,
     submissionPart: SubmissionPart<TwitterFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const warnings = [];
 
-    const description = PlaintextParser.parse(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-      23,
-    );
-
-    if (description.length > 280) {
+    if (this.stripTagsShortcut(description).length > 280) {
       warnings.push(
         `Approximated description may surpass 280 character limit (${description.length})`,
       );

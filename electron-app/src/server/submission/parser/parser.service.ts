@@ -14,6 +14,7 @@ import {
   Submission,
   FileSubmission,
   FileRecord,
+  SubmissionPart,
 } from 'postybirb-commons';
 import { ScalingOptions } from 'src/server/websites/interfaces/scaling-options.interface';
 import { PostData } from '../post/interfaces/post-data.interface';
@@ -42,7 +43,12 @@ export class ParserService {
     private readonly fileManipulator: FileManipulationService,
     websitesService: WebsitesService,
   ) {
-    this.descriptionParser = new DescriptionParser(customShortcuts, websitesService, settings, this);
+    this.descriptionParser = new DescriptionParser(
+      customShortcuts,
+      websitesService,
+      settings,
+      this,
+    );
   }
 
   public async parse(
@@ -86,17 +92,18 @@ export class ParserService {
 
   public async parseDescription(
     website: Website,
-    defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<DefaultOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+    websitePart: SubmissionPart<DefaultOptions>,
     type: SubmissionType,
+    generateTags: boolean = true,
   ): Promise<string> {
-    return this.descriptionParser.parse(website, defaultPart, websitePart, type);
+    return this.descriptionParser.parse(website, defaultPart, websitePart, type, generateTags);
   }
 
   public async parseTags(
     website: Website,
-    defaultPart: SubmissionPartEntity<DefaultOptions>,
-    websitePart: SubmissionPartEntity<DefaultOptions>,
+    defaultPart: SubmissionPart<DefaultOptions>,
+    websitePart: SubmissionPart<DefaultOptions>,
   ): Promise<string[]> {
     let tags = _.uniq<string>(FormContent.getTags(defaultPart.data.tags, websitePart.data.tags));
     if (tags.length) {

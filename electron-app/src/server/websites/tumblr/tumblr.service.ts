@@ -158,6 +158,7 @@ export class Tumblr extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<TumblrFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
@@ -211,6 +212,7 @@ export class Tumblr extends Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<TumblrNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
+    description: string,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
