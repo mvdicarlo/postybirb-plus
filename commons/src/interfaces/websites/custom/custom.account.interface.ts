@@ -9,4 +9,5 @@ export interface CustomAccountData {
   tagField?: string;
   thumbnaiField?: string;
   titleField?: string;
+  altTextField?: string;
 }
