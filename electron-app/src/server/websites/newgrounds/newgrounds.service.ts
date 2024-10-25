@@ -310,7 +310,6 @@ export class Newgrounds extends Website {
           [key]: value,
         },
       });
-      console.log(key, value, contentUpdateRes.body);
     }
 
     if (!this.checkIsSaved(contentUpdateRes.body)) {
