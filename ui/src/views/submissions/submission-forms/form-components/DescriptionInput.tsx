@@ -41,7 +41,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
     skin: uiStore!.state.theme === 'dark' ? 'oxide-dark' : 'oxide',
     inline: false,
     statusbar: false,
-    paste_data_images: true,
+    paste_data_images: false,
     browser_spellcheck: true, // should be supported in electron 8
     entity_encoding: 'raw',
     paste_retain_style_properties: 'color',
