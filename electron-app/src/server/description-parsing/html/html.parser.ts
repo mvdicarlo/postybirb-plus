@@ -11,8 +11,10 @@ export class HTMLFormatParser {
     html = HTMLFormatParser.preparse(html);
     html = HTMLFormatParser.trim(html);
     html = sanitize(html, {
-      allowedTags: false,
+      allowedTags: sanitize.defaults.allowedTags.concat(['img']),
+      allowedSchemes: ['data', 'http', 'https'],
       allowedAttributes: {
+        img: ['src', 'alt', 'title', 'width', 'height', 'style', 'target'],
         a: ['href'],
         div: ['align', 'style'],
         pre: ['align', 'style'],
