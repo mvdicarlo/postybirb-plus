@@ -115,6 +115,7 @@ export class Custom extends Website {
     }
 
     const descriptionParser = this.getAccountInfo(data.part.accountId, 'parser');
+    const files = [data.primary, ...data.additional];
     const form: any = {
       [accountData.descriptionField || 'description']: descriptionParser
         ? descriptionParser(data.description)
@@ -122,8 +123,9 @@ export class Custom extends Website {
       [accountData.tagField || 'tags']: data.tags.join(','),
       [accountData.titleField || 'title']: data.title,
       [accountData.ratingField || 'rating']: data.rating,
-      [accountData.fileField || 'file']: [data.primary.file, ...data.additional.map(a => a.file)],
+      [accountData.fileField || 'file']: files.map(f => f.file),
       [accountData.thumbnaiField || 'thumbnail']: data.thumbnail,
+      [accountData.altTextField || 'alt']: files.map(f => f.altText || ''),
     };
 
     const headers: any = {};
