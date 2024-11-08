@@ -37,7 +37,6 @@ import FormData from 'form-data';
 // HACK: The atproto library contains some kind of invalid typescript
 // declaration in @atproto/api, so we can't include directly from it. Rummaging
 // around in the dist files directly works though.
-// This hack is also present in BlueskyLogin.tsx.
 import { AtUri } from '@atproto/syntax';
 import { BlobRef } from '@atproto/lexicon';
 import { BskyAgent } from '@atproto/api/dist/bsky-agent';
@@ -71,7 +70,6 @@ export class Bluesky extends Website {
     // by letting you specify a fetch handler, but then uses Headers and
     // FormData unconditionally anyway, with no way to change that behavior.
     // Patching them into the global namespace is ugly, but it works.
-    // This hack is also present in BlueskyLogin.tsx.
     globalThis.FormData = FormData as any;
     globalThis.Headers = fetch.Headers;
     globalThis.Request = fetch.Request;
