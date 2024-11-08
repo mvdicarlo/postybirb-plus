@@ -99,6 +99,20 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
                 value={this.state.password}
                 onChange={({ target }) => this.setState({ password: target.value })}
               />
+              {this.state.password &&
+                !/^([a-z0-9]{4}-){3}[a-z0-9]{4}$/.test(this.state.password) && (
+                  <Alert
+                    type="warning"
+                    message="This doesn't look like an app password."
+                    description={
+                      <div>
+                        You need to use an <em>app</em> password, <strong>not</strong> your account
+                        password! You can generate an app password in the Bluesky settings under the
+                        Advanced section.
+                      </div>
+                    }
+                  />
+                )}
             </Form.Item>
           </Form>
           <Button onClick={this.submit.bind(this)} disabled={!this.isValid()}>
