@@ -80,18 +80,22 @@ export class Bluesky extends Website {
   }
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    const status: LoginResponse = { loggedIn: false, username: null };
-    const agent = this.makeAgent();
+    const username = data?.data?.username;
+    const password = data?.data?.password;
+    if (!username || !password) {
+      return { loggedIn: false, username };
+    }
 
+    const status: LoginResponse = { loggedIn: false, username };
+    const agent = this.makeAgent();
     await agent
       .login({
-        identifier: data.data.username,
-        password: data.data.password,
+        identifier: username,
+        password,
       })
       .then(res => {
         if (res.success) {
           status.loggedIn = true;
-          status.username = data.data.username;
         } else {
           status.loggedIn = false;
         }
