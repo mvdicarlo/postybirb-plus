@@ -246,6 +246,8 @@ export class Telegram extends Website {
   }
 
   private async loadChannels(profileId: string, appId: string) {
+    // Used code from https://github.com/alik0211/mtproto-core/issues/279#issuecomment-1540604519
+
     const channels: Folder[] = [];
     const offsetId = 0;
     const offsetPeer = {
