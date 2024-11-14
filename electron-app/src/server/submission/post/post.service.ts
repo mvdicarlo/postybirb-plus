@@ -2,7 +2,14 @@ import { Injectable, Logger, Inject, forwardRef, BadRequestException } from '@ne
 import fs from 'fs-extra';
 import _ from 'lodash';
 import { SubmissionService } from '../submission.service';
-import { Submission, DefaultOptions, FileRecord, PostStatuses, PostInfo } from 'postybirb-commons';
+import {
+  Submission,
+  DefaultOptions,
+  FileRecord,
+  PostStatuses,
+  PostInfo,
+  Parts,
+} from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { SettingsService } from 'src/server/settings/settings.service';
@@ -276,73 +283,157 @@ export class PostService {
         waitingForExternal.forEach(poster => poster.doPost());
       }
     } else {
-      this.logService
-        .addLog(
-          submission,
-          posters
-            .filter(poster => poster.status !== 'CANCELLED')
-            .map(poster => ({
-              part: {
-                ...poster.part.asPlain(),
-                postStatus: poster.status,
-                postedTo: poster.getSource(),
-              },
-              response: poster.getFullResponse(),
-            })),
-        )
-        .finally(() => {
-          const canDelete: boolean =
-            posters.length === posters.filter(p => p.status === 'SUCCESS').length;
-          if (canDelete) {
-            const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
-            this.notificationService.create(
-              {
-                type: NotificationType.SUCCESS,
-                body,
-                title: 'Post Success',
-              },
-              submission instanceof FileSubmissionEntity
-                ? nativeImage.createFromPath(submission.primary.preview)
-                : undefined,
-            );
-            this.submissionService.deleteSubmission(submission._id, true);
-          } else {
-            const body = posters
-              .filter(p => p.status === 'FAILED')
-              .map(p => p.getMessage())
-              .join('\n');
-            if (body) {
+      this.tryUpdateChildren(submission).then(childUpdateOk => {
+        this.logService
+          .addLog(
+            submission,
+            posters
+              .filter(poster => poster.status !== 'CANCELLED')
+              .map(poster => ({
+                part: {
+                  ...poster.part.asPlain(),
+                  postStatus: poster.status,
+                  postedTo: poster.getSource(),
+                },
+                response: poster.getFullResponse(),
+              })),
+          )
+          .finally(() => {
+            const canDelete: boolean =
+              posters.length === posters.filter(p => p.status === 'SUCCESS').length;
+            if (canDelete) {
+              const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
               this.notificationService.create(
                 {
-                  type: NotificationType.ERROR,
+                  type: NotificationType.SUCCESS,
                   body,
-                  title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
+                  title: 'Post Success',
                 },
                 submission instanceof FileSubmissionEntity
                   ? nativeImage.createFromPath(submission.primary.preview)
                   : undefined,
               );
+              this.submissionService.deleteSubmission(submission._id, true).catch(e => {
+                this.logger.error(`Error deleting submission: ${e}`);
+              });
+            } else {
+              const body = posters
+                .filter(p => p.status === 'FAILED')
+                .map(p => p.getMessage())
+                .join('\n');
+              if (body) {
+                this.notificationService.create(
+                  {
+                    type: NotificationType.ERROR,
+                    body,
+                    title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
+                  },
+                  submission instanceof FileSubmissionEntity
+                    ? nativeImage.createFromPath(submission.primary.preview)
+                    : undefined,
+                );
+              }
+
+              this.uiNotificationService.createUINotification(
+                NotificationType.ERROR,
+                20,
+                posters.map(p => p.getMessage()).join('\n'),
+                `Post Failure: ${submission.title}`,
+              );
             }
+          });
 
-            this.uiNotificationService.createUINotification(
-              NotificationType.ERROR,
-              20,
-              posters.map(p => p.getMessage()).join('\n'),
-              `Post Failure: ${submission.title}`,
-            );
+        if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+          // If the failures were not cancels
+          const shouldEmptyQueue: boolean =
+            !childUpdateOk || !!posters.filter(p => p.status === 'FAILED').length;
+          if (shouldEmptyQueue) {
+            this.clearQueueIfRequired(submission);
           }
-        });
+        }
+        this.clearAndPostNext(submission.type);
+      });
+    }
+  }
 
-      if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-        // If the failures were not cancels
-        const shouldEmptyQueue: boolean = !!posters.filter(p => p.status === 'FAILED').length;
-        if (shouldEmptyQueue) {
-          this.clearQueueIfRequired(submission);
+  private async tryUpdateChildren(parent: SubmissionEntity): Promise<boolean> {
+    try {
+      const errors = await this.updateChildren(parent);
+      if (errors.length) {
+        this.uiNotificationService.createUINotification(
+          NotificationType.ERROR,
+          20,
+          `Error updating child submissions:\n${errors.join('\n')}`,
+          `Child Error: ${parent.title}`,
+        );
+        return false;
+      } else {
+        return true;
+      }
+    } catch (e) {
+      this.logger.error(`Failed to update children: ${e}`, e.stack);
+      this.uiNotificationService.createUINotification(
+        NotificationType.ERROR,
+        20,
+        `Error updating child submissions: ${e}`,
+        `Child Error: ${parent.title}`,
+      );
+      return false;
+    }
+  }
+
+  private async updateChildren(parent: SubmissionEntity): Promise<Array<string>> {
+    const children = await this.submissionService.getChildren(parent._id, true);
+    const errors = [];
+    if (children?.length) {
+      for (const child of children) {
+        try {
+          const childErrors = await this.updateChild(parent, child.submission, child.parts);
+          errors.push(...childErrors);
+        } catch (e) {
+          this.logger.error(`Failed to update child ${child?.submission?._id}: ${e}`, e.stack);
+          const title =
+            child?.parts?.find(p => p.isDefault)?.data?.title || child?.submission?.title;
+          errors.push(`${title}: ${e}`);
         }
       }
-
-      this.clearAndPostNext(submission.type);
     }
+    return errors;
+  }
+
+  private async updateChild(
+    parent: SubmissionEntity,
+    childSubmission: SubmissionEntity,
+    childParts: Array<SubmissionPartEntity<any>>,
+  ): Promise<Array<string>> {
+    const errors = [];
+    for (const childPart of childParts) {
+      if (!childPart?.isDefault) {
+        try {
+          const website = this.websites.getWebsiteModule(childPart.website);
+          // Lazy-load the source, the website may not need it.
+          const getSource = async () => {
+            const parentPart = await this.partService.getSubmissionPart(
+              parent._id,
+              childPart.accountId,
+            );
+            return parentPart?.postedTo;
+          };
+          if (await website.updateChildPart(childPart, getSource)) {
+            await this.submissionService.setPart(childSubmission, childPart);
+          }
+        } catch (e) {
+          this.logger.error(
+            `Failed to update child ${childSubmission?._id} part ` +
+              `${childPart?.website} ${childPart?.accountId}: ${e}`,
+            e.stack,
+          );
+          const title = childParts?.find(p => p.isDefault)?.data?.title || childSubmission?.title;
+          errors.push(`${title} ${childPart?.website} ${childPart?.accountId}: ${e}`);
+        }
+      }
+    }
+    return errors;
   }
 
   private async clearAndPostNext(type: SubmissionType) {

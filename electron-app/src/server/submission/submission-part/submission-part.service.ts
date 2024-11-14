@@ -92,6 +92,18 @@ export class SubmissionPartService {
     return (await this.repository.find({ accountId, submissionId }))[0];
   }
 
+  async getSubmissionDefaultPart(
+    submissionId: string,
+  ): Promise<SubmissionPartEntity<any> | undefined> {
+    return (await this.repository.find({ isDefault: true, submissionId }))[0];
+  }
+
+  async getChildSubmissionIds(parentId: string): Promise<Array<string>> {
+    return (await this.repository.find({ isDefault: true, 'data.parentId': parentId })).map(
+      part => part.submissionId,
+    );
+  }
+
   removeSubmissionPart(id: string): Promise<number> {
     this.logger.log(id, 'Remove Submission Part');
     return this.repository.remove(id);

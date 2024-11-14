@@ -65,6 +65,10 @@ export default class SubmissionService {
     return axios.get(`/submission/${id}?packaged=${packaged}`);
   }
 
+  static getSubmissionParentOptions(id: string) {
+    return axios.get(`/submission/${id}/parent-options`);
+  }
+
   static overwriteSubmissionParts(overwrite: SubmissionOverwrite) {
     return axios.post('/submission/overwrite', overwrite);
   }

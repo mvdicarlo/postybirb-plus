@@ -20,6 +20,7 @@ export class Bluesky extends WebsiteImpl {
   name: string = 'Bluesky';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
+  supportsParentId: boolean = true;
   loginUrl: string = '';
 
   LoginDialog = (props: LoginDialogProps) => <BlueskyLogin {...props} />;
@@ -79,6 +80,7 @@ BlueskyNotificationOptions
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+        <p>Will be filled with the URL of the parent submission.</p>
       </Form.Item>
     );
     return elements;
@@ -124,6 +126,7 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+        <p>Will be filled with the URL of the parent submission.</p>
       </Form.Item>,
     );
     return elements;

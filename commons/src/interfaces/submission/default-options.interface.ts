@@ -8,6 +8,7 @@ export interface DefaultOptions {
   description: DescriptionData;
   rating?: SubmissionRating | string;
   spoilerText?: string;
+  parentId?: string;
   sources: string[];
 }
 
