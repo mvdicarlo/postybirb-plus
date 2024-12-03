@@ -49,6 +49,7 @@ import {
   AppBskyVideoGetJobStatus,
 } from '@atproto/api/dist/client';
 import { RichText } from '@atproto/api/dist/rich-text/rich-text';
+import { blob } from 'stream/consumers';
 
 function getRichTextLength(text: string): number {
   return new RichText({ text }).graphemeLength;
@@ -127,7 +128,29 @@ export class Bluesky extends Website {
     files: PostFileRecord[],
     fallbackAltText?: string,
   ): Promise<AppBskyEmbedImages.Main | AppBskyEmbedVideo.Main> {
-    if (this.countFileTypes(files).videos !== 0) {
+    // Bluesky supports either images or a video as an embed
+
+    if (this.countFileTypes(files).videos === 0) {
+      const uploadedImages: AppBskyEmbedImages.Image[] = [];
+      for (const file of files.slice(0, this.MAX_MEDIA)) {
+        const altText = file.altText || fallbackAltText;
+        const ref = await this.uploadImage(agent, file.file);
+
+        uploadedImages.push({
+          image: ref,
+          alt: altText,
+          aspectRatio: {
+            height: file.file.options.height,
+            width: file.file.options.width,
+          },
+        });
+      }
+
+      return {
+        images: uploadedImages,
+        $type: 'app.bsky.embed.images',
+      };
+    } else {
       for (const file of files) {
         if (file.type == FileSubmissionType.VIDEO) {
           const altText = file.altText || fallbackAltText;
@@ -140,23 +163,6 @@ export class Bluesky extends Website {
           };
         }
       }
-    } else {
-      let uploadedImages: AppBskyEmbedImages.Image[] = [];
-      let fileCount = 0;
-      for (const file of files) {
-        const altText = file.altText || fallbackAltText;
-        const ref = await this.uploadImage(agent, file.file);
-        const image: AppBskyEmbedImages.Image = { image: ref, alt: altText };
-        uploadedImages.push(image);
-        fileCount++;
-        if (fileCount == this.MAX_MEDIA) {
-          break;
-        }
-      }
-      return {
-        images: uploadedImages,
-        $type: 'app.bsky.embed.images',
-      };
     }
   }
 
