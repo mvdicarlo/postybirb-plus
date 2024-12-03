@@ -243,8 +243,8 @@ export class SubscribeStarAdult extends Website {
       async function getInfo() {
         var csrf = document.body.parentElement.innerHTML.match(/<meta name="csrf-token" content="(.*?)"/)[1].trim();
         var cookies = (await cookieStore.getAll()).reduce((a, b) => \`$\{a\} $\{b.name\}=$\{b.value\};\`, '').trim();
-        var postKey = document.getElementsByClassName('new_post')[0].innerHTML.replace(/&quot;/g, '"').replace(/\&quot;/g, '"').match(/data-s3-upload-path=\\\\"(.*?)\\\\"/)[1].trim();
-        var bucket = document.getElementsByClassName('new_post')[0].innerHTML.replace(/&quot;/g, '"').replace(/\&quot;/g, '"').match(/data-s3-bucket=\\\\"(.*?)\\\\"/)[1].trim();
+        var postKey = document.getElementsByClassName('new_post')[0].innerHTML.replace(/&quot;/g, '"').match(/data-s3-upload-path=\\\\"(.*?)\\\\"/)[1].trim();
+        var bucket = document.getElementsByClassName('new_post')[0].innerHTML.replace(/&quot;/g, '"').match(/data-s3-bucket=\\\\"(.*?)\\\\"/)[1].trim();
         var out = { csrf, cookies, postKey, bucket }
 
         return out;
