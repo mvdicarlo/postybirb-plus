@@ -391,4 +391,16 @@ export abstract class Megalodon extends Website {
     return upload.data.id;
   }
 
+  override async updateChildPart(
+    part: SubmissionPart<MastodonFileOptions & MastodonNotificationOptions>,
+    getSource: () => Promise<string | undefined>,
+  ): Promise<boolean> {
+    const source = await getSource();
+    if (source?.length) {
+      part.data.replyToUrl = source;
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
