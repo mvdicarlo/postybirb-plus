@@ -20,5 +20,7 @@ export interface PostFile {
   options: {
     contentType: string;
     filename: string;
+    height?: number;
+    width?: number;
   };
 }
