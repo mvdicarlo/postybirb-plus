@@ -70,7 +70,7 @@ export class FileManipulationService {
         if (skipRescale) {
           this.logger.debug('Skip rescale');
         } else {
-          const originalFileSize = buffer.length;
+          const originalFileSize = newBuffer.length;
           if (originalFileSize <= targetSize) {
             this.logger.debug(
               `Original file size ${originalFileSize} <= target size ${targetSize}`,
