@@ -113,6 +113,7 @@ export class Bluesky extends Website {
       maxHeight: 2000,
       maxWidth: 2000,
       maxSize: 1000000,
+      noTransparency: true, // Bsky doesn't support alpha transparency.
     };
   }
 

@@ -21,6 +21,7 @@ export class FileManipulationService {
     scalingOptions: ScalingOptions,
     settings: {
       convertToJPEG?: boolean;
+      noTransparency?: boolean;
     },
   ): Promise<{ buffer: Buffer; mimetype: string }> {
     let targetSize = scalingOptions.maxSize; // Assumed to be bytes
@@ -75,6 +76,7 @@ export class FileManipulationService {
               originalFileSize,
               targetSize,
               prescale,
+              !settings.noTransparency,
             );
             if (!pngScaledBuffer) {
               const jpgScaledBuffer = await this.scaleJPEG(
@@ -130,6 +132,7 @@ export class FileManipulationService {
     originalSize: number,
     targetSize: number,
     prescale: number,
+    supportsTransparency: boolean,
   ): Promise<Buffer | null> {
     if (im.getMimeType() === 'image/jpeg') {
       return null;
@@ -138,7 +141,8 @@ export class FileManipulationService {
     im.toPNG();
 
     let reductionValue: number = this.settings.getValue<number>('maxPNGSizeCompression');
-    if (im.hasTransparency()) {
+    const haveTransparency = supportsTransparency && im.hasTransparency();
+    if (haveTransparency) {
       reductionValue = this.settings.getValue<number>('maxPNGSizeCompressionWithAlpha');
     } else if (!this.settings.getValue('reduceSizeOverQuality')) {
       return null;
