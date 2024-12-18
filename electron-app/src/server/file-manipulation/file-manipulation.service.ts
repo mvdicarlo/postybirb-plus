@@ -36,6 +36,7 @@ export class FileManipulationService {
 
       try {
         let skipRescale = false;
+        let prescale = 1.0;
         // Is the file above the pixel dimension limits, if set ?
         if (scalingOptions.maxHeight || scalingOptions.maxWidth) {
           let maxSize = 0;
@@ -48,6 +49,7 @@ export class FileManipulationService {
 
           if (maxSize < im.getHeight() || maxSize < im.getWidth()) {
             const scaled = await im.resize(maxSize).getData();
+            prescale = Math.min(maxSize / im.getWidth(), maxSize / im.getHeight());
             newBuffer = scaled.buffer;
 
             if (newBuffer.length > targetSize) {
@@ -68,9 +70,19 @@ export class FileManipulationService {
               im.toJPEG();
             }
 
-            const pngScaledBuffer = await this.scalePNG(im, originalFileSize, targetSize);
+            const pngScaledBuffer = await this.scalePNG(
+              im,
+              originalFileSize,
+              targetSize,
+              prescale,
+            );
             if (!pngScaledBuffer) {
-              const jpgScaledBuffer = await this.scaleJPEG(im, originalFileSize, targetSize);
+              const jpgScaledBuffer = await this.scaleJPEG(
+                im,
+                originalFileSize,
+                targetSize,
+                prescale,
+              );
               if (!jpgScaledBuffer) {
                 this.logger.warn(
                   `Unable to successfully scale image down to ${targetSize} bytes from ${originalFileSize} bytes`,
@@ -117,6 +129,7 @@ export class FileManipulationService {
     im: ImageManipulator,
     originalSize: number,
     targetSize: number,
+    prescale: number,
   ): Promise<Buffer | null> {
     if (im.getMimeType() === 'image/jpeg') {
       return null;
@@ -130,7 +143,9 @@ export class FileManipulationService {
     }
 
     const scaleSize = originalSize / targetSize > 1.5 ? 20 : 10; // try to optimize # of runs for way larger files
-    const scaleSteps = this.getSteps(reductionValue, scaleSize).map(step => 1 - step / 100);
+    const scaleSteps = this.getSteps(this.applyPrescale(reductionValue, prescale), scaleSize).map(
+      step => 1 - step / 100,
+    );
 
     const lastStep = scaleSteps.pop();
     const lastScaled = await im.scale(lastStep).getData(); // check end first to see if we should calculate anything between
@@ -154,6 +169,7 @@ export class FileManipulationService {
     im: ImageManipulator,
     originalSize: number,
     targetSize: number,
+    prescale: number,
   ): Promise<Buffer> {
     const maxQualityReduction = this.settings.getValue<number>('maxJPEGQualityCompression');
     const maxSizeReduction = this.settings.getValue<number>('maxJPEGSizeCompression');
@@ -161,7 +177,9 @@ export class FileManipulationService {
     im.toJPEG().setQuality(100);
 
     const scaleSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
-    const scaleSteps = this.getSteps(maxSizeReduction, scaleSize).map(step => 1 - step / 100);
+    const scaleSteps = this.getSteps(this.applyPrescale(maxSizeReduction, prescale), scaleSize).map(
+      step => 1 - step / 100,
+    );
 
     const lastStep = scaleSteps[scaleSteps.length - 1];
     const lastScaled = await im.scale(lastStep).getData(); // check end first to see if we should calculate anything between
@@ -224,5 +242,19 @@ export class FileManipulationService {
     }
 
     return [...steps, value];
+  }
+
+  // The user specifies a maximum size reduction in the application settings,
+  // but website limits may have caused the image to already have been scaled
+  // down. In that case, we need to rescale the reduction amount.
+  private applyPrescale(reductionValue: number, prescale: number): number {
+    if (prescale < 1.0) {
+      return Math.max(
+        0.0,
+        Math.floor(100.0 - ((100.0 - reductionValue) / 100.0 / prescale) * 100.0),
+      );
+    } else {
+      return reductionValue;
+    }
   }
 }
