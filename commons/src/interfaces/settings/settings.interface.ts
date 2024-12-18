@@ -12,6 +12,7 @@ export interface Settings {
   maxPNGSizeCompressionWithAlpha: number;
   maxJPEGQualityCompression: number;
   maxJPEGSizeCompression: number;
+  reduceSizeOverQuality: boolean;
   silentNotification: boolean;
   defaultTagSearchProvider: TagSearchProviders;
   proxy: string;
