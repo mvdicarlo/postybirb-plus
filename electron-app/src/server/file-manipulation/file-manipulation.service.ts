@@ -140,6 +140,8 @@ export class FileManipulationService {
     let reductionValue: number = this.settings.getValue<number>('maxPNGSizeCompression');
     if (im.hasTransparency()) {
       reductionValue = this.settings.getValue<number>('maxPNGSizeCompressionWithAlpha');
+    } else if (!this.settings.getValue('reduceSizeOverQuality')) {
+      return null;
     }
 
     const scaleSize = originalSize / targetSize > 1.5 ? 20 : 10; // try to optimize # of runs for way larger files
@@ -174,7 +176,25 @@ export class FileManipulationService {
     const maxQualityReduction = this.settings.getValue<number>('maxJPEGQualityCompression');
     const maxSizeReduction = this.settings.getValue<number>('maxJPEGSizeCompression');
 
-    im.toJPEG().setQuality(100);
+    im.toJPEG();
+
+    if (!this.settings.getValue('reduceSizeOverQuality')) {
+      const minQuality = Math.max(1, Math.round(100 - maxQualityReduction));
+      // Quality reduction on its own is pretty fast, so just try every value
+      // along the way instead of using some kind of smart scale stepping.
+      for (let quality = 100; quality >= minQuality; --quality) {
+        const compressed = await im.setQuality(quality).getData();
+        if (compressed.buffer.length <= targetSize) {
+          this.logger.log(
+            `File Compressed successfully at ${quality}% quality`,
+            'JPEG QUALITY COMPRESSION',
+          );
+          return compressed.buffer;
+        }
+      }
+    }
+
+    im.setQuality(100);
 
     const scaleSize = originalSize / targetSize > 2 ? 20 : 10; // try to optimize # of runs for way larger files
     const scaleSteps = this.getSteps(this.applyPrescale(maxSizeReduction, prescale), scaleSize).map(
