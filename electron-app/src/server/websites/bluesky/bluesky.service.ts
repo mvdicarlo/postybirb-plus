@@ -18,6 +18,7 @@ import { CancellationToken } from 'src/server/submission/post/cancellation/cance
 import {
   FilePostData,
   PostFile,
+  PostFileRecord,
 } from 'src/server/submission/post/interfaces/file-post-data.interface';
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
@@ -26,108 +27,29 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import {
-  BskyAgent,
-  stringifyLex,
-  jsonToLex,
-  AppBskyEmbedImages,
-  ComAtprotoLabelDefs,
-  BlobRef,
-  RichText,
-  AppBskyFeedThreadgate,
-  AtUri,
-} from '@atproto/api';
 import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import fetch from 'node-fetch';
 import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
 import FormContent from 'src/server/utils/form-content.util';
-
-// Start of Polyfill
-
-const GET_TIMEOUT = 15e3; // 15s
-const POST_TIMEOUT = 60e3; // 60s
-
-interface FetchHandlerResponse {
-  status: number;
-  headers: Record<string, string>;
-  body: ArrayBuffer | undefined;
-}
-
-type ThreadgateSetting =
-  | { type: 'nobody' }
-  | { type: 'mention' }
-  | { type: 'following' }
-  | { type: 'list'; list: string };
-
-async function fetchHandler(
-  reqUri: string,
-  reqMethod: string,
-  reqHeaders: Record<string, string>,
-  reqBody: any,
-): Promise<FetchHandlerResponse> {
-  const reqMimeType = reqHeaders['Content-Type'] || reqHeaders['content-type'];
-  if (reqMimeType && reqMimeType.startsWith('application/json')) {
-    reqBody = stringifyLex(reqBody);
-  } else if (
-    typeof reqBody === 'string' &&
-    (reqBody.startsWith('/') || reqBody.startsWith('file:'))
-  ) {
-    // if (reqBody.endsWith('.jpeg') || reqBody.endsWith('.jpg')) {
-    //   // HACK
-    //   // React native has a bug that inflates the size of jpegs on upload
-    //   // we get around that by renaming the file ext to .bin
-    //   // see https://github.com/facebook/react-native/issues/27099
-    //   // -prf
-    //   const newPath = reqBody.replace(/\.jpe?g$/, '.bin')
-    //   await RNFS.moveFile(reqBody, newPath)
-    //   reqBody = newPath
-    // }
-    // NOTE
-    // React native treats bodies with {uri: string} as file uploads to pull from cache
-    // -prf
-    reqBody = { uri: reqBody };
-  }
-
-  const controller = new AbortController();
-  const to = setTimeout(
-    () => controller.abort(),
-    reqMethod === 'post' ? POST_TIMEOUT : GET_TIMEOUT,
-  );
-
-  const res = await fetch(reqUri, {
-    method: reqMethod,
-    headers: reqHeaders,
-    body: reqBody,
-    signal: controller.signal,
-  });
-
-  const resStatus = res.status;
-  const resHeaders: Record<string, string> = {};
-  res.headers.forEach((value: string, key: string) => {
-    resHeaders[key] = value;
-  });
-  const resMimeType = resHeaders['Content-Type'] || resHeaders['content-type'];
-  let resBody;
-  if (resMimeType) {
-    if (resMimeType.startsWith('application/json')) {
-      resBody = jsonToLex(await res.json());
-    } else if (resMimeType.startsWith('text/')) {
-      resBody = await res.text();
-    } else {
-      resBody = await res.blob();
-    }
-  }
-
-  clearTimeout(to);
-
-  return {
-    status: resStatus,
-    headers: resHeaders,
-    body: resBody,
-  };
-}
-
-// End of Polyfill
+import { JobStatus } from '@atproto/api/dist/client/types/app/bsky/video/defs';
+import WaitUtil from 'src/server/utils/wait.util';
+import FormData from 'form-data';
+// HACK: The atproto library contains some kind of invalid typescript
+// declaration in @atproto/api, so we can't include directly from it. Rummaging
+// around in the dist files directly works though.
+import { AtUri } from '@atproto/syntax';
+import { BlobRef } from '@atproto/lexicon';
+import { BskyAgent } from '@atproto/api/dist/bsky-agent';
+import {
+  ComAtprotoLabelDefs,
+  AppBskyEmbedImages,
+  AppBskyEmbedVideo,
+  AppBskyFeedThreadgate,
+  AppBskyVideoGetUploadLimits,
+  AppBskyVideoGetJobStatus,
+} from '@atproto/api/dist/client';
+import { RichText } from '@atproto/api/dist/rich-text/rich-text';
+import { blob } from 'stream/consumers';
 
 function getRichTextLength(text: string): number {
   return new RichText({ text }).graphemeLength;
@@ -136,7 +58,7 @@ function getRichTextLength(text: string): number {
 @Injectable()
 export class Bluesky extends Website {
   readonly BASE_URL = '';
-  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
+  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp4'];
   readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
@@ -144,21 +66,35 @@ export class Bluesky extends Website {
   readonly MAX_MEDIA = 4;
   readonly enableAdvertisement = false;
 
+  private makeAgent(): BskyAgent {
+    // HACK: The atproto library makes a half-hearted attempt at supporting Node
+    // by letting you specify a fetch handler, but then uses Headers and
+    // FormData unconditionally anyway, with no way to change that behavior.
+    // Patching them into the global namespace is ugly, but it works.
+    globalThis.FormData = FormData as any;
+    globalThis.Headers = fetch.Headers;
+    globalThis.Request = fetch.Request;
+    globalThis.Response = fetch.Response;
+    return new BskyAgent({ service: 'https://bsky.social', fetch });
+  }
+
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    BskyAgent.configure({ fetch: fetchHandler });
+    const username = data?.data?.username;
+    const password = data?.data?.password;
+    if (!username || !password) {
+      return { loggedIn: false, username };
+    }
 
-    const status: LoginResponse = { loggedIn: false, username: null };
-    const agent = new BskyAgent({ service: 'https://bsky.social' });
-
+    const status: LoginResponse = { loggedIn: false, username };
+    const agent = this.makeAgent();
     await agent
       .login({
-        identifier: data.data.username,
-        password: data.data.password,
+        identifier: username,
+        password,
       })
       .then(res => {
         if (res.success) {
           status.loggedIn = true;
-          status.username = data.data.username;
         } else {
           status.loggedIn = false;
         }
@@ -187,12 +123,50 @@ export class Bluesky extends Website {
     ).map(tag => `#${tag}`);
   }
 
-  private async uploadMedia(
+  private async uploadEmbeds(
     agent: BskyAgent,
-    data: BlueskyAccountData,
-    file: PostFile,
-    altText: string,
-  ): Promise<BlobRef | undefined> {
+    files: PostFileRecord[],
+    fallbackAltText?: string,
+  ): Promise<AppBskyEmbedImages.Main | AppBskyEmbedVideo.Main> {
+    // Bluesky supports either images or a video as an embed
+
+    if (this.countFileTypes(files).videos === 0) {
+      const uploadedImages: AppBskyEmbedImages.Image[] = [];
+      for (const file of files.slice(0, this.MAX_MEDIA)) {
+        const altText = file.altText || fallbackAltText;
+        const ref = await this.uploadImage(agent, file.file);
+
+        uploadedImages.push({
+          image: ref,
+          alt: altText,
+          aspectRatio: {
+            height: file.file.options.height,
+            width: file.file.options.width,
+          },
+        });
+      }
+
+      return {
+        images: uploadedImages,
+        $type: 'app.bsky.embed.images',
+      };
+    } else {
+      for (const file of files) {
+        if (file.type == FileSubmissionType.VIDEO) {
+          const altText = file.altText || fallbackAltText;
+          this.checkVideoUploadLimits(agent);
+          const ref = await this.uploadVideo(agent, file.file);
+          return {
+            video: ref,
+            alt: altText,
+            $type: 'app.bsky.embed.video',
+          };
+        }
+      }
+    }
+  }
+
+  private async uploadImage(agent: BskyAgent, file: PostFile): Promise<BlobRef | undefined> {
     const blobUpload = await agent
       .uploadBlob(file.value, { encoding: file.options.contentType })
       .catch(err => {
@@ -205,6 +179,172 @@ export class Bluesky extends Website {
     }
   }
 
+  // There's video methods in the API, but they are utterly non-functional in
+  // many ways: wrong lexicon entries and overeager validation thereof that
+  // prevents passing required parameters, picking the wrong host to upload to
+  // (must be video.bsky.app, NOT some bsky.network host that'll just 404 at the
+  // path) and not doing the proper service authentication dance. So we instead
+  // follow what the website does here, which is the way that actually works.
+  // We also use the same inconsistent header capitalization as they do.
+
+  private async checkVideoUploadLimits(agent: BskyAgent): Promise<void> {
+    const token = await this.getAuthToken(
+      agent,
+      'did:web:video.bsky.app',
+      'app.bsky.video.getUploadLimits',
+    );
+
+    const url = 'https://video.bsky.app/xrpc/app.bsky.video.getUploadLimits';
+    const req: RequestInit = {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+        authorization: `Bearer ${token}`,
+        'atproto-accept-labelers': 'did:plc:ar7c4by46qjdydhdevvrndac;redact',
+      },
+    };
+    const uploadLimits: AppBskyVideoGetUploadLimits.OutputSchema = await this.checkFetchResult(
+      fetch(url, req),
+    ).catch(err => {
+      this.logger.error(err);
+      return Promise.reject(
+        this.createPostResponse({ message: 'Getting video upload limits failed', error: err }),
+      );
+    });
+
+    this.logger.debug(`Upload limits: ${JSON.stringify(uploadLimits)}`);
+    if (!uploadLimits.canUpload) {
+      return Promise.reject({ message: `Not allowed to upload: ${uploadLimits.message}` });
+    }
+  }
+
+  private async uploadVideo(agent: BskyAgent, file: PostFile): Promise<BlobRef> {
+    const token = await this.getAuthToken(
+      agent,
+      `did:web:${agent.pdsUrl.hostname}`,
+      'com.atproto.repo.uploadBlob',
+    );
+    const did = encodeURIComponent(agent.did);
+    const name = encodeURIComponent(this.generateVideoName());
+    const url = `https://video.bsky.app/xrpc/app.bsky.video.uploadVideo?did=${did}&name=${name}`;
+    const req: RequestInit = {
+      method: 'POST',
+      body: file.value,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': file.options.contentType,
+      },
+    };
+    // Uploading an already-processed video returns 409 conflict, but a valid
+    // response that contains a job id at top level.
+    const videoUpload: any = await this.checkFetchResult(fetch(url, req), true).catch(err => {
+      this.logger.error(err);
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Checking video processing status failed',
+          error: err,
+        }),
+      );
+    });
+    this.logger.debug(`Video upload: ${JSON.stringify(videoUpload)}`);
+    return await this.waitForVideoProcessing(videoUpload?.jobStatus?.jobId || videoUpload.jobId);
+  }
+
+  private generateVideoName(): string {
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let name = '';
+    for (let i = 0; i < 12; ++i) {
+      name += characters[Math.floor(Math.random() * characters.length)];
+    }
+    return name + '.mp4';
+  }
+
+  private async waitForVideoProcessing(jobId: string): Promise<BlobRef> {
+    const encodedJobId = encodeURIComponent(jobId);
+    const url = `https://video.bsky.app/xrpc/app.bsky.video.getJobStatus?jobId=${encodedJobId}`;
+    let jobStatus: JobStatus;
+    do {
+      await WaitUtil.wait(4000);
+      this.logger.debug(`Polling video processing status at ${url}`);
+      const req: RequestInit = {
+        method: 'GET',
+        headers: {
+          'atproto-accept-labelers': 'did:plc:ar7c4by46qjdydhdevvrndac;redact',
+        },
+      };
+      const res: AppBskyVideoGetJobStatus.OutputSchema = await this.checkFetchResult(
+        fetch(url, req),
+      ).catch(err => {
+        this.logger.error(err);
+        return Promise.reject(
+          this.createPostResponse({
+            message: 'Checking video processing status failed',
+            error: err,
+          }),
+        );
+      });
+      this.logger.debug(`Job status: ${JSON.stringify(res)}`);
+      jobStatus = res.jobStatus;
+    } while (jobStatus.state !== 'JOB_STATE_COMPLETED' && jobStatus.state !== 'JOB_STATE_FAILED');
+
+    if (jobStatus.state === 'JOB_STATE_COMPLETED') {
+      if (jobStatus.blob) {
+        return jobStatus.blob;
+      } else {
+        return Promise.reject(
+          this.createPostResponse({ message: 'No blob ref after video processing' }),
+        );
+      }
+    } else {
+      return Promise.reject(
+        this.createPostResponse({ message: `Video processing failed: ${jobStatus.message}` }),
+      );
+    }
+  }
+
+  private async checkFetchResult(
+    promise: Promise<Response>,
+    allowConflict: boolean = false,
+  ): Promise<any> {
+    const res = await promise;
+    if ((res.status >= 200 && res.status < 300) || (allowConflict && res.status === 409)) {
+      try {
+        const body = await res.json();
+        return body;
+      } catch (err) {
+        return Promise.reject({ message: `Failed to get JSON body: ${err}` });
+      }
+    } else {
+      const body = await this.tryGetErrorBody(res);
+      return Promise.reject(`Failed with status ${res.status} ${res.statusText}: ${body})}`);
+    }
+  }
+
+  private async getAuthToken(agent: BskyAgent, aud: string, lxm: string): Promise<string> {
+    this.logger.debug(`Get auth token for ${aud}::${lxm}`);
+    const auth = await agent.com.atproto.server.getServiceAuth({ aud, lxm }).catch(err => {
+      this.logger.error(err);
+      return Promise.reject(
+        this.createPostResponse({ message: `Auth for ${aud}::${lxm} failed`, error: err }),
+      );
+    });
+    if (!auth.success) {
+      return Promise.reject(
+        this.createPostResponse({ message: `Auth for ${aud}::${lxm} not successful` }),
+      );
+    }
+    return auth.data.token;
+  }
+
+  private async tryGetErrorBody(res: Response): Promise<string> {
+    try {
+      const body = await res.text();
+      return body;
+    } catch (e) {
+      return `(error getting body: ${e})`;
+    }
+  }
+
   async postFileSubmission(
     cancellationToken: CancellationToken,
     data: FilePostData<BlueskyFileOptions>,
@@ -212,7 +352,7 @@ export class Bluesky extends Website {
   ): Promise<PostResponse> {
     this.checkCancelled(cancellationToken);
 
-    const agent = new BskyAgent({ service: 'https://bsky.social' });
+    const agent = this.makeAgent();
 
     await agent.login({
       identifier: accountData.username,
@@ -224,23 +364,7 @@ export class Bluesky extends Website {
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
 
     const files = [data.primary, ...data.additional];
-    let uploadedMedias: AppBskyEmbedImages.Image[] = [];
-    let fileCount = 0;
-    for (const file of files) {
-      const altText = file.altText || data.options.altText;
-      const ref = await this.uploadMedia(agent, accountData, file.file, altText);
-      const image: AppBskyEmbedImages.Image = { image: ref, alt: altText };
-      uploadedMedias.push(image);
-      fileCount++;
-      if (fileCount == this.MAX_MEDIA) {
-        break;
-      }
-    }
-
-    const embeds: AppBskyEmbedImages.Main = {
-      images: uploadedMedias,
-      $type: 'app.bsky.embed.images',
-    };
+    const embeds = await this.uploadEmbeds(agent, files, data.options.altText);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -326,7 +450,7 @@ export class Bluesky extends Website {
   ): Promise<PostResponse> {
     this.checkCancelled(cancellationToken);
 
-    const agent = new BskyAgent({ service: 'https://bsky.social' });
+    const agent = this.makeAgent();
 
     await agent.login({
       identifier: accountData.username,
@@ -406,6 +530,11 @@ export class Bluesky extends Website {
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
 
+    const { images, videos, other } = this.countFileTypes(files);
+    if ((images !== 0 && videos !== 0) || videos > 1 || other !== 0) {
+      problems.push('Supports either a set of images or a single video');
+    }
+
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
@@ -413,7 +542,7 @@ export class Bluesky extends Website {
       }
 
       let maxMB: number = 1;
-      if (FileSize.MBtoBytes(maxMB) < size) {
+      if (type !== FileSubmissionType.VIDEO && FileSize.MBtoBytes(maxMB) < size) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
@@ -444,6 +573,24 @@ export class Bluesky extends Website {
     this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
 
     return { problems, warnings };
+  }
+
+  private countFileTypes(files: { type: FileSubmissionType }[]): {
+    images: number;
+    videos: number;
+    other: number;
+  } {
+    const counts = { images: 0, videos: 0, other: 0 };
+    for (const file of files) {
+      if (file.type === FileSubmissionType.VIDEO) {
+        ++counts.videos;
+      } else if (file.type === FileSubmissionType.IMAGE) {
+        ++counts.images;
+      } else {
+        ++counts.other;
+      }
+    }
+    return counts;
   }
 
   validateNotificationSubmission(
@@ -493,7 +640,7 @@ export class Bluesky extends Website {
     );
 
     const rt = new RichText({ text: description });
-    const agent = new BskyAgent({ service: 'https://bsky.social' });
+    const agent = this.makeAgent();
     rt.detectFacets(agent);
 
     if (rt.graphemeLength > this.MAX_CHARS) {
@@ -508,7 +655,7 @@ export class Bluesky extends Website {
           getRichTextLength,
         );
       } else {
-        warnings.push(`You have not inserted the {tags} shortcut in your description; 
+        warnings.push(`You have not inserted the {tags} shortcut in your description;
           tags will not be inserted in your post`);
       }
     }

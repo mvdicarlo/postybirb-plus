@@ -246,55 +246,61 @@ export class Telegram extends Website {
   }
 
   private async loadChannels(profileId: string, appId: string) {
-    const { chats } = await this.callApi<{
-      chats: {
-        _: string;
-        creator: boolean;
-        access_hash: string;
-        title: string;
-        id: number;
-        left: boolean;
-        deactivated: boolean;
-        /**
-         * Reverted default user rights.
-         */
-        default_banned_rights: {
-          /**
-           * So false means that the user
-           * actually can send the media
-           */
-          send_media: boolean;
-        };
-        admin_rights: {
-          post_messages: boolean;
-        };
-      }[];
-    }>(appId, 'messages.getDialogs', {
-      offset_peer: {
-        _: 'inputPeerEmpty',
-      },
-      limit: 400,
-    });
+    // Used code from https://github.com/alik0211/mtproto-core/issues/279#issuecomment-1540604519
 
-    const channels: Folder[] = chats
-      .filter(c => {
-        // Skip forbidden chats
-        if (c.left || c.deactivated || !['channel', 'chat'].includes(c._)) return false;
+    const channels: Folder[] = [];
+    const offsetId = 0;
+    const offsetPeer = {
+      _: 'inputPeerEmpty',
+    };
 
-        if (
-          c.creator ||
-          c.admin_rights?.post_messages ||
-          // False means that user can send media
-          c.default_banned_rights?.send_media === false
-        )
-          return true;
-      })
-      .map(c => ({
-        label: c.title,
-        value: `${c.id}-${c.access_hash}`,
-      }));
+    let requestLimit = 30;
+    let offsetDate = 0;
+
+    while (requestLimit >= 0) {
+      requestLimit--;
+
+      const { chats, messages } = await this.callApi<Dialogs>(appId, 'messages.getDialogs', {
+        offset_id: offsetId,
+        offset_peer: offsetPeer,
+        offset_date: offsetDate,
+        limit: 100,
+      });
+
+      for (const chat of chats) {
+        if (!this.canSendMediaInChat(chat)) continue;
+
+        const id = chat.id.toString();
+        const value = chat.access_hash ? `${id}-${chat.access_hash}` : id;
+        if (!channels.find(e => e.value === value)) {
+          channels.push({
+            label: chat.title,
+            value: value,
+          });
+        }
+      }
+
+      if (messages.length > 0) {
+        offsetDate = messages[messages.length - 1].date;
+      } else break;
+    }
+
+    this.logger.debug(`Loaded ${channels.length} channels and chats.`);
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
+  }
+
+  private canSendMediaInChat(chat: Chat) {
+    // Cannot in forbidden chats
+    if (chat.left || chat.deactivated || !['channel', 'chat'].includes(chat._)) return false;
+
+    if (
+      chat.creator ||
+      chat.admin_rights?.post_messages ||
+      // Right is not banned -> user can send media
+      chat.default_banned_rights?.send_media === false
+    )
+      return true;
   }
 
   transformAccountData(data: object): object {
@@ -308,7 +314,7 @@ export class Telegram extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(this.MAX_MB) };
+    return { maxSize: FileSize.MBtoBytes(this.MAX_MB), maxWidth: 2560, maxHeight: 2560 };
   }
 
   private async upload(appId: string, file: PostFileRecord, spoiler: boolean) {
@@ -388,12 +394,8 @@ export class Telegram extends Website {
 
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
-      const [channel_id, access_hash] = channel.split('-');
-      const peer = {
-        _: 'inputPeerChannel',
-        channel_id,
-        access_hash,
-      };
+      const peer = this.getPeer(channel);
+
       if (files.length === 1) {
         response = await this.callApi(appId, `messages.sendMedia`, {
           random_id: Date.now(),
@@ -482,24 +484,34 @@ export class Telegram extends Website {
 
     for (const channel of data.options.channels) {
       this.checkCancelled(cancellationToken);
-      const [channel_id, access_hash] = channel.split('-');
-      const peer = {
-        _: 'inputPeerChannel',
-        channel_id,
-        access_hash,
-      };
+
       response = await this.callApi(accountData.appId, 'messages.sendMessage', {
         random_id: Date.now(),
         message: description,
         entities: entities,
         silent: data.options.silent,
-        peer,
+        peer: this.getPeer(channel),
       });
 
-      await WaitUtil.wait(2000);
+      await WaitUtil.wait(1000);
     }
 
     return this.createPostResponse({ source: this.getSourceFromResponse(response) });
+  }
+
+  private getPeer(channel: string) {
+    const [chat_id, access_hash] = channel.split('-');
+    const peer = access_hash
+      ? {
+          _: 'inputPeerChannel',
+          channel_id: chat_id,
+          access_hash,
+        }
+      : {
+          _: 'inputPeerChat',
+          chat_id,
+        };
+    return peer;
   }
 
   private getSourceFromResponse(response: SendMessageResponse) {
@@ -518,28 +530,8 @@ export class Telegram extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (submissionPart.data.channels?.length) {
-      const folders: Folder[] = _.get(
-        this.accountInformation.get(submissionPart.accountId),
-        GenericAccountProp.FOLDERS,
-        [],
-      );
-      submissionPart.data.channels.forEach(f => {
-        if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(this.channelNotFound(f));
-        }
-      });
-    } else {
-      problems.push('No channel(s) selected.');
-    }
-
-    const { description } = TelegramDescription.fromHTML(
-      FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
-    );
-
-    if (description.length > 4096) {
-      warnings.push('Max description length allowed is 4,096 characters.');
-    }
+    this.validateChannels(submissionPart, warnings, problems);
+    this.validateDescriptionLength(defaultPart, submissionPart, warnings);
 
     const files = [
       submission.primary,
@@ -580,21 +572,17 @@ export class Telegram extends Website {
     const problems: string[] = [];
     const warnings: string[] = [];
 
-    if (submissionPart.data.channels?.length) {
-      const folders: Folder[] = _.get(
-        this.accountInformation.get(submissionPart.accountId),
-        GenericAccountProp.FOLDERS,
-        [],
-      );
-      submissionPart.data.channels.forEach(f => {
-        if (!WebsiteValidator.folderIdExists(f, folders)) {
-          problems.push(this.channelNotFound(f));
-        }
-      });
-    } else {
-      problems.push('No channel(s) selected.');
-    }
+    this.validateChannels(submissionPart, warnings, problems);
+    this.validateDescriptionLength(defaultPart, submissionPart, warnings);
 
+    return { problems, warnings };
+  }
+
+  private validateDescriptionLength(
+    defaultPart: SubmissionPart<DefaultOptions>,
+    submissionPart: SubmissionPart<TelegramNotificationOptions>,
+    warnings: string[],
+  ) {
     const { description } = TelegramDescription.fromHTML(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
     );
@@ -602,12 +590,27 @@ export class Telegram extends Website {
     if (description.length > 4096) {
       warnings.push('Max description length allowed is 4,096 characters.');
     }
-
-    return { problems, warnings };
   }
 
-  private channelNotFound(f: string) {
-    return `Channel (${f}) not found. To fix this, simply post something in the channel. PostyBirb requests latest 400 chats and then filters them to include only those where you can send media. If you have a lot of active chats, PostyBirb will be not able to view inactive channels.`;
+  private validateChannels(
+    submissionPart: SubmissionPart<TelegramNotificationOptions>,
+    warnings: string[],
+    problems: string[],
+  ) {
+    if (!submissionPart.data.channels?.length) {
+      problems.push('No channel(s) selected.');
+    } else {
+      const folders: Folder[] = _.get(
+        this.accountInformation.get(submissionPart.accountId),
+        GenericAccountProp.FOLDERS,
+        [],
+      );
+      submissionPart.data.channels.forEach(f => {
+        if (!WebsiteValidator.folderIdExists(f, folders)) {
+          warnings.push(`Channel (${f}) not found.`);
+        }
+      });
+    }
   }
 }
 
@@ -637,4 +640,31 @@ interface SendMessageResponse {
   updates: { _: 'updateNewChannelMessage'; id: number; peer_id: { channel_id: number } }[];
 }
 
+interface Chat {
+  _: string;
+  creator: boolean;
+  access_hash: string;
+  title: string;
+  id: number;
+  left: boolean;
+  deactivated: boolean;
+  /**
+   * Reverted default user rights.
+   */
+  default_banned_rights: {
+    /**
+     * So false means that the user
+     * actually can send the media
+     */
+    send_media: boolean;
+  };
+  admin_rights?: {
+    post_messages: boolean;
+  };
+}
 
+interface Dialogs {
+  chats: Chat[];
+  dialogs: object[];
+  messages: { date: number }[];
+}

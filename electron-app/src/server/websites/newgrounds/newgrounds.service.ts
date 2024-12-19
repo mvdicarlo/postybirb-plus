@@ -10,6 +10,7 @@ import {
   PostResponse,
   Submission,
   SubmissionPart,
+  SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { GifManipulator } from 'src/server/file-manipulation/manipulators/gif.manipulator';
@@ -71,6 +72,20 @@ export class Newgrounds extends Website {
     return text.replace(/<div/gm, '<p').replace(/<\/div>/gm, '</p>');
   }
 
+  private getSuitabilityRating(rating: SubmissionRating): string {
+    switch (rating) {
+      case SubmissionRating.GENERAL:
+        return 'e';
+      case SubmissionRating.MATURE:
+        return 'm';
+      case SubmissionRating.ADULT:
+      case SubmissionRating.EXTREME:
+        return 'a';
+      default:
+        return rating;
+    }
+  }
+
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
     data: PostData<Submission, DefaultOptions>,
@@ -95,6 +110,7 @@ export class Newgrounds extends Website {
           tag: '',
           'tags[]': this.formatTags(data.tags),
           body: `<p>${data.description}</p>`,
+          suitability: this.getSuitabilityRating(data.rating),
         },
         requestOptions: {
           qsStringifyOptions: { arrayFormat: 'repeat' },

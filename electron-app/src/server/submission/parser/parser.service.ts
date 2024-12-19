@@ -201,6 +201,8 @@ export class ParserService {
         options: {
           contentType: file.mimetype,
           filename: this.parseFileName(file.name),
+          height: file.height,
+          width: file.width,
         },
       },
       altText: file.altText || '',

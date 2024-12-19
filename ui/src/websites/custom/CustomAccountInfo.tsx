@@ -19,7 +19,8 @@ export default class CustomAccountInfo extends React.Component<
     ratingField: 'rating',
     tagField: 'tags',
     thumbnaiField: 'thumbnail',
-    titleField: 'title'
+    titleField: 'title',
+    altTextField: 'alt',
   };
 
   constructor(props: LoginDialogProps) {
@@ -111,12 +112,22 @@ export default class CustomAccountInfo extends React.Component<
           </Form.Item>
           <Form.Item
             label="File Field"
-            help="The multipart field name that will be used for the submission file."
+            help="The multipart field name that will be used for the submission file(s)."
           >
             <Input
               className="w-full"
               defaultValue={this.state.fileField}
               onBlur={({ target }) => this.setState({ fileField: target.value })}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Alt Text Field"
+            help="The multipart field name that will be used for the alt text(s)."
+          >
+            <Input
+              className="w-full"
+              defaultValue={this.state.altTextField}
+              onBlur={({ target }) => this.setState({ altTextField: target.value })}
             />
           </Form.Item>
           <Form.Item

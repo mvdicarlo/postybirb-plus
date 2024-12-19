@@ -4,6 +4,7 @@ import {
   FileSubmission,
   NewgroundsFileOptions,
   Submission,
+  SubmissionRating,
 } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -44,7 +45,25 @@ export class Newgrounds extends WebsiteImpl {
         },
       }}
       ratingOptions={{
-        show: false,
+        show: true,
+        ratings: [
+          {
+            value: SubmissionRating.GENERAL,
+            name: 'Suitable for everyone',
+          },
+          {
+            value: 't',
+            name: 'May be inappropriate for kids under 13',
+          },
+          {
+            value: SubmissionRating.MATURE,
+            name: 'Mature subject matter. Not for kids!',
+          },
+          {
+            value: SubmissionRating.ADULT,
+            name: 'Adults only! This is NSFW and not for kids!',
+          },
+        ],
       }}
     />
   );

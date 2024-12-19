@@ -45,15 +45,16 @@ export default class DescriptionInput extends React.Component<Props, State> {
     browser_spellcheck: true, // should be supported in electron 8
     entity_encoding: 'raw',
     paste_retain_style_properties: 'color',
-    invalid_elements: 'img,audio,video',
+    invalid_elements: 'audio,video',
+    image_uploadtab: false,
     block_formats:
       'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3;Header 4=h4;Header 5=h5;Header 6=h6',
     content_style: 'p {margin: 0}',
     height: 200,
-    plugins: 'autoresize autolink link preview paste hr template help code lists',
+    plugins: 'autoresize autolink link preview paste hr template help code lists image',
     menubar: 'file edit insert view tools help',
     toolbar:
-      'newdocument undo redo | formatselect removeformat | link unlink hr | bold italic underline strikethrough forecolor | alignleft aligncenter alignright | bullist | code template help',
+      'newdocument undo redo | formatselect removeformat | image link unlink hr | bold italic underline strikethrough forecolor | alignleft aligncenter alignright | bullist | code template help',
     templates: [],
     formats: {
       underline: { inline: 'u', exact: true },
@@ -61,8 +62,10 @@ export default class DescriptionInput extends React.Component<Props, State> {
     },
     paste_preprocess(plugin: any, args: any) {
       args.content = sanitize(args.content, {
-        allowedTags: false,
+        allowedTags: sanitize.defaults.allowedTags.concat([ 'img' ]),
+        allowedSchemes: [ 'data', 'http', 'https'],
         allowedAttributes: {
+          img: ['src', 'alt', 'title', 'width', 'height', 'style', 'target'],
           a: ['href', 'target'],
           div: ['align', 'style'],
           pre: ['align', 'style'],

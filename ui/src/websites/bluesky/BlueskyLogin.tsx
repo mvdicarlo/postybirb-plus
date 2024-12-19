@@ -3,7 +3,6 @@ import React from 'react';
 import { BlueskyAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
-import { BskyAgent } from '@atproto/api';
 
 interface State extends BlueskyAccountData {
   loading: boolean;
@@ -25,21 +24,27 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
   }
 
   submit() {
-    const agent = new BskyAgent({ service: 'https://bsky.social' });
-
-    agent
-      .login({
-        identifier: this.state.username,
-        password: this.state.password,
-      })
-      .then(res => {
-        if (res.success) {
-          LoginService.setAccountData(this.props.account._id, this.state).then(() => {
-            message.success(`Details confirmed and saved`);
+    LoginService.setAccountData(this.props.account._id, {
+      username: this.state.username,
+      password: this.state.password,
+    })
+      .then(() => {
+        LoginService.checkLogin(this.props.account._id)
+          .then(res => {
+            if (res.data?.loggedIn) {
+              message.success('Logged in successfully. You can close this page now.');
+            } else {
+              message.error('Login failed.');
+            }
+          })
+          .catch(e => {
+            console.error('checkLogin failed', e);
+            message.error(`Failed to check login status: ${e}`);
           });
-        } else {
-          message.error(`Failed to authenticate.`);
-        }
+      })
+      .catch(e => {
+        console.error('setAccountData failed', e);
+        message.error(`Failed to set account data: ${e}`);
       });
   }
 
@@ -94,6 +99,20 @@ export default class BlueskyLogin extends React.Component<LoginDialogProps, Stat
                 value={this.state.password}
                 onChange={({ target }) => this.setState({ password: target.value })}
               />
+              {this.state.password &&
+                !/^([a-z0-9]{4}-){3}[a-z0-9]{4}$/.test(this.state.password) && (
+                  <Alert
+                    type="warning"
+                    message="This doesn't look like an app password."
+                    description={
+                      <div>
+                        You need to use an <em>app</em> password, <strong>not</strong> your account
+                        password! You can generate an app password in the Bluesky settings under the
+                        Advanced section.
+                      </div>
+                    }
+                  />
+                )}
             </Form.Item>
           </Form>
           <Button onClick={this.submit.bind(this)} disabled={!this.isValid()}>
