@@ -16,6 +16,7 @@ export class SettingsStore {
     maxPNGSizeCompressionWithAlpha: 25,
     maxJPEGQualityCompression: 10,
     maxJPEGSizeCompression: 30,
+    reduceSizeOverQuality: false,
     silentNotification: false,
     defaultTagSearchProvider: 'none',
     proxy: '',

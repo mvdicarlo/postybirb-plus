@@ -21,6 +21,7 @@ const settingDefaults: Settings = {
   maxPNGSizeCompressionWithAlpha: 60,
   maxJPEGQualityCompression: 15,
   maxJPEGSizeCompression: 50,
+  reduceSizeOverQuality: false,
   silentNotification: false,
   defaultTagSearchProvider: 'none',
   proxy: '',
