@@ -126,14 +126,13 @@ export class Bluesky extends Website {
   private async uploadEmbeds(
     agent: BskyAgent,
     files: PostFileRecord[],
-    fallbackAltText?: string,
   ): Promise<AppBskyEmbedImages.Main | AppBskyEmbedVideo.Main> {
     // Bluesky supports either images or a video as an embed
 
     if (this.countFileTypes(files).videos === 0) {
       const uploadedImages: AppBskyEmbedImages.Image[] = [];
       for (const file of files.slice(0, this.MAX_MEDIA)) {
-        const altText = file.altText || fallbackAltText;
+        const altText = file.altText || '';
         const ref = await this.uploadImage(agent, file.file);
 
         uploadedImages.push({
@@ -153,7 +152,7 @@ export class Bluesky extends Website {
     } else {
       for (const file of files) {
         if (file.type == FileSubmissionType.VIDEO) {
-          const altText = file.altText || fallbackAltText;
+          const altText = file.altText || '';
           this.checkVideoUploadLimits(agent);
           const ref = await this.uploadVideo(agent, file.file);
           return {
@@ -364,7 +363,7 @@ export class Bluesky extends Website {
     const reply = await this.getReplyRef(agent, data.options.replyToUrl);
 
     const files = [data.primary, ...data.additional];
-    const embeds = await this.uploadEmbeds(agent, files, data.options.altText);
+    const embeds = await this.uploadEmbeds(agent, files);
 
     let labelsRecord: ComAtprotoLabelDefs.SelfLabels | undefined;
     if (data.options.label_rating) {
@@ -519,12 +518,6 @@ export class Bluesky extends Website {
         f => !f.ignoredAccounts!.includes(submissionPart.accountId),
       ),
     ];
-    if (!submissionPart.data.altText && files.some(f => !f.altText)) {
-      problems.push(
-        'Bluesky currently always requires alt text to be provided, ' +
-          'even if your settings say otherwise. This is a bug on their side.',
-      );
-    }
 
     this.validateRating(submissionPart, defaultPart, warnings);
 

@@ -73,8 +73,8 @@ BlueskyNotificationOptions
           <Select.Option value={''}>Everybody</Select.Option>
           <Select.Option value={'nobody'}>Nobody</Select.Option>
           <Select.Option value={'mention'}>Mentioned Users</Select.Option>
-          <Select.Option value={'following'}>Followed Users</Select.Option>   
-          <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>     
+          <Select.Option value={'following'}>Followed Users</Select.Option>
+          <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>
         </Select>
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
@@ -112,16 +112,10 @@ export class BlueskyFileSubmissionForm extends GenericFileSubmissionSection<Blue
         <Select.Option value={''}>Everybody</Select.Option>
         <Select.Option value={'nobody'}>Nobody</Select.Option>
         <Select.Option value={'mention'}>Mentioned Users</Select.Option>
-        <Select.Option value={'following'}>Followed Users</Select.Option>   
-        <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>     
-      </Select>                  
+        <Select.Option value={'following'}>Followed Users</Select.Option>
+        <Select.Option value={'mention,following'}>Mentioned & Followed Users</Select.Option>
+      </Select>
     </Form.Item>,
-      <Form.Item label="Fallback Alt Text">
-        <Input
-          value={data.altText}
-          onChange={this.handleValueChange.bind(this, 'altText')}
-        />
-      </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
       </Form.Item>,
