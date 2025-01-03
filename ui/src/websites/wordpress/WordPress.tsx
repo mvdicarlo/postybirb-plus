@@ -109,7 +109,7 @@ class WordPressNotificationSubmissionForm extends GenericSubmissionSection<
           <Select.Option value="quote">Quote</Select.Option>
           <Select.Option value="status">Status</Select.Option>
           <Select.Option value="audio">Audio</Select.Option>
-          <Select.Option value="video">video</Select.Option>
+          <Select.Option value="video">Video</Select.Option>
         </Select>
       </Form.Item>,
 
@@ -125,48 +125,73 @@ class WordPressNotificationSubmissionForm extends GenericSubmissionSection<
   }
 }
 
-
-// TODO: implement options
-// slug (string)
-// comment status (open/close)
-// format (standard, aside, chat, gallery, link, image, quote, status, video, audio)
-// categories (string input)
-// status (publish, future, draft, pending [review], private)
-// sticky (boolean)
 export class WordPressFileSubmissionForm extends GenericFileSubmissionSection<WordPressFileOptions> {
   renderLeftForm(data: WordPressFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
-      //<div>
-      //  <Checkbox
-      //    checked={data.useTitle}
-      //    onChange={this.handleCheckedChange.bind(this, 'sticky')}
-      //  >
-      //    Sticky
-      //  </Checkbox>
-      //</div>,
-      //<Form.Item label="Fallback Alt Text">
-      //  <Input
-      //    value={data.altText}
-      //    onChange={this.handleValueChange.bind(this, 'altText')}
-      //  />
-      //</Form.Item>,
-      //<Form.Item label="Post Visibility">
-      //  <Select
-      //    {...GenericSelectProps}
-      //    className="w-full"
-      //    value={data.visibility}
-      //    onSelect={this.setValue.bind(this, 'visibility')}
-      //  >
-      //    <Select.Option value="public">Public</Select.Option>
-      //    <Select.Option value="unlisted">Unlisted</Select.Option>
-      //    <Select.Option value="private">Followers Only</Select.Option>
-      //    <Select.Option value="direct">Mentioned Users Only</Select.Option>
-      //  </Select>
-      //</Form.Item>,
-      //<Form.Item label="Reply To Post URL">
-      //  <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
-      //</Form.Item>,
+      <div>
+      </div>,
+      <Form.Item label="Post slug">
+        <Input value={data.slug} onChange={this.handleValueChange.bind(this, 'slug')} />
+      </Form.Item>,
+
+      <Form.Item label="Post status">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.status}
+          onSelect={this.setValue.bind(this, 'status')}
+        >
+          <Select.Option value="publish">Publish</Select.Option>
+          <Select.Option value="future">Future</Select.Option>
+          <Select.Option value="draft">Draft</Select.Option>
+          <Select.Option value="pending">Pending Review</Select.Option>
+          <Select.Option value="private">Private</Select.Option>
+        </Select>
+      </Form.Item>,
+
+      <Form.Item label="Post comment status">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.commentStatus}
+          onSelect={this.setValue.bind(this, 'commentStatus')}
+        >
+          <Select.Option value="open">Open</Select.Option>
+          <Select.Option value="closed">Closed</Select.Option>
+        </Select>
+      </Form.Item>,
+
+      <Form.Item label="Categories">
+        <Input value={data.categories} onChange={this.handleValueChange.bind(this, 'categories')} />
+      </Form.Item>,
+
+      <Form.Item label="Post Format (Advanced use only)">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.format}
+          onSelect={this.setValue.bind(this, 'format')}
+        >
+          <Select.Option value="standard">Standard</Select.Option>
+          <Select.Option value="aside">Aside</Select.Option>
+          <Select.Option value="chat">Chat</Select.Option>
+          <Select.Option value="gallery">Gallery</Select.Option>
+          <Select.Option value="link">Link</Select.Option>
+          <Select.Option value="image">Image</Select.Option>
+          <Select.Option value="quote">Quote</Select.Option>
+          <Select.Option value="status">Status</Select.Option>
+          <Select.Option value="audio">Audio</Select.Option>
+          <Select.Option value="video">Video</Select.Option>
+        </Select>
+      </Form.Item>,
+
+      <Checkbox
+        checked={data.sticky}
+        onChange={this.handleCheckedChange.bind(this, 'sticky')}
+      >
+        Sticky
+      </Checkbox>
     );
     return elements;
   }
