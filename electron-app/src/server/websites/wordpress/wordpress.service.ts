@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   DefaultOptions,
-  DiscordFileOptions,
-  DiscordNotificationOptions,
   FileRecord,
   FileSubmission,
   FileSubmissionType,
@@ -10,11 +8,10 @@ import {
   Submission,
   SubmissionPart,
   WordPressAccountData,
+  WordPressFileOptions,
   WordPressNotificationOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
-import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
@@ -53,8 +50,10 @@ export class WordPress extends Website {
 
     const accountInfo = JSON.parse(me.body);
 
-    if (me.error || me.response.statusCode >= 300 || accountInfo.capabilities.publish_posts === false) {
+    if (me.error || me.response.statusCode >= 300) {
       status.loggedIn = false;
+    } else if (accountInfo.capabilities.publish_posts === false) {
+      throw new Error("Provided login does not have permission to publish posts");
     } else {
       status.loggedIn = true;
       status.username = accountInfo.name
@@ -69,7 +68,7 @@ export class WordPress extends Website {
 
   async postNotificationSubmission(
     cancellationToken: CancellationToken,
-    data: PostData<Submission, DiscordNotificationOptions>,
+    data: PostData<Submission, WordPressNotificationOptions>,
     accountData: WordPressAccountData,
   ): Promise<PostResponse> {
     this.checkCancelled(cancellationToken);
@@ -92,19 +91,18 @@ export class WordPress extends Website {
       );
     }
 
-    return this.createPostResponse({ additionalInfo: res.body });
+    return this.createPostResponse({ source: JSON.parse(res.body).guid.rendered, additionalInfo: res.body });
   }
 
   async postFileSubmission(
     cancellationToken: CancellationToken,
-    data: FilePostData<DiscordFileOptions>,
+    data: FilePostData<WordPressFileOptions>,
     accountData: WordPressAccountData,
   ): Promise<PostResponse> {
-
     this.checkCancelled(cancellationToken);
 
     // media upload
-    const fileres = await Http.post<any>(accountData.instance + '/wp-json/wp/v2/media', '', {
+    const fileRes = await Http.post<any>(accountData.instance + '/wp-json/wp/v2/media', '', {
       data: data.primary,
       type: 'multipart',
       skipCookies: true,
@@ -113,18 +111,18 @@ export class WordPress extends Website {
       }
     });
 
-    if (fileres.error || fileres.response.statusCode >= 300) {
+    if (fileRes.error || fileRes.response.statusCode >= 300) {
       return Promise.reject(
         this.createPostResponse({
-          error: fileres.error,
-          message: 'File Upload Failure',
-          additionalInfo: fileres.body,
+          error: fileRes.error,
+          message: 'WordPress file upload failure',
+          additionalInfo: fileRes.body,
         }),
       );
     }
 
     const postres = await Http.post<any>(accountData.instance + '/wp-json/wp/v2/posts', '', {
-      data: this.buildDescriptionPayload(data, accountData, JSON.parse(fileres.body).id),
+      data: this.buildDescriptionPayload(data, accountData, JSON.parse(fileRes.body).id),
       type: 'multipart',
       skipCookies: true,
       headers: {
@@ -136,17 +134,18 @@ export class WordPress extends Website {
       return Promise.reject(
         this.createPostResponse({
           error: postres.error,
-          message: 'Post Upload Failure',
+          message: 'WordPress posting failure',
           additionalInfo: postres.body,
         }),
       );
     }
 
     return this.createPostResponse({
+      source: JSON.parse(postres.body).guid.rendered,
       additionalInfo:
         '--- FILE UPLOAD REQUEST ---\n' +
-        fileres.body +
-        '\n--- END OF FILE UPLOAD REQUEST - BEGIN POST UPLOAD REQUEST ---\n' +
+        fileRes.body +
+        '--- END OF FILE UPLOAD REQUEST - BEGIN POST UPLOAD REQUEST ---' +
         postres.body,
     });
   }
@@ -157,12 +156,11 @@ export class WordPress extends Website {
 
   validateFileSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DiscordFileOptions>,
+    submissionPart: SubmissionPart<WordPressFileOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
-    const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     const files = [
       submission.primary,
@@ -180,6 +178,15 @@ export class WordPress extends Website {
         );
       }
     });
+
+    const categories = submissionPart.data.categories
+    if (categories) {
+      categories.split(", ").forEach(categoryId => {
+        if (typeof categoryId === 'number') {
+          problems.push("All category IDs must be strictly numeric, separated by a comma followed by a space.")
+        }
+      })
+    }
 
     const description = this.defaultDescriptionParser(
       FormContent.getDescription(defaultPart.data.description, submissionPart.data.description),
@@ -204,7 +211,6 @@ export class WordPress extends Website {
     accountData: WordPressAccountData,
     featuredImageId: number | null,
   ) {
-    console.log(data.options.categories.split(", "))
     const payload: any = {
       content: data.description,
       title: data.title,
@@ -212,10 +218,11 @@ export class WordPress extends Website {
       comment_status: data.options.commentStatus,
       format: data.options.format,
       status: data.options.status,
-      //categories: data.options.categories.split(", "),
-      //sticky: data.options.sticky,
+      sticky: data.options.sticky.toString(),
     };
-    if (featuredImageId !== null) payload.featured_media = featuredImageId;
+    if (featuredImageId) payload.featured_media = featuredImageId;
+    if (data.options.categories) payload.categories = data.options.categories;
+
     return payload;
   }
 }

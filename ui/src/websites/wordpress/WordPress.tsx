@@ -27,8 +27,6 @@ export class WordPress extends WebsiteImpl {
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, WordPressFileOptions>) => (
     <WordPressFileSubmissionForm
       key={props.part.accountId}
-      ratingOptions={{ show: false }}
-      tagOptions={{ show: false }}
       {...props}
     />
   );
@@ -89,7 +87,7 @@ class WordPressNotificationSubmissionForm extends GenericSubmissionSection<
         </Select>
       </Form.Item>,
 
-      <Form.Item label="Categories">
+      <Form.Item label="Category IDs (comma seperated)">
         <Input value={data.categories} onChange={this.handleValueChange.bind(this, 'categories')} />
       </Form.Item>,
 

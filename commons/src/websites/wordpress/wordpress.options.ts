@@ -24,9 +24,8 @@ export class WordPressOptionsEntity
     format!: 'standard' | 'aside' | 'chat' | 'gallery' | 'link' | 'image' | 'quote' | 'status' | 'video' | 'audio';
 
     @Expose()
-    @IsOptional()
     @IsString()
-    categories?: string;
+    categories!: string;
 
     @Expose()
     @IsOptional()

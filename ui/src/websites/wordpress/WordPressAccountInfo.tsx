@@ -26,6 +26,7 @@ export default class WordPressAccountInfo extends React.Component<
   async submit() {
     LoginService.setAccountData(this.props.account._id, this.state)
       .then(() => {
+        // TODO: somehow check if login info even has perms to post to the instance
         message.success('WordPress login info saved');
       })
       .catch(() => {
