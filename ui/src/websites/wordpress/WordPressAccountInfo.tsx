@@ -1,17 +1,15 @@
-// @ts-nocheck
-
 import { Button, Form, Input, message, Radio } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { WordpressAccountData } from 'postybirb-commons';
+import { WordPressAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
 
 export default class WordPressAccountInfo extends React.Component<
   LoginDialogProps,
-  WordpressAccountData
+  WordPressAccountData
 > {
-  state: WordpressAccountData = {
+  state: WordPressAccountData = {
     username: '',
     app_password: '',
     instance: '',
@@ -21,7 +19,7 @@ export default class WordPressAccountInfo extends React.Component<
     super(props);
     this.state = {
       ...this.state,
-      ...(props.data as WordpressAccountData)
+      ...(props.data as WordPressAccountData)
     };
   }
 
