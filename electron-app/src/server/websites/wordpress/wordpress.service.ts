@@ -10,6 +10,7 @@ import {
   Submission,
   SubmissionPart,
   WordPressAccountData,
+  WordPressNotificationOptions,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
@@ -29,8 +30,8 @@ import { Website } from '../website.base';
 export class WordPress extends Website {
   readonly BASE_URL: string = '';
   readonly MAX_CHARS: number = 2000;
-  readonly acceptsFiles: string[] = ['png', 'webp', 'svg', 'jpg', 'jpeg']; // accepts all images (?)
-  readonly acceptsAdditionalFiles: boolean = true;
+  readonly acceptsFiles: string[] = ['png', 'webp', 'svg', 'jpg', 'jpeg', 'gif']; // accepts all images (?)
+  readonly acceptsAdditionalFiles: boolean = false;
   readonly enableAdvertisement: boolean = false;
   readonly defaultDescriptionParser = (html: string) => {
     // TODO: we don't need this?
@@ -43,8 +44,21 @@ export class WordPress extends Website {
     const status: LoginResponse = { loggedIn: false, username: null };
 
     const wordpressData: WordPressAccountData = data.data;
-    status.loggedIn = true; // TODO actually check login
-    status.username = wordpressData.username;
+
+    const me = await Http.post<any>(wordpressData.instance + '/wp-json/wp/v2/users/me', '', {
+      headers: {
+        "Authorization": "Basic " + Buffer.from(wordpressData.username + ":" + wordpressData.app_password).toString("base64")
+      }
+    });
+
+    const accountInfo = JSON.parse(me.body);
+
+    if (me.error || me.response.statusCode >= 300 || accountInfo.capabilities.publish_posts === false) {
+      status.loggedIn = false;
+    } else {
+      status.loggedIn = true;
+      status.username = accountInfo.name
+    }
 
     return status;
   }
@@ -109,8 +123,6 @@ export class WordPress extends Website {
       );
     }
 
-    // TODO get featured image id
-    console.log(JSON.parse(fileres.body).id)
     const postres = await Http.post<any>(accountData.instance + '/wp-json/wp/v2/posts', '', {
       data: this.buildDescriptionPayload(data, accountData, JSON.parse(fileres.body).id),
       type: 'multipart',
@@ -178,7 +190,7 @@ export class WordPress extends Website {
 
   validateNotificationSubmission(
     submission: FileSubmission,
-    submissionPart: SubmissionPart<DiscordNotificationOptions>,
+    submissionPart: SubmissionPart<WordPressNotificationOptions>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): ValidationParts {
     const problems: string[] = [];
@@ -188,15 +200,21 @@ export class WordPress extends Website {
   }
 
   private buildDescriptionPayload(
-    data: PostData<Submission, DiscordNotificationOptions>,
+    data: PostData<Submission, WordPressNotificationOptions>,
     accountData: WordPressAccountData,
     featuredImageId: number | null,
   ) {
-    const payload: any = { 
+    console.log(data.options.categories.split(", "))
+    const payload: any = {
       content: data.description,
-      title: data.title
+      title: data.title,
+      slug: data.options.slug,
+      comment_status: data.options.commentStatus,
+      format: data.options.format,
+      status: data.options.status,
+      //categories: data.options.categories.split(", "),
+      //sticky: data.options.sticky,
     };
-    console.log("Featured image is: ", featuredImageId)
     if (featuredImageId !== null) payload.featured_media = featuredImageId;
     return payload;
   }
