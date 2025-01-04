@@ -31,7 +31,7 @@ export class WordPress extends Website {
   readonly acceptsFiles: string[] = ['png', 'webp', 'jpg', 'jpeg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = false;
   readonly enableAdvertisement: boolean = false;
-  
+
   readonly defaultDescriptionParser = (html: string) => {
     return HTMLFormatParser.parse(html);
   };
@@ -43,6 +43,8 @@ export class WordPress extends Website {
 
     const wordpressData: WordPressAccountData = data.data;
 
+    // Yes I am aware this should be a get method, however wordpress gives more fields when you send a POST.
+    // I am not joking.
     const me = await Http.post<any>(wordpressData.instance + '/wp-json/wp/v2/users/me', '', {
       headers: {
         "Authorization": "Basic " + Buffer.from(wordpressData.username + ":" + wordpressData.app_password).toString("base64")
