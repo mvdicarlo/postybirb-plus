@@ -22,17 +22,18 @@ import FormContent from 'src/server/utils/form-content.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
 
 @Injectable()
 export class WordPress extends Website {
   readonly BASE_URL: string = '';
-  readonly MAX_CHARS: number = 2000;
-  readonly acceptsFiles: string[] = ['png', 'webp', 'svg', 'jpg', 'jpeg', 'gif']; // accepts all images (?)
+  readonly MAX_CHARS: number = undefined; // no limit
+  readonly acceptsFiles: string[] = ['png', 'webp', 'jpg', 'jpeg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = false;
   readonly enableAdvertisement: boolean = false;
+  
   readonly defaultDescriptionParser = (html: string) => {
-    // TODO: we don't need this?
-    return html;
+    return HTMLFormatParser.parse(html);
   };
 
   readonly usernameShortcuts = [];
