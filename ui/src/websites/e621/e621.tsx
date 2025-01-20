@@ -59,11 +59,11 @@ export class E621FileSubmissionForm extends GenericFileSubmissionSection<e621Fil
   getSourceSection() {
     const sources: JSX.Element[] = [];
     const { data } = this.props.part;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       sources.push(
         <Form.Item label={`Source ${i + 1}`}>
           <Input value={data.sources[i]} onChange={this.handleSourceChange.bind(this, i)} />
-        </Form.Item>
+        </Form.Item>,
       );
     }
     return sources;

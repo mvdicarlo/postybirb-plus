@@ -3,4 +3,5 @@ export interface ScalingOptions {
   maxHeight?: number;
   maxWidth?: number;
   converToJPEG?: boolean;
+  noTransparency?: boolean;
 }

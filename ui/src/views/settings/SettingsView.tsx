@@ -166,7 +166,9 @@ export default class SettingsView extends React.Component<Props> {
               </Form.Item>
               <Form.Item
                 label="Max Image Quality Reduction"
-                extra="Size reduction is attempted before quality reduction."
+                extra={`An image would be reduced down to a ${
+                  100 - settings.maxJPEGQualityCompression
+                }% quality JPEG at most.`}
               >
                 <InputNumber
                   min={0}
@@ -181,6 +183,15 @@ export default class SettingsView extends React.Component<Props> {
                   }
                 />
               </Form.Item>
+            </Form.Item>
+            <Form.Item
+              label="Reduce Size Before Quality"
+              extra="Enabling this will scale images smaller before using lossy JPEG compression. Images with opacity will always attempt scaling before resorting to JPEG."
+            >
+              <Switch
+                checked={settings.reduceSizeOverQuality}
+                onChange={value => this.updateSetting('reduceSizeOverQuality', value)}
+              />
             </Form.Item>
           </Collapse.Panel>
           <Collapse.Panel header="Theme" key="theme">

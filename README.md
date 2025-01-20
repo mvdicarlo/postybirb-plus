@@ -2,7 +2,7 @@
 **A rewrite of the desktop application [PostyBirb](https://github.com/mvdicarlo/postybirb) using TypeScript, NestJS, React, and Electron.**
 
 ## [Commons](/commons)
-Shared interfaces, models, etc. between the UI and Backend
+Shared interfaces, models, etc. between the UI and Backend.
 
 ## [Electron-App](/electron-app) (backend)
 ElectronJS + NestJs that handles running the local server and the desktop application itself.
@@ -16,10 +16,10 @@ React code that handles UI of the application displayed in the desktop applicati
 To set up a local copy of PostyBirb for development:
 
 1. clone this repository and `cd` into it.
-2. `npm run contribute` to install dependencies in every folder
+2. `npm run contribute` to install dependencies in every folder.
 
-Please not that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run contribute` 
-instead
+Please note that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run contribute` 
+instead.
 
 <details>
   <summary>INSTALL TROUBLESHOOTING</summary>
@@ -71,7 +71,7 @@ npm run build
 ```
 
 Please not that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run build` 
-instead
+instead.
 
 And then, depending on your build target, use this command:
 ```
