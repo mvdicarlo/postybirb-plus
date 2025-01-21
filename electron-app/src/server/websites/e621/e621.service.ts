@@ -159,7 +159,8 @@ export class e621 extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).length < 4) {
+    const tags = FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags);
+    if (tags.length < 4) {
       problems.push('Requires at least 4 tags.');
     }
 
