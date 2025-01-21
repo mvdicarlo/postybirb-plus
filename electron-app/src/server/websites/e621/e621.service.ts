@@ -42,6 +42,10 @@ export class e621 extends Website {
     },
   ];
 
+  private readonly headers = {
+    'User-Agent': `PostyBirb/${app.getVersion()}`,
+  };
+
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: e621AccountData = data.data;
@@ -49,6 +53,7 @@ export class e621 extends Website {
       status.username = accountData.username;
       status.loggedIn = true;
     }
+    this.storeAccountInformation(data._id, 'username', status.username);
     return status;
   }
 
@@ -114,9 +119,7 @@ export class e621 extends Website {
       data: form,
       skipCookies: true,
       requestOptions: { json: true },
-      headers: {
-        'User-Agent': `PostyBirb/${app.getVersion()}`,
-      },
+      headers: this.headers,
     });
 
     if (post.body.success && post.body.location) {
@@ -150,11 +153,11 @@ export class e621 extends Website {
     };
   }
 
-  validateFileSubmission(
+  async validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): ValidationParts {
+  ): Promise<ValidationParts> {
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
@@ -162,6 +165,93 @@ export class e621 extends Website {
     const tags = FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags);
     if (tags.length < 4) {
       problems.push('Requires at least 4 tags.');
+    }
+
+    if (tags.length) {
+      const formattedTags = this.formatTags(tags);
+
+      try {
+        const tagsMeta = await this.getTagMetadata(formattedTags);
+
+        let ifYouWantToCreateNotice = true;
+        function tagIsInvalid(tag: string) {
+          const createTagNotice = `If you want to create a new tag, make a post with it, and then go to the https://e621.net/tags?search[name]=${tag}, press edit and select tag category`;
+
+          warnings.push(
+            `Tag ${tag} does not exist yet or is invalid. See https://e621.net/wiki_pages/show_or_new?title=${tag}. ${
+              ifYouWantToCreateNotice ? createTagNotice : ''
+            }`,
+          );
+          ifYouWantToCreateNotice = false;
+        }
+
+        if (Array.isArray(tagsMeta.body)) {
+          // All tags do exists but may be still invalid
+          let generalTags = 0;
+          const tagsSet = new Set(formattedTags);
+
+          for (const tagMeta of tagsMeta.body) {
+            if (tagMeta.category === e621TagCategory.General) generalTags++;
+
+            tagsSet.delete(tagMeta.name);
+            this.validateTag(tagMeta, problems, warnings);
+          }
+
+          // Some tags are just not being returned in the response as non existent
+          for (const tag of tagsSet) tagIsInvalid(tag);
+
+          if (generalTags < 10) {
+            warnings.push(
+              `It is recommended to add atleast 10 general tags ( ${generalTags} / 10 ). See https://e621.net/help/tagging_checklist`,
+            );
+          }
+        } else {
+          // Some of the tags does not exists, iterate through all
+          // of them because there is no other way to check
+          for (const tag of formattedTags) {
+            const tagsMeta = await this.getTagMetadata([tag]);
+
+            if (Array.isArray(tagsMeta.body)) {
+              this.validateTag(tagsMeta.body[0], problems, warnings);
+            } else tagIsInvalid(tag);
+          }
+        }
+      } catch (error) {
+        this.logger.error(error);
+        warnings.push(`Unable to validate tags. Please check them manually`);
+      }
+    }
+
+    try {
+      const username = 'fishys1'; //this.getAccountInfo(submissionPart.accountId, 'username');
+      const feedbacks = await this.getUserFeedback(username);
+
+      if (Array.isArray(feedbacks.body)) {
+        if (feedbacks.body.length) {
+          for (const feedback of feedbacks.body) {
+            if (feedback.category === e621UserFeedbackCategory.Positive) continue;
+
+            const updatedAt = new Date(feedback.updated_at);
+            const week =
+              /*ms*/ 1000 * /*sec*/ 60 * /*min*/ 60 * /*hour*/ 60 * /*day*/ 24 * /*week*/ 7;
+
+            if (Date.now() - updatedAt.getTime() > week) continue;
+
+            warnings.push(
+              `You have recent ${
+                feedback.category
+              } feedback at the https://e621.net/user_feedbacks?search[user_name]=${username}. Feedback: ${
+                feedback.body.length > 100
+                  ? `${feedback.body.slice(0, 100)}... (More on the e621)`
+                  : feedback.body
+              }`,
+            );
+          }
+        }
+      }
+    } catch (error) {
+      this.logger.error(error);
+      warnings.push(`Unable to get user feedback. You can check your account manually`);
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
@@ -185,4 +275,116 @@ export class e621 extends Website {
 
     return { problems, warnings };
   }
+
+  private validateTag(tagMeta: e621Tag, problems: string[], warnings: string[]) {
+    if (tagMeta.category === e621TagCategory.Invalid) {
+      problems.push(
+        `Tag ${tagMeta.name} is invalid. See https://e621.net/wiki_pages/show_or_new?title=${tagMeta.name}`,
+      );
+    }
+
+    if (tagMeta.post_count < 2) {
+      warnings.push(
+        `Tag ${tagMeta.name} has ${tagMeta.post_count} post(s). Tag may be invalid or low use`,
+      );
+    }
+  }
+
+  private async getUserFeedback(username: string) {
+    return this.getMetdata<e621UserFeedbacksEmpty | e621UserFeedbacks>(
+      `user_feedbacks.json?search[user_name]=${username}`,
+    );
+  }
+
+  private async getTagMetadata(formattedTags: string[]) {
+    return this.getMetdata<e621TagsEmpty | e621Tags>(
+      `tags.json?search[name]=${formattedTags.join(',')}`,
+    );
+  }
+
+  private async getMetdata<T>(url: string) {
+    // TODO Maybe replace with fetch for better performance
+    // TODO Maybe use caching?
+    return await Http.get<T>(`${this.BASE_URL}/${url}`, undefined, {
+      skipCookies: true,
+      requestOptions: { json: true },
+      headers: this.headers,
+    });
+  }
+}
+
+// Source: https://e621.net/tags
+enum e621TagCategory {
+  General = 0,
+  Artist = 1,
+  Contributor = 2,
+  Copyright = 3,
+  Character = 4,
+  Species = 5,
+  Invalid = 6,
+  Meta = 7,
+  Lore = 8,
+}
+
+// Source: https://e621.net/tags.json?search[name]=nonexistenttag
+interface e621TagsEmpty {
+  tags: [];
+}
+
+// Source https://e621.net/tags.json?search[name]=furry
+type e621Tags = e621Tag[];
+
+// Source https://e621.net/tags.json?search[name]=furry
+interface e621Tag {
+  id: number;
+  name: string;
+  post_count: number;
+
+  // example: 'anthro 2 duo 2 female 2 furry 2 male 2 male/female 2 mammal 2 beach 1 beatrice_doodledox 1 big_butt 1 bikini 1 credits 1 drew 1 hand_on_butt 1 hi_res 1 human 1 humanoid 1 lion 1 signature 1 spicebunny 1 spicebxnny 1 text 1 this 1 two-piece_swimsuit 1 underwear 1'
+  related_tags: string;
+
+  // example: '2025-01-20T00:16:49.927+03:00'
+  related_tags_updated_at: string;
+
+  category: e621TagCategory;
+
+  // example: false
+  is_locked: boolean;
+
+  // example: '2020-03-05T13:49:37.994+03:00'
+  created_at: string;
+
+  // example: '2025-01-20T00:16:49.928+03:00'
+  updated_at: string;
+}
+
+// Source: https://e621.net/user_feedbacks.json
+interface e621UserFeedbacksEmpty {
+  user_feedbacks: [];
+}
+
+// Source: https://e621.net/user_feedbacks.json?search[user_name]=fishys1
+type e621UserFeedbacks = e621UserFeedback[];
+
+// Source: https://e621.net/user_feedbacks
+enum e621UserFeedbackCategory {
+  Neutral = 'neutral',
+  Negative = 'negative',
+  Positive = 'positive',
+}
+
+// Source: https://e621.net/user_feedbacks.json?search[user_name]=fishys1
+interface e621UserFeedback {
+  id: number;
+  user_id: number;
+  creator_id: number;
+  // example: '2025-01-04T06:55:21.562+03:00'
+  created_at: string;
+  // example: 'Please do not post advertisements for you YCH auctions.  "[1]":/posts/5263398 "[2]":/posts/5280084\n\n[section=Advertising]\n* Do not promote any external sites, resources, products, or services.\n* If you are an artist or content owner, you are permitted to advertise products and services you may offer. You may do so in the "description" field of your posts, on the artist page, and in your profile description.\n\nIf you wish to promote your products or services through a banner ad, please contact `ads@dragonfru.it` with any questions. See the "advertisement help page":/help/advertising for more information.\n\n"[Code of Conduct - Advertising]":/wiki_pages/e621:rules#advertising\n[/section]\n'
+  body: string;
+  category: e621UserFeedbackCategory;
+  // example: '2025-01-04T06:55:21.562+03:00'
+  updated_at: string;
+  updater_id: string;
+  is_deleted: boolean;
 }

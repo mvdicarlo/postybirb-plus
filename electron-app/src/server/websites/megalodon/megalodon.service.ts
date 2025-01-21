@@ -79,10 +79,11 @@ export abstract class Megalodon extends Website {
   private async getAndStoreInstanceInfo(profileId: string, data: MegalodonAccountData) {
     const client = generator(this.megalodonService, data.website, data.token);
     const instance = await client.getInstance();
-    this.logger.debug("*************");
+    this.logger.debug('*************');
     this.logger.debug(`Account ID ${profileId}`);
-    this.logger.debug(instance.data);
-    this.logger.debug("*************");
+    // NOTE: Disabled to prevent spam in the console
+    // this.logger.debug(instance.data);
+    this.logger.debug('*************');
     this.storeAccountInformation(profileId, INFO_KEY, instance.data);
   }
 

@@ -9,7 +9,7 @@ import CookieConverter from 'src/server/utils/cookie-converter.util';
 import 'url';
 const FormData = require('form-data');
 
-interface GetOptions {
+export interface GetOptions {
   headers?: any;
   updateCookies?: boolean;
   requestOptions?: request.CoreOptions;
