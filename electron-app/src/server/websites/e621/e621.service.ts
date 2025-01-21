@@ -223,7 +223,7 @@ export class e621 extends Website {
     }
 
     try {
-      const username = 'fishys1'; //this.getAccountInfo(submissionPart.accountId, 'username');
+      const username = this.getAccountInfo(submissionPart.accountId, 'username');
       const feedbacks = await this.getUserFeedback(username);
 
       if (Array.isArray(feedbacks.body)) {
