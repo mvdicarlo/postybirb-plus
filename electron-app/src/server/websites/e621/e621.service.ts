@@ -175,22 +175,23 @@ export class e621 extends Website {
 
         let ifYouWantToCreateNotice = true;
         function tagIsInvalid(tag: string) {
-          const createTagNotice = `If you want to create a new tag, make a post with it, and then go to the https://e621.net/tags?search[name]=${tag}, press edit and select tag category`;
+          const wikiLink = `See https://e621.net/wiki_pages/show_or_new?title=${tag}.`
+          const createTagNotice = ` ${wikiLink} If you want to create a new tag, make a post with it, and then go to the https://e621.net/tags?search[name]=${tag}, press edit and select tag category`;
 
           warnings.push(
-            `Tag ${tag} does not exist yet or is invalid. See https://e621.net/wiki_pages/show_or_new?title=${tag}. ${
+            `Tag ${tag} does not exist yet or is invalid.${
               ifYouWantToCreateNotice ? createTagNotice : ''
             }`,
           );
           ifYouWantToCreateNotice = false;
         }
 
-        if (Array.isArray(tagsMeta.body)) {
+        if (Array.isArray(tagsMeta)) {
           // All tags do exists but may be still invalid
           let generalTags = 0;
           const tagsSet = new Set(formattedTags);
 
-          for (const tagMeta of tagsMeta.body) {
+          for (const tagMeta of tagsMeta) {
             if (tagMeta.category === e621TagCategory.General) generalTags++;
 
             tagsSet.delete(tagMeta.name);
@@ -202,7 +203,7 @@ export class e621 extends Website {
 
           if (generalTags < 10) {
             warnings.push(
-              `It is recommended to add atleast 10 general tags ( ${generalTags} / 10 ). See https://e621.net/help/tagging_checklist`,
+              `It is recommended to add at least 10 general tags ( ${generalTags} / 10 ). See https://e621.net/help/tagging_checklist`,
             );
           }
         } else {
@@ -211,8 +212,8 @@ export class e621 extends Website {
           for (const tag of formattedTags) {
             const tagsMeta = await this.getTagMetadata([tag]);
 
-            if (Array.isArray(tagsMeta.body)) {
-              this.validateTag(tagsMeta.body[0], problems, warnings);
+            if (Array.isArray(tagsMeta)) {
+              this.validateTag(tagsMeta[0], problems, warnings);
             } else tagIsInvalid(tag);
           }
         }
@@ -226,9 +227,8 @@ export class e621 extends Website {
       const username = this.getAccountInfo(submissionPart.accountId, 'username');
       const feedbacks = await this.getUserFeedback(username);
 
-      if (Array.isArray(feedbacks.body)) {
-        if (feedbacks.body.length) {
-          for (const feedback of feedbacks.body) {
+      if (Array.isArray(feedbacks)) {
+          for (const feedback of feedbacks) {
             if (feedback.category === e621UserFeedbackCategory.Positive) continue;
 
             const updatedAt = new Date(feedback.updated_at);
@@ -246,7 +246,6 @@ export class e621 extends Website {
                   : feedback.body
               }`,
             );
-          }
         }
       }
     } catch (error) {
@@ -302,14 +301,23 @@ export class e621 extends Website {
     );
   }
 
+  private metadataCache = new Map<string, object>()
+
   private async getMetdata<T>(url: string) {
-    // TODO Maybe replace with fetch for better performance
-    // TODO Maybe use caching?
-    return await Http.get<T>(`${this.BASE_URL}/${url}`, undefined, {
+    // TODO Cache invalidation?
+    
+    const cached = this.metadataCache.get(url) as T
+    if (cached) return cached
+    
+    const response = await Http.get<T>(`${this.BASE_URL}/${url}`, undefined, {
       skipCookies: true,
       requestOptions: { json: true },
       headers: this.headers,
     });
+    const result = response.body;
+    this.metadataCache.set(url, result)
+    
+    return result;
   }
 }
 
