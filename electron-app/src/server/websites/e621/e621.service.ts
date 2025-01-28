@@ -306,7 +306,7 @@ export class e621 extends Website {
   private async getMetdata<T>(url: string) {
     // TODO Cache invalidation?
     
-    const cached = this.metadataCache.get(url) as T
+    const cached = this.metadataCache.get(url) as unknown as T
     if (cached) return cached
     
     const response = await Http.get<T>(`${this.BASE_URL}/${url}`, undefined, {
@@ -315,7 +315,7 @@ export class e621 extends Website {
       headers: this.headers,
     });
     const result = response.body;
-    this.metadataCache.set(url, result)
+    this.metadataCache.set(url, result as unknown as object)
     
     return result;
   }
