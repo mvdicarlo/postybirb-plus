@@ -24,6 +24,11 @@ export class PillowfortFileOptionsEntity
   @DefaultValue(true)
   allowReblogging!: boolean;
 
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(true)
+  useTitle!: boolean;
+
   constructor(entity?: Partial<PillowfortFileOptions>) {
     super(entity as DefaultFileOptions);
   }

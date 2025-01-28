@@ -1,5 +1,12 @@
+import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
+import { JobStatus } from '@atproto/api/dist/client/types/app/bsky/video/defs';
 import { Injectable } from '@nestjs/common';
+import FormData from 'form-data';
+import fetch from 'node-fetch';
 import {
+  BlueskyAccountData,
+  BlueskyFileOptions,
+  BlueskyNotificationOptions,
   DefaultOptions,
   FileRecord,
   FileSubmission,
@@ -7,12 +14,10 @@ import {
   PostResponse,
   Submission,
   SubmissionPart,
-  BlueskyAccountData,
-  BlueskyFileOptions,
-  BlueskyNotificationOptions,
   SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
+import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import {
@@ -23,33 +28,27 @@ import {
 import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
+import FormContent from 'src/server/utils/form-content.util';
+import WaitUtil from 'src/server/utils/wait.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
-import fetch from 'node-fetch';
-import { ReplyRef } from '@atproto/api/dist/client/types/app/bsky/feed/post';
-import FormContent from 'src/server/utils/form-content.util';
-import { JobStatus } from '@atproto/api/dist/client/types/app/bsky/video/defs';
-import WaitUtil from 'src/server/utils/wait.util';
-import FormData from 'form-data';
 // HACK: The atproto library contains some kind of invalid typescript
 // declaration in @atproto/api, so we can't include directly from it. Rummaging
 // around in the dist files directly works though.
-import { AtUri } from '@atproto/syntax';
-import { BlobRef } from '@atproto/lexicon';
 import { BskyAgent } from '@atproto/api/dist/bsky-agent';
 import {
-  ComAtprotoLabelDefs,
   AppBskyEmbedImages,
   AppBskyEmbedVideo,
   AppBskyFeedThreadgate,
-  AppBskyVideoGetUploadLimits,
   AppBskyVideoGetJobStatus,
+  AppBskyVideoGetUploadLimits,
+  ComAtprotoLabelDefs,
 } from '@atproto/api/dist/client';
 import { RichText } from '@atproto/api/dist/rich-text/rich-text';
-import { blob } from 'stream/consumers';
+import { BlobRef } from '@atproto/lexicon';
+import { AtUri } from '@atproto/syntax';
 
 function getRichTextLength(text: string): number {
   return new RichText({ text }).graphemeLength;
@@ -58,7 +57,7 @@ function getRichTextLength(text: string): number {
 @Injectable()
 export class Bluesky extends Website {
   readonly BASE_URL = '';
-  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp4'];
+  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp4', 'mov'];
   readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;

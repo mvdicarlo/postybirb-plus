@@ -4,4 +4,5 @@ export interface PillowfortNotificationOptions extends DefaultOptions {
   privacy: string;
   allowComments: boolean;
   allowReblogging: boolean;
+  useTitle: boolean;
 }
