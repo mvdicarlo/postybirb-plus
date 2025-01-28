@@ -477,7 +477,7 @@ export class SubmissionService {
     let hasProblems: boolean = false;
     const parts = await this.partService.getPartsForSubmission(submission._id, true);
     const problems: Problems = parts.length
-      ? this.validatorService.validateParts(submission, parts)
+      ? await this.validatorService.validateParts(submission, parts)
       : {};
     for (const p of Object.values(problems)) {
       if (p.problems.length) {
