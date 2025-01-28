@@ -14,18 +14,20 @@ import FileSubmissionEntity from '../file-submission/models/file-submission.enti
 export class ValidatorService {
   constructor(private readonly websiteProvider: WebsiteProvider) {}
 
-  validateParts(submission: Submission, parts: Array<SubmissionPart<any>>): Problems {
+  async validateParts(
+    submission: Submission,
+    parts: Array<SubmissionPart<any>>,
+  ): Promise<Problems> {
     const defaultPart: SubmissionPart<DefaultOptions> = parts.find(p => p.isDefault);
     const websiteProblems: Problems = {};
-    parts
-      .filter(p => !p.isDefault)
-      .forEach(p => {
-        websiteProblems[p.accountId] = {
-          ...this.validatePart(submission, p, defaultPart),
-          website: p.website,
-          accountId: p.accountId,
-        };
-      });
+
+    for (const p of parts.filter(p => !p.isDefault)) {
+      websiteProblems[p.accountId] = {
+        ...(await this.validatePart(submission, p, defaultPart)),
+        website: p.website,
+        accountId: p.accountId,
+      };
+    }
 
     return {
       [defaultPart.accountId]: {
@@ -37,11 +39,11 @@ export class ValidatorService {
     };
   }
 
-  private validatePart(
+  private async validatePart(
     submission: Submission,
     part: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): ValidationParts {
+  ): Promise<ValidationParts> {
     const website: Website = this.websiteProvider.getWebsiteModule(part.website);
     const parsedPart = this.parsePart(part, defaultPart);
     switch (submission.type) {

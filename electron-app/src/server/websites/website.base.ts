@@ -239,13 +239,13 @@ export abstract class Website {
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): ValidationParts;
+  ): ValidationParts | Promise<ValidationParts>;
 
   validateNotificationSubmission(
     submission: Submission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
-  ): ValidationParts {
+  ): ValidationParts | Promise<ValidationParts> {
     return { problems: [], warnings: [] };
   }
 
