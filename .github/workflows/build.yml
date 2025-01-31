@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
       - name: Check out Git repository
@@ -35,8 +35,8 @@ jobs:
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}
 
-          # If the commit is tagged with a version (e.g. "v1.0.0"),
+          # If the branch is master,
           # release the app after building
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+            release: ${{ github.ref == 'refs/heads/master' }}
           skip-build: true
           app_root: 'electron-app'

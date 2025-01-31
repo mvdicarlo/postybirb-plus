@@ -57,7 +57,7 @@ function getRichTextLength(text: string): number {
 @Injectable()
 export class Bluesky extends Website {
   readonly BASE_URL = '';
-  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp4', 'mov'];
+  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'mp4', 'mov', 'webm'];
   readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
