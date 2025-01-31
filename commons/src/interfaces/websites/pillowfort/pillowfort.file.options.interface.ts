@@ -4,4 +4,5 @@ export interface PillowfortFileOptions extends DefaultFileOptions {
   privacy: string;
   allowComments: boolean;
   allowReblogging: boolean;
+  useTitle: boolean;
 }

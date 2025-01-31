@@ -4,7 +4,7 @@ import {
   PillowfortFileOptions,
   PillowfortNotificationOptions,
   Submission,
-  SubmissionRating
+  SubmissionRating,
 } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -17,7 +17,7 @@ const privacyOptions = {
   public: 'Everyone',
   followers: 'Followers',
   mutuals: 'Mutuals',
-  private: 'Private'
+  private: 'Private',
 };
 
 export class Pillowfort extends WebsiteImpl {
@@ -36,20 +36,20 @@ export class Pillowfort extends WebsiteImpl {
         ratings: [
           {
             name: 'SFW',
-            value: SubmissionRating.GENERAL
+            value: SubmissionRating.GENERAL,
           },
           {
             name: 'NSFW',
-            value: SubmissionRating.ADULT
-          }
-        ]
+            value: SubmissionRating.ADULT,
+          },
+        ],
       }}
       {...props}
     />
   );
 
   NotificationSubmissionForm = (
-    props: WebsiteSectionProps<Submission, PillowfortNotificationOptions>
+    props: WebsiteSectionProps<Submission, PillowfortNotificationOptions>,
   ) => (
     <PillowfortNotificationSubmissionForm
       key={props.part.accountId}
@@ -58,22 +58,20 @@ export class Pillowfort extends WebsiteImpl {
         ratings: [
           {
             name: 'SFW',
-            value: SubmissionRating.GENERAL
+            value: SubmissionRating.GENERAL,
           },
           {
             name: 'NSFW',
-            value: SubmissionRating.ADULT
-          }
-        ]
+            value: SubmissionRating.ADULT,
+          },
+        ],
       }}
       {...props}
     />
   );
 }
 
-export class PillowfortNotificationSubmissionForm extends GenericSubmissionSection<
-  PillowfortNotificationOptions
-> {
+export class PillowfortNotificationSubmissionForm extends GenericSubmissionSection<PillowfortNotificationOptions> {
   renderLeftForm(data: PillowfortNotificationOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
@@ -92,7 +90,15 @@ export class PillowfortNotificationSubmissionForm extends GenericSubmissionSecti
         >
           Allow reblogging
         </Checkbox>
-      </div>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.useTitle}
+          onChange={this.handleCheckedChange.bind(this, 'useTitle')}
+        >
+          Use title
+        </Checkbox>
+      </div>,
     );
     return elements;
   }
@@ -111,15 +117,13 @@ export class PillowfortNotificationSubmissionForm extends GenericSubmissionSecti
             <Select.Option value={value}>{title}</Select.Option>
           ))}
         </Select>
-      </Form.Item>
+      </Form.Item>,
     );
     return elements;
   }
 }
 
-export class PillowfortFileSubmissionForm extends GenericFileSubmissionSection<
-  PillowfortFileOptions
-> {
+export class PillowfortFileSubmissionForm extends GenericFileSubmissionSection<PillowfortFileOptions> {
   renderLeftForm(data: PillowfortFileOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
@@ -138,7 +142,15 @@ export class PillowfortFileSubmissionForm extends GenericFileSubmissionSection<
         >
           Allow reblogging
         </Checkbox>
-      </div>
+      </div>,
+      <div>
+        <Checkbox
+          checked={data.useTitle}
+          onChange={this.handleCheckedChange.bind(this, 'useTitle')}
+        >
+          Use title
+        </Checkbox>
+      </div>,
     );
     return elements;
   }
@@ -157,7 +169,7 @@ export class PillowfortFileSubmissionForm extends GenericFileSubmissionSection<
             <Select.Option value={value}>{title}</Select.Option>
           ))}
         </Select>
-      </Form.Item>
+      </Form.Item>,
     );
     return elements;
   }

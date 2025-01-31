@@ -24,6 +24,11 @@ export class PillowfortNotificationOptionsEntity
   @DefaultValue(true)
   allowReblogging!: boolean;
 
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(true)
+  useTitle!: boolean;
+
   constructor(entity?: Partial<PillowfortNotificationOptions>) {
     super(entity as DefaultOptions);
   }

@@ -13,6 +13,7 @@ import {
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
+import { MarkdownParser } from 'src/server/description-parsing/markdown/markdown.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
@@ -31,6 +32,7 @@ export class Piczel extends Website {
   readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif'];
   readonly acceptsAdditionalFiles: boolean = true;
+  readonly defaultDescriptionParser = MarkdownParser.parse;
 
   readonly usernameShortcuts = [
     {
