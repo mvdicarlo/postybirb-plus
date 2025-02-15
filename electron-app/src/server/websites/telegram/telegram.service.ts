@@ -32,9 +32,9 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { TelegramDescription } from './telegram-description.parser';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
-import { TelegramDescription } from './telegram-description.parser';
 
 @Injectable()
 export class Telegram extends Website {
@@ -248,14 +248,16 @@ export class Telegram extends Website {
   private async loadChannels(profileId: string, appId: string) {
     // Used code from https://github.com/alik0211/mtproto-core/issues/279#issuecomment-1540604519
 
+    const start = Date.now();
     const channels: Folder[] = [];
     const offsetId = 0;
     const offsetPeer = {
       _: 'inputPeerEmpty',
     };
 
-    let requestLimit = 30;
-    let offsetDate = 0;
+    let totalChats = 0;
+    let requestLimit = 50;
+    let offsetDate = Math.round(Date.now() / 1000);
 
     while (requestLimit >= 0) {
       requestLimit--;
@@ -268,16 +270,19 @@ export class Telegram extends Website {
       });
 
       for (const chat of chats) {
-        if (!this.canSendMediaInChat(chat)) continue;
-
         const id = chat.id.toString();
         const value = chat.access_hash ? `${id}-${chat.access_hash}` : id;
         if (!channels.find(e => e.value === value)) {
+          totalChats++;
+          if (!this.canSendMediaInChat(chat)) continue;
+
           channels.push({
             label: chat.title,
             value: value,
           });
         }
+
+        this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
       }
 
       if (messages.length > 0) {
@@ -285,7 +290,10 @@ export class Telegram extends Website {
       } else break;
     }
 
-    this.logger.debug(`Loaded ${channels.length} channels and chats.`);
+    const seconds = ((Date.now() - start) / 1000).toFixed(2);
+    this.logger.debug(
+      `Loaded ${totalChats} channels and chats total, ${channels.length} filtered in ${seconds}s.`,
+    );
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, channels);
   }
