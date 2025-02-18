@@ -4,6 +4,7 @@
 /node_modules
 /electron-dist
 /release
+/signing
 tsconfig.build.tsbuildinfo
 
 # Logs
