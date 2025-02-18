@@ -153,6 +153,18 @@ export class e621 extends Website {
     };
   }
 
+  private tagIsInvalid(context: TagCheckingContext, tag: string) {
+    const wikiLink = `See https://e621.net/wiki_pages/show_or_new?title=${tag}.`;
+    const createTagNotice = ` ${wikiLink} If you want to create a new tag, make a post with it, and then go to the https://e621.net/tags?search[name]=${tag}, press edit and select tag category`;
+
+    context.warnings.push(
+      `Tag ${tag} does not exist yet or is invalid.${
+        context.ifYouWantToCreateNotice ? createTagNotice : ''
+      }`,
+    );
+    context.ifYouWantToCreateNotice = false;
+  }
+
   async validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,
@@ -168,54 +180,37 @@ export class e621 extends Website {
     }
 
     if (tags.length) {
-      const formattedTags = this.formatTags(tags);
-
       try {
+        const formattedTags = this.formatTags(tags);
         const tagsMeta = await this.getTagMetadata(formattedTags);
-
-        let ifYouWantToCreateNotice = true;
-        function tagIsInvalid(tag: string) {
-          const wikiLink = `See https://e621.net/wiki_pages/show_or_new?title=${tag}.`
-          const createTagNotice = ` ${wikiLink} If you want to create a new tag, make a post with it, and then go to the https://e621.net/tags?search[name]=${tag}, press edit and select tag category`;
-
-          warnings.push(
-            `Tag ${tag} does not exist yet or is invalid.${
-              ifYouWantToCreateNotice ? createTagNotice : ''
-            }`,
-          );
-          ifYouWantToCreateNotice = false;
-        }
+        const context: TagCheckingContext = {
+          ifYouWantToCreateNotice: true,
+          generalTags: 0,
+          problems,
+          warnings,
+        };
 
         if (Array.isArray(tagsMeta)) {
           // All tags do exists but may be still invalid
-          let generalTags = 0;
           const tagsSet = new Set(formattedTags);
 
           for (const tagMeta of tagsMeta) {
-            if (tagMeta.category === e621TagCategory.General) generalTags++;
-
             tagsSet.delete(tagMeta.name);
-            this.validateTag(tagMeta, problems, warnings);
+            this.validateTag(tagMeta, context);
           }
 
-          // Some tags are just not being returned in the response as non existent
-          for (const tag of tagsSet) tagIsInvalid(tag);
-
-          if (generalTags < 10) {
-            warnings.push(
-              `It is recommended to add at least 10 general tags ( ${generalTags} / 10 ). See https://e621.net/help/tagging_checklist`,
-            );
-          }
+          // Some tags are just not being returned in the response for some unknown reason
+          for (const tag of tagsSet) await this.getAndValidateSingleTag(tag, context);
         } else {
           // Some of the tags does not exists, iterate through all
           // of them because there is no other way to check
-          for (const tag of formattedTags) {
-            const tagsMeta = await this.getTagMetadata([tag]);
+          for (const tag of formattedTags) await this.getAndValidateSingleTag(tag, context);
+        }
 
-            if (Array.isArray(tagsMeta)) {
-              this.validateTag(tagsMeta[0], problems, warnings);
-            } else tagIsInvalid(tag);
-          }
+        if (context.generalTags < 10) {
+          warnings.push(
+            `It is recommended to add at least 10 general tags ( ${context.generalTags} / 10 ). See https://e621.net/help/tagging_checklist`,
+          );
         }
       } catch (error) {
         this.logger.error(error);
@@ -228,24 +223,24 @@ export class e621 extends Website {
       const feedbacks = await this.getUserFeedback(username);
 
       if (Array.isArray(feedbacks)) {
-          for (const feedback of feedbacks) {
-            if (feedback.category === e621UserFeedbackCategory.Positive) continue;
+        for (const feedback of feedbacks) {
+          if (feedback.category === e621UserFeedbackCategory.Positive) continue;
 
-            const updatedAt = new Date(feedback.updated_at);
-            const week =
-              /*ms*/ 1000 * /*sec*/ 60 * /*min*/ 60 * /*hour*/ 60 * /*day*/ 24 * /*week*/ 7;
+          const updatedAt = new Date(feedback.updated_at);
+          const week =
+            /*ms*/ 1000 * /*sec*/ 60 * /*min*/ 60 * /*hour*/ 60 * /*day*/ 24 * /*week*/ 7;
 
-            if (Date.now() - updatedAt.getTime() > week) continue;
+          if (Date.now() - updatedAt.getTime() > week) continue;
 
-            warnings.push(
-              `You have recent ${
-                feedback.category
-              } feedback at the https://e621.net/user_feedbacks?search[user_name]=${username}. Feedback: ${
-                feedback.body.length > 100
-                  ? `${feedback.body.slice(0, 100)}... (More on the e621)`
-                  : feedback.body
-              }`,
-            );
+          warnings.push(
+            `You have recent ${
+              feedback.category
+            } feedback at the https://e621.net/user_feedbacks?search[user_name]=${username}. Feedback: ${
+              feedback.body.length > 100
+                ? `${feedback.body.slice(0, 100)}... (More on the e621)`
+                : feedback.body
+            }`,
+          );
         }
       }
     } catch (error) {
@@ -275,18 +270,28 @@ export class e621 extends Website {
     return { problems, warnings };
   }
 
-  private validateTag(tagMeta: e621Tag, problems: string[], warnings: string[]) {
+  private async getAndValidateSingleTag(tag: string, context: TagCheckingContext) {
+    const tagsMeta = await this.getTagMetadata([tag]);
+
+    if (Array.isArray(tagsMeta)) {
+      this.validateTag(tagsMeta[0], context);
+    } else this.tagIsInvalid(context, tag);
+  }
+
+  private validateTag(tagMeta: e621Tag, context: TagCheckingContext) {
     if (tagMeta.category === e621TagCategory.Invalid) {
-      problems.push(
+      context.problems.push(
         `Tag ${tagMeta.name} is invalid. See https://e621.net/wiki_pages/show_or_new?title=${tagMeta.name}`,
       );
     }
 
     if (tagMeta.post_count < 2) {
-      warnings.push(
+      context.warnings.push(
         `Tag ${tagMeta.name} has ${tagMeta.post_count} post(s). Tag may be invalid or low use`,
       );
     }
+
+    if (tagMeta.category === e621TagCategory.General) context.generalTags++;
   }
 
   private async getUserFeedback(username: string) {
@@ -301,24 +306,33 @@ export class e621 extends Website {
     );
   }
 
-  private metadataCache = new Map<string, object>()
+  private metadataCache = new Map<string, object>();
 
   private async getMetdata<T>(url: string) {
     // TODO Cache invalidation?
-    
-    const cached = this.metadataCache.get(url) as unknown as T
-    if (cached) return cached
-    
+
+    const cached = this.metadataCache.get(url) as unknown as T;
+    if (cached) return cached;
+
     const response = await Http.get<T>(`${this.BASE_URL}/${url}`, undefined, {
       skipCookies: true,
       requestOptions: { json: true },
       headers: this.headers,
     });
+    if (response.error) throw response.error;
+
     const result = response.body;
-    this.metadataCache.set(url, result as unknown as object)
-    
+    this.metadataCache.set(url, result as unknown as object);
+
     return result;
   }
+}
+
+interface TagCheckingContext {
+  ifYouWantToCreateNotice: boolean;
+  generalTags: number;
+  warnings: string[];
+  problems: string[];
 }
 
 // Source: https://e621.net/tags
