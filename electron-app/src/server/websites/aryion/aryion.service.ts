@@ -54,6 +54,7 @@ export class Aryion extends Website {
     'mpeg',
     'flv',
     'mp4',
+    'pdf',
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
@@ -151,7 +152,17 @@ export class Aryion extends Website {
 
     this.verifyResponse(post, 'Verify Post');
     try {
-      const json = JSON.parse(post.body.replace(/(<textarea>|<\/textarea>)/g, ''));
+
+      // Split errors/warnings if they exist and handle them separately. The
+      // error/warning message for Aryion is returned as a separate div from
+      // the response JSON. You may want to do a more detailed check in the
+      // future to fail on specific warnings/errors.
+      const responses = post.body.split('\n');
+      if (responses.length > 1 && responses[0].indexOf('Warning:') === -1) {
+        return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
+      }
+
+      const json = JSON.parse(responses[responses.length - 1].replace(/(<textarea>|<\/textarea>)/g, ''));
       if (json.id) {
         return this.createPostResponse({ source: `${this.BASE_URL}${json.url}` });
       }
