@@ -68,7 +68,10 @@ export class Pixiv extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<PixivFileOptions>,
   ): Promise<PostResponse> {
-    const page = await Http.get<string>(`${this.BASE_URL}/upload.php`, data.part.accountId);
+    const page = await Http.get<string>(
+      `${this.BASE_URL}/illustration/create`,
+      data.part.accountId,
+    );
     this.verifyResponse(page, 'Get page');
 
     if (page.body.includes('__NEXT_DATA__')) {
@@ -85,7 +88,7 @@ export class Pixiv extends Website {
   ): Promise<PostResponse> {
     const $ = cheerio.load(body);
     const accountInfo = JSON.parse($('#__NEXT_DATA__').contents().first().text());
-    const token = accountInfo.props.pageProps.token;
+    const token = JSON.parse(accountInfo.props.pageProps.serverSerializedPreloadedState).api.token;
     const files = [data.thumbnail, data.primary.file, ...data.additional.map(f => f.file)].filter(
       f => f,
     );
