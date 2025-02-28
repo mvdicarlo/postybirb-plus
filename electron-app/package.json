@@ -47,6 +47,24 @@
     "@nestjs/platform-socket.io": "^7.6.18",
     "@nestjs/schedule": "^0.4.2",
     "@nestjs/websockets": "^7.6.18",
+    "@tiptap/core": "^2.7.2",
+    "@tiptap/extension-blockquote": "^2.7.2",
+    "@tiptap/extension-bold": "^2.7.2",
+    "@tiptap/extension-color": "^2.7.2",
+    "@tiptap/extension-document": "^2.7.2",
+    "@tiptap/extension-hard-break": "^2.7.2",
+    "@tiptap/extension-heading": "^2.7.2",
+    "@tiptap/extension-horizontal-rule": "^2.7.2",
+    "@tiptap/extension-italic": "^2.7.2",
+    "@tiptap/extension-link": "^2.7.2",
+    "@tiptap/extension-paragraph": "^2.7.2",
+    "@tiptap/extension-strike": "^2.7.2",
+    "@tiptap/extension-text": "^2.7.2",
+    "@tiptap/extension-text-align": "^2.7.2",
+    "@tiptap/extension-text-style": "^2.7.2",
+    "@tiptap/extension-underline": "^2.7.2",
+    "@tiptap/html": "^2.7.2",
+    "@tiptap/pm": "^2.7.2",
     "@types/node": "^16.10.2",
     "async-mutex": "^0.5.0",
     "chardet": "^0.8.0",
@@ -82,25 +100,7 @@
     "twitter-lite": "^1.1.0",
     "uuid": "^3.3.3",
     "winston": "^3.2.1",
-    "winston-daily-rotate-file": "^4.5.5",
-    "@tiptap/core": "^2.7.2",
-    "@tiptap/extension-blockquote": "^2.7.2",
-    "@tiptap/extension-bold": "^2.7.2",
-    "@tiptap/extension-color": "^2.7.2",
-    "@tiptap/extension-document": "^2.7.2",
-    "@tiptap/extension-hard-break": "^2.7.2",
-    "@tiptap/extension-heading": "^2.7.2",
-    "@tiptap/extension-horizontal-rule": "^2.7.2",
-    "@tiptap/extension-italic": "^2.7.2",
-    "@tiptap/extension-link": "^2.7.2",
-    "@tiptap/extension-paragraph": "^2.7.2",
-    "@tiptap/extension-strike": "^2.7.2",
-    "@tiptap/extension-text": "^2.7.2",
-    "@tiptap/extension-text-align": "^2.7.2",
-    "@tiptap/extension-text-style": "^2.7.2",
-    "@tiptap/extension-underline": "^2.7.2",
-    "@tiptap/html": "^2.7.2",
-    "@tiptap/pm": "^2.7.2"
+    "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
     "@jest-runner/electron": "^3.0.1",
@@ -120,7 +120,7 @@
     "@types/socket.io": "^2.1.12",
     "@types/supertest": "^2.0.11",
     "electron": "^19.1.9",
-    "electron-builder": "^23.6.0",
+    "electron-builder": "^24.13.3",
     "jest": "^26.6.3",
     "supertest": "^6.1.6",
     "ts-jest": "^26.5.6",
@@ -142,12 +142,23 @@
       "output": "release"
     },
     "mac": {
+      "notarize": {
+        "teamId": "ZRKS9CNUQZ"
+      },
       "category": "public.app-category.productivity",
+      "entitlements": "packaging-resources/entitlements.mac.plist",
+      "entitlementsInherit": "packaging-resources/entitlements.mac.plist",
+      "hardenedRuntime": true,
+      "type": "distribution",
       "icon": "icons/icon.icns",
       "gatekeeperAssess": false,
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "default",
+          "arch": [
+            "universal"
+          ]
+        }
       ]
     },
     "linux": {
