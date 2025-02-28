@@ -49,6 +49,7 @@ import {
 import { RichText } from '@atproto/api/dist/rich-text/rich-text';
 import { BlobRef } from '@atproto/lexicon';
 import { AtUri } from '@atproto/syntax';
+import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
 
 function getRichTextLength(text: string): number {
   return new RichText({ text }).graphemeLength;
@@ -64,6 +65,12 @@ export class Bluesky extends Website {
   readonly MAX_CHARS = 300;
   readonly MAX_MEDIA = 4;
   readonly enableAdvertisement = false;
+  readonly usernameShortcuts = [
+    {
+      key: 'bsky',
+      url: 'https://bsky.app/profile/$1',
+    },
+  ];
 
   private makeAgent(): BskyAgent {
     // HACK: The atproto library makes a half-hearted attempt at supporting Node
@@ -114,6 +121,10 @@ export class Bluesky extends Website {
       maxSize: 1000000,
       noTransparency: true, // Bsky doesn't support alpha transparency.
     };
+  }
+
+  preparseDescription(text: string) {
+    return UsernameParser.replaceText(text, 'bsky', '@$1');
   }
 
   formatTags(tags: string[]) {
@@ -185,7 +196,6 @@ export class Bluesky extends Website {
   // path) and not doing the proper service authentication dance. So we instead
   // follow what the website does here, which is the way that actually works.
   // We also use the same inconsistent header capitalization as they do.
-
   private async checkVideoUploadLimits(agent: BskyAgent): Promise<void> {
     const token = await this.getAuthToken(
       agent,
