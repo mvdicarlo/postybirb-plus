@@ -86,7 +86,7 @@ export class Patreon extends Website {
         relationships: any;
         type: string;
       }[];
-    }>(data._id, `${this.BASE_URL}/membership`, 'return window.patreon.bootstrap.creator', 1000);
+    }>(data._id, `${this.BASE_URL}/membership`, 'return window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.pageBootstrap.creator', 1000);
 
     if (body.data) {
       status.loggedIn = true;
