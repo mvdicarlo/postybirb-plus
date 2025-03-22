@@ -110,7 +110,7 @@ export class TwitterAPIService {
       // possibly_sensitive: data.rating !== 'general',
     };
 
-    tweet.text = (tweet?.text || '');
+    tweet.text = tweet?.text || '';
 
     let mediaIds = [];
     if (data.files.length) {
@@ -136,7 +136,7 @@ export class TwitterAPIService {
       } catch (err) {
         this.logger.error(err, err.stack, 'Failed to upload files to Twitter');
         return new ApiResponse({
-          error: Array.isArray(err) ? err.map(e => e.message).join('\n') : err,
+          error: Array.isArray(err) ? err.map(e => e.message).join('\n') : err + '',
         });
       }
 
@@ -272,6 +272,11 @@ export class TwitterAPIService {
           oauth,
         },
         (err, res, body) => {
+          if (err) {
+            this.logger.error(err, 'Failed to upload media to ' + url);
+            return reject(new Error('Failed to upload media to upload.twitter.com: ' + err));
+          }
+
           if (body && body.errors) {
             reject(body.errors);
           } else {
@@ -280,6 +285,8 @@ export class TwitterAPIService {
         },
       );
     });
+
+    if (!mediaData) throw new Error('Failed to get uploaded media ids');
 
     const { media_id_string } = mediaData;
     const chunks = _.chunk(file.value, this.MAX_FILE_CHUNK);
