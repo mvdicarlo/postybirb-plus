@@ -135,9 +135,7 @@ export class TwitterAPIService {
           );
       } catch (err) {
         this.logger.error(err, err.stack, 'Failed to upload files to Twitter');
-        return new ApiResponse({
-          error: Array.isArray(err) ? err.map(e => e.message).join('\n') : err + '',
-        });
+        return ApiResponse.fromMaybeMultipleErrors<{ url: string; errors: unknown }>(err);
       }
 
       const ids = _.chunk(mediaIds, 4);
@@ -191,9 +189,7 @@ export class TwitterAPIService {
       });
     } catch (err) {
       this.logger.error(err, '', 'Failed to post');
-      return new ApiResponse({
-        error: Array.isArray(err) ? err.map(e => e.message).join('\n') : err,
-      });
+      return ApiResponse.fromMaybeMultipleErrors<{ url: string; errors: unknown }>(err);
     }
   }
 
