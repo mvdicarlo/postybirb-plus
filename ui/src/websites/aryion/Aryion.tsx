@@ -26,7 +26,7 @@ export class Aryion extends WebsiteImpl {
   );
 
   supportsTextType(type: string): boolean {
-    return ['text/plain'].includes(type);
+    return ['text/plain', 'application/pdf', 'text/pdf'].includes(type);
   }
 }
 
