@@ -139,8 +139,15 @@ export class Bluesky extends Website {
     files: PostFileRecord[],
   ): Promise<AppBskyEmbedImages.Main | AppBskyEmbedVideo.Main> {
     // Bluesky supports either images or a video as an embed
+    // GIFs must be treated as video on bsky
+    var gifs: number = 0;
+    for (const file of files) {
+      if (file.file.options.filename.endsWith('.gif')) {
+        ++gifs;
+      }
+    }
 
-    if (this.countFileTypes(files).videos === 0) {
+    if (this.countFileTypes(files).videos === 0 && gifs === 0) {
       const uploadedImages: AppBskyEmbedImages.Image[] = [];
       for (const file of files.slice(0, this.MAX_MEDIA)) {
         const altText = file.altText || '';
@@ -162,7 +169,7 @@ export class Bluesky extends Website {
       };
     } else {
       for (const file of files) {
-        if (file.type == FileSubmissionType.VIDEO) {
+        if (file.type == FileSubmissionType.VIDEO || FileSubmissionType.IMAGE) {  // Only IMAGE file type left is a GIF
           const altText = file.altText || '';
           this.checkVideoUploadLimits(agent);
           const ref = await this.uploadVideo(agent, file.file);
@@ -529,13 +536,23 @@ export class Bluesky extends Website {
       ),
     ];
 
+    // count number of GIFs
+    var gifs: number = 0;
+    for (const file of files) {
+      if (file.location.endsWith('.gif')) {
+        gifs++;
+      }
+    }
+
     this.validateRating(submissionPart, defaultPart, warnings);
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
 
     const { images, videos, other } = this.countFileTypes(files);
-    if ((images !== 0 && videos !== 0) || videos > 1 || other !== 0) {
-      problems.push('Supports either a set of images or a single video');
+
+    // first condition also includes the case where there are gifs and videos
+    if ((images !== 0 && videos !== 0) || (images > 1 && gifs !==0) || videos > 1 || gifs > 1 || other !== 0) {
+      problems.push('Supports either a set of images, a single video, or a single GIF.');
     }
 
     files.forEach(file => {
@@ -545,7 +562,7 @@ export class Bluesky extends Website {
       }
 
       let maxMB: number = 1;
-      if (type !== FileSubmissionType.VIDEO && FileSize.MBtoBytes(maxMB) < size) {
+      if (type !== FileSubmissionType.VIDEO && FileSize.MBtoBytes(maxMB) < size && (gifs === 0)) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
@@ -570,6 +587,12 @@ export class Bluesky extends Website {
     if (files.length > this.MAX_MEDIA) {
       warnings.push(
         'Too many files selected for this platform, only the first four will be posted',
+      );
+    }
+
+    if (gifs > 0) {
+      warnings.push(
+        'Bluesky automatically converts GIFs to videos.'
       );
     }
 
