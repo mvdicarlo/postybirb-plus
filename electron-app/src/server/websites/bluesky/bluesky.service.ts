@@ -50,6 +50,7 @@ import { RichText } from '@atproto/api/dist/rich-text/rich-text';
 import { BlobRef } from '@atproto/lexicon';
 import { AtUri } from '@atproto/syntax';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
+import { count } from 'console';
 
 function getRichTextLength(text: string): number {
   return new RichText({ text }).graphemeLength;
