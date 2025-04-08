@@ -50,7 +50,6 @@ import { RichText } from '@atproto/api/dist/rich-text/rich-text';
 import { BlobRef } from '@atproto/lexicon';
 import { AtUri } from '@atproto/syntax';
 import { UsernameParser } from 'src/server/description-parsing/miscellaneous/username.parser';
-import { count } from 'console';
 
 function getRichTextLength(text: string): number {
   return new RichText({ text }).graphemeLength;
@@ -141,14 +140,15 @@ export class Bluesky extends Website {
   ): Promise<AppBskyEmbedImages.Main | AppBskyEmbedVideo.Main> {
     // Bluesky supports either images or a video as an embed
     // GIFs must be treated as video on bsky
-    var gifs: number = 0;
-    for (const file of files) {
-      if (file.file.options.filename.endsWith('.gif')) {
-        ++gifs;
-      }
-    }
 
-    if (this.countFileTypes(files).videos === 0 && gifs === 0) {
+    const fileCount = this.countFileTypes(
+      files.map(f => ({
+        type: f.type,
+        mimetype: f.file.options.contentType,
+        name: f.file.options.filename,
+      })),
+    );
+    if (fileCount.videos === 0 && fileCount.gifs === 0) {
       const uploadedImages: AppBskyEmbedImages.Image[] = [];
       for (const file of files.slice(0, this.MAX_MEDIA)) {
         const altText = file.altText || '';
@@ -170,7 +170,8 @@ export class Bluesky extends Website {
       };
     } else {
       for (const file of files) {
-        if (file.type == FileSubmissionType.VIDEO || FileSubmissionType.IMAGE) {  // Only IMAGE file type left is a GIF
+        if (file.type == FileSubmissionType.VIDEO || FileSubmissionType.IMAGE) {
+          // Only IMAGE file type left is a GIF
           const altText = file.altText || '';
           this.checkVideoUploadLimits(agent);
           const ref = await this.uploadVideo(agent, file.file);
@@ -537,22 +538,20 @@ export class Bluesky extends Website {
       ),
     ];
 
-    // count number of GIFs
-    var gifs: number = 0;
-    for (const file of files) {
-      if (file.location.endsWith('.gif')) {
-        gifs++;
-      }
-    }
-
     this.validateRating(submissionPart, defaultPart, warnings);
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
 
-    const { images, videos, other } = this.countFileTypes(files);
+    const { images, videos, other, gifs } = this.countFileTypes(files);
 
     // first condition also includes the case where there are gifs and videos
-    if ((images !== 0 && videos !== 0) || (images > 1 && gifs !==0) || videos > 1 || gifs > 1 || other !== 0) {
+    if (
+      (images !== 0 && videos !== 0) ||
+      (images > 1 && gifs !== 0) ||
+      videos > 1 ||
+      gifs > 1 ||
+      other !== 0
+    ) {
       problems.push('Supports either a set of images, a single video, or a single GIF.');
     }
 
@@ -563,7 +562,7 @@ export class Bluesky extends Website {
       }
 
       let maxMB: number = 1;
-      if (type !== FileSubmissionType.VIDEO && FileSize.MBtoBytes(maxMB) < size && (gifs === 0)) {
+      if (type !== FileSubmissionType.VIDEO && FileSize.MBtoBytes(maxMB) < size && gifs === 0) {
         if (
           isAutoscaling &&
           type === FileSubmissionType.IMAGE &&
@@ -592,9 +591,7 @@ export class Bluesky extends Website {
     }
 
     if (gifs > 0) {
-      warnings.push(
-        'Bluesky automatically converts GIFs to videos.'
-      );
+      warnings.push('Bluesky automatically converts GIFs to videos.');
     }
 
     this.validateReplyToUrl(problems, submissionPart.data.replyToUrl);
@@ -602,15 +599,18 @@ export class Bluesky extends Website {
     return { problems, warnings };
   }
 
-  private countFileTypes(files: { type: FileSubmissionType }[]): {
+  private countFileTypes(files: Pick<FileRecord, 'type' | 'name' | 'mimetype'>[]): {
     images: number;
     videos: number;
     other: number;
+    gifs: number;
   } {
-    const counts = { images: 0, videos: 0, other: 0 };
+    const counts = { images: 0, videos: 0, other: 0, gifs: 0 };
     for (const file of files) {
       if (file.type === FileSubmissionType.VIDEO) {
         ++counts.videos;
+      } else if (file.name.endsWith('.gif') || file.mimetype.startsWith('image/gif')) {
+        ++counts.gifs;
       } else if (file.type === FileSubmissionType.IMAGE) {
         ++counts.images;
       } else {
