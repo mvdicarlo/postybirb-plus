@@ -25,6 +25,9 @@ import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { RateLimiterUtil } from 'src/server/utils/rate-limiter.util';
+import { CancellationException } from 'src/server/submission/post/cancellation/cancellation.exception';
+import { CancellationTokenDynamic } from 'src/server/submission/post/cancellation/cancellation-token-dynamic';
 
 @Injectable()
 export class e621 extends Website {
@@ -34,6 +37,7 @@ export class e621 extends Website {
   readonly acceptsSourceUrls: boolean = true;
   readonly defaultDescriptionParser = PlaintextParser.parse;
   readonly enableAdvertisement: boolean = false;
+  readonly MAX_MB = 100;
 
   readonly usernameShortcuts = [
     {
@@ -42,9 +46,31 @@ export class e621 extends Website {
     },
   ];
 
-  private readonly headers = {
-    'User-Agent': `PostyBirb/${app.getVersion()}`,
-  };
+  private readonly headers = { 'User-Agent': `PostyBirb/${app.getVersion()}` };
+
+  // e621 has hard limit of 2req/1sec, so its a 1req/500ms
+  private rateLimit = new RateLimiterUtil(500);
+
+  private lastReq = Date.now();
+
+  private async request<T>(
+    cancellationToken: CancellationTokenDynamic,
+    method: 'get' | 'post',
+    url: string,
+    form?: unknown,
+  ) {
+    await this.rateLimit.trigger(cancellationToken);
+
+    console.log('call to', url, 'time', Date.now() - this.lastReq);
+    this.lastReq = Date.now();
+
+    return await Http[method]<T>(`${this.BASE_URL}${url}`, undefined, {
+      skipCookies: true,
+      requestOptions: { json: true },
+      headers: this.headers,
+      ...(form && method === 'post' ? { type: 'multipart', data: form } : {}),
+    });
+  }
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
@@ -58,7 +84,7 @@ export class e621 extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(100) };
+    return { maxSize: FileSize.MBtoBytes(this.MAX_MB) };
   }
 
   preparseDescription(text: string) {
@@ -94,7 +120,7 @@ export class e621 extends Website {
     data: FilePostData<e621FileOptions>,
     accountData: e621AccountData,
   ): Promise<PostResponse> {
-    const form: any = {
+    const form = {
       login: accountData.username,
       api_key: accountData.key,
       'upload[tag_string]': this.formatTags(data.tags).join(' ').trim(),
@@ -109,18 +135,12 @@ export class e621 extends Website {
     };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{
+    const post = await this.request<{
       success: boolean;
       location: string;
       reason: string;
       message: string;
-    }>(`${this.BASE_URL}/uploads.json`, undefined, {
-      type: 'multipart',
-      data: form,
-      skipCookies: true,
-      requestOptions: { json: true },
-      headers: this.headers,
-    });
+    }>(new CancellationTokenDynamic(), 'post', `/uploads.json`, form);
 
     if (post.body.success && post.body.location) {
       return this.createPostResponse({ source: `https://e621.net${post.body.location}` });
@@ -165,15 +185,96 @@ export class e621 extends Website {
     context.ifYouWantToCreateNotice = false;
   }
 
+  // Used to debounce long running validation requests
+  private validateSubmissionCancelTokens = new Map<string, CancellationTokenDynamic>();
+
   async validateFileSubmission(
     submission: FileSubmission,
     submissionPart: SubmissionPart<any>,
     defaultPart: SubmissionPart<DefaultOptions>,
   ): Promise<ValidationParts> {
+    const oldToken = this.validateSubmissionCancelTokens.get(submission._id);
+    if (oldToken) oldToken.cancel();
+
+    const cancellationToken = new CancellationTokenDynamic();
+    this.validateSubmissionCancelTokens.set(submission._id, cancellationToken);
+
     const problems: string[] = [];
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
+    try {
+      await this.validateTags(defaultPart, submissionPart, problems, warnings, cancellationToken);
+      await this.validateUserFeedback(submissionPart, warnings, cancellationToken);
+    } catch (e) {
+      // Ignore validation canceled errors
+      if (!(e instanceof CancellationException)) throw e;
+    }
+
+    if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
+      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
+    }
+
+    const { type, size, name } = submission.primary;
+
+    if (FileSize.MBtoBytes(this.MAX_MB) < size) {
+      if (
+        isAutoscaling &&
+        type === FileSubmissionType.IMAGE &&
+        ImageManipulator.isMimeType(submission.primary.mimetype)
+      ) {
+        warnings.push(`${name} will be scaled down to ${this.MAX_MB}MB`);
+      } else {
+        problems.push(`e621 limits ${submission.primary.mimetype} to ${this.MAX_MB}MB`);
+      }
+    }
+
+    return { problems, warnings };
+  }
+
+  private async validateUserFeedback(
+    submissionPart: SubmissionPart<any>,
+    warnings: string[],
+    cancellationToken: CancellationTokenDynamic,
+  ) {
+    try {
+      const username = this.getAccountInfo(submissionPart.accountId, 'username');
+      const feedbacks = await this.getUserFeedback(cancellationToken, username);
+
+      if (Array.isArray(feedbacks)) {
+        for (const feedback of feedbacks) {
+          if (feedback.category === e621UserFeedbackCategory.Positive) continue;
+
+          const updatedAt = new Date(feedback.updated_at);
+          const week =
+            /*ms*/ 1000 * /*sec*/ 60 * /*min*/ 60 * /*hour*/ 60 * /*day*/ 24 * /*week*/ 7;
+
+          if (Date.now() - updatedAt.getTime() > week) continue;
+
+          warnings.push(
+            `You have recent ${
+              feedback.category
+            } feedback at the https://e621.net/user_feedbacks?search[user_name]=${username}. Feedback: ${
+              feedback.body.length > 100
+                ? `${feedback.body.slice(0, 100)}... (More on the e621)`
+                : feedback.body
+            }`,
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.error(error);
+      warnings.push(`Unable to get user feedback. You can check your account manually`);
+    }
+  }
+
+  private async validateTags(
+    defaultPart: SubmissionPart<DefaultOptions>,
+    submissionPart: SubmissionPart<any>,
+    problems: string[],
+    warnings: string[],
+    cancellationToken: CancellationTokenDynamic,
+  ) {
     const tags = FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags);
     if (tags.length < 4) {
       problems.push('Requires at least 4 tags.');
@@ -182,12 +283,13 @@ export class e621 extends Website {
     if (tags.length) {
       try {
         const formattedTags = this.formatTags(tags);
-        const tagsMeta = await this.getTagMetadata(formattedTags);
+        const tagsMeta = await this.getTagMetadata(cancellationToken, formattedTags);
         const context: TagCheckingContext = {
           ifYouWantToCreateNotice: true,
           generalTags: 0,
           problems,
           warnings,
+          cancellationToken,
         };
 
         if (Array.isArray(tagsMeta)) {
@@ -217,61 +319,10 @@ export class e621 extends Website {
         warnings.push(`Unable to validate tags. Please check them manually`);
       }
     }
-
-    try {
-      const username = this.getAccountInfo(submissionPart.accountId, 'username');
-      const feedbacks = await this.getUserFeedback(username);
-
-      if (Array.isArray(feedbacks)) {
-        for (const feedback of feedbacks) {
-          if (feedback.category === e621UserFeedbackCategory.Positive) continue;
-
-          const updatedAt = new Date(feedback.updated_at);
-          const week =
-            /*ms*/ 1000 * /*sec*/ 60 * /*min*/ 60 * /*hour*/ 60 * /*day*/ 24 * /*week*/ 7;
-
-          if (Date.now() - updatedAt.getTime() > week) continue;
-
-          warnings.push(
-            `You have recent ${
-              feedback.category
-            } feedback at the https://e621.net/user_feedbacks?search[user_name]=${username}. Feedback: ${
-              feedback.body.length > 100
-                ? `${feedback.body.slice(0, 100)}... (More on the e621)`
-                : feedback.body
-            }`,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error(error);
-      warnings.push(`Unable to get user feedback. You can check your account manually`);
-    }
-
-    if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
-      problems.push(`Currently supported file formats: ${this.acceptsFiles.join(', ')}`);
-    }
-
-    const { type, size, name } = submission.primary;
-    let maxMB: number = 100;
-
-    if (FileSize.MBtoBytes(maxMB) < size) {
-      if (
-        isAutoscaling &&
-        type === FileSubmissionType.IMAGE &&
-        ImageManipulator.isMimeType(submission.primary.mimetype)
-      ) {
-        warnings.push(`${name} will be scaled down to ${maxMB}MB`);
-      } else {
-        problems.push(`e621 limits ${submission.primary.mimetype} to ${maxMB}MB`);
-      }
-    }
-
-    return { problems, warnings };
   }
 
   private async getAndValidateSingleTag(tag: string, context: TagCheckingContext) {
-    const tagsMeta = await this.getTagMetadata([tag]);
+    const tagsMeta = await this.getTagMetadata(context.cancellationToken, [tag]);
 
     if (Array.isArray(tagsMeta)) {
       this.validateTag(tagsMeta[0], context);
@@ -294,35 +345,37 @@ export class e621 extends Website {
     if (tagMeta.category === e621TagCategory.General) context.generalTags++;
   }
 
-  private async getUserFeedback(username: string) {
+  private async getUserFeedback(cancellationToken: CancellationTokenDynamic, username: string) {
     return this.getMetdata<e621UserFeedbacksEmpty | e621UserFeedbacks>(
-      `user_feedbacks.json?search[user_name]=${username}`,
+      cancellationToken,
+      `/user_feedbacks.json?search[user_name]=${username}`,
     );
   }
 
-  private async getTagMetadata(formattedTags: string[]) {
+  private async getTagMetadata(
+    cancellationToken: CancellationTokenDynamic,
+    formattedTags: string[],
+  ) {
     return this.getMetdata<e621TagsEmpty | e621Tags>(
-      `tags.json?search[name]=${formattedTags.join(',')}`,
+      cancellationToken,
+      `/tags.json?search[name]=${formattedTags.join(',')}`,
     );
   }
 
   private metadataCache = new Map<string, object>();
 
-  private async getMetdata<T>(url: string) {
-    // TODO Cache invalidation?
-
-    const cached = this.metadataCache.get(url) as unknown as T;
+  private async getMetdata<T extends object>(
+    cancellationToken: CancellationTokenDynamic,
+    url: string,
+  ) {
+    const cached = this.metadataCache.get(url) as T;
     if (cached) return cached;
 
-    const response = await Http.get<T>(`${this.BASE_URL}/${url}`, undefined, {
-      skipCookies: true,
-      requestOptions: { json: true },
-      headers: this.headers,
-    });
+    const response = await this.request<object>(cancellationToken, 'get', url);
     if (response.error) throw response.error;
 
     const result = response.body;
-    this.metadataCache.set(url, result as unknown as object);
+    this.metadataCache.set(url, result);
 
     return result;
   }
@@ -333,6 +386,7 @@ interface TagCheckingContext {
   generalTags: number;
   warnings: string[];
   problems: string[];
+  cancellationToken: CancellationTokenDynamic;
 }
 
 // Source: https://e621.net/tags

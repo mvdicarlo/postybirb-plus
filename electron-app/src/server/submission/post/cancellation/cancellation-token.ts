@@ -1,13 +1,13 @@
 export class CancellationToken {
   private cancelState: boolean = false;
 
-  constructor(private readonly cancelCallback?: () => void) {}
+  constructor(protected readonly cancelCallback?: () => void) {}
 
   public cancel() {
     if (!this.cancelState) {
       this.cancelState = true;
       if (this.cancelCallback) {
-        this.cancelCallback();
+        return this.cancelCallback();
       }
     }
   }
