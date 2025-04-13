@@ -7,7 +7,7 @@ export class CancellationToken {
     if (!this.cancelState) {
       this.cancelState = true;
       if (this.cancelCallback) {
-        return this.cancelCallback();
+        this.cancelCallback();
       }
     }
   }
