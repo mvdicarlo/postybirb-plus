@@ -51,8 +51,6 @@ export class e621 extends Website {
   // e621 has hard limit of 2req/1sec, so its a 1req/500ms
   private rateLimit = new RateLimiterUtil(500);
 
-  private lastReq = Date.now();
-
   private async request<T>(
     cancellationToken: CancellationTokenDynamic,
     method: 'get' | 'post',
@@ -60,9 +58,6 @@ export class e621 extends Website {
     form?: unknown,
   ) {
     await this.rateLimit.trigger(cancellationToken);
-
-    console.log('call to', url, 'time', Date.now() - this.lastReq);
-    this.lastReq = Date.now();
 
     return await Http[method]<T>(`${this.BASE_URL}${url}`, undefined, {
       skipCookies: true,
