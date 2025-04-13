@@ -35,6 +35,7 @@ import { Website } from '../website.base';
 import { TelegramDescription } from './telegram-description.parser';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
+import { resolveProjectReferencePath } from 'typescript';
 
 @Injectable()
 export class Telegram extends Website {
@@ -523,10 +524,13 @@ export class Telegram extends Website {
   }
 
   private getSourceFromResponse(response: SendMessageResponse) {
-    // TODO Maybe support multiple sources from multiple channels. Need to rewrite some ui
-    const update = response.updates.find(e => e._ === 'updateNewChannelMessage');
-    if (!update || !update.peer_id || !update.id) return '';
-    return `https://t.me/c/${update.peer_id.channel_id}/${update.id}`;
+    const message = response.updates.find(e => e._ === 'updateNewChannelMessage')?.message;
+    if (!message || !message.peer_id || !message.id) return '';
+
+    const chat = response.chats.find(e => e.id === message.peer_id.channel_id);
+    if (!chat || !chat.username) return '';
+
+    return `https://t.me/${chat.username}/${message.id}`;
   }
 
   validateFileSubmission(
@@ -645,7 +649,11 @@ interface Input {
 }
 
 interface SendMessageResponse {
-  updates: { _: 'updateNewChannelMessage'; id: number; peer_id: { channel_id: number } }[];
+  updates: {
+    _: 'updateNewChannelMessage';
+    message: { id: number; peer_id: { channel_id: number } };
+  }[];
+  chats: Chat[];
 }
 
 interface Chat {
@@ -655,6 +663,7 @@ interface Chat {
   title: string;
   id: number;
   left: boolean;
+  username?: string;
   deactivated: boolean;
   /**
    * Reverted default user rights.
