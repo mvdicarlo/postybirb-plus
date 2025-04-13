@@ -6,7 +6,7 @@ import {
   FurAffinityFileOptions,
   FurAffinityNotificationOptions,
   Submission,
-  SubmissionRating
+  SubmissionRating,
 } from 'postybirb-commons';
 import React from 'react';
 import WebsiteService from '../../services/website.service';
@@ -35,33 +35,33 @@ export class FurAffinity extends WebsiteImpl {
       tagOptions={{
         show: true,
         options: {
-          maxLength: 250,
-          mode: 'length'
-        }
+          maxLength: 500,
+          mode: 'length',
+        },
       }}
       ratingOptions={{
         show: true,
         ratings: [
           {
             value: SubmissionRating.GENERAL,
-            name: 'General'
+            name: 'General',
           },
           {
             value: SubmissionRating.MATURE,
-            name: 'Mature'
+            name: 'Mature',
           },
           {
             value: SubmissionRating.ADULT,
-            name: 'Adult'
-          }
-        ]
+            name: 'Adult',
+          },
+        ],
       }}
       {...props}
     />
   );
 
   NotificationSubmissionForm = (
-    props: WebsiteSectionProps<Submission, FurAffinityNotificationOptions>
+    props: WebsiteSectionProps<Submission, FurAffinityNotificationOptions>,
   ) => (
     <FurAffinityNotificationSubmissionForm
       key={props.part.accountId}
@@ -76,9 +76,7 @@ interface FurAffinityFileSubmissionState {
   folders: Folder[];
 }
 
-class FurAffinityNotificationSubmissionForm extends GenericSubmissionSection<
-  FurAffinityNotificationOptions
-> {
+class FurAffinityNotificationSubmissionForm extends GenericSubmissionSection<FurAffinityNotificationOptions> {
   renderLeftForm(data: FurAffinityNotificationOptions) {
     const elements = super.renderLeftForm(data);
     elements.push(
@@ -86,23 +84,21 @@ class FurAffinityNotificationSubmissionForm extends GenericSubmissionSection<
         <Checkbox checked={data.feature} onChange={this.handleCheckedChange.bind(this, 'feature')}>
           Feature
         </Checkbox>
-      </div>
+      </div>,
     );
     return elements;
   }
 }
 
-export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
-  FurAffinityFileOptions
-> {
+export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<FurAffinityFileOptions> {
   state: FurAffinityFileSubmissionState = {
-    folders: []
+    folders: [],
   };
 
   constructor(props: SubmissionSectionProps<FileSubmission, FurAffinityFileOptions>) {
     super(props);
     this.state = {
-      folders: []
+      folders: [],
     };
 
     WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
@@ -112,7 +108,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
             this.setState({ folders: data });
           }
         }
-      }
+      },
     );
   }
 
@@ -182,7 +178,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
             }
           })}
         </Select>
-      </Form.Item>
+      </Form.Item>,
     );
     return elements;
   }
@@ -202,7 +198,7 @@ export class FurAffinityFileSubmissionForm extends GenericFileSubmissionSection<
         <Checkbox checked={data.scraps} onChange={this.handleCheckedChange.bind(this, 'scraps')}>
           Send to scraps
         </Checkbox>
-      </div>
+      </div>,
     );
     return elements;
   }
