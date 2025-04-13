@@ -35,7 +35,6 @@ import { Website } from '../website.base';
 import { TelegramDescription } from './telegram-description.parser';
 import { TelegramStorage } from './telegram.storage';
 import _ = require('lodash');
-import { resolveProjectReferencePath } from 'typescript';
 
 @Injectable()
 export class Telegram extends Website {
