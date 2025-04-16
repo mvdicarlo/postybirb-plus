@@ -296,12 +296,11 @@ export class e621 extends Website {
             this.validateTag(tagMeta, context);
           }
 
-          // Some tags are just not being returned in the response for some unknown reason
-          for (const tag of tagsSet) await this.getAndValidateSingleTag(tag, context);
+          // Missing tags are invalid
+          for (const tag of tagsSet) this.tagIsInvalid(context, tag);
         } else {
-          // Some of the tags does not exists, iterate through all
-          // of them because there is no other way to check
-          for (const tag of formattedTags) await this.getAndValidateSingleTag(tag, context);
+          // No results are produced, all tags are invalid
+          for (const tag of formattedTags) this.tagIsInvalid(context, tag);
         }
 
         if (context.generalTags < 10) {
@@ -353,7 +352,7 @@ export class e621 extends Website {
   ) {
     return this.getMetdata<e621TagsEmpty | e621Tags>(
       cancellationToken,
-      `/tags.json?search[name]=${formattedTags.join(',')}`,
+      `tags.json?search[name]=${formattedTags.map(e => encodeURIComponent(e)).join(',')}&limit=320`,
     );
   }
 
