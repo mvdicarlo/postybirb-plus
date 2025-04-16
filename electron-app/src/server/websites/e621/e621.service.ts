@@ -352,7 +352,9 @@ export class e621 extends Website {
   ) {
     return this.getMetadata<e621TagsEmpty | e621Tags>(
       cancellationToken,
-      `tags.json?search[name]=${formattedTags.map(e => encodeURIComponent(e)).join(',')}&limit=320`,
+      `/tags.json?search[name]=${formattedTags
+        .map(e => encodeURIComponent(e))
+        .join(',')}&limit=320`,
     );
   }
 
