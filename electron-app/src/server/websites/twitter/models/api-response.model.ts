@@ -1,3 +1,5 @@
+import util from 'util';
+
 export class ApiResponse<T> {
   static fromMaybeMultipleErrors<T extends { errors: unknown }>(err: unknown | unknown[]) {
     return new ApiResponse<T>({
@@ -15,7 +17,11 @@ export class ApiResponse<T> {
   }
 
   private static maybeErrorToString(e: unknown, stacktrace = false): string {
-    return e instanceof Error ? (stacktrace ? e.stack : e.message) : String(e);
+    return e instanceof Error
+      ? stacktrace
+        ? e.stack
+        : e.message
+      : util.inspect(e, { colors: false });
   }
 
   data: T;
