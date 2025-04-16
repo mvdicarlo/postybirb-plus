@@ -340,7 +340,7 @@ export class e621 extends Website {
   }
 
   private async getUserFeedback(cancellationToken: CancellationTokenDynamic, username: string) {
-    return this.getMetdata<e621UserFeedbacksEmpty | e621UserFeedbacks>(
+    return this.getMetadata<e621UserFeedbacksEmpty | e621UserFeedbacks>(
       cancellationToken,
       `/user_feedbacks.json?search[user_name]=${username}`,
     );
@@ -350,7 +350,7 @@ export class e621 extends Website {
     cancellationToken: CancellationTokenDynamic,
     formattedTags: string[],
   ) {
-    return this.getMetdata<e621TagsEmpty | e621Tags>(
+    return this.getMetadata<e621TagsEmpty | e621Tags>(
       cancellationToken,
       `tags.json?search[name]=${formattedTags.map(e => encodeURIComponent(e)).join(',')}&limit=320`,
     );
@@ -358,7 +358,7 @@ export class e621 extends Website {
 
   private metadataCache = new Map<string, object>();
 
-  private async getMetdata<T extends object>(
+  private async getMetadata<T extends object>(
     cancellationToken: CancellationTokenDynamic,
     url: string,
   ) {
