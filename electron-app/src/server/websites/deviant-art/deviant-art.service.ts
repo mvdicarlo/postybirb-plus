@@ -94,7 +94,11 @@ export class DeviantArt extends Website {
     if (userInfoCookie) {
       status.loggedIn = true;
       status.username = JSON.parse(decodeURIComponent(userInfoCookie.value).split(';')[1]).username;
-      await this.getFolders(data._id, status.username);
+      if (!status.username) {
+        status.loggedIn = false;
+      } else {
+        await this.getFolders(data._id, status.username);
+      }
     }
 
     return status;
