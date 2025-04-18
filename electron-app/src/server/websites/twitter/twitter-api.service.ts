@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as _ from 'lodash';
 import * as request from 'request';
-import Twitter, { AccessTokenResponse, TokenResponse, TwitterOptions } from 'twitter-lite';
+import Twitter, { AccessTokenResponse, TwitterOptions } from 'twitter-lite';
 import {
   ContentBlurType,
   ESensitiveMediaWarnings_Utils,
@@ -39,6 +39,13 @@ interface SendTweetV2Params {
   };
   reply_settings?: TTweetReplySettingsV2 | string;
   text?: string;
+}
+
+interface TwitterOAuth {
+  consumer_key: string;
+  consumer_secret: string;
+  token: string;
+  token_secret: string;
 }
 
 @Injectable()
@@ -93,6 +100,52 @@ export class TwitterAPIService {
       this.logger.error(err, err.stack, 'Twitter Auth Complete Failure');
       return new ApiResponse({ error: err });
     }
+  }
+
+  private getOAuth(apiKeys: ApiData, client: Twitter) {
+    const tokens = client['token'];
+
+    const oauth: TwitterOAuth = {
+      consumer_key: apiKeys.key,
+      consumer_secret: apiKeys.secret,
+      token: tokens.key,
+      token_secret: tokens.secret,
+    };
+
+    return oauth;
+  }
+
+  private async request(
+    method: 'get' | 'post',
+    url: string,
+    purpose: string,
+    oauth: TwitterOAuth,
+    form?: unknown,
+    formData?: unknown,
+  ) {
+    return await new Promise((resolve, reject) => {
+      request[method](
+        url,
+        {
+          json: true,
+          form,
+          formData,
+          oauth,
+        },
+        (err, res, body) => {
+          if (err) {
+            this.logger.error(err, `Failed to ${purpose} (${method} ${url})`);
+            return reject(new Error(`Failed to ${purpose}: ` + String(err)));
+          }
+
+          if (body && body.errors) {
+            reject(body.errors);
+          } else {
+            resolve(body);
+          }
+        },
+      );
+    });
   }
 
   async post(
@@ -163,18 +216,10 @@ export class TwitterAPIService {
       let replyId;
       for (const t of tweets) {
         if (replyId) {
-          t.reply = {
-            in_reply_to_tweet_id: replyId,
-          };
+          t.reply = { in_reply_to_tweet_id: replyId };
         }
-        const tokens = client['token'];
 
-        const oauth = {
-          consumer_key: apiKeys.key,
-          consumer_secret: apiKeys.secret,
-          token: tokens.key,
-          token_secret: tokens.secret,
-        };
+        const oauth = this.getOAuth(apiKeys, client);
         const post = await this.postTweet(t, oauth);
         const me = await this.getAuthenticatedUser(oauth);
         if (!url) {
@@ -182,56 +227,21 @@ export class TwitterAPIService {
         }
         replyId = post.id_str;
       }
-      return new ApiResponse({
-        data: {
-          url,
-        },
-      });
+      return new ApiResponse({ data: { url } });
     } catch (err) {
       this.logger.error(err, '', 'Failed to post');
       return ApiResponse.fromMaybeMultipleErrors<{ url: string; errors: unknown }>(err);
     }
   }
 
-  private getAuthenticatedUser(oauth: any): Promise<any> {
+  private getAuthenticatedUser(oauth: TwitterOAuth): Promise<any> {
     const url = 'https://api.twitter.com/2/users/me';
-    return new Promise((resolve, reject) => {
-      request.get(
-        url,
-        {
-          json: true,
-          oauth,
-        },
-        (err, res, body) => {
-          if (body && body.errors) {
-            reject(body.errors);
-          } else {
-            resolve(body);
-          }
-        },
-      );
-    });
+    return this.request('get', url, 'get authenticated user', oauth);
   }
 
-  private postTweet(form: any, oauth: any): Promise<any> {
+  private postTweet(form: any, oauth: TwitterOAuth): Promise<any> {
     const url = 'https://api.twitter.com/2/tweets';
-    return new Promise((resolve, reject) => {
-      request.post(
-        url,
-        {
-          json: true,
-          body: form,
-          oauth,
-        },
-        (err, res, body) => {
-          if (body && body.errors) {
-            reject(body.errors);
-          } else {
-            resolve(body);
-          }
-        },
-      );
-    });
+    return this.request('post', url, 'post tweet', oauth, form);
   }
 
   private async uploadMedia(apiKeys: ApiData, client: Twitter, file: RequestFile): Promise<string> {
@@ -250,37 +260,8 @@ export class TwitterAPIService {
     }
 
     const url = 'https://upload.twitter.com/1.1/media/upload.json';
-    const tokens = client['token'];
-
-    const oauth = {
-      consumer_key: apiKeys.key,
-      consumer_secret: apiKeys.secret,
-      token: tokens.key,
-      token_secret: tokens.secret,
-    };
-
-    const mediaData: any = await new Promise((resolve, reject) => {
-      request.post(
-        url,
-        {
-          json: true,
-          form: init,
-          oauth,
-        },
-        (err, res, body) => {
-          if (err) {
-            this.logger.error(err, 'Failed to upload media to ' + url);
-            return reject(new Error('Failed to upload media to upload.twitter.com: ' + err));
-          }
-
-          if (body && body.errors) {
-            reject(body.errors);
-          } else {
-            resolve(body);
-          }
-        },
-      );
-    });
+    const oauth = this.getOAuth(apiKeys, client);
+    const mediaData: any = await this.request('post', url, 'upload media', oauth, init);
 
     if (!mediaData) throw new Error('Failed to get uploaded media ids');
 
@@ -290,52 +271,21 @@ export class TwitterAPIService {
       chunks.map((chunk, i) => this.uploadChunk(oauth, media_id_string, Buffer.from(chunk), i)),
     );
 
-    await new Promise((resolve, reject) => {
-      request.post(
-        url,
-        {
-          form: {
-            command: 'FINALIZE',
-            media_id: media_id_string,
-          },
-          json: true,
-          oauth,
-        },
-        (err, res, body) => {
-          if (body && body.errors) {
-            reject(body.errors);
-          } else {
-            resolve(body);
-          }
-        },
-      );
+    await this.request('post', url, 'finalize media upload', oauth, {
+      command: 'FINALIZE',
+      media_id: media_id_string,
     });
 
     return media_id_string;
   }
 
-  private uploadChunk(oauth: any, id: string, chunk: Buffer, index: number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      request.post(
-        'https://upload.twitter.com/1.1/media/upload.json',
-        {
-          formData: {
-            command: 'APPEND',
-            media_id: id,
-            media_data: chunk.toString('base64'),
-            segment_index: index,
-          },
-          json: true,
-          oauth,
-        },
-        (err, res, body) => {
-          if (body && body.errors) {
-            reject(body.errors);
-          } else {
-            resolve(body);
-          }
-        },
-      );
+  private uploadChunk(oauth: TwitterOAuth, id: string, chunk: Buffer, index: number): Promise<any> {
+    const url = 'https://upload.twitter.com/1.1/media/upload.json';
+    return this.request('post', url, `upload chunk ${index}`, oauth, undefined, {
+      command: 'APPEND',
+      media_id: id,
+      media_data: chunk.toString('base64'),
+      segment_index: index,
     });
   }
 }

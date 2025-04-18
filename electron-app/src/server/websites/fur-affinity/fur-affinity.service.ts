@@ -45,6 +45,8 @@ export class FurAffinity extends Website {
     },
   ];
 
+  private readonly MAX_TAGS_LENGTH = 500;
+
   readonly acceptsFiles = [
     'jpg',
     'gif',
@@ -329,7 +331,7 @@ export class FurAffinity extends Website {
   }
 
   getFormTags(tags: string[]): string {
-    const maxLength = 250;
+    const maxLength = this.MAX_TAGS_LENGTH;
     tags = super.parseTags(tags).map(tag => tag.replace(/(\/|\\)/gm, '_'));
     const filteredTags = tags.filter(tag => tag.length >= 3);
     let tagString = filteredTags.join(' ').trim();
@@ -356,9 +358,10 @@ export class FurAffinity extends Website {
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     if (
-      FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).join(' ').length > 250
+      FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).join(' ').length >
+      this.MAX_TAGS_LENGTH
     ) {
-      warnings.push('Tags will be truncated to a length of 250 characters.');
+      warnings.push(`Tags will be truncated to a length of ${this.MAX_TAGS_LENGTH} characters.`);
     }
 
     if (submissionPart.data.folders) {

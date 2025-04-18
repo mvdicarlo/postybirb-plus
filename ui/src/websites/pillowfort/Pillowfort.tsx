@@ -18,6 +18,7 @@ const privacyOptions = {
   followers: 'Followers',
   mutuals: 'Mutuals',
   private: 'Private',
+  users: 'Logged-in users',
 };
 
 export class Pillowfort extends WebsiteImpl {
