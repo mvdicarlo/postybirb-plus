@@ -169,12 +169,8 @@
         "github"
       ],
       "target": [
-        "AppImage",
-        "snap"
+        "AppImage"
       ]
-    },
-    "snap": {
-      "publish": null
     },
     "nsis": {
       "artifactName": "postybirb-plus-setup-${version}.${ext}",
