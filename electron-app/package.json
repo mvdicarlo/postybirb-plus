@@ -173,6 +173,9 @@
         "snap"
       ]
     },
+    "snap": {
+      "publish": null
+    },
     "nsis": {
       "artifactName": "postybirb-plus-setup-${version}.${ext}",
       "deleteAppDataOnUninstall": true
