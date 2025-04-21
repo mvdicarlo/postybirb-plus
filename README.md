@@ -16,10 +16,11 @@ React code that handles UI of the application displayed in the desktop applicati
 To set up a local copy of PostyBirb for development:
 
 1. clone this repository and `cd` into it.
-2. `npm run contribute` to install dependencies in every folder.
+2. `npm install`
+3. `NODE_OPTIONS=--openssl-legacy-provider npm run contribute` to install dependencies in every folder.
 
-Please note that if you have node version 16 and above (you can check that by running `node -v`), you should use  `NODE_OPTIONS=--openssl-legacy-provider npm run contribute` 
-instead.
+> [!NOTE]  
+> If you are using node version 16 and below you don't need to set `NODE_OPTIONS` in step 3, just do `npm run contribute` instead.
 
 <details>
   <summary>INSTALL TROUBLESHOOTING</summary>
