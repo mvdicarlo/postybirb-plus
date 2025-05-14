@@ -65,7 +65,7 @@ export class Discord extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(50) };
+    return { maxSize: FileSize.MBtoBytes(10) };
   }
 
   async postNotificationSubmission(
@@ -141,7 +141,6 @@ export class Discord extends Website {
   ): ValidationParts {
     const problems: string[] = [];
     const warnings: string[] = [];
-    const isAutoscaling: boolean = submissionPart.data.autoScale;
 
     const files = [
       submission.primary,
@@ -150,12 +149,12 @@ export class Discord extends Website {
       ),
     ];
 
-    const maxMB: number = 25;
+    const maxMB: number = 10;
     files.forEach(file => {
-      const { type, size, name, mimetype } = file;
+      const { size } = file;
       if (FileSize.MBtoBytes(maxMB) < size) {
         warnings.push(
-          `Discord requires files be 25MB or less, unless your channel has been boosted.`,
+          `Discord requires files be ${maxMB}MB or less, unless your channel has been boosted.`,
         );
       }
     });
