@@ -135,7 +135,10 @@ export default class DefaultFormSection extends React.Component<
               </Select.Option>
             ))}
           </Select>
-          <p>Supported by {DefaultFormSection.websitesSupportingParentIds}.</p>
+          <p>
+            Used by <code>parent</code> shortcuts and supported by{' '}
+            {DefaultFormSection.websitesSupportingParentIds}.
+          </p>
         </Form.Item>
       </div>
     );

@@ -2,14 +2,7 @@ import { Injectable, Logger, Inject, forwardRef, BadRequestException } from '@ne
 import fs from 'fs-extra';
 import _ from 'lodash';
 import { SubmissionService } from '../submission.service';
-import {
-  Submission,
-  DefaultOptions,
-  FileRecord,
-  PostStatuses,
-  PostInfo,
-  Parts,
-} from 'postybirb-commons';
+import { Submission, DefaultOptions, FileRecord, PostStatuses, PostInfo } from 'postybirb-commons';
 import { SubmissionType } from 'postybirb-commons';
 import { WebsiteProvider } from 'src/server/websites/website-provider.service';
 import { SettingsService } from 'src/server/settings/settings.service';
@@ -384,11 +377,56 @@ export class PostService {
 
   private async updateChildren(parent: SubmissionEntity): Promise<Array<string>> {
     const children = await this.submissionService.getChildren(parent._id, true);
+    this.logger.debug(`Update ${children?.length || 0} children`);
+
+    // Lazy-load the sources, they may not be needed or needed more than once.
+    const getSource = (() => {
+      let sources: Map<string, string> | null = null;
+      return async (search: string, considerWebsite: boolean) => {
+        if (sources === null) {
+          sources = new Map<string, string>();
+          for (const part of await this.partService.getPartsForSubmission(parent._id, false)) {
+            if (part?.postedTo) {
+              if (part.accountId) {
+                sources.set(`a${part.accountId}`, part.postedTo);
+              }
+              const website = part.website?.toLowerCase();
+              if (website && !sources.has(website)) {
+                sources.set(`w${website}`, part.postedTo);
+              }
+            }
+          }
+        }
+
+        const accountIdSource = sources.get(`a${search}`);
+        if (accountIdSource !== undefined) {
+          this.logger.debug(`Found source for account id '${search}': '${accountIdSource}'`);
+          return accountIdSource;
+        }
+
+        if (considerWebsite) {
+          const websiteSource = sources.get(`w${search.toLowerCase()}`);
+          if (websiteSource !== undefined) {
+            this.logger.debug(`Found source for website '${search}': '${websiteSource}'`);
+            return websiteSource;
+          }
+        }
+
+        this.logger.debug(`No source found for '${search}' (considerWebsite ${considerWebsite})`);
+        return undefined;
+      };
+    })();
+
     const errors = [];
     if (children?.length) {
       for (const child of children) {
         try {
-          const childErrors = await this.updateChild(parent, child.submission, child.parts);
+          const childErrors = await this.updateChild(
+            parent,
+            child.submission,
+            child.parts,
+            getSource,
+          );
           errors.push(...childErrors);
         } catch (e) {
           this.logger.error(`Failed to update child ${child?.submission?._id}: ${e}`, e.stack);
@@ -405,21 +443,42 @@ export class PostService {
     parent: SubmissionEntity,
     childSubmission: SubmissionEntity,
     childParts: Array<SubmissionPartEntity<any>>,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
   ): Promise<Array<string>> {
     const errors = [];
     for (const childPart of childParts) {
-      if (!childPart?.isDefault) {
+      if (childPart) {
+        this.logger.debug(`Handling child part ${childPart?.website} ${childPart?.accountId}`);
         try {
-          const website = this.websites.getWebsiteModule(childPart.website);
-          // Lazy-load the source, the website may not need it.
-          const getSource = async () => {
-            const parentPart = await this.partService.getSubmissionPart(
-              parent._id,
-              childPart.accountId,
+          let childSourceLinksChanged = false;
+          try {
+            childSourceLinksChanged = await this.updateChildSourceLinks(childPart, getSource);
+          } catch (e) {
+            this.logger.error(
+              `Failed to handle child ${childSubmission?._id} part ` +
+                `${childPart?.website} ${childPart?.accountId} source links: ${e}`,
+              e.stack,
             );
-            return parentPart?.postedTo;
-          };
-          if (await website.updateChildPart(childPart, getSource)) {
+            const title = childParts?.find(p => p.isDefault)?.data?.title || childSubmission?.title;
+            errors.push(`${title} ${childPart?.website} ${childPart?.accountId}: ${e}`);
+          }
+
+          let childWebsitePartChanged = false;
+          try {
+            childWebsitePartChanged = await this.updateChildWebsitePart(childPart, getSource);
+          } catch (e) {
+            this.logger.error(
+              `Failed to handle child ${childSubmission?._id} part ` +
+                `${childPart?.website} ${childPart?.accountId} website: ${e}`,
+              e.stack,
+            );
+            const title = childParts?.find(p => p.isDefault)?.data?.title || childSubmission?.title;
+            errors.push(`${title} ${childPart?.website} ${childPart?.accountId}: ${e}`);
+          }
+
+          this.logger.debug(`Child links changed ${childSourceLinksChanged}`);
+          this.logger.debug(`Child part changed ${childWebsitePartChanged}`);
+          if (childSourceLinksChanged || childWebsitePartChanged) {
             await this.submissionService.setPart(childSubmission, childPart);
           }
         } catch (e) {
@@ -434,6 +493,79 @@ export class PostService {
       }
     }
     return errors;
+  }
+
+  private async updateChildSourceLinks(
+    childPart: SubmissionPartEntity<any>,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<boolean> {
+    const description = childPart.data?.description?.value as string;
+    if (description) {
+      this.logger.debug(`Looking at description '${description}'`);
+      const sources = await this.collectSources(description, getSource);
+      this.logger.debug(`Got ${sources.size} source(s)`);
+      if (sources.size !== 0) {
+        const changedDescription = description.replace(
+          /{parent:(.+?)}/gi,
+          (match: string, p1: string): string => {
+            const source = sources.get(p1?.trim());
+            if (source) {
+              this.logger.debug(`Replace ${match} with ${source}`);
+              return source;
+            } else {
+              this.logger.debug(`Keep ${match}`);
+              return match;
+            }
+          },
+        );
+
+        if (description !== changedDescription) {
+          this.logger.debug(`Description changed to ${changedDescription}`);
+          childPart.data.description.value = changedDescription;
+          return true;
+        } else {
+          this.logger.debug(`Description still the same`);
+        }
+      }
+    } else {
+      this.logger.debug(`NOT looking at blank description`);
+    }
+    return false;
+  }
+
+  private async collectSources(
+    description: string,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<Map<string, string | null>> {
+    const sources = new Map<string, string | null>();
+    // Global matching in a while loop requires the regex instance to stay the
+    // same, so don't replace the variable with a literal!
+    const regex = /{parent:(.+?)}/gi;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(description)) !== null) {
+      const target = match[1].trim();
+      if (!sources.has(target)) {
+        const source = await getSource(target, true);
+        sources.set(target, source === undefined ? null : source);
+      }
+    }
+    return sources;
+  }
+
+  private async updateChildWebsitePart(
+    childPart: SubmissionPartEntity<any>,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<boolean> {
+    if (childPart.isDefault) {
+      return false;
+    } else {
+      // Lazy-load the source, it may not be needed or needed more than once.
+      const getSourceForChild = async () => {
+        return getSource(childPart.accountId, false);
+      };
+      const website = this.websites.getWebsiteModule(childPart.website);
+      return await website.updateChildPart(childPart, getSourceForChild);
+    }
   }
 
   private async clearAndPostNext(type: SubmissionType) {
