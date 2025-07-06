@@ -34,7 +34,7 @@ export class Discord extends Website {
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
-  maxMB: number = DEFAULT_SIZE_MB;
+  maxMB: number = this.DEFAULT_SIZE_MB;
   readonly defaultDescriptionParser = (html: string) => {
     const markdown = MarkdownParser.parse(html).replace(
       // Matches [url](text)
