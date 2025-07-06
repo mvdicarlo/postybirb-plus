@@ -1,4 +1,4 @@
-import { Checkbox, Form, Radio } from 'antd';
+import { Checkbox, Form, Select} from 'antd';
 import { DiscordFileOptions, FileSubmission, Submission } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
@@ -80,19 +80,21 @@ export class DiscordFileSubmissionForm extends GenericFileSubmissionSection<Disc
   
   renderRightForm(data: DiscordFileOptions) {
       const elements = super.renderRightForm(data);
-      return [
+	  
+	  return [
         ...elements,
 		<Form.Item label="File Size Limit">
-		<Radio.Group
-		  onChange={this.handleValueChange.bind(this, 'filesizelimit')}
+		<Select
+		  {...GenericSelectProps}
+		  onChange={this.setValue.bind(this, 'filesizelimit')}
 		  className="w-full"
 		  value={data.filesizelimit}
-		  buttonStyle="solid"
 		>
-		  <Radio.Button value='10'>10 MB (Default)</Radio.Button>
-		  <Radio.Button value='50'>50 MB (Nitro Classic)</Radio.Button>
-		  <Radio.Button value='500'>500 MB (Nitro)</Radio.Button>
-		</Radio.Group>
+		  <Select.Option value={10}>10 MB (Default)</Select.Option>
+		  <Select.Option value={50}>50 MB (Nitro Classic / Boost Level 2)</Select.Option>
+		  <Select.Option value={100}>100 MB (Boost Level 3)</Select.Option>
+		  <Select.Option value={500}>500 MB (Nitro)</Select.Option>
+		</Select>
 		</Form.Item>
       ];
     }
