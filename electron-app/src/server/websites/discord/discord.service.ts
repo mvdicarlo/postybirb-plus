@@ -156,11 +156,11 @@ export class Discord extends Website {
     this.maxMB = submissionPart.data.filesizelimit;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-	  if (FileSize.MBtoBytes(this.maxMB) > this.DEFAULT_SIZE_BYTES) {
-	    warnings.push(
-	      `When using a file size limit greater than ${this.DEFAULT_SIZE_MB}MB, ensure that the Discord channel is appropriately boosted or the account has the required Nitro subscription.`,
-	    );
-	  }
+      if (FileSize.MBtoBytes(this.maxMB) > this.DEFAULT_SIZE_BYTES) {
+        warnings.push(
+          `When using a file size limit greater than ${this.DEFAULT_SIZE_MB}MB, ensure that the Discord channel is appropriately boosted or the account has the required Nitro subscription.`,
+        );
+      }
       if (FileSize.MBtoBytes(this.maxMB) < size) {
         warnings.push(
           `The selected Discord file size limit requires files to be ${this.maxMB}MB or less.`,

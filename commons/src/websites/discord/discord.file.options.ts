@@ -14,7 +14,7 @@ export class DiscordFileOptionsEntity
   @IsBoolean()
   @DefaultValue(false)
   spoiler!: boolean;
-  
+
   @Expose()
   @IsNumber()
   @DefaultValue(10)
