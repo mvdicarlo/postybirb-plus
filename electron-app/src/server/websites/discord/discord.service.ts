@@ -32,6 +32,7 @@ export class Discord extends Website {
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
+  maxMB: number = 10;
   readonly defaultDescriptionParser = (html: string) => {
     const markdown = MarkdownParser.parse(html).replace(
       // Matches [url](text)
@@ -65,7 +66,7 @@ export class Discord extends Website {
   }
 
   getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(50) };
+    return { maxSize: FileSize.MBtoBytes(this.maxMB) };
   }
 
   async postNotificationSubmission(
@@ -150,12 +151,12 @@ export class Discord extends Website {
       ),
     ];
 
-    const maxMB: number = 25;
+    this.maxMB = submissionPart.data.filesizelimit;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-      if (FileSize.MBtoBytes(maxMB) < size) {
+      if (FileSize.MBtoBytes(this.maxMB) < size) {
         warnings.push(
-          `Discord requires files be 25MB or less, unless your channel has been boosted.`,
+          `Discord requires files be ${this.maxMB}MB or less, unless your channel has been boosted.`,
         );
       }
     });
