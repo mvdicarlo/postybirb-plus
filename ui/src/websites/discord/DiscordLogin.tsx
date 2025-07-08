@@ -1,13 +1,15 @@
 import React from 'react';
 import { LoginDialogProps } from '../interfaces/website.interface';
-import { Form, Input, Button, Checkbox, message } from 'antd';
+import { Form, Input, Button, Checkbox, Select, message } from 'antd';
 import LoginService from '../../services/login.service';
 import BrowserLink from '../../components/BrowserLink';
+import { GenericSelectProps } from '../generic/GenericSelectProps';
 
 interface State {
   name: string;
   webhook: string;
   forum: boolean,
+  serverBoostLevel: number,
   sending: boolean;
 }
 
@@ -16,6 +18,7 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
     name: '',
     webhook: '',
     forum: false,
+	serverBoostLevel: 0,
     sending: false
   };
 
@@ -33,6 +36,7 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
       name: this.state.name,
       webhook: this.state.webhook,
       forum: this.state.forum,
+	  serverBoostLevel: this.state.serverBoostLevel
     })
       .then(() => {
         message.success('Discord updated.');
@@ -71,6 +75,18 @@ export default class DiscordLogin extends React.Component<LoginDialogProps, Stat
               onBlur={({ target }) => this.setState({ webhook: target.value })}
             />
           </Form.Item>
+		  <Form.Item label="Server Boost Level">
+		  		<Select
+		  		  {...GenericSelectProps}
+		  		  onChange={value => this.setState({ serverBoostLevel : value })}
+		  		  className="w-full"
+		  		  defaultValue={this.state.serverBoostLevel}
+		  		>
+		  		  <Select.Option value={0}>Default - Boost Level 0 and 1 (10MB)</Select.Option>
+		  		  <Select.Option value={1}>Boost Level 2 (50MB)</Select.Option>
+		  		  <Select.Option value={2}>Boost Level 3 (100MB)</Select.Option>
+		  		</Select>
+		  </Form.Item>
           <Form.Item>
             <Checkbox
               checked={this.state.forum}

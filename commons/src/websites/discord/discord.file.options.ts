@@ -16,11 +16,6 @@ export class DiscordFileOptionsEntity
   spoiler!: boolean;
 
   @Expose()
-  @IsNumber()
-  @DefaultValue(10)
-  filesizelimit!: number;
-
-  @Expose()
   @IsBoolean()
   @DefaultValue(true)
   useTitle!: boolean;

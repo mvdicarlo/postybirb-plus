@@ -27,14 +27,14 @@ import { DiscordAccountData } from './discord.account.interface';
 
 @Injectable()
 export class Discord extends Website {
+  readonly SERVER_BOOST_LIMITS: number[] = [10, 50, 100];
   readonly BASE_URL: string = '';
   readonly MAX_CHARS: number = 2000;
-  readonly DEFAULT_SIZE_MB: number = 10;
-  readonly DEFAULT_SIZE_BYTES: number = FileSize.MBtoBytes(this.DEFAULT_SIZE_MB);
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
-  maxMB: number = this.DEFAULT_SIZE_MB;
+  serverBoostLevel: number;
+  maxMB: number;
   readonly defaultDescriptionParser = (html: string) => {
     const markdown = MarkdownParser.parse(html).replace(
       // Matches [url](text)
@@ -57,6 +57,9 @@ export class Discord extends Website {
       const channel = await Http.get<any>(webhookData.webhook, undefined, {
         requestOptions: { json: true },
       });
+	  
+	  this.serverBoostLevel = webhookData.serverBoostLevel;
+	  this.maxMB = this.SERVER_BOOST_LIMITS[this.serverBoostLevel];
 
       if (!channel.error && channel.body.id) {
         status.loggedIn = true;
@@ -153,17 +156,16 @@ export class Discord extends Website {
       ),
     ];
 
-    this.maxMB = submissionPart.data.filesizelimit;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-      if (FileSize.MBtoBytes(this.maxMB) > this.DEFAULT_SIZE_BYTES) {
+      if (this.serverBoostLevel > 0) {
         warnings.push(
-          `When using a file size limit greater than ${this.DEFAULT_SIZE_MB}MB, ensure that the Discord channel is appropriately boosted or the account has the required Nitro subscription.`,
+          `Ensure that the Discord channel is appropriately boosted to level ${this.serverBoostLevel} or greater.`,
         );
       }
       if (FileSize.MBtoBytes(this.maxMB) < size) {
         warnings.push(
-          `The selected Discord file size limit requires files to be ${this.maxMB}MB or less.`,
+          `The selected Discord boost level requires files to be ${this.maxMB}MB or less.`,
         );
       }
     });
