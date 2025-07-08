@@ -33,8 +33,6 @@ export class Discord extends Website {
   readonly acceptsFiles: string[] = []; // accepts all
   readonly acceptsAdditionalFiles: boolean = true;
   readonly enableAdvertisement: boolean = false;
-  serverBoostLevel: number;
-  maxMB: number;
   readonly defaultDescriptionParser = (html: string) => {
     const markdown = MarkdownParser.parse(html).replace(
       // Matches [url](text)
@@ -58,8 +56,7 @@ export class Discord extends Website {
         requestOptions: { json: true },
       });
 	  
-	  this.serverBoostLevel = webhookData.serverBoostLevel;
-	  this.maxMB = this.SERVER_BOOST_LIMITS[this.serverBoostLevel];
+	  this.storeAccountInformation(data._id, 'serverBoostLevel', webhookData.serverBoostLevel);
 
       if (!channel.error && channel.body.id) {
         status.loggedIn = true;
@@ -70,8 +67,9 @@ export class Discord extends Website {
     return status;
   }
 
-  getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(this.maxMB) };
+  getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
+	const serverBoostLevel: number  = this.getAccountInfo(accountId, 'serverBoostLevel');
+    return { maxSize: FileSize.MBtoBytes(this.SERVER_BOOST_LIMITS[serverBoostLevel]) };
   }
 
   async postNotificationSubmission(
@@ -158,14 +156,18 @@ export class Discord extends Website {
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-      if (this.serverBoostLevel > 0) {
+	  
+	  const serverBoostLevel = this.getAccountInfo(submissionPart.accountId, 'serverBoostLevel');
+	  const filesizeLimit = this.SERVER_BOOST_LIMITS[serverBoostLevel];
+	  
+      if (serverBoostLevel > 0) {
         warnings.push(
-          `Ensure that the Discord channel is appropriately boosted to level ${this.serverBoostLevel} or greater.`,
+          `Ensure that the Discord channel is appropriately boosted to Level ${serverBoostLevel + 1} or greater.`,
         );
       }
-      if (FileSize.MBtoBytes(this.maxMB) < size) {
+      if (FileSize.MBtoBytes(filesizeLimit) < size) {
         warnings.push(
-          `The selected Discord boost level requires files to be ${this.maxMB}MB or less.`,
+          `$The selected Discord boost level requires files to be ${filesizeLimit}MB or less.`,
         );
       }
     });
