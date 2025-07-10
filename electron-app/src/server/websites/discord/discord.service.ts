@@ -27,6 +27,7 @@ import { DiscordAccountData } from './discord.account.interface';
 
 @Injectable()
 export class Discord extends Website {
+  readonly SERVER_BOOST_LIMITS: number[] = [10, 50, 100];
   readonly BASE_URL: string = '';
   readonly MAX_CHARS: number = 2000;
   readonly acceptsFiles: string[] = []; // accepts all
@@ -55,6 +56,8 @@ export class Discord extends Website {
         requestOptions: { json: true },
       });
 
+      this.storeAccountInformation(data._id, 'serverBoostLevel', webhookData.serverBoostLevel);
+
       if (!channel.error && channel.body.id) {
         status.loggedIn = true;
         status.username = webhookData.name;
@@ -64,8 +67,9 @@ export class Discord extends Website {
     return status;
   }
 
-  getScalingOptions(file: FileRecord): ScalingOptions {
-    return { maxSize: FileSize.MBtoBytes(50) };
+  getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
+    const serverBoostLevel: number = this.getAccountInfo(accountId, 'serverBoostLevel');
+    return { maxSize: FileSize.MBtoBytes(this.SERVER_BOOST_LIMITS[serverBoostLevel]) };
   }
 
   async postNotificationSubmission(
@@ -150,12 +154,22 @@ export class Discord extends Website {
       ),
     ];
 
-    const maxMB: number = 25;
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-      if (FileSize.MBtoBytes(maxMB) < size) {
+
+      const serverBoostLevel = this.getAccountInfo(submissionPart.accountId, 'serverBoostLevel');
+      const filesizeLimit = this.SERVER_BOOST_LIMITS[serverBoostLevel];
+
+      if (serverBoostLevel > 0) {
         warnings.push(
-          `Discord requires files be 25MB or less, unless your channel has been boosted.`,
+          `Ensure that the Discord channel is appropriately boosted to Level ${
+            serverBoostLevel + 1
+          } or greater.`,
+        );
+      }
+      if (FileSize.MBtoBytes(filesizeLimit) < size) {
+        warnings.push(
+          `$The selected Discord boost level requires files to be ${filesizeLimit}MB or less.`,
         );
       }
     });
