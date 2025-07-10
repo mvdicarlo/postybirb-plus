@@ -55,8 +55,8 @@ export class Discord extends Website {
       const channel = await Http.get<any>(webhookData.webhook, undefined, {
         requestOptions: { json: true },
       });
-	  
-	  this.storeAccountInformation(data._id, 'serverBoostLevel', webhookData.serverBoostLevel);
+
+      this.storeAccountInformation(data._id, 'serverBoostLevel', webhookData.serverBoostLevel);
 
       if (!channel.error && channel.body.id) {
         status.loggedIn = true;
@@ -68,7 +68,7 @@ export class Discord extends Website {
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
-	const serverBoostLevel: number  = this.getAccountInfo(accountId, 'serverBoostLevel');
+    const serverBoostLevel: number = this.getAccountInfo(accountId, 'serverBoostLevel');
     return { maxSize: FileSize.MBtoBytes(this.SERVER_BOOST_LIMITS[serverBoostLevel]) };
   }
 
@@ -156,13 +156,15 @@ export class Discord extends Website {
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
-	  
-	  const serverBoostLevel = this.getAccountInfo(submissionPart.accountId, 'serverBoostLevel');
-	  const filesizeLimit = this.SERVER_BOOST_LIMITS[serverBoostLevel];
-	  
+
+      const serverBoostLevel = this.getAccountInfo(submissionPart.accountId, 'serverBoostLevel');
+      const filesizeLimit = this.SERVER_BOOST_LIMITS[serverBoostLevel];
+
       if (serverBoostLevel > 0) {
         warnings.push(
-          `Ensure that the Discord channel is appropriately boosted to Level ${serverBoostLevel + 1} or greater.`,
+          `Ensure that the Discord channel is appropriately boosted to Level ${
+            serverBoostLevel + 1
+          } or greater.`,
         );
       }
       if (FileSize.MBtoBytes(filesizeLimit) < size) {
