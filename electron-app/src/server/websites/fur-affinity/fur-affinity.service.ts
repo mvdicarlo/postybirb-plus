@@ -72,7 +72,7 @@ export class FurAffinity extends Website {
     const res = await HttpExperimental.get<string>(`${this.BASE_URL}/controls/submissions`, {
       partition: data._id,
     });
-    if (res.body.includes('logout-link')) {
+    if (res.body?.includes('logout-link')) {
       status.loggedIn = true;
       const $ = cheerio.load(res.body);
       status.username = $('.loggedin_user_avatar').attr('alt');
@@ -164,7 +164,7 @@ export class FurAffinity extends Website {
     });
 
     this.verifyResponseExperimental(post, 'Post');
-    if (post.body.includes('journal-title')) {
+    if (post.body?.includes('journal-title')) {
       return this.createPostResponse({ source: post.responseUrl });
     }
 
@@ -213,7 +213,7 @@ export class FurAffinity extends Website {
   }
 
   private processForError(body: string): string | undefined {
-    if (body.includes('redirect-message')) {
+    if (body?.includes('redirect-message')) {
       const $ = cheerio.load(body);
       let msg = $('.redirect-message').first().text();
 
@@ -316,7 +316,7 @@ export class FurAffinity extends Website {
 
     const { body } = post;
 
-    if (!post.responseUrl.includes('?upload-successful')) {
+    if (!post?.responseUrl?.includes('?upload-successful')) {
       err = this.processForError(body);
       if (err) {
         return Promise.reject(this.createPostResponse({ message: err, additionalInfo: body }));
