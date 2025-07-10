@@ -1,4 +1,4 @@
-import { Checkbox, Form } from 'antd';
+import { Checkbox } from 'antd';
 import { DiscordFileOptions, FileSubmission, Submission } from 'postybirb-commons';
 import React from 'react';
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';

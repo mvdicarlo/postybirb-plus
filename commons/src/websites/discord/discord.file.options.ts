@@ -1,6 +1,5 @@
 import { Expose } from 'class-transformer';
 import { IsBoolean } from 'class-validator';
-import { IsNumber } from 'class-validator';
 import { DefaultFileOptions } from '../../interfaces/submission/default-options.interface';
 import { DiscordFileOptions } from '../../interfaces/websites/discord/discord.file.options.interface';
 import { DefaultValue } from '../../models/decorators/default-value.decorator';
