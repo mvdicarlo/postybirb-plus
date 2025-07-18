@@ -24,6 +24,7 @@ import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
+import { HttpExperimental } from 'src/server/utils/http-experimental';
 
 @Injectable()
 export class Aryion extends Website {
@@ -123,8 +124,8 @@ export class Aryion extends Website {
 
     const form: any = {
       action: 'new-item',
-      parentid: data.options.folder,
-      MAX_FILE_SIZE: '78643200',
+      parentid: data.options.folder[data.options.folder.length - 1],
+      MAX_FILE_SIZE: '104857600',
       title: data.title,
       file: postFile,
       thumb: data.thumbnail,
@@ -141,23 +142,23 @@ export class Aryion extends Website {
     };
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(
+    const post = await HttpExperimental.post<string>(
       `${this.BASE_URL}/g4/itemaction.php`,
-      data.part.accountId,
       {
+        partition: data.part.accountId,
         type: 'multipart',
         data: form,
       },
     );
 
-    this.verifyResponse(post, 'Verify Post');
+    this.verifyResponseExperimental(post, 'Verify Post');
     try {
 
       // Split errors/warnings if they exist and handle them separately. The
       // error/warning message for Aryion is returned as a separate div from
       // the response JSON. You may want to do a more detailed check in the
       // future to fail on specific warnings/errors.
-      const responses = post.body.split('\n');
+      const responses = post.body.trim().split('\n').map(r => r?.trim());
       if (responses.length > 1 && responses[0].indexOf('Warning:') === -1) {
         return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
       }
@@ -208,7 +209,7 @@ export class Aryion extends Website {
     }
 
     const { type, size, name } = submission.primary;
-    const maxMB: number = 20;
+    const maxMB: number = 100;
     if (FileSize.MBtoBytes(maxMB) < size) {
       if (
         isAutoscaling &&
