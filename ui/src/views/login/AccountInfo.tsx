@@ -114,6 +114,9 @@ export default class AccountInfo extends React.Component<AccountInfoProps, Accou
             <div>
               {accountInfo.alias}
               <span className="text-link ml-1">
+                <Typography.Text copyable={{ text: this.props.accountInfo._id}}></Typography.Text>
+              </span>
+              <span className="text-link ml-1">
                 <Icon
                   type="edit"
                   onClick={() =>
@@ -129,6 +132,14 @@ export default class AccountInfo extends React.Component<AccountInfoProps, Accou
                 onOk={this.renameAccount}
                 okButtonProps={{ disabled: !this.isRenameValid() }}
               >
+                <p>
+                  Account ID:{' '}
+                  <code>
+                    <Typography.Text copyable={{ text: this.props.accountInfo._id }}>
+                      {this.props.accountInfo._id}
+                    </Typography.Text>
+                  </code>
+                </p>
                 <Form
                   onSubmit={e => {
                     e.preventDefault();
