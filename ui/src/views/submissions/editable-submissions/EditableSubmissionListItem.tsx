@@ -317,11 +317,7 @@ export class EditableSubmissionListItem extends React.Component<ListItemProps, L
               >
                 <DatePicker
                   className="w-full"
-                  defaultValue={
-                    this.props.item.submission.schedule.postAt
-                      ? moment(this.state.postAt)
-                      : undefined
-                  }
+                  defaultValue={moment(item.submission.schedule.postAt)}
                   format="YYYY-MM-DD HH:mm:ss"
                   showTime={{ format: 'HH:mm:ss', use12Hours: true }}
                   placeholder="Unscheduled"
