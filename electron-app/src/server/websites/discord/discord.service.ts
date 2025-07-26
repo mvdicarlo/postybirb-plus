@@ -56,6 +56,10 @@ export class Discord extends Website {
         requestOptions: { json: true },
       });
 
+      const boostLevel = webhookData.serverBoostLevel;
+      if (boostLevel == null || boostLevel < 0 || boostLevel >= this.SERVER_BOOST_LIMITS.length) {
+        webhookData.serverBoostLevel = 0;
+      }
       this.storeAccountInformation(data._id, 'serverBoostLevel', webhookData.serverBoostLevel);
 
       if (!channel.error && channel.body.id) {
@@ -169,7 +173,7 @@ export class Discord extends Website {
       }
       if (FileSize.MBtoBytes(filesizeLimit) < size) {
         warnings.push(
-          `$The selected Discord boost level requires files to be ${filesizeLimit}MB or less.`,
+          `The selected Discord boost level requires files to be ${filesizeLimit}MB or less.`,
         );
       }
     });
