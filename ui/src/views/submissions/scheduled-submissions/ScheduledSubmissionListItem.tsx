@@ -107,7 +107,7 @@ export class ScheduledSubmissionListItem extends React.Component<ListItemProps, 
         >
           <DatePicker
             className="w-full"
-            defaultValue={moment(this.props.item.submission.schedule.postAt)}
+            defaultValue={moment(item.submission.schedule.postAt)}
             format="YYYY-MM-DD HH:mm:ss"
             showTime={{ format: 'HH:mm:ss', use12Hours: true }}
             placeholder="Unscheduled"
