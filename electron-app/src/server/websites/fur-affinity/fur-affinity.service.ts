@@ -357,11 +357,13 @@ export class FurAffinity extends Website {
     const warnings: string[] = [];
     const isAutoscaling: boolean = submissionPart.data.autoScale;
 
-    if (
-      FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags).join(' ').length >
-      this.MAX_TAGS_LENGTH
-    ) {
+    const tags = FormContent.getTags(defaultPart.data.tags, submissionPart.data.tags);
+    if (tags.join(' ').length > this.MAX_TAGS_LENGTH) {
       warnings.push(`Tags will be truncated to a length of ${this.MAX_TAGS_LENGTH} characters.`);
+    }
+
+    if (tags.length < 3) {
+      problems.push(`At least 3 tags are required.`);
     }
 
     if (submissionPart.data.folders) {
