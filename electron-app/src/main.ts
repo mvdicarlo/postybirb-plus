@@ -1,13 +1,11 @@
 /* tslint:disable: no-console no-var-requires */
 import path from 'path';
-import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification } from 'electron';
+import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification, ipcMain, dialog, clipboard } from 'electron';
 import WindowStateKeeper from 'electron-window-state';
 import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
-import { initialize as initializeRemote, enable as enableRemote } from '@electron/remote/main';
 import { session } from 'electron';
 
-initializeRemote();
 
 const hasLock = app.requestSingleInstanceLock();
 if (!hasLock) {
@@ -105,6 +103,7 @@ async function initialize() {
   if (!hasLock) {
     return;
   }
+  registerIpcHandlers();
   const ses = session.fromPartition('persist:name');
   const userAgent = `PostyBirb/${app.getVersion()} (by mvdicarlo on GitHub) ${ses.getUserAgent()}`;
 
@@ -137,6 +136,94 @@ async function initialize() {
   createWindow();
 }
 
+let ipcHandlersRegistered = false;
+function registerIpcHandlers() {
+  if (ipcHandlersRegistered) return;
+  ipcHandlersRegistered = true;
+
+  ipcMain.on('app:get-config', (event) => {
+    event.returnValue = {
+      PORT: process.env.PORT,
+      AUTH_ID: (global as any).AUTH_ID,
+      AUTH_SERVER_URL: (global as any).AUTH_SERVER_URL,
+      IS_DARK_THEME: nativeTheme.shouldUseDarkColors,
+      appVersion: app.getVersion(),
+    };
+  });
+
+  ipcMain.handle('dialog:showOpenDialog', async (event, options) => {
+    const bw = BrowserWindow.fromWebContents(event.sender) || mainWindow || undefined;
+    return dialog.showOpenDialog(bw, options || {});
+  });
+
+  ipcMain.handle('session:getCookies', async (_event, accountId: string) => {
+    const ses = session.fromPartition(`persist:${accountId}`);
+    return ses.cookies.get({});
+  });
+
+  ipcMain.handle('session:clearSessionData', async (_event, id: string) => {
+    const ses = session.fromPartition(`persist:${id}`);
+    await ses.clearStorageData();
+    return true;
+  });
+
+  ipcMain.on('app:quit', () => app.quit());
+
+  // Tumblr auth bridge
+  const Tumblr = require('./app/authorizers/tumblr.auth');
+  let tumblrAuthCbChannel: string | null = null;
+  ipcMain.on('auth:tumblr:getAuthURL', (event) => {
+    try {
+      event.returnValue = Tumblr.getAuthURL();
+    } catch (e) {
+      event.returnValue = null;
+    }
+  });
+  ipcMain.handle('auth:tumblr:start', async (event, cbChannel: string) => {
+    tumblrAuthCbChannel = cbChannel;
+    Tumblr.start((data: any) => {
+      try {
+        event.sender.send(cbChannel, data);
+      } catch (_) {
+        // no-op if sender gone
+      } finally {
+        tumblrAuthCbChannel = null;
+      }
+    });
+    return true;
+  });
+  ipcMain.handle('auth:tumblr:stop', async () => {
+    try {
+      Tumblr.stop();
+    } finally {
+      tumblrAuthCbChannel = null;
+    }
+    return true;
+  });
+
+  // Clipboard bridge (sync for compatibility with existing UI code)
+  ipcMain.on('clipboard:availableFormatsSync', (event) => {
+    try {
+      event.returnValue = clipboard.availableFormats();
+    } catch (e) {
+      event.returnValue = [];
+    }
+  });
+  ipcMain.on('clipboard:readImageSync', (event) => {
+    try {
+      const ni = clipboard.readImage();
+      if (!ni || ni.isEmpty()) {
+        event.returnValue = null;
+        return;
+      }
+  const png: Buffer = ni.toPNG();
+  event.returnValue = { type: 'image/png', base64: Buffer.from(png.buffer, png.byteOffset, png.byteLength).toString('base64') };
+    } catch (e) {
+      event.returnValue = null;
+    }
+  });
+}
+
 function createWindow() {
   if (!mainWindowState) {
     mainWindowState = WindowStateKeeper({
@@ -167,7 +254,6 @@ function createWindow() {
     },
   });
 
-  enableRemote(mainWindow.webContents);
   (mainWindow as any).PORT = process.env.PORT;
   (mainWindow as any).AUTH_ID = global.AUTH_ID;
   (mainWindow as any).AUTH_SERVER_URL = global.AUTH_SERVER_URL;
@@ -176,7 +262,9 @@ function createWindow() {
     mainWindowState.manage(mainWindow);
   }
 
-  mainWindow.webContents.on('new-window', event => event.preventDefault());
+  mainWindow.webContents.setWindowOpenHandler(() => {
+    return { action: 'deny' };
+  });
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (!global.settingsDB.getState().quitOnClose && global.tray && util.isWindows()) {
