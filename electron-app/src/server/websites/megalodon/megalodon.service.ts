@@ -44,7 +44,7 @@ export abstract class Megalodon extends Website {
     super();
   }
 
-  megalodonService: 'mastodon' | 'pleroma' | 'misskey' | 'friendica' = 'mastodon'; // Set this as appropriate in your constructor
+  megalodonService: 'mastodon' | 'pleroma' | 'friendica' | 'firefish' | 'gotosocial' = 'mastodon'; // Set this as appropriate in your constructor
   maxMediaCount = undefined; 
 
   readonly BASE_URL: string;

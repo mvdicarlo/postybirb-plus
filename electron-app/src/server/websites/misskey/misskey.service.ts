@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import generator, { Entity, Response } from 'megalodon';
 import {
   DefaultOptions,
   FileRecord,
@@ -12,7 +11,6 @@ import {
   Submission,
   SubmissionPart,
   SubmissionRating,
-  MegalodonInstanceSettings,
 } from 'postybirb-commons';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
@@ -33,18 +31,21 @@ import { FileManagerService } from 'src/server/file-manager/file-manager.service
 const INFO_KEY = 'INSTANCE INFO';
 
 type MissKeyInstanceInfo = {
-  configuration: {
-    statuses: {
-      max_characters: number;
-      max_media_attachments: number;
-    };
-    media_attachments: {
-      supported_mime_types: string[];
-      image_size_limit: number;
-      video_size_limit: number;
-    };
-  };
+  maxNoteTextLength: number;
+  driveCapacityPerLocalUserMb: number;
 };
+
+// Dynamic import cache for ES module
+// Using Function constructor to prevent TypeScript from transpiling import() to require()
+let misskeyModule: typeof import('misskey-js') | null = null;
+async function getMisskeyModule() {
+  if (!misskeyModule) {
+    // Use Function constructor to preserve dynamic import at runtime
+    const dynamicImport = new Function('specifier', 'return import(specifier)');
+    misskeyModule = await dynamicImport('misskey-js');
+  }
+  return misskeyModule;
+}
 
 @Injectable()
 export class MissKey extends Website {
@@ -73,7 +74,7 @@ export class MissKey extends Website {
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
     const accountData: MissKeyAccountData = data.data;
-    if (accountData && accountData.tokenData) {
+    if (accountData && accountData.token) {
       await this.getAndStoreInstanceInfo(data._id, accountData);
 
       status.loggedIn = true;
@@ -83,28 +84,25 @@ export class MissKey extends Website {
   }
 
   private async getAndStoreInstanceInfo(profileId: string, data: MissKeyAccountData) {
-    const client = generator('misskey', `https://${data.website}`, data.tokenData.access_token);
-    const instance = await client.getInstance();
-
-    this.storeAccountInformation(profileId, INFO_KEY, instance.data);
+    const Misskey = await getMisskeyModule();
+    const cli = new Misskey.api.APIClient({
+      origin: `https://${data.website}`,
+      credential: data.token,
+    });
+    
+    const meta = await cli.request('meta', {});
+    this.storeAccountInformation(profileId, INFO_KEY, meta);
   }
 
   getScalingOptions(file: FileRecord, accountId: string): ScalingOptions {
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(accountId, INFO_KEY);
-    return instanceInfo?.configuration?.media_attachments
-      ? {
-          maxHeight: 4000,
-          maxWidth: 4000,
-          maxSize:
-            file.type === FileSubmissionType.IMAGE
-              ? instanceInfo.configuration.media_attachments.image_size_limit
-              : instanceInfo.configuration.media_attachments.video_size_limit,
-        }
-      : {
-          maxHeight: 4000,
-          maxWidth: 4000,
-          maxSize: FileSize.MBtoBytes(300),
-        };
+    // Misskey typically limits files based on the drive capacity
+    // Default to conservative limits if instance info not available
+    return {
+      maxHeight: 4000,
+      maxWidth: 4000,
+      maxSize: FileSize.MBtoBytes(instanceInfo?.driveCapacityPerLocalUserMb ? 50 : 10),
+    };
   }
 
   async postFileSubmission(
@@ -112,65 +110,86 @@ export class MissKey extends Website {
     data: FilePostData<MissKeyFileOptions>,
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
-    const M = generator(
-      'misskey',
-      `https://${accountData.website}`,
-      accountData.tokenData.access_token,
-    );
+    const Misskey = await getMisskeyModule();
+    const cli = new Misskey.api.APIClient({
+      origin: `https://${accountData.website}`,
+      credential: accountData.token,
+    });
 
     const files = [data.primary, ...data.additional];
-    const uploadedMedias: string[] = [];
+    const uploadedFileIds: string[] = [];
+    
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      const upload = await M.uploadMedia(file.file.value, {
-        description: file.altText || data.options.altText,
+      
+      // Create a Blob from the Buffer for misskey-js
+      // Note: In Node.js we need to use the file buffer directly via multipart/form-data
+      const FormData = require('form-data');
+      const form = new FormData();
+      form.append('file', file.file.value, {
+        filename: file.file.options.filename,
+        contentType: file.file.options.contentType,
       });
-      if (upload.status > 300) {
-        return Promise.reject(
-          this.createPostResponse({ additionalInfo: upload.status, message: upload.statusText }),
-        );
+      
+      if (file.altText || data.options.altText) {
+        form.append('comment', file.altText || data.options.altText);
       }
-      uploadedMedias.push(upload.data.id);
+      form.append('isSensitive', data.rating !== SubmissionRating.GENERAL ? 'true' : 'false');
+      
+      // Make direct HTTP request to drive/files/create endpoint
+      const axios = require('axios');
+      const uploadResponse = await axios.post(
+        `https://${accountData.website}/api/drive/files/create`,
+        form,
+        {
+          headers: {
+            ...form.getHeaders(),
+            'Authorization': `Bearer ${accountData.token}`,
+          },
+        }
+      );
+      
+      uploadedFileIds.push(uploadResponse.data.id);
     }
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const chunkCount = instanceInfo?.configuration?.statuses?.max_media_attachments ?? 4;
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars = instanceInfo?.maxNoteTextLength ?? 3000;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-    const chunks = _.chunk(uploadedMedias, chunkCount);
-    let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
-      data.description
-    }`.substring(0, maxChars);
-    let lastId = '';
+    const chunks = _.chunk(uploadedFileIds, 4); // Misskey typically allows 4 files per note
+    
+    let noteText = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`.substring(0, maxChars);
+    let lastNoteId: string | undefined;
     let source = '';
 
     for (let i = 0; i < chunks.length; i++) {
-      const statusOptions: any = {
-        sensitive: isSensitive,
-        visibility: data.options.visibility || 'public',
-        media_ids: chunks[i],
+      this.checkCancelled(cancellationToken);
+      
+      const noteParams: import('misskey-js').entities.NotesCreateRequest = {
+        text: noteText,
+        fileIds: chunks[i],
+        visibility: data.options.visibility as any || 'public',
+        cw: data.spoilerText || data.options.spoilerText || undefined,
       };
 
-      if (i !== 0) {
-        statusOptions.in_reply_to_id = lastId;
-      }
-      if (data.spoilerText) {
-        statusOptions.spoiler_text = data.spoilerText;
+      if (i !== 0 && lastNoteId) {
+        noteParams.replyId = lastNoteId;
       }
 
-      this.checkCancelled(cancellationToken);
       try {
-        const result = (await M.postStatus(status, statusOptions)) as Response<Entity.Status>;
-        lastId = result.data.id;
-        if (!source) source = (await M.getStatus(result.data.id)).data.url;
+        const result = await cli.request('notes/create', noteParams);
+        lastNoteId = result.createdNote.id;
+        
+        if (!source) {
+          // Construct the note URL
+          source = `https://${accountData.website}/notes/${result.createdNote.id}`;
+        }
       } catch (error) {
         return Promise.reject(this.createPostResponse({ message: error.message }));
       }
     }
 
     this.checkCancelled(cancellationToken);
-
     return this.createPostResponse({ source });
   }
 
@@ -179,31 +198,28 @@ export class MissKey extends Website {
     data: PostData<Submission, MissKeyNotificationOptions>,
     accountData: MissKeyAccountData,
   ): Promise<PostResponse> {
-    const M = generator(
-      'misskey',
-      `https://${accountData.website}`,
-      accountData.tokenData.access_token,
-    );
+    const Misskey = await getMisskeyModule();
+    const cli = new Misskey.api.APIClient({
+      origin: `https://${accountData.website}`,
+      credential: accountData.token,
+    });
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(data.part.accountId, INFO_KEY);
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars = instanceInfo?.maxNoteTextLength ?? 3000;
 
     const isSensitive = data.rating !== SubmissionRating.GENERAL;
-    const statusOptions: any = {
-      sensitive: isSensitive,
-      visibility: data.options.visibility || 'public',
+    let noteText = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${data.description}`.substring(0, maxChars);
+    
+    const noteParams: import('misskey-js').entities.NotesCreateRequest = {
+      text: noteText,
+      visibility: data.options.visibility as any || 'public',
+      cw: data.spoilerText || data.options.spoilerText || undefined,
     };
-    let status = `${data.options.useTitle && data.title ? `${data.title}\n` : ''}${
-      data.description
-    }`.substring(0, maxChars);
-    if (data.spoilerText) {
-      statusOptions.spoiler_text = data.spoilerText;
-    }
 
     this.checkCancelled(cancellationToken);
     try {
-      const result = (await M.postStatus(status, statusOptions)).data as Entity.Status;
-      const source = (await M.getStatus(result.id)).data.url;
+      const result = await cli.request('notes/create', noteParams);
+      const source = `https://${accountData.website}/notes/${result.createdNote.id}`;
       return this.createPostResponse({ source });
     } catch (error) {
       return Promise.reject(this.createPostResponse({ message: error.message }));
@@ -238,11 +254,11 @@ export class MissKey extends Website {
     );
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars = instanceInfo?.maxNoteTextLength ?? 3000;
 
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+        `Max description length allowed is ${maxChars} characters (for this MissKey instance).`,
       );
     } else {
       this.validateInsertTags(
@@ -260,9 +276,8 @@ export class MissKey extends Website {
       ),
     ];
 
-    const maxImageSize = instanceInfo
-      ? instanceInfo?.configuration?.media_attachments?.image_size_limit
-      : FileSize.MBtoBytes(50);
+    // Default to 50MB if instance info not available
+    const maxImageSize = FileSize.MBtoBytes(50);
 
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
@@ -282,7 +297,7 @@ export class MissKey extends Website {
         }
       }
 
-      // Check the image dimensions are not over 4000 x 4000 - this is the MissKey server max
+      // Check the image dimensions are not over 4000 x 4000 - conservative limit for Misskey
       if (
         isAutoscaling &&
         type === FileSubmissionType.IMAGE &&
@@ -317,10 +332,11 @@ export class MissKey extends Website {
     );
 
     const instanceInfo: MissKeyInstanceInfo = this.getAccountInfo(submissionPart.accountId, INFO_KEY);
-    const maxChars = instanceInfo?.configuration?.statuses?.max_characters ?? 500;
+    const maxChars = instanceInfo?.maxNoteTextLength ?? 3000;
+    
     if (description.length > maxChars) {
       warnings.push(
-        `Max description length allowed is ${maxChars} characters (for this MissKey client).`,
+        `Max description length allowed is ${maxChars} characters (for this MissKey instance).`,
       );
     } else {
       this.validateInsertTags(

@@ -27,7 +27,7 @@ type PleromaInstanceInfo = {
 export class Pleroma extends Megalodon {
 
   readonly acceptsAdditionalFiles = true;
-  megalodonService: 'mastodon' | 'pleroma' | 'misskey' | 'friendica' = 'pleroma';
+  megalodonService: 'mastodon' | 'pleroma' | 'friendica' | 'firefish' | 'gotosocial' = 'pleroma';
   readonly acceptsFiles = [
     'png',
     'jpeg',
