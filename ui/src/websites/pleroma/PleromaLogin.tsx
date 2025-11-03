@@ -62,8 +62,8 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
     }
     client.registerApp('PostyBirb', opts )
       .then(appData => {
-        this.state.client_id = appData.clientId;
-        this.state.client_secret = appData.clientSecret;
+        this.state.client_id = appData.client_id;
+        this.state.client_secret = appData.client_secret;
         this.state.username = appData.name;
         auth_url = appData.url || "Error - no auth url";
         this.view.src = auth_url;
@@ -75,7 +75,7 @@ export default class PleromaLogin extends React.Component<LoginDialogProps, Stat
     const client = generator('pleroma', website);
     client.fetchAccessToken(this.state.client_id, this.state.client_secret, this.state.code).then((value: OAuth.TokenData) => {
       // Get the username so we have complete data.
-      const usernameClient = generator('pleroma', website, value.accessToken);
+      const usernameClient = generator('pleroma', website, value.access_token);
       usernameClient.verifyAccountCredentials().then((res)=>{
         this.state.username = res.data.username;
         this.state.token = value.access_token;
