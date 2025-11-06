@@ -76,6 +76,8 @@
     "electron-updater": "^5.2.1",
     "electron-window-state": "^5.0.3",
     "form-data": "^4.0.0",
+    "axios": "^1.6.8",
+    "ws": "^8.13.0",
     "form-urlencoded": "^6.1.4",
     "fs-extra": "^8.1.0",
     "iconv-lite": "^0.5.1",
