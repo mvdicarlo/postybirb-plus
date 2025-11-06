@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import parse from 'node-html-parser';
 import {
   DefaultOptions,
   FileRecord,
@@ -22,15 +23,13 @@ import { PostData } from 'src/server/submission/post/interfaces/post-data.interf
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import BrowserWindowUtil from 'src/server/utils/browser-window.util';
 import FileSize from 'src/server/utils/filesize.util';
+import { HttpExperimental } from 'src/server/utils/http-experimental';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { v1 } from 'uuid';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
-
-import _ from 'lodash';
-import Http from 'src/server/http/http.util';
 
 /*
  * Developer note:
@@ -86,7 +85,12 @@ export class Patreon extends Website {
         relationships: any;
         type: string;
       }[];
-    }>(data._id, `${this.BASE_URL}/membership`, 'return window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.pageBootstrap.creator', 1000);
+    }>(
+      data._id,
+      `${this.BASE_URL}/membership`,
+      'return window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.pageBootstrap.creator',
+      1000,
+    );
 
     if (body.data) {
       status.loggedIn = true;
@@ -97,6 +101,7 @@ export class Patreon extends Website {
           included => included.type === 'reward' || included.type === 'access-rule',
         ),
       );
+      this.getCSRF(data._id).then(console.log).catch(console.error);
     }
     return status;
   }
@@ -150,12 +155,12 @@ export class Patreon extends Website {
   }
 
   private async getCSRF(profileId: string): Promise<string> {
-    const csrf = await BrowserWindowUtil.runScriptOnPage<string>(
-      profileId,
-      `${this.BASE_URL}`,
-      'return window.__NEXT_DATA__.props.pageProps.bootstrapEnvelope.csrfSignature',
-      100,
-    );
+    const page = await HttpExperimental.get<string>(this.BASE_URL, {
+      partition: profileId,
+    });
+
+    const root = parse(page.body);
+    const csrf = root.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     if (!csrf) {
       throw new Error('No CSRF Token found.');
     }
