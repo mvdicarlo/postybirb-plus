@@ -1,4 +1,6 @@
 /* tslint:disable: no-console no-var-requires */
+// Polyfill fetch for Node.js/Electron main process
+global.fetch = require('node-fetch');
 import path from 'path';
 import { app, BrowserWindow, Menu, nativeImage, nativeTheme, Tray, Notification } from 'electron';
 import WindowStateKeeper from 'electron-window-state';

@@ -27,6 +27,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { Website } from '../website.base';
 import _ from 'lodash';
 import { FileManagerService } from 'src/server/file-manager/file-manager.service';
+import path from 'path';
 
 const INFO_KEY = 'INSTANCE INFO';
 
@@ -36,13 +37,26 @@ type MissKeyInstanceInfo = {
 };
 
 // Dynamic import cache for ES module
-// Using Function constructor to prevent TypeScript from transpiling import() to require()
 let misskeyModule: typeof import('misskey-js') | null = null;
 async function getMisskeyModule() {
   if (!misskeyModule) {
-    // Use Function constructor to preserve dynamic import at runtime
+    // Determine the correct path for asar/unpacked
+    let modulePath = 'misskey-js';
+    if (process.mainModule?.filename.includes('app.asar')) {
+      // Running from asar, so use the unpacked path
+      const base = process.resourcesPath;
+      modulePath = path.join(
+        'file://',
+        base,
+        'app.asar.unpacked',
+        'node_modules',
+        'misskey-js',
+        'built',
+        'index.js'
+      );
+    }
     const dynamicImport = new Function('specifier', 'return import(specifier)');
-    misskeyModule = await dynamicImport('misskey-js');
+    misskeyModule = await dynamicImport(modulePath);
   }
   return misskeyModule;
 }
