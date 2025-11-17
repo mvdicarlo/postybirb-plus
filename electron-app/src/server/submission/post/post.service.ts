@@ -276,72 +276,295 @@ export class PostService {
         waitingForExternal.forEach(poster => poster.doPost());
       }
     } else {
-      this.logService
-        .addLog(
-          submission,
-          posters
-            .filter(poster => poster.status !== 'CANCELLED')
-            .map(poster => ({
-              part: {
-                ...poster.part.asPlain(),
-                postStatus: poster.status,
-                postedTo: poster.getSource(),
-              },
-              response: poster.getFullResponse(),
-            })),
-        )
-        .finally(() => {
-          const canDelete: boolean =
-            posters.length === posters.filter(p => p.status === 'SUCCESS').length;
-          if (canDelete) {
-            const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
-            this.notificationService.create(
-              {
-                type: NotificationType.SUCCESS,
-                body,
-                title: 'Post Success',
-              },
-              submission instanceof FileSubmissionEntity
-                ? nativeImage.createFromPath(submission.primary.preview)
-                : undefined,
-            );
-            this.submissionService.deleteSubmission(submission._id, true);
-          } else {
-            const body = posters
-              .filter(p => p.status === 'FAILED')
-              .map(p => p.getMessage())
-              .join('\n');
-            if (body) {
+      this.tryUpdateChildren(submission).then(childUpdateOk => {
+        this.logService
+          .addLog(
+            submission,
+            posters
+              .filter(poster => poster.status !== 'CANCELLED')
+              .map(poster => ({
+                part: {
+                  ...poster.part.asPlain(),
+                  postStatus: poster.status,
+                  postedTo: poster.getSource(),
+                },
+                response: poster.getFullResponse(),
+              })),
+          )
+          .finally(() => {
+            const canDelete: boolean =
+              posters.length === posters.filter(p => p.status === 'SUCCESS').length;
+            if (canDelete) {
+              const body = `Posted (${_.capitalize(submission.type)}) ${submission.title}`; // may want to make body more dynamic to title
               this.notificationService.create(
                 {
-                  type: NotificationType.ERROR,
+                  type: NotificationType.SUCCESS,
                   body,
-                  title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
+                  title: 'Post Success',
                 },
                 submission instanceof FileSubmissionEntity
                   ? nativeImage.createFromPath(submission.primary.preview)
                   : undefined,
               );
+              this.submissionService.deleteSubmission(submission._id, true).catch(e => {
+                this.logger.error(`Error deleting submission: ${e}`);
+              });
+            } else {
+              const body = posters
+                .filter(p => p.status === 'FAILED')
+                .map(p => p.getMessage())
+                .join('\n');
+              if (body) {
+                this.notificationService.create(
+                  {
+                    type: NotificationType.ERROR,
+                    body,
+                    title: `Post Failure: (${_.capitalize(submission.type)}) ${submission.title}`,
+                  },
+                  submission instanceof FileSubmissionEntity
+                    ? nativeImage.createFromPath(submission.primary.preview)
+                    : undefined,
+                );
+              }
+
+              this.uiNotificationService.createUINotification(
+                NotificationType.ERROR,
+                20,
+                posters.map(p => p.getMessage()).join('\n'),
+                `Post Failure: ${submission.title}`,
+              );
             }
+          });
 
-            this.uiNotificationService.createUINotification(
-              NotificationType.ERROR,
-              20,
-              posters.map(p => p.getMessage()).join('\n'),
-              `Post Failure: ${submission.title}`,
-            );
+        if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
+          // If the failures were not cancels
+          const shouldEmptyQueue: boolean =
+            !childUpdateOk || !!posters.filter(p => p.status === 'FAILED').length;
+          if (shouldEmptyQueue) {
+            this.clearQueueIfRequired(submission);
           }
-        });
+        }
+        this.clearAndPostNext(submission.type);
+      });
+    }
+  }
 
-      if (this.settings.getValue<boolean>('emptyQueueOnFailedPost')) {
-        // If the failures were not cancels
-        const shouldEmptyQueue: boolean = !!posters.filter(p => p.status === 'FAILED').length;
-        if (shouldEmptyQueue) {
-          this.clearQueueIfRequired(submission);
+  private async tryUpdateChildren(parent: SubmissionEntity): Promise<boolean> {
+    try {
+      const errors = await this.updateChildren(parent);
+      if (errors.length) {
+        this.uiNotificationService.createUINotification(
+          NotificationType.ERROR,
+          20,
+          `Error updating child submissions:\n${errors.join('\n')}`,
+          `Child Error: ${parent.title}`,
+        );
+        return false;
+      } else {
+        return true;
+      }
+    } catch (e) {
+      this.logger.error(`Failed to update children: ${e}`, e.stack);
+      this.uiNotificationService.createUINotification(
+        NotificationType.ERROR,
+        20,
+        `Error updating child submissions: ${e}`,
+        `Child Error: ${parent.title}`,
+      );
+      return false;
+    }
+  }
+
+  private async updateChildren(parent: SubmissionEntity): Promise<Array<string>> {
+    const children = await this.submissionService.getChildren(parent._id, true);
+    this.logger.debug(`Update ${children?.length || 0} children`);
+
+    // Lazy-load the sources, they may not be needed or needed more than once.
+    const getSource = (() => {
+      let sources: Map<string, string> | null = null;
+      return async (search: string, considerWebsite: boolean) => {
+        if (sources === null) {
+          sources = new Map<string, string>();
+          for (const part of await this.partService.getPartsForSubmission(parent._id, false)) {
+            if (part?.postedTo) {
+              if (part.accountId) {
+                sources.set(`a${part.accountId}`, part.postedTo);
+              }
+              const website = part.website?.toLowerCase();
+              if (website && !sources.has(website)) {
+                sources.set(`w${website}`, part.postedTo);
+              }
+            }
+          }
+        }
+
+        const accountIdSource = sources.get(`a${search}`);
+        if (accountIdSource !== undefined) {
+          this.logger.debug(`Found source for account id '${search}': '${accountIdSource}'`);
+          return accountIdSource;
+        }
+
+        if (considerWebsite) {
+          const websiteSource = sources.get(`w${search.toLowerCase()}`);
+          if (websiteSource !== undefined) {
+            this.logger.debug(`Found source for website '${search}': '${websiteSource}'`);
+            return websiteSource;
+          }
+        }
+
+        this.logger.debug(`No source found for '${search}' (considerWebsite ${considerWebsite})`);
+        return undefined;
+      };
+    })();
+
+    const errors = [];
+    if (children?.length) {
+      for (const child of children) {
+        try {
+          const childErrors = await this.updateChild(
+            parent,
+            child.submission,
+            child.parts,
+            getSource,
+          );
+          errors.push(...childErrors);
+        } catch (e) {
+          this.logger.error(`Failed to update child ${child?.submission?._id}: ${e}`, e.stack);
+          const title =
+            child?.parts?.find(p => p.isDefault)?.data?.title || child?.submission?.title;
+          errors.push(`${title}: ${e}`);
         }
       }
+    }
+    return errors;
+  }
 
-      this.clearAndPostNext(submission.type);
+  private async updateChild(
+    parent: SubmissionEntity,
+    childSubmission: SubmissionEntity,
+    childParts: Array<SubmissionPartEntity<any>>,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<Array<string>> {
+    const errors = [];
+    for (const childPart of childParts) {
+      if (childPart) {
+        this.logger.debug(`Handling child part ${childPart?.website} ${childPart?.accountId}`);
+        try {
+          let childSourceLinksChanged = false;
+          try {
+            childSourceLinksChanged = await this.updateChildSourceLinks(childPart, getSource);
+          } catch (e) {
+            this.logger.error(
+              `Failed to handle child ${childSubmission?._id} part ` +
+                `${childPart?.website} ${childPart?.accountId} source links: ${e}`,
+              e.stack,
+            );
+            const title = childParts?.find(p => p.isDefault)?.data?.title || childSubmission?.title;
+            errors.push(`${title} ${childPart?.website} ${childPart?.accountId}: ${e}`);
+          }
+
+          let childWebsitePartChanged = false;
+          try {
+            childWebsitePartChanged = await this.updateChildWebsitePart(childPart, getSource);
+          } catch (e) {
+            this.logger.error(
+              `Failed to handle child ${childSubmission?._id} part ` +
+                `${childPart?.website} ${childPart?.accountId} website: ${e}`,
+              e.stack,
+            );
+            const title = childParts?.find(p => p.isDefault)?.data?.title || childSubmission?.title;
+            errors.push(`${title} ${childPart?.website} ${childPart?.accountId}: ${e}`);
+          }
+
+          this.logger.debug(`Child links changed ${childSourceLinksChanged}`);
+          this.logger.debug(`Child part changed ${childWebsitePartChanged}`);
+          if (childSourceLinksChanged || childWebsitePartChanged) {
+            await this.submissionService.setPart(childSubmission, childPart);
+          }
+        } catch (e) {
+          this.logger.error(
+            `Failed to update child ${childSubmission?._id} part ` +
+              `${childPart?.website} ${childPart?.accountId}: ${e}`,
+            e.stack,
+          );
+          const title = childParts?.find(p => p.isDefault)?.data?.title || childSubmission?.title;
+          errors.push(`${title} ${childPart?.website} ${childPart?.accountId}: ${e}`);
+        }
+      }
+    }
+    return errors;
+  }
+
+  private async updateChildSourceLinks(
+    childPart: SubmissionPartEntity<any>,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<boolean> {
+    const description = childPart.data?.description?.value as string;
+    if (description) {
+      this.logger.debug(`Looking at description '${description}'`);
+      const sources = await this.collectSources(description, getSource);
+      this.logger.debug(`Got ${sources.size} source(s)`);
+      if (sources.size !== 0) {
+        const changedDescription = description.replace(
+          /{parent:(.+?)}/gi,
+          (match: string, p1: string): string => {
+            const source = sources.get(p1?.trim());
+            if (source) {
+              this.logger.debug(`Replace ${match} with ${source}`);
+              return source;
+            } else {
+              this.logger.debug(`Keep ${match}`);
+              return match;
+            }
+          },
+        );
+
+        if (description !== changedDescription) {
+          this.logger.debug(`Description changed to ${changedDescription}`);
+          childPart.data.description.value = changedDescription;
+          return true;
+        } else {
+          this.logger.debug(`Description still the same`);
+        }
+      }
+    } else {
+      this.logger.debug(`NOT looking at blank description`);
+    }
+    return false;
+  }
+
+  private async collectSources(
+    description: string,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<Map<string, string | null>> {
+    const sources = new Map<string, string | null>();
+    // Global matching in a while loop requires the regex instance to stay the
+    // same, so don't replace the variable with a literal!
+    const regex = /{parent:(.+?)}/gi;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(description)) !== null) {
+      const target = match[1].trim();
+      if (!sources.has(target)) {
+        const source = await getSource(target, true);
+        sources.set(target, source === undefined ? null : source);
+      }
+    }
+    return sources;
+  }
+
+  private async updateChildWebsitePart(
+    childPart: SubmissionPartEntity<any>,
+    getSource: (search: string, considerWebsite: boolean) => Promise<string | undefined>,
+  ): Promise<boolean> {
+    if (childPart.isDefault) {
+      return false;
+    } else {
+      // Lazy-load the source, it may not be needed or needed more than once.
+      const getSourceForChild = async () => {
+        return getSource(childPart.accountId, false);
+      };
+      const website = this.websites.getWebsiteModule(childPart.website);
+      return await website.updateChildPart(childPart, getSourceForChild);
     }
   }
 
