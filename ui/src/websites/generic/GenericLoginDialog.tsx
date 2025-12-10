@@ -23,7 +23,7 @@ export class GenericLoginDialog extends React.Component<LoginDialogProps, State>
     return (
       <div className="h-full w-full">
         <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
-          <webview src={this.props.url} className="webview h-full w-full" webpreferences="nativeWindowOpen=1" allowpopups partition={`persist:${this.props.account._id}`} />
+          <webview src={this.props.url} className="webview h-full w-full" webpreferences="nativeWindowOpen=1" allowpopups={'true' as any} partition={`persist:${this.props.account._id}`} />
         </Spin>
       </div>
     );
