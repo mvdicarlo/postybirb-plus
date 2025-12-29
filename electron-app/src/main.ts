@@ -39,7 +39,7 @@ let defaultBaseDirectory = path.join(app.getPath('documents'), 'PostyBirb');
 if (
   util.isWindows() &&
   defaultBaseDirectory.includes('OneDrive') &&
-  fs.statSync(path.join(defaultBaseDirectory, 'data', 'submissions.db')).size > 0
+  fs.statSync(path.join(defaultBaseDirectory, 'data', 'submissions.db')).size === 0
 ) {
   defaultBaseDirectory = path.join(app.getPath('home'), 'Documents', 'PostyBirb');
 }
