@@ -6,6 +6,7 @@ import { enableSleep } from './app/power-save';
 import * as util from './app/utils';
 import { initialize as initializeRemote, enable as enableRemote } from '@electron/remote/main';
 import { session } from 'electron';
+import fs from 'fs';
 
 initializeRemote();
 
@@ -19,20 +20,33 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
 
-const portIndex = process.argv.findIndex((arg) => arg === '-p' || arg === '--port') + 1;
+const portIndex = process.argv.findIndex(arg => arg === '-p' || arg === '--port') + 1;
 process.env.PORT =
   portIndex && !isNaN(Number(process.argv[portIndex]))
     ? process.argv[portIndex]
     : process.env.PORT || '9247';
 
 global.AUTH_SERVER_URL = 'https://postybirb-auth.azurewebsites.net';
-global.DEBUG_MODE = !!process.argv.find((arg) => arg === '-d' || arg === '--develop');
-global.SERVER_ONLY_MODE = !!process.argv.find((arg) => arg === '-s' || arg === '--server');
+global.DEBUG_MODE = !!process.argv.find(arg => arg === '-d' || arg === '--develop');
+global.SERVER_ONLY_MODE = !!process.argv.find(arg => arg === '-s' || arg === '--server');
 
-const baseIndex = process.argv.findIndex((arg) => arg === '--directory') + 1;
-const defaultBase = path.join(app.getPath('documents'), 'PostyBirb');
+let defaultBaseDirectory = path.join(app.getPath('documents'), 'PostyBirb');
+
+// If OneDrive is enabled on Windows it overrides Documents path. And it can get enabled by
+// some random update or in other random cases. To user it will look like all the data was wiped
+// so to prevent that we explicily use Documents directory instead. If the user has saved anything
+// inside one drive and is actually using it, then we let it be like this...
+if (
+  util.isWindows() &&
+  defaultBaseDirectory.includes('OneDrive') &&
+  fs.statSync(path.join(defaultBaseDirectory, 'data', 'submissions.db')).size > 0
+) {
+  defaultBaseDirectory = path.join(app.getPath('home'), 'Documents', 'PostyBirb');
+}
+
+const baseIndex = process.argv.findIndex(arg => arg === '--directory') + 1;
 global.BASE_DIRECTORY =
-  baseIndex && process.argv[baseIndex] ? process.argv[baseIndex] : defaultBase;
+  baseIndex && process.argv[baseIndex] ? process.argv[baseIndex] : defaultBaseDirectory;
 
 global.CHILD_PROCESS_IDS = [];
 
