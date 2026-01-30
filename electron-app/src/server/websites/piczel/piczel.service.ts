@@ -127,6 +127,12 @@ export class Piczel extends Website {
     const userData = this.getAccountInfo(data.part.accountId, 'data');
     const headers: any = {
       Accent: '*/*',
+<<<<<<< HEAD
+=======
+      client: userData.auth.client,
+      uid: userData.auth.uid,
+      'access-token': userData.auth['access-token'],
+>>>>>>> ef7baee (fix: piczel login)
     };
 
     this.checkCancelled(cancellationToken);
