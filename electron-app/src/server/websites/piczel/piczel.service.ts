@@ -25,6 +25,7 @@ import { LoginResponse } from 'src/server/websites/interfaces/login-response.int
 import { Website } from 'src/server/websites/website.base';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
+import parse from 'node-html-parser';
 
 @Injectable()
 export class Piczel extends Website {
@@ -46,12 +47,14 @@ export class Piczel extends Website {
     const res = await Http.get<string>(`${this.BASE_URL}/gallery/upload`, data._id);
     if (!res.body.includes('/signup')) {
       status.loggedIn = true;
+      const $ = parse(res.body);
       const preloadedData = JSON.parse(
-        res.body.match(
-          /<script type="text\/javascript">window\.__PRELOADED_STATE__ = (.*?)<\/script>/ms,
+        $.getElementById('_R_').textContent.split(
+          'window.__PRELOADED_STATE__ = ',
         )[1],
       );
-      status.username = preloadedData.currentUser.data.username;
+      const { username } = preloadedData.currentUser.data;
+      status.username = username;
       this.storeAccountInformation(data._id, 'data', preloadedData);
       this.getFolders(data._id, status.username);
     }
@@ -120,10 +123,7 @@ export class Piczel extends Website {
     const headers: any = {
       Accent: '*/*',
       client: userData.auth.client,
-      expiry: userData.auth.expiry,
-      'token-type': userData.auth['token-type'],
       uid: userData.auth.uid,
-      Authorization: `${userData.auth['token-type']} ${userData.auth['access-token']}`,
       'access-token': userData.auth['access-token'],
     };
 
