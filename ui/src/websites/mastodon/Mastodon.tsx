@@ -21,6 +21,7 @@ export class Mastodon extends WebsiteImpl {
   name: string = 'Mastodon Instance';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
+  supportsParentId: boolean = true;
   loginUrl: string = '';
 
   LoginDialog = (props: LoginDialogProps) => <MastodonLogin {...props} />;
@@ -94,6 +95,7 @@ class MastodonNotificationSubmissionForm extends GenericSubmissionSection<
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+        <p>Will be filled with the URL of the parent submission.</p>
       </Form.Item>,
     );
     return elements;
@@ -139,6 +141,7 @@ export class MastodonFileSubmissionForm extends GenericFileSubmissionSection<Mas
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+        <p>Will be filled with the URL of the parent submission.</p>
       </Form.Item>,
     );
     return elements;
