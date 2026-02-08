@@ -76,6 +76,8 @@
     "electron-updater": "^5.2.1",
     "electron-window-state": "^5.0.3",
     "form-data": "^4.0.0",
+    "axios": "^1.6.8",
+    "ws": "^8.13.0",
     "form-urlencoded": "^6.1.4",
     "fs-extra": "^8.1.0",
     "iconv-lite": "^0.5.1",
@@ -83,7 +85,10 @@
     "jimp": "^0.16.1",
     "lodash": "^4.17.20",
     "lowdb": "^1.0.0",
-    "megalodon": "^7.0.0",
+    "megalodon": "^10.0.6",
+    "misskey-js": "^2025.10.2",
+    "eventemitter3": "^5.0.1",
+    "reconnecting-websocket": "^4.4.0",
     "nanoid": "^2.1.8",
     "nedb": "^1.8.0",
     "node-fetch": "^2.6.12",
@@ -142,6 +147,11 @@
       "buildResources": "packaging-resources",
       "output": "release"
     },
+    "asarUnpack": [
+      "node_modules/misskey-js/**",
+      "node_modules/eventemitter3/**",
+      "node_modules/reconnecting-websocket/**"
+    ],
     "mac": {
       "notarize": {
         "teamId": "ZRKS9CNUQZ"
