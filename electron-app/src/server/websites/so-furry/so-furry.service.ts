@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import cheerio from 'cheerio';
 import {
   DefaultOptions,
   FileRecord,
@@ -8,21 +7,17 @@ import {
   Folder,
   PostResponse,
   SoFurryFileOptions,
-  Submission,
   SubmissionPart,
   SubmissionRating,
 } from 'postybirb-commons';
 import UserAccountEntity from 'src/server//account/models/user-account.entity';
-import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
 import ImageManipulator from 'src/server/file-manipulation/manipulators/image.manipulator';
 import Http from 'src/server/http/http.util';
 import { CancellationToken } from 'src/server/submission/post/cancellation/cancellation-token';
 import { FilePostData } from 'src/server/submission/post/interfaces/file-post-data.interface';
-import { PostData } from 'src/server/submission/post/interfaces/post-data.interface';
 import { ValidationParts } from 'src/server/submission/validator/interfaces/validation-parts.interface';
 import FileSize from 'src/server/utils/filesize.util';
 import FormContent from 'src/server/utils/form-content.util';
-import HtmlParserUtil from 'src/server/utils/html-parser.util';
 import WebsiteValidator from 'src/server/utils/website-validator.util';
 import { GenericAccountProp } from '../generic/generic-account-props.enum';
 import { LoginResponse } from '../interfaces/login-response.interface';
@@ -30,46 +25,127 @@ import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 
 import _ from 'lodash';
-import { FallbackInformation } from '../interfaces/fallback-information.interface';
-import HtmlParser from 'src/server/description-parsing/html-node/parser';
 import { HTMLFormatParser } from 'src/server/description-parsing/html/html.parser';
-import BrowserWindowUtil from 'src/server/utils/browser-window.util';
+import { PlaintextParser } from 'src/server/description-parsing/plaintext/plaintext.parser';
+import { HttpExperimental } from 'src/server/utils/http-experimental';
+import { FallbackInformation } from '../interfaces/fallback-information.interface';
+
+interface SofurrySubmissionResponse {
+  id: string;
+  title: string;
+  description: string | null;
+  author: string;
+  category: number;
+  type: number;
+  rating: number | null;
+  status: number;
+  privacy: string | null;
+  content: string[];
+  allowComments: boolean | null;
+  allowDownloads: boolean | null;
+  isWorkInProgress: boolean | null;
+  isAdvert: boolean | null;
+  optimize: boolean | null;
+  pixelPerfect: boolean | null;
+  onHold: boolean;
+  onHoldReason: string | null;
+  inReview: boolean | null;
+  thumbUrl: string;
+  coverUrl: string | null;
+  artistTags: string[];
+  publishedAt: string | null;
+  importedFrom: string | null;
+  buyAtVendor: string | null;
+  buyAtUrl: string | null;
+  customDownloadUrl: string | null;
+  folders: string[];
+}
+
+interface SoFurryFileUploadResponse {
+  contentId: string;
+  title: string;
+  description: string;
+  body: {
+    extension: string;
+    displayUrl: string;
+  };
+  position: number;
+  type: string;
+}
+
+interface SoFurryThumbnailUploadResponse {
+  url: string;
+}
 
 @Injectable()
 export class SoFurry extends Website {
-  readonly BASE_URL: string = 'https://www.sofurry.com';
+  readonly BASE_URL: string = 'https://sofurry.com';
   readonly MAX_CHARS: number = undefined; // No Limit
   readonly acceptsFiles: string[] = ['png', 'jpeg', 'jpg', 'gif', 'swf', 'txt', 'mp3', 'mp4'];
   readonly usernameShortcuts = [
     {
       key: 'sf',
-      url: 'https://$1.sofurry.com/',
+      url: 'https://sofurry.com/u/$1',
     },
   ];
+  defaultDescriptionParser = PlaintextParser.parse;
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
     const status: LoginResponse = { loggedIn: false, username: null };
-    await BrowserWindowUtil.getPage(data._id, this.BASE_URL, true);
-    const res = await Http.get<string>(`${this.BASE_URL}/upload/details?contentType=1`, data._id);
-    if (res.body.includes('Logout')) {
-      status.loggedIn = true;
+    const res = await Http.get<string>(this.BASE_URL, data._id);
 
-      const $ = cheerio.load(res.body);
-      status.username = $('a[class=avatar]').attr('href').split('.')[0].split('/').pop();
-      this.getFolders(data._id, $);
-      // Http.saveSessionCookies(this.BASE_URL, data._id);
+    // Check for logged in user via window.handle pattern
+    const handleMatch = res.body.match(/window\.handle = "(.*)"/);
+    if (handleMatch && handleMatch[1] !== 'null' && handleMatch[1]) {
+      const username = handleMatch[1];
+
+      // Extract CSRF token from meta tag
+      const csrfMatch = res.body.match(/<meta name="csrf-token" content="([^"]+)"/);
+      const csrfToken = csrfMatch ? csrfMatch[1] : undefined;
+      if (csrfToken) {
+        // Fetch folders
+        await this.getFolders(data._id, csrfToken);
+        status.loggedIn = true;
+        status.username = username;
+      }
     }
     return status;
   }
 
-  private getFolders(profileId: string, $: cheerio.Root) {
+  /**
+   * Fetch a fresh CSRF token from SoFurry.
+   */
+  private async fetchCsrfToken(partition: string): Promise<string | undefined> {
+    const res = await Http.get<string>(this.BASE_URL, partition);
+
+    const csrfMatch = res.body.match(/<meta name="csrf-token" content="([^"]+)"/);
+    return csrfMatch ? csrfMatch[1] : undefined;
+  }
+
+  /**
+   * Fetch user folders from SoFurry.
+   */
+  private async getFolders(profileId: string, csrfToken: string): Promise<void> {
+    const res = await HttpExperimental.get<[{ id: string; name: string }]>(
+      `${this.BASE_URL}/ui/folders`,
+      {
+        partition: profileId,
+        headers: {
+          'x-csrf-token': csrfToken,
+        },
+      },
+    );
+
+    const { body } = res;
     const folders: Folder[] = [];
-    $('#UploadForm_folderId')
-      .children()
-      .toArray()
-      .forEach(o => {
-        folders.push({ value: $(o).attr('value'), label: $(o).text() });
+    if (Array.isArray(body)) {
+      body.forEach(folder => {
+        folders.push({
+          label: folder.name,
+          value: folder.id,
+        });
       });
+    }
 
     this.storeAccountInformation(profileId, GenericAccountProp.FOLDERS, folders);
   }
@@ -95,16 +171,33 @@ export class SoFurry extends Website {
     }
   }
 
-  private getRating(rating: SubmissionRating) {
+  private getRating(rating: SubmissionRating): number {
     switch (rating) {
       case SubmissionRating.EXTREME:
-        return '2';
       case SubmissionRating.ADULT:
+        return 20; // Adult
       case SubmissionRating.MATURE:
-        return '1';
+        return 10; // Mature
       case SubmissionRating.GENERAL:
       default:
-        return '0';
+        return 0; // Clean
+    }
+  }
+
+  private getDefaultCategoryAndType(fileType: FileSubmissionType): {
+    category: number;
+    type: number;
+  } {
+    switch (fileType) {
+      case FileSubmissionType.AUDIO:
+        return { category: 40, type: 41 }; // Music -> Track
+      case FileSubmissionType.TEXT:
+        return { category: 20, type: 21 }; // Writing -> Short Story
+      case FileSubmissionType.VIDEO:
+        return { category: 50, type: 59 }; // Video -> Other
+      case FileSubmissionType.IMAGE:
+      default:
+        return { category: 10, type: 11 }; // Artwork -> Drawing
     }
   }
 
@@ -112,95 +205,141 @@ export class SoFurry extends Website {
     cancellationToken: CancellationToken,
     data: FilePostData<SoFurryFileOptions>,
   ): Promise<PostResponse> {
-    const url = `${this.BASE_URL}/upload/details?contentType=${this.getSubmissionType(
-      data.primary.type,
-    )}`;
-    const page = await Http.get<string>(url, data.part.accountId);
-    this.verifyResponse(page, 'Get form page');
-
-    const form: any = {
-      YII_CSRF_TOKEN: HtmlParserUtil.getInputValue(page.body, 'YII_CSRF_TOKEN'),
-      'UploadForm[binarycontent_5]': data.thumbnail || '',
-      'UploadForm[P_title]': data.title,
-      'UploadForm[description]': data.description.replace(/<\/div>(\n|\r)/g, '</div>'),
-      'UploadForm[formtags]': this.formatTags(data.tags).join(', '),
-      'UploadForm[contentLevel]': this.getRating(data.rating),
-      'UploadForm[P_hidePublic]': '0',
-      'UploadForm[folderId]': data.options.folder || '0',
-    };
-
-    if (data.primary.type === FileSubmissionType.TEXT) {
-      form['UploadForm[textcontent]'] = data.primary.file.value;
-      if (!WebsiteValidator.supportsFileType(data.submission.primary, this.acceptsFiles)) {
-        form['UploadForm[textcontent]'] = data.fallback.value;
-      }
-      if (data.options.thumbnailAsCoverArt) {
-        form['UploadForm[binarycontent_25]'] = data.thumbnail || '';
-      }
-    } else {
-      form['UploadForm[binarycontent]'] = data.primary.file;
-    }
-
-    this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(url, data.part.accountId, {
-      type: 'multipart',
-      data: form,
-      headers: {
-        referer: url,
+    const csrf = await this.fetchCsrfToken(data.part.accountId);
+    const createRes = await HttpExperimental.put<SofurrySubmissionResponse>(
+      `${this.BASE_URL}/ui/submission`,
+      {
+        partition: data.part.accountId,
+        type: 'json',
+        data: {},
+        headers: {
+          'x-csrf-token': csrf,
+        },
       },
-    });
+    );
 
-    this.verifyResponse(post, 'Verify posted');
-    if (post.body.includes('edit')) {
-      return this.createPostResponse({ source: post.returnUrl });
+    if (!createRes.body?.id) {
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Failed to create submission',
+          additionalInfo: createRes.body,
+        }),
+      );
     }
 
-    return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
+    const submissionId = createRes.body.id;
+    const files = [data.primary, ...data.additional];
+    const contentIds: string[] = [];
+    for (const file of files) {
+      this.checkCancelled(cancellationToken);
+      const uploadRes = await HttpExperimental.post<SoFurryFileUploadResponse>(
+        `${this.BASE_URL}/ui/submission/${submissionId}/content`,
+        {
+          partition: data.part.accountId,
+          type: 'multipart',
+          data: {
+            name: file.file.options.filename,
+            file: file.file,
+          },
+          headers: {
+            'x-csrf-token': csrf,
+            referer: `${this.BASE_URL}/s/${submissionId}/edit`,
+            origin: this.BASE_URL,
+          },
+        },
+      );
+      if (uploadRes.statusCode >= 400 || !uploadRes.body?.contentId) {
+        return Promise.reject(
+          this.createPostResponse({
+            message: 'Failed to upload file',
+            additionalInfo: uploadRes.body,
+          }),
+        );
+      }
+      contentIds.push(uploadRes.body.contentId);
+    }
+
+    let thumbnailId: string | undefined;
+    if (data.thumbnail) {
+      const thumbRes = await HttpExperimental.post<SoFurryThumbnailUploadResponse>(
+        `${this.BASE_URL}/ui/submission/${submissionId}/thumbnail`,
+        {
+          partition: data.part.accountId,
+          type: 'multipart',
+          data: {
+            name: data.thumbnail.options.filename,
+            file: data.thumbnail,
+          },
+          headers: {
+            'x-csrf-token': csrf,
+            referer: `${this.BASE_URL}/s/${submissionId}/edit`,
+            origin: this.BASE_URL,
+          },
+        },
+      );
+      if (thumbRes.statusCode >= 400 || !thumbRes.body?.url) {
+        return Promise.reject(
+          this.createPostResponse({
+            message: 'Failed to upload thumbnail',
+            additionalInfo: thumbRes.body,
+          }),
+        );
+      }
+      thumbnailId = thumbRes.body.url;
+    }
+
+    const category = parseInt(data.options.category, 10);
+    const type = parseInt(data.options.type, 10);
+
+    const finalizeRes = await HttpExperimental.post(
+      `${this.BASE_URL}/ui/submission/${submissionId}`,
+      {
+        partition: data.part.accountId,
+        type: 'json',
+        headers: {
+          'x-csrf-token': csrf,
+        },
+        data: {
+          title: data.title,
+          category,
+          type,
+          rating: this.getRating(data.rating),
+          privacy: data.options.privacy || '3',
+          allowComments: data.options.allowComments ? 1 : 0,
+          allowDownloads: data.options.allowDownloads ? 1 : 0,
+          isWip: data.options.isWip ? 1 : 0,
+          optimize: 1,
+          pixelPerfect: data.options.pixelPerfectDisplay ? 1 : 0,
+          isAdvert: data.options.intendedAsAdvertisement ? 1 : 0,
+          description: data.description,
+          artistTags: this.formatTags(data.tags),
+          canPurchase: false,
+          purchaseAtVendor: null,
+          purchaseAtUrl: null,
+          contentOrder: contentIds,
+          thumbUrl: thumbnailId,
+        },
+      },
+    );
+
+    if (finalizeRes.statusCode >= 400) {
+      return Promise.reject(
+        this.createPostResponse({
+          message: 'Failed to finalize submission',
+          additionalInfo: finalizeRes.body,
+        }),
+      );
+    }
+
+    return this.createPostResponse({
+      source: `${this.BASE_URL}/s/${submissionId}`,
+      additionalInfo: finalizeRes.body,
+    });
   }
 
   fallbackFileParser(html: string): FallbackInformation {
     const t = HTMLFormatParser.parse(html);
     return { text: this.parseDescription(html), type: 'text/plain', extension: 'txt' };
-  }
-
-  async postNotificationSubmission(
-    cancellationToken: CancellationToken,
-    data: PostData<Submission, SoFurryFileOptions>,
-  ): Promise<PostResponse> {
-    const url = `${this.BASE_URL}/upload/details?contentType=3`;
-    const page = await Http.get<string>(url, data.part.accountId);
-    this.verifyResponse(page, 'Get form page');
-
-    const form: any = {
-      YII_CSRF_TOKEN: HtmlParserUtil.getInputValue(page.body, 'YII_CSRF_TOKEN'),
-      'UploadForm[P_id]': HtmlParserUtil.getInputValue(page.body, 'UploadForm[P_id]'),
-      'UploadForm[P_title]': data.title,
-      'UploadForm[textcontent]': data.description,
-      'UploadForm[description]': PlaintextParser.parse(data.description.split('\n')[0]),
-      'UploadForm[formtags]': this.formatTags(data.tags).join(', '),
-      'UploadForm[contentLevel]': this.getRating(data.rating),
-      'UploadForm[P_hidePublic]': '0',
-      'UploadForm[folderId]': data.options.folder || '0',
-      'UploadForm[newFolderName]': '',
-      'UploadForm[P_isHTML]': '1',
-      save: 'Publish',
-    };
-
-    this.checkCancelled(cancellationToken);
-    const post = await Http.post<string>(url, data.part.accountId, {
-      type: 'multipart',
-      data: form,
-      headers: {
-        referer: url,
-      },
-    });
-
-    this.verifyResponse(post, 'Verify posted');
-    if (post.body.includes('edit')) {
-      return this.createPostResponse({ source: post.returnUrl });
-    }
-
-    return Promise.reject(this.createPostResponse({ additionalInfo: post.body }));
   }
 
   formatTags(tags: string[]) {
@@ -229,6 +368,10 @@ export class SoFurry extends Website {
       if (!folders.find(f => f.value === submissionPart.data.folder)) {
         warnings.push(`Folder (${submissionPart.data.folder}) not found.`);
       }
+    }
+
+    if (!submissionPart.data.category || !submissionPart.data.type) {
+      problems.push(`Category and Type are required`);
     }
 
     if (!WebsiteValidator.supportsFileType(submission.primary, this.acceptsFiles)) {
