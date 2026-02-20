@@ -104,12 +104,24 @@ export class SoFurryFileSubmissionForm extends GenericFileSubmissionSection<SoFu
           value={data.type}
           onSelect={this.setValue.bind(this, 'type')}
         >
-          <Select.Option value="11">Drawing</Select.Option>
-          <Select.Option value="12">Comic</Select.Option>
-          <Select.Option value="31">Photograph</Select.Option>
-          <Select.Option value="32">Album</Select.Option>
-          <Select.Option value="21">Short Story</Select.Option>
-          <Select.Option value="22">Book</Select.Option>
+          <Select.Option value="11" disabled={data.category !== '10'}>
+            Drawing
+          </Select.Option>
+          <Select.Option value="12" disabled={data.category !== '10'}>
+            Comic
+          </Select.Option>
+          <Select.Option value="31" disabled={data.category !== '30'}>
+            Photograph
+          </Select.Option>
+          <Select.Option value="32" disabled={data.category !== '30'}>
+            Album
+          </Select.Option>
+          <Select.Option value="21" disabled={data.category !== '20'}>
+            Short Story
+          </Select.Option>
+          <Select.Option value="22" disabled={data.category !== '20'}>
+            Book
+          </Select.Option>
           <Select.Option value="13">Animation</Select.Option>
         </Select>
       </Form.Item>,

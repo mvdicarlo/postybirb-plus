@@ -154,23 +154,6 @@ export class SoFurry extends Website {
     return { maxSize: FileSize.MBtoBytes(50) };
   }
 
-  parseDescription(text: string) {
-    return HTMLFormatParser.parse(text).replace(/\n/g, '');
-  }
-
-  private getSubmissionType(type: FileSubmissionType): string {
-    switch (type) {
-      case FileSubmissionType.AUDIO:
-        return '2';
-      case FileSubmissionType.TEXT:
-        return '0';
-      case FileSubmissionType.IMAGE:
-      case FileSubmissionType.VIDEO:
-      default:
-        return '1';
-    }
-  }
-
   private getRating(rating: SubmissionRating): number {
     switch (rating) {
       case SubmissionRating.EXTREME:
@@ -206,14 +189,17 @@ export class SoFurry extends Website {
     data: FilePostData<SoFurryFileOptions>,
   ): Promise<PostResponse> {
     const csrf = await this.fetchCsrfToken(data.part.accountId);
-    const createRes = await HttpExperimental.put<SofurrySubmissionResponse>(
+    const createRes = await Http.put<SofurrySubmissionResponse>(
       `${this.BASE_URL}/ui/submission`,
+      data.part.accountId,
       {
-        partition: data.part.accountId,
         type: 'json',
         data: {},
         headers: {
           'x-csrf-token': csrf,
+        },
+        requestOptions: {
+          json: true,
         },
       },
     );
@@ -232,10 +218,10 @@ export class SoFurry extends Website {
     const contentIds: string[] = [];
     for (const file of files) {
       this.checkCancelled(cancellationToken);
-      const uploadRes = await HttpExperimental.post<SoFurryFileUploadResponse>(
+      const uploadRes = await Http.post<SoFurryFileUploadResponse>(
         `${this.BASE_URL}/ui/submission/${submissionId}/content`,
+        data.part.accountId,
         {
-          partition: data.part.accountId,
           type: 'multipart',
           data: {
             name: file.file.options.filename,
@@ -246,9 +232,12 @@ export class SoFurry extends Website {
             referer: `${this.BASE_URL}/s/${submissionId}/edit`,
             origin: this.BASE_URL,
           },
+          requestOptions: {
+            json: true,
+          },
         },
       );
-      if (uploadRes.statusCode >= 400 || !uploadRes.body?.contentId) {
+      if (uploadRes.response.statusCode >= 400 || !uploadRes.body?.contentId) {
         return Promise.reject(
           this.createPostResponse({
             message: 'Failed to upload file',
@@ -261,10 +250,10 @@ export class SoFurry extends Website {
 
     let thumbnailId: string | undefined;
     if (data.thumbnail) {
-      const thumbRes = await HttpExperimental.post<SoFurryThumbnailUploadResponse>(
+      const thumbRes = await Http.post<SoFurryThumbnailUploadResponse>(
         `${this.BASE_URL}/ui/submission/${submissionId}/thumbnail`,
+        data.part.accountId,
         {
-          partition: data.part.accountId,
           type: 'multipart',
           data: {
             name: data.thumbnail.options.filename,
@@ -277,7 +266,7 @@ export class SoFurry extends Website {
           },
         },
       );
-      if (thumbRes.statusCode >= 400 || !thumbRes.body?.url) {
+      if (thumbRes.response.statusCode >= 400 || !thumbRes.body?.url) {
         return Promise.reject(
           this.createPostResponse({
             message: 'Failed to upload thumbnail',
@@ -291,10 +280,10 @@ export class SoFurry extends Website {
     const category = parseInt(data.options.category, 10);
     const type = parseInt(data.options.type, 10);
 
-    const finalizeRes = await HttpExperimental.post(
+    const finalizeRes = await Http.post(
       `${this.BASE_URL}/ui/submission/${submissionId}`,
+      data.part.accountId,
       {
-        partition: data.part.accountId,
         type: 'json',
         headers: {
           'x-csrf-token': csrf,
@@ -322,7 +311,7 @@ export class SoFurry extends Website {
       },
     );
 
-    if (finalizeRes.statusCode >= 400) {
+    if (finalizeRes.response.statusCode >= 400) {
       return Promise.reject(
         this.createPostResponse({
           message: 'Failed to finalize submission',
