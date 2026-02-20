@@ -15,14 +15,44 @@ export class SoFurryFileOptionsEntity
   folder?: string;
 
   @Expose()
-  @IsBoolean()
-  @DefaultValue(false)
-  thumbnailAsCoverArt!: boolean;
+  @IsString()
+  @DefaultValue('')
+  category!: string;
 
   @Expose()
   @IsString()
-  @DefaultValue('0')
-  viewOptions!: string;
+  @DefaultValue('')
+  type!: string;
+
+  @Expose()
+  @IsString()
+  @DefaultValue('3')
+  privacy!: string;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(true)
+  allowComments!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(true)
+  allowDownloads!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  intendedAsAdvertisement!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  isWip!: boolean;
+
+  @Expose()
+  @IsBoolean()
+  @DefaultValue(false)
+  pixelPerfectDisplay!: boolean;
 
   constructor(entity?: Partial<SoFurryFileOptions>) {
     super(entity as DefaultFileOptions);
