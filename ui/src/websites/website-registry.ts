@@ -33,6 +33,7 @@ import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 import { Pixelfed } from './pixelfed/Pixelfed';
 import { Bluesky } from './bluesky/Bluesky';
 import { Twitter } from './twitter/Twitter';
+import { WordPress } from './wordpress/WordPress';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -70,6 +71,7 @@ export class WebsiteRegistry {
     Weasyl: new Weasyl(),
     e621: new e621(),
     Twitter: new Twitter(),
+    WordPress: new WordPress(),
   };
 
   static getAllAsArray() {
