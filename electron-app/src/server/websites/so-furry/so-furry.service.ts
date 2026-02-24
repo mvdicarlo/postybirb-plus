@@ -332,7 +332,7 @@ export class SoFurry extends Website {
   }
 
   formatTags(tags: string[]) {
-    return tags;
+    return tags.map(tag => tag.replace(/_/g, ' ').trim());
   }
 
   validateFileSubmission(
