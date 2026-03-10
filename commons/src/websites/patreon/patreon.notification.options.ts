@@ -29,6 +29,12 @@ export class PatreonNotificationOptionsEntity
   @IsString()
   teaser?: string;
 
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  @DefaultValue([])
+  collections?: Array<{ id: string; type: string }>;
+
   constructor(entity?: Partial<PatreonNotificationOptions>) {
     super(entity as DefaultOptions);
   }
