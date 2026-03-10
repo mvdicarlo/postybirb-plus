@@ -104,19 +104,19 @@ export class HttpExperimental {
       Object.entries(DEFAULT_HEADERS).forEach(([key, value]) => {
         req.setHeader(key, value);
       });
+    }
 
-      if (options.headers) {
-        Object.entries(([headerKey, headerValue]) => {
-          if (RESTRICTED_HEADERS.includes(headerKey)) {
-            HttpExperimental.logger.error(
-              `Not allowed to set header: ${headerKey} [https://www.electronjs.org/docs/api/client-request#instance-methods]`,
-            );
-            throw new Error(`Not allowed to set header: ${headerKey}`);
-          }
+    if (options.headers) {
+      Object.entries(options.headers).forEach(([headerKey, headerValue]) => {
+        if (RESTRICTED_HEADERS.includes(headerKey)) {
+          HttpExperimental.logger.error(
+            `Not allowed to set header: ${headerKey} [https://www.electronjs.org/docs/api/client-request#instance-methods]`,
+          );
+          throw new Error(`Not allowed to set header: ${headerKey}`);
+        }
 
-          req.setHeader(headerKey, headerValue);
-        });
-      }
+        req.setHeader(headerKey, headerValue);
+      });
     }
 
     return req;
@@ -214,7 +214,11 @@ export class HttpExperimental {
         const message = Buffer.concat(chunks);
 
         let body: T | string = message.toString();
-        if (headers['content-type'] && headers['content-type'].includes('application/json')) {
+        if (
+          headers['content-type'] &&
+          (headers['content-type'].includes('application/json') ||
+            headers['content-type'].includes('application/vnd.api+json'))
+        ) {
           try {
             body = JSON.parse(body) as T;
           } catch {

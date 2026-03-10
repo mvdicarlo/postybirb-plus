@@ -7,4 +7,5 @@ export interface PatreonFileOptions extends DefaultFileOptions {
   teaser?: string;
   allAsAttachment: boolean;
   earlyAccess?: Date;
+  collections?: Array<{ id: string; type: string }>;
 }
