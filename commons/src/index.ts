@@ -95,6 +95,8 @@ export * from './interfaces/websites/bluesky/bluesky.file.options.interface';
 export * from './interfaces/websites/bluesky/bluesky.notification.options.interface';
 export * from './interfaces/websites/twitter/twitter.file.options.interface';
 export * from './interfaces/websites/twitter/twitter.account.interface';
+export * from './interfaces/websites/instagram/instagram.account.interface';
+export * from './interfaces/websites/instagram/instagram.file.options.interface';
 
 // Models/Entities
 export * from './models/default-options.entity';
