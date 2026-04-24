@@ -5,13 +5,11 @@ import ReactDOM from 'react-dom';
 import { MissKeyAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
-
-import generator, { OAuth } from 'megalodon'
+import * as Misskey from 'misskey-js';
 
 interface State extends MissKeyAccountData {
   code: string;
-  client_id: string;
-  client_secret: string;
+  sessionId: string;
   loading: boolean;
 }
 
@@ -20,9 +18,8 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
     website: 'misskey.io',
     code: '',
     loading: true,
-    client_id: '',
-    client_secret: '',
-    tokenData: null,
+    sessionId: '',
+    token: null,
     username: ''
   };
 
@@ -51,45 +48,57 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
   }
 
   private getAuthURL(website: string) {
-    let auth_url : string = "";
-
-    // Get the Auth URL ... Display it. 
-    const client = generator('misskey', `https://${website}`);
-    let opts: any = {
-      redirect_uris: `https://localhost:${window['PORT']}/misskey/display/${window.AUTH_ID}`
-    }
-    client.registerApp('PostyBirb', opts )
-      .then(appData => {
-        this.state.client_id = appData.clientId;
-        this.state.client_secret = appData.clientSecret;
-        this.state.username = appData.name;
-        auth_url = appData.url || "Error - no auth url";
-        this.view.src = auth_url;
-      });
+    // Generate a unique session ID for MiAuth
+    const sessionId = `postybirb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    this.setState({ sessionId });
+    
+    // Construct MiAuth URL - Misskey's authentication system
+    const authUrl = `https://${website}/miauth/${sessionId}?name=PostyBirb&permission=write:notes,write:drive`;
+    this.view.src = authUrl;
   }
 
-  submit() {
-    const client = generator('misskey', `https://${this.state.website}`);
-    client.fetchAccessToken(this.state.client_id, this.state.client_secret, this.state.code).then((value: OAuth.TokenData) => {
-      // Get the username so we have complete data.
-      const usernameClient = generator('misskey', `https://${this.state.website}`, value.accessToken);
-      usernameClient.verifyAccountCredentials().then((res)=>{
-        let website = `https://${this.state.website}`;
-        this.state.username = res.data.username;
-        this.state.tokenData = value;
-        LoginService.setAccountData(this.props.account._id, this.state ).then(
-          () => {
-            message.success(`${this.state.website} authenticated.`);
-          });
-      });
-    })
-    .catch((err: Error) => {
-      message.error(`Failed to authenticate ${this.state.website}.`);
-    })
+  async submit() {
+    if (!this.state.sessionId) {
+      message.error('Invalid session. Please try again.');
+      return;
+    }
+
+    try {
+      // Check MiAuth session
+      const response = await Axios.post(`https://${this.state.website}/api/miauth/${this.state.sessionId}/check`);
+      
+      if (response.data.ok && response.data.token) {
+        // Create API client to get username
+        const cli = new Misskey.api.APIClient({
+          origin: `https://${this.state.website}`,
+          credential: response.data.token,
+        });
+        
+        const userInfo = await cli.request('i', {});
+        
+        this.setState({ 
+          token: response.data.token,
+          username: userInfo.username 
+        });
+        
+        await LoginService.setAccountData(this.props.account._id, {
+          website: this.state.website,
+          token: response.data.token,
+          username: userInfo.username
+        });
+        
+        message.success(`${this.state.website} authenticated successfully!`);
+      } else {
+        message.error('Authentication not completed. Please authorize in the browser first.');
+      }
+    } catch (err: any) {
+      console.error('MissKey authentication error:', err);
+      message.error(`Failed to authenticate ${this.state.website}: ${err.message}`);
+    }
   }
 
   isValid(): boolean {
-    return !!this.state.website && !!this.state.code;
+    return !!this.state.website && !!this.state.sessionId;
   }
 
   render() {
@@ -104,21 +113,21 @@ export default class MissKeyLogin extends React.Component<LoginDialogProps, Stat
                 addonBefore="https://"
                 onBlur={({ target }) => {
                   const website = target.value.replace(/(https:\/\/|http:\/\/)/, '');
-                  this.view.loadURL(this.getAuthURL(website));
+                  this.getAuthURL(website);
                   this.setState({ website });
                 }}
               />
             </Form.Item>
-            <Form.Item label="Code" help="Obtained from authenticating the website" required>
-              <Input
-                value={this.state.code}
-                onChange={({ target }) => this.setState({ code: target.value })}
-                addonAfter={
-                  <Button onClick={this.submit.bind(this)} disabled={!this.isValid()}>
-                    Authorize
-                  </Button>
-                }
-              />
+            <Form.Item 
+              label="Status" 
+              help="Authorize PostyBirb in the window above, then click Check Authorization">
+              <Button 
+                type="primary" 
+                onClick={this.submit.bind(this)} 
+                disabled={!this.isValid()}
+                block>
+                Check Authorization
+              </Button>
             </Form.Item>
           </Form>
         </div>
