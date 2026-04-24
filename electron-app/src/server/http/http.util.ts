@@ -167,8 +167,16 @@ export default class Http {
     return Http.postLike('post', uri, partitionId, options);
   }
 
+  static async put<T>(
+    uri: string,
+    partitionId: string | undefined,
+    options: PostOptions,
+  ): Promise<HttpResponse<T>> {
+    return Http.postLike('put', uri, partitionId, options);
+  }
+
   private static async postLike<T>(
-    type: 'post' | 'patch',
+    type: 'post' | 'patch' | 'put',
     uri: string,
     partitionId: string | undefined,
     options: PostOptions,

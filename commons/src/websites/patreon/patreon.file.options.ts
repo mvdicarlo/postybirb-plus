@@ -39,6 +39,12 @@ export class PatreonFileOptionsEntity
   @IsDate()
   earlyAccess?: Date;
 
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  @DefaultValue([])
+  collections?: Array<{ id: string; type: string }>;
+
   constructor(entity?: Partial<PatreonFileOptions>) {
     super(entity as DefaultFileOptions);
   }

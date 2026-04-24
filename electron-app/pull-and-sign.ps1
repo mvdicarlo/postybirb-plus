@@ -65,7 +65,7 @@ function Sign-Files {
         [string]$filePath
     )
     Write-Host "Signing $filePath"
-    & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86\signtool.exe" sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a $filePath
+    & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x86\signtool.exe" sign /tr http://timestamp.sectigo.com /td sha256 /fd sha256 /a $filePath
 }
 
 # Step 4: Upload the files back up to the draft release

@@ -1,9 +1,8 @@
 import { Logger } from '@nestjs/common';
-import { net, ClientRequest, ClientRequestConstructorOptions } from 'electron';
-import { encode as encodeQueryString } from 'querystring';
-import urlEncoded from 'form-urlencoded';
+import { BrowserWindow, ClientRequest, ClientRequestConstructorOptions, net } from 'electron';
 import FormData from 'form-data';
-import { BrowserWindow } from 'electron';
+import urlEncoded from 'form-urlencoded';
+import { encode as encodeQueryString } from 'querystring';
 
 // https://www.electronjs.org/docs/api/client-request#instance-methods
 const RESTRICTED_HEADERS: string[] = [
@@ -93,7 +92,11 @@ export class HttpExperimental {
     }
 
     const req = net.request(clientRequestOptions);
-    if (clientRequestOptions.method === 'POST' || clientRequestOptions.method === 'PATCH') {
+    if (
+      clientRequestOptions.method === 'POST' ||
+      clientRequestOptions.method === 'PATCH' ||
+      clientRequestOptions.method === 'PUT'
+    ) {
       if ((options as PostOptions).type === 'multipart') {
         req.chunkedEncoding = true;
       }
@@ -101,19 +104,19 @@ export class HttpExperimental {
       Object.entries(DEFAULT_HEADERS).forEach(([key, value]) => {
         req.setHeader(key, value);
       });
+    }
 
-      if (options.headers) {
-        Object.entries(([headerKey, headerValue]) => {
-          if (RESTRICTED_HEADERS.includes(headerKey)) {
-            HttpExperimental.logger.error(
-              `Not allowed to set header: ${headerKey} [https://www.electronjs.org/docs/api/client-request#instance-methods]`,
-            );
-            throw new Error(`Not allowed to set header: ${headerKey}`);
-          }
+    if (options.headers) {
+      Object.entries(options.headers).forEach(([headerKey, headerValue]) => {
+        if (RESTRICTED_HEADERS.includes(headerKey)) {
+          HttpExperimental.logger.error(
+            `Not allowed to set header: ${headerKey} [https://www.electronjs.org/docs/api/client-request#instance-methods]`,
+          );
+          throw new Error(`Not allowed to set header: ${headerKey}`);
+        }
 
-          req.setHeader(headerKey, headerValue);
-        });
-      }
+        req.setHeader(headerKey, headerValue);
+      });
     }
 
     return req;
@@ -211,7 +214,11 @@ export class HttpExperimental {
         const message = Buffer.concat(chunks);
 
         let body: T | string = message.toString();
-        if (headers['content-type'] && headers['content-type'].includes('application/json')) {
+        if (
+          headers['content-type'] &&
+          (headers['content-type'].includes('application/json') ||
+            headers['content-type'].includes('application/vnd.api+json'))
+        ) {
           try {
             body = JSON.parse(body) as T;
           } catch {
@@ -274,6 +281,21 @@ export class HttpExperimental {
   }
 
   /**
+   * Creates a PUT method request.
+   *
+   * @param url
+   * @param options
+   * @param crOptions
+   */
+  static put<T>(
+    url: string,
+    options: PostOptions | BinaryPostOptions,
+    crOptions?: ClientRequestConstructorOptions,
+  ): Promise<HttpResponse<T>> {
+    return HttpExperimental.postLike('put', url, options, crOptions ?? {});
+  }
+
+  /**
    * Creates a POST method request.
    *
    * @static
@@ -310,7 +332,7 @@ export class HttpExperimental {
   }
 
   private static postLike<T>(
-    method: 'post' | 'patch',
+    method: 'post' | 'patch' | 'put',
     url: string,
     options: PostOptions | BinaryPostOptions,
     crOptions: ClientRequestConstructorOptions,

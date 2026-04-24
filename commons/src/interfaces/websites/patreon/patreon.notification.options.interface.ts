@@ -5,4 +5,5 @@ export interface PatreonNotificationOptions extends DefaultOptions {
   charge: boolean;
   schedule?: string; // as date string
   teaser?: string;
+  collections?: Array<{ id: string; type: string }>;
 }

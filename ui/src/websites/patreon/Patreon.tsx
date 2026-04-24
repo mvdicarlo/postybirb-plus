@@ -62,13 +62,15 @@ export class Patreon extends WebsiteImpl {
 
 interface PatreonSubmissionState {
   folders: Folder[];
+  collections: Folder[];
 }
 
 export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
   PatreonNotificationOptions
 > {
   state: PatreonSubmissionState = {
-    folders: []
+    folders: [],
+    collections: []
   };
 
   patronsOnlyId: string = '';
@@ -77,7 +79,8 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
   constructor(props: WebsiteSectionProps<FileSubmission, PatreonNotificationOptions>) {
     super(props);
     this.state = {
-      folders: []
+      folders: [],
+      collections: []
     };
 
     WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
@@ -98,6 +101,16 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
         }
       }
     );
+
+    WebsiteService.getAccountInformation(
+      this.props.part.website,
+      this.props.part.accountId,
+      'collections'
+    ).then(({ data }) => {
+      if (data && Array.isArray(data)) {
+        this.setState({ collections: data });
+      }
+    });
   }
 
   renderLeftForm(data: PatreonNotificationOptions) {
@@ -170,6 +183,25 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
           onChange={this.handleValueChange.bind(this, 'teaser')}
           maxLength={140}
         />
+      </Form.Item>,
+      <Form.Item label="Collections">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.collections?.map((c: any) => c.id) || []}
+          mode="multiple"
+          onChange={(value: string[]) => {
+            this.setValue(
+              'collections',
+              (value || []).map(id => ({ id, type: 'collection' }))
+            );
+          }}
+          allowClear
+        >
+          {this.state.collections.map(c => (
+            <Select.Option key={c.value} value={c.value}>{c.label}</Select.Option>
+          ))}
+        </Select>
       </Form.Item>
     );
     return elements;
@@ -178,7 +210,8 @@ export class PatreonNotificationSubmissionForm extends GenericSubmissionSection<
 
 export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<PatreonFileOptions> {
   state: PatreonSubmissionState = {
-    folders: []
+    folders: [],
+    collections: []
   };
 
   patronsOnlyId: string = '';
@@ -187,7 +220,8 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
   constructor(props: WebsiteSectionProps<FileSubmission, PatreonFileOptions>) {
     super(props);
     this.state = {
-      folders: []
+      folders: [],
+      collections: []
     };
 
     WebsiteService.getAccountFolders(this.props.part.website, this.props.part.accountId).then(
@@ -208,6 +242,16 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
         }
       }
     );
+
+    WebsiteService.getAccountInformation(
+      this.props.part.website,
+      this.props.part.accountId,
+      'collections'
+    ).then(({ data }) => {
+      if (data && Array.isArray(data)) {
+        this.setState({ collections: data });
+      }
+    });
   }
 
   renderLeftForm(data: PatreonFileOptions) {
@@ -300,6 +344,25 @@ export class PatreonFileSubmissionForm extends GenericFileSubmissionSection<Patr
           onChange={this.handleValueChange.bind(this, 'teaser')}
           maxLength={140}
         />
+      </Form.Item>,
+      <Form.Item label="Collections">
+        <Select
+          {...GenericSelectProps}
+          className="w-full"
+          value={data.collections?.map((c: any) => c.id) || []}
+          mode="multiple"
+          onChange={(value: string[]) => {
+            this.setValue(
+              'collections',
+              (value || []).map(id => ({ id, type: 'collection' }))
+            );
+          }}
+          allowClear
+        >
+          {this.state.collections.map(c => (
+            <Select.Option key={c.value} value={c.value}>{c.label}</Select.Option>
+          ))}
+        </Select>
       </Form.Item>
     );
     return elements;
