@@ -9,6 +9,7 @@ import WebsiteService from '../../../../services/website.service';
 import { WebsiteRegistry } from '../../../../websites/website-registry';
 import { uiStore } from '../../../../stores/ui.store';
 import { CustomShortcutStore } from '../../../../stores/custom-shortcut.store';
+import { LoginStatusStore } from '../../../../stores/login-status.store';
 
 interface Props {
   customShortcutStore?: CustomShortcutStore;
@@ -21,12 +22,13 @@ interface Props {
   overwriteDescriptionValue?: string;
   lengthParser?: (text: string) => number;
   anchorLength?: number;
+  loginStatusStore?: LoginStatusStore;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {}
 
-@inject('descriptionTemplateStore', 'customShortcutStore')
+@inject('descriptionTemplateStore', 'customShortcutStore', 'loginStatusStore')
 @observer
 export default class DescriptionInput extends React.Component<Props, State> {
   state: State = {};
@@ -146,6 +148,19 @@ export default class DescriptionInput extends React.Component<Props, State> {
     );
 
     const customShortcuts = this.props.customShortcutStore!.shortcuts;
+    const accounts = this.props.loginStatusStore!.statuses.map(({ _id: id, website, username }) => {
+      const websiteKey = website.toLowerCase();
+      return { username, website, websiteKey, shortcut: `{parent:${id}}` };
+    });
+    const websitesWithAccount = new Set<string>(accounts.map(({ websiteKey }) => websiteKey));
+    const websites = WebsiteRegistry.getAllAsArray()
+      .map(w => {
+        return { name: w.name, key: w.internalName.toLowerCase() };
+      })
+      .filter(({ key }) => websitesWithAccount.has(key))
+      .map(({ name, key }) => {
+        return { name, shortcut: `{parent:${key}}` };
+      });
 
     return (
       <Form.Item
@@ -189,6 +204,46 @@ export default class DescriptionInput extends React.Component<Props, State> {
                         <span className="mx-1">-</span>
                         <span>
                           Inserts the content warning
+                        </span>
+                      </li>
+                      <li>
+                        <code>{'{parent:WHAT}'}</code>
+                        <span className="mx-1">-</span>
+                        <span>
+                          Replaced with the source link from the parent submission when that is
+                          posted. Only works if you actually specify a parent submission.
+                          <br />
+                          <code>WHAT</code> can be the name of a website of one of your accounts,
+                          one of:
+                          <ul>
+                            {websites.map(w => (
+                              <li>
+                                {w.name}:{' '}
+                                <Typography.Text
+                                  copyable={{ text: w.shortcut }}
+                                  code={true}
+                                  strong={true}
+                                >
+                                  {w.shortcut}
+                                </Typography.Text>
+                              </li>
+                            ))}
+                          </ul>
+                          If that would be ambiguous, you can use one of your account IDs directly:
+                          <ul>
+                            {accounts.map(a => (
+                              <li>
+                                {a.website} {a.username}:{' '}
+                                <Typography.Text
+                                  copyable={{ text: a.shortcut }}
+                                  code={true}
+                                  strong={true}
+                                >
+                                  {a.shortcut}
+                                </Typography.Text>
+                              </li>
+                            ))}
+                          </ul>
                         </span>
                       </li>
                     </ul>

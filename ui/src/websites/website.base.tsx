@@ -19,6 +19,7 @@ export abstract class WebsiteImpl implements Website {
   abstract name: string;
   supportsAdditionalFiles?: boolean = false;
   supportsTags?: boolean = true;
+  supportsParentId?: boolean = false;
 
   LoginDialog(props: LoginDialogProps): JSX.Element {
     return <GenericLoginDialog url={this.loginUrl} {...props} />;

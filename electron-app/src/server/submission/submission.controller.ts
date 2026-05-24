@@ -61,6 +61,11 @@ export class SubmissionController {
     return this.isTrue(packaged) ? this.service.getAndValidate(id) : this.service.get(id);
   }
 
+  @Get(':id/parent-options')
+  async getParentOptions(@Param('id') id: string) {
+    return this.service.getParentOptions(id);
+  }
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.service.deleteSubmission(id);
