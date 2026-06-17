@@ -1,25 +1,26 @@
-import { Button, Form, Icon, Input, message, Spin } from 'antd';
+import { Button, Form, Icon, Input, message, notification } from 'antd';
 import { TwitterAccountData } from 'postybirb-commons';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import BrowserLink from '../../components/BrowserLink';
 import LoginService from '../../services/login.service';
 import axios from '../../utils/http';
 import { LoginDialogProps } from '../interfaces/website.interface';
 
 interface State {
-  loading: boolean;
   pin: string;
   secret: string;
   key: string;
+  authUrl: string;
+  requestingAuth: boolean;
 }
 
 export class TwitterLogin extends React.Component<LoginDialogProps, State> {
   state: State = {
     secret: '',
     key: '',
-    loading: true,
     pin: '',
+    authUrl: '',
+    requestingAuth: false,
   };
 
   private oauth_token: string = '';
@@ -32,32 +33,29 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
     };
   }
 
-  componentDidMount() {
-    const node = ReactDOM.findDOMNode(this);
-    if (node instanceof HTMLElement) {
-      const view: any = node.querySelector('.webview');
-      if (!view) return; // Webview not found
-      view.addEventListener('did-stop-loading', () => {
-        if (this.state.loading) this.setState({ loading: false });
+  requestAuthorization() {
+    this.setState({ requestingAuth: true });
+    axios
+      .get<{ data: { url: string; oauth_token: string } }>(`/twitter/v2/authorize`, {
+        params: {
+          key: this.state.key,
+          secret: this.state.secret,
+        },
+      })
+      .then(({ data }) => {
+        this.oauth_token = data.data.oauth_token;
+        this.setState({ authUrl: data.data.url, requestingAuth: false });
+        window.electron.shell.openInBrowser(data.data.url).catch(() =>
+          notification.error({
+            message: 'Browser Failure',
+            description: `PostyBirb was unable to open ${data.data.url}`,
+          }),
+        );
+      })
+      .catch(() => {
+        this.setState({ requestingAuth: false });
+        message.error('A problem occurred when attempting to contact authentication server.');
       });
-      view.allowpopups = true;
-      view.partition = `persist:${this.props.account._id}`;
-      axios
-        .get<{ data: { url: string; oauth_token: string } }>(`/twitter/v2/authorize`, {
-          params: {
-            key: this.state.key,
-            secret: this.state.secret,
-          },
-        })
-        .then(({ data }) => {
-          view.src = data.data.url;
-          this.oauth_token = data.data.oauth_token;
-          this.setState({ loading: false });
-        })
-        .catch(() => {
-          message.error('A problem occurred when attempting to contact authentication server.');
-        });
-    }
   }
 
   updateAuthData(data: TwitterAccountData) {
@@ -78,13 +76,9 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
     LoginService.setAccountData(this.props.account._id, {
       key: this.state.key,
       secret: this.state.secret,
-    })
-      .then(() => {
-        message.success('Twitter API Key and Secret saved.');
-      })
-      .finally(() => {
-        this.componentDidMount();
-      });
+    }).then(() => {
+      message.success('Twitter API Key and Secret saved.');
+    });
   }
 
   submit() {
@@ -118,42 +112,6 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
   }
 
   render() {
-    if (!this.isAPIValid()) {
-      return (
-        <div className="h-full w-full">
-          <div className="container">
-            <Form layout="vertical">
-              <div>
-                <h1>Twitter API Key and Secret</h1>
-                <p>
-                  <BrowserLink url="https://www.postybirb.com/twitter-setup.html">
-                    How to get your API Key and Secret <Icon type="link" />
-                  </BrowserLink>
-                </p>
-              </div>
-              <Form.Item label="Twitter API Key" required>
-                <Input
-                  className="w-full"
-                  value={this.state.key}
-                  onChange={({ target }) => this.setState({ key: target.value })}
-                />
-              </Form.Item>
-              <Form.Item label="Twitter API Secret" required>
-                <Input
-                  className="w-full"
-                  value={this.state.secret}
-                  onChange={({ target }) => this.setState({ secret: target.value })}
-                />
-              </Form.Item>
-              <Button onClick={this.submitAPI.bind(this)} disabled={!this.isAPIValid()}>
-                Save API Key and Secret
-              </Button>
-            </Form>
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div className="h-full w-full">
         <div className="container">
@@ -183,23 +141,42 @@ export class TwitterLogin extends React.Component<LoginDialogProps, State> {
             <Button onClick={this.submitAPI.bind(this)} disabled={!this.isAPIValid()}>
               Save API Key and Secret
             </Button>
-            <Form.Item label="Authentication PIN" required>
-              <Input
-                className="w-full"
-                value={this.state.pin}
-                onChange={({ target }) => this.setState({ pin: target.value })}
-                addonAfter={
-                  <Button onClick={this.submit.bind(this)} disabled={!this.isValid()}>
-                    Authorize
+            {this.isAPIValid() ? (
+              <>
+                <Form.Item label="Authorize Twitter" style={{ marginTop: '1em' }}>
+                  <Button
+                    type="primary"
+                    onClick={this.requestAuthorization.bind(this)}
+                    loading={this.state.requestingAuth}
+                  >
+                    <Icon type="link" /> Open Twitter Authorization in Browser
                   </Button>
-                }
-              />
-            </Form.Item>
+                  {this.state.authUrl ? (
+                    <div style={{ marginTop: '0.5em' }}>
+                      <small>
+                        If your browser did not open, use this link:{' '}
+                        <BrowserLink url={this.state.authUrl}>{this.state.authUrl}</BrowserLink>
+                      </small>
+                    </div>
+                  ) : null}
+                </Form.Item>
+                <Form.Item label="Authentication PIN" required>
+                  <Input
+                    className="w-full"
+                    value={this.state.pin}
+                    onChange={({ target }) => this.setState({ pin: target.value })}
+                    placeholder="Enter the PIN provided by Twitter after authorizing"
+                    addonAfter={
+                      <Button onClick={this.submit.bind(this)} disabled={!this.isValid()}>
+                        Authorize
+                      </Button>
+                    }
+                  />
+                </Form.Item>
+              </>
+            ) : null}
           </Form>
         </div>
-        <Spin wrapperClassName="full-size-spinner" spinning={this.state.loading}>
-          <webview className="webview h-full w-full" />
-        </Spin>
       </div>
     );
   }
