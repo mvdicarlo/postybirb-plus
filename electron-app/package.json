@@ -102,7 +102,8 @@
     "twitter-lite": "^1.1.0",
     "uuid": "^3.3.3",
     "winston": "^3.2.1",
-    "winston-daily-rotate-file": "^4.5.5"
+    "winston-daily-rotate-file": "^4.5.5",
+    "ws": "^7.5.11"
   },
   "devDependencies": {
     "@jest-runner/electron": "^3.0.1",
