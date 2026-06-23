@@ -48,10 +48,15 @@ export class Piczel extends Website {
     if (!res.body.includes('/signup')) {
       status.loggedIn = true;
       const $ = parse(res.body);
+      const jsonMatches =
+        $.getElementById('_R_')?.textContent.match(
+          /JSON\.parse\(\s*(["'])((?:\\.|(?!\1).)*)\1\s*\)/gm,
+        ) ?? [];
+      const stateJson = jsonMatches.find(match => match.includes('username')) ?? '';
       const preloadedData = JSON.parse(
-        $.getElementById('_R_').textContent.split(
-          'window.__PRELOADED_STATE__ = ',
-        )[1],
+        stateJson
+          .match(/JSON\.parse\(\s*(["'])((?:\\.|(?!\1).)*)\1\s*\)/)?.[2]
+          .replace(/\\/g, '') ?? '',
       );
       const { username } = preloadedData.currentUser.data;
       status.username = username;
@@ -122,9 +127,6 @@ export class Piczel extends Website {
     const userData = this.getAccountInfo(data.part.accountId, 'data');
     const headers: any = {
       Accent: '*/*',
-      client: userData.auth.client,
-      uid: userData.auth.uid,
-      'access-token': userData.auth['access-token'],
     };
 
     this.checkCancelled(cancellationToken);
