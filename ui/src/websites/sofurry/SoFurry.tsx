@@ -7,14 +7,18 @@ import { SubmissionSectionProps } from '../../views/submissions/submission-forms
 import { WebsiteSectionProps } from '../form-sections/website-form-section.interface';
 import GenericFileSubmissionSection from '../generic/GenericFileSubmissionSection';
 import { GenericSelectProps } from '../generic/GenericSelectProps';
+import { LoginDialogProps } from '../interfaces/website.interface';
 import { WebsiteImpl } from '../website.base';
+import SoFurryLogin from './SoFurryLogin';
 
 export class SoFurry extends WebsiteImpl {
   internalName: string = 'SoFurry';
   name: string = 'SoFurry';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
-  loginUrl: string = 'https://sofurry.com/login';
+  loginUrl: string = '';
+
+  LoginDialog = (props: LoginDialogProps) => <SoFurryLogin {...props} />;
 
   FileSubmissionForm = (props: WebsiteSectionProps<FileSubmission, SoFurryFileOptions>) => (
     <SoFurryFileSubmissionForm

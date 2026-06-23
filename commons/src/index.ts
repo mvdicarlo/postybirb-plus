@@ -76,6 +76,7 @@ export * from './interfaces/websites/piczel/piczel.file.options.interface';
 export * from './interfaces/websites/pillowfort/pillowfort.file.options.interface';
 export * from './interfaces/websites/pillowfort/pillowfort.notification.options.interface';
 export * from './interfaces/websites/pixiv/pixiv.file.options.interface';
+export * from './interfaces/websites/so-furry/so-furry.account.interface';
 export * from './interfaces/websites/so-furry/so-furry.file.options.interface';
 export * from './interfaces/websites/subscribe-star/subscribe-star.file.options.interface';
 export * from './interfaces/websites/subscribe-star/subscribe-star.notification.options.interface';
