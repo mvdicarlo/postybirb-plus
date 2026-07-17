@@ -129,8 +129,6 @@ export class Piczel extends Website {
     const userData = this.getAccountInfo(data.part.accountId, 'data');
     const headers: any = {
       Accent: '*/*',
-      client: userData.auth.client,
-      uid: userData.auth.uid,
     };
 
     this.checkCancelled(cancellationToken);
