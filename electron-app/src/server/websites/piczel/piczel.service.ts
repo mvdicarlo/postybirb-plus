@@ -48,16 +48,23 @@ export class Piczel extends Website {
     if (!res.body.includes('/signup')) {
       status.loggedIn = true;
       const $ = parse(res.body);
-      const jsonMatches =
+const jsonMatches =
         $.getElementById('_R_')?.textContent.match(
           /JSON\.parse\(\s*(["'])((?:\\.|(?!\1).)*)\1\s*\)/gm,
         ) ?? [];
-      const stateJson = jsonMatches.find(match => match.includes('username')) ?? '';
-      const preloadedData = JSON.parse(
-        stateJson
-          .match(/JSON\.parse\(\s*(["'])((?:\\.|(?!\1).)*)\1\s*\)/)?.[2]
-          .replace(/\\/g, '') ?? '',
-      );
+      const stateJson =
+        jsonMatches.find((match) => match.includes('username')) ?? '';
+      const escapedJson = stateJson.match(
+        /JSON\.parse\(\s*(["'])((?:\\.|(?!\1).)*)\1\s*\)/,
+      )?.[2];
+      // The captured content is the escaped body of a string literal that was
+      // passed to JSON.parse. Unescape it properly (handles \uXXXX, \\, \n,
+      // etc.) by parsing it as a JSON string, instead of stripping backslashes,
+      // which corrupted any non-ASCII/escaped data and broke login detection.
+      const unescapedJson = escapedJson
+        ? (JSON.parse(`"${escapedJson}"`) as string)
+        : '';
+      const preloadedData = JSON.parse(unescapedJson || '{}');
       const { username } = preloadedData.currentUser.data;
       status.username = username;
       this.storeAccountInformation(data._id, 'data', preloadedData);

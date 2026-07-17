@@ -1,6 +1,6 @@
 {
   "name": "postybirb-plus-ui",
-  "version": "3.1.72",
+  "version": "3.1.73",
   "license": "BSD-3-Clause",
   "private": true,
   "Author": "Michael DiCarlo",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-app-rewired build && shx mv build ../electron-app",
+    "build": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-app-rewired --openssl-legacy-provider build && shx mv build ../electron-app",
     "build:legacy": "run-s build:clean build:tailwind build:antd-tweaks build:themes && react-app-rewired --openssl-legacy-provider build && shx mv build ../electron-app",
     "build:clean": "rimraf ../electron-app/build",
     "build:style": "npm run build:tailwind && npm run build:themes",
