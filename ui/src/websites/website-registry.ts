@@ -33,6 +33,7 @@ import { SubscribeStarAdult } from './subscribe-star/SubscribeStarAdult';
 import { Pixelfed } from './pixelfed/Pixelfed';
 import { Bluesky } from './bluesky/Bluesky';
 import { Twitter } from './twitter/Twitter';
+import { Instagram } from './instagram/Instagram';
 
 export class WebsiteRegistry {
   static readonly websites: Record<string, Website> = {
@@ -49,6 +50,7 @@ export class WebsiteRegistry {
     FurryNetwork: new FurryNetwork(),
     HentaiFoundry: new HentaiFoundry(),
     Inkbunny: new Inkbunny(),
+    Instagram: new Instagram(),
     Itaku: new Itaku(),
     KoFi: new KoFi(),
     Manebooru: new Manebooru(),
