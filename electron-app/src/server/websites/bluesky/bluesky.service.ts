@@ -729,4 +729,17 @@ export class Bluesky extends Website {
 
     return null;
   }
+
+  override async updateChildPart(
+    part: SubmissionPart<BlueskyFileOptions & BlueskyNotificationOptions>,
+    getSource: () => Promise<string | undefined>,
+  ): Promise<boolean> {
+    const source = await getSource();
+    if (source?.length) {
+      part.data.replyToUrl = source;
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

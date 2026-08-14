@@ -34,6 +34,10 @@ export class DefaultOptionsEntity implements DefaultOptions {
   @IsOptional()
   spoilerText?: string;
 
+  @Expose()
+  @IsOptional()
+  parentId?: string;
+
   @IsArray()
   sources: string[];
 

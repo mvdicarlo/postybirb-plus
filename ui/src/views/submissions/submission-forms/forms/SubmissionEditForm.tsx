@@ -68,6 +68,7 @@ export interface SubmissionEditFormState {
   imageCropperResolve?: (file: File) => void;
   imageCropperReject?: () => void;
   altTexts: { [key: string]: string };
+  parentOptions?: [{ id: string; type: SubmissionType; title: string }];
 }
 
 @inject('loginStatusStore')
@@ -106,8 +107,11 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
   constructor(props: Props) {
     super(props);
     this.id = props.match.params.id;
-    SubmissionService.getSubmission(this.id, true)
-      .then(({ data }) => {
+    Promise.all([
+      SubmissionService.getSubmission(this.id, true),
+      SubmissionService.getSubmissionParentOptions(this.id),
+    ])
+      .then(([{ data }, { data: parentOptions }]) => {
         this.original = _.cloneDeep(data);
         const submissionType: SubmissionType = data.submission.type;
         const altTexts = {};
@@ -125,6 +129,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
           postAt: data.submission.schedule.postAt,
           submissionType,
           altTexts,
+          parentOptions,
         });
       })
       .catch(() => {
@@ -810,6 +815,7 @@ class SubmissionEditForm extends React.Component<Props, SubmissionEditFormState>
                   problems={this.state.problems.default}
                   onUpdate={this.onUpdate}
                   submission={this.state.submission!}
+                  parentOptions={this.state.parentOptions}
                 />
               </Form.Item>
 

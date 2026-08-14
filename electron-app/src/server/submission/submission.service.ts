@@ -145,6 +145,42 @@ export class SubmissionService {
     ); // filter out submissions that are missing parts entirely (assumes it is currently being deleted)
   }
 
+  async getChildren(
+    parentId: string,
+    incompleteOnly: boolean,
+  ): Promise<Array<{ submission: SubmissionEntity; parts: Array<SubmissionPartEntity<any>> }>> {
+    const results = [];
+    const childIds = await this.partService.getChildSubmissionIds(parentId);
+    if (childIds?.length) {
+      const submissions = await this.repository.find({ _id: { $in: childIds } });
+      for (const submission of submissions) {
+        const parts = await this.partService.getPartsForSubmission(submission._id, incompleteOnly);
+        // filter out submissions that are missing parts entirely (assumes it is currently being deleted)
+        if (parts?.length) {
+          results.push({ submission, parts });
+        }
+      }
+    }
+    return results;
+  }
+
+  async getParentOptions(
+    id: string,
+  ): Promise<Array<{ id: string; type: SubmissionType; title: string }>> {
+    const options = [];
+    const submissions = await this.repository.find({ _id: { $ne: id } });
+    for (const submission of submissions) {
+      const id = submission._id;
+      const defaultPart = await this.partService.getSubmissionDefaultPart(id);
+      options.push({
+        id,
+        type: submission.type,
+        title: defaultPart?.data?.title || submission.title,
+      });
+    }
+    return options;
+  }
+
   postingStateChanged(): void {
     this.eventEmitter.emitOnComplete(Events.SubmissionEvent.UPDATED, this.getAllAndValidate());
   }
