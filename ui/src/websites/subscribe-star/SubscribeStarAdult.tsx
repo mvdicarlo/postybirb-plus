@@ -23,7 +23,7 @@ export class SubscribeStarAdult extends WebsiteImpl {
   name: string = 'SubscribeStar (Adult)';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = false;
-  loginUrl: string = 'https://www.subscribestar.adult';
+  loginUrl: string = 'https://www.subscribestar.art';
 
   getDefaults(type: SubmissionType) {
     return type === SubmissionType.FILE
