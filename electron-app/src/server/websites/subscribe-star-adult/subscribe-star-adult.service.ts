@@ -34,7 +34,7 @@ import _ from 'lodash';
 
 @Injectable()
 export class SubscribeStarAdult extends Website {
-  readonly BASE_URL = 'https://www.subscribestar.adult';
+  readonly BASE_URL = 'https://www.subscribestar.art';
   readonly acceptsAdditionalFiles = true;
   readonly MAX_CHARS: number = undefined; // No Limit
   readonly enableAdvertisement: boolean = false;
@@ -285,8 +285,8 @@ export class SubscribeStarAdult extends Website {
           authenticity_token: csrf,
         },
         headers: {
-          Referer: 'https://www.subscribestar.adult/',
-          Origin: 'https://www.subscribestar.adult',
+          Referer: 'https://www.subscribestar.art/',
+          Origin: 'https://www.subscribestar.art',
           cookie: cookies,
         },
       });
