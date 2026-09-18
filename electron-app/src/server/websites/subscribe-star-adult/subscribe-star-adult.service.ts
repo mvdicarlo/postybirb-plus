@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { nativeImage } from 'electron';
+import parse from 'node-html-parser';
 import {
   DefaultOptions,
   FileRecord,
@@ -56,24 +57,39 @@ export class SubscribeStarAdult extends Website {
   }
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
-    const status: LoginResponse = { loggedIn: false, username: null };
-    const res = await Http.get<string>(this.BASE_URL, data._id, { updateCookies: false });
-    if (res.body.includes('top_bar-user_name')) {
-      status.loggedIn = true;
-      status.username = res.body.match(/<div class="top_bar-user_name">(.*?)<\/div>/)[1];
+    const profilePage = await Http.get<string>(`${this.BASE_URL}/profile/settings`, data._id, {
+      updateCookies: false,
+    });
 
-      let usernameLink = res.body.match(
-        /class="top_bar-branding for-adult">(.*?)href="(.*?)"/ims,
-      )[2];
-      if (usernameLink && usernameLink.includes('/feed')) {
-        usernameLink = `/${status.username}`;
+    const $ = parse(profilePage.body);
+    const topBar = $.querySelector('.top_bar-user_info');
+    if (topBar) {
+      const username = $.querySelector('.top_bar-user_name')?.innerText.trim();
+
+      if (!username) {
+        return { loggedIn: false, username: '' };
       }
 
-      this.storeAccountInformation(data._id, 'username', usernameLink);
+      const csrfToken = $.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      if (!csrfToken) {
+        this.logger.warn('Failed to find csrf-token meta element during login');
+        return { loggedIn: false, username: '' };
+      }
+
+      this.storeAccountInformation(data._id, 'username', `/${username}`);
 
       await this.getTiers(data._id);
+      const userId = topBar.querySelector('img')?.getAttribute('data-user-id');
+      if (!userId) {
+        this.logger.warn('Failed to find user-id img element during login');
+        return { loggedIn: false, username: '' };
+      }
+
+      await this.getTiers(data._id);
+      return { loggedIn: true, username };
     }
-    return status;
+
+    return { loggedIn: false, username: '' };
   }
 
   private async getTiers(profileId: string) {

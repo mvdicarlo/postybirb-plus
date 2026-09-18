@@ -25,6 +25,7 @@ import { LoginResponse } from '../interfaces/login-response.interface';
 import { ScalingOptions } from '../interfaces/scaling-options.interface';
 import { Website } from '../website.base';
 import _ from 'lodash';
+import { HttpExperimental } from 'src/server/utils/http-experimental';
 
 @Injectable()
 export class KoFi extends Website {
@@ -97,31 +98,38 @@ export class KoFi extends Website {
     try {
       const filesToPost = [data.primary, ...data.additional].slice(0, 8);
       for (const fileRecord of filesToPost) {
-        const upload = await Http.post<string>(
-          `${this.BASE_URL}/api/media/gallery-item/upload?throwOnError=true`,
-          data.part.accountId,
+        const upload = await HttpExperimental.post<
           {
-            type: 'multipart',
-            data: {
-              filenames: fileRecord.file.options.filename,
-              'file[0]': fileRecord.file,
-            },
+            ExternalId: string;
+            OriginalFileName: string;
+            FileName: string;
+            SizeInBytes: number;
+            InternalDropzoneId: string;
+            Location: null;
+            VideoUid: null;
+          }[]
+        >(`${this.BASE_URL}/api/media/gallery-item/upload?throwOnError=true`, {
+          partition: data.part.accountId,
+          type: 'multipart',
+          data: {
+            filenames: fileRecord.file.options.filename,
+            'file[0]': fileRecord.file,
           },
-        );
+        });
 
         body = upload.body;
-        const json = JSON.parse(upload.body);
-        imageUploadIds.push(json[0].ExternalId);
+        console.log(body);
+        imageUploadIds.push(body[0].ExternalId);
       }
     } catch (err) {
       return Promise.reject(this.createPostResponse({ message: err, additionalInfo: body }));
     }
 
     this.checkCancelled(cancellationToken);
-    const post = await Http.post<{ success: boolean } | string>(
+    const post = await HttpExperimental.post<{ success: boolean } | string>(
       `${this.BASE_URL}/Gallery/AddGalleryItem`,
-      data.part.accountId,
       {
+        partition: data.part.accountId,
         type: 'json',
         data: {
           Album: data.options.album || '',
@@ -135,7 +143,6 @@ export class KoFi extends Website {
           Title: data.title,
           UploadAsIndividualImages: false,
         },
-        requestOptions: { gzip: true },
         headers: {
           'Accept-Encoding': 'gzip, deflate, br',
           Accept: 'text/html, */*',
