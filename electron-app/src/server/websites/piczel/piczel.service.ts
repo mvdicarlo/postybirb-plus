@@ -117,8 +117,6 @@ export class Piczel extends Website {
           data: `data:${f.file.options.contentType};base64,${f.file.value.toString('base64')}`,
         })),
       uploadMode: 'PUBLISH',
-      queue: false,
-      publish_at: '',
       thumbnail_id: '0',
     };
 
@@ -126,13 +124,12 @@ export class Piczel extends Website {
       form.folder_id = data.options.folder;
     }
 
-    const userData = this.getAccountInfo(data.part.accountId, 'data');
     const headers: any = {
       Accent: '*/*',
     };
 
     this.checkCancelled(cancellationToken);
-    const postResponse = await Http.post<any>(`${this.BASE_URL}/api/gallery`, data.part.accountId, {
+    const postResponse = await Http.post<any>(`https://api.piczel.tv/gallery`, data.part.accountId, {
       type: 'json',
       data: form,
       headers,
