@@ -27,6 +27,31 @@ export default class FallbackStoryInput extends React.Component<Props, State> {
     fallbackText: ''
   };
 
+  private sanitizeContent(content: string): string {
+    return sanitize(content, {
+      allowedTags: sanitize.defaults.allowedTags,
+      allowedSchemes: ['http', 'https'],
+      allowedAttributes: {
+        a: ['href', 'target'],
+        div: ['align', 'style'],
+        pre: ['align', 'style'],
+        p: ['align', 'style'],
+        h1: ['align', 'style'],
+        h2: ['align', 'style'],
+        h3: ['align', 'style'],
+        h4: ['align', 'style'],
+        h5: ['align', 'style'],
+        h6: ['align', 'style'],
+        span: ['align', 'style']
+      },
+      allowedStyles: {
+        '*': {
+          'text-align': [/.*/]
+        }
+      }
+    });
+  }
+
   private tinyMCESettings: any = {
     suffix: '.min',
     skin: uiStore!.state.theme === 'dark' ? 'oxide-dark' : 'oxide',
@@ -50,35 +75,15 @@ export default class FallbackStoryInput extends React.Component<Props, State> {
       underline: { inline: 'u', exact: true },
       strikethrough: { inline: 's', exact: true }
     },
-    paste_preprocess(plugin: any, args: any) {
-      args.content = sanitize(args.content, {
-        allowedTags: false,
-        allowedAttributes: {
-          a: ['href', 'target'],
-          div: ['align', 'style'],
-          pre: ['align', 'style'],
-          p: ['align', 'style'],
-          h1: ['align', 'style'],
-          h2: ['align', 'style'],
-          h3: ['align', 'style'],
-          h4: ['align', 'style'],
-          h5: ['align', 'style'],
-          h6: ['align', 'style'],
-          span: ['align', 'style']
-        },
-        allowedStyles: {
-          '*': {
-            'text-align': [/.*/]
-          }
-        }
-      });
+    paste_preprocess: (plugin: any, args: any) => {
+      args.content = this.sanitizeContent(args.content);
     }
   };
 
   showAndLoad() {
     this.setState({ loading: true, modalVisible: true });
     SubmissionService.getFallbackText(this.props.submission._id)
-      .then(data => this.setState({ fallbackText: data }))
+      .then(data => this.setState({ fallbackText: this.sanitizeContent(data) }))
       .finally(() => this.setState({ loading: false }));
   }
 

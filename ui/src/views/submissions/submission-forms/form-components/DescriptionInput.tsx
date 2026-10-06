@@ -36,6 +36,32 @@ export default class DescriptionInput extends React.Component<Props, State> {
     value: ''
   };
 
+  private sanitizeContent(content: string): string {
+    return sanitize(content, {
+      allowedTags: sanitize.defaults.allowedTags.concat(['img']),
+      allowedSchemes: ['data', 'http', 'https'],
+      allowedAttributes: {
+        img: ['src', 'alt', 'title', 'width', 'height', 'style', 'target'],
+        a: ['href', 'target'],
+        div: ['align', 'style'],
+        pre: ['align', 'style'],
+        p: ['align', 'style'],
+        h1: ['align', 'style'],
+        h2: ['align', 'style'],
+        h3: ['align', 'style'],
+        h4: ['align', 'style'],
+        h5: ['align', 'style'],
+        h6: ['align', 'style'],
+        span: ['align', 'style']
+      },
+      allowedStyles: {
+        '*': {
+          'text-align': [/.*/]
+        }
+      }
+    });
+  }
+
   private tinyMCESettings: any = {
     suffix: '.min',
     skin: uiStore!.state.theme === 'dark' ? 'oxide-dark' : 'oxide',
@@ -60,42 +86,23 @@ export default class DescriptionInput extends React.Component<Props, State> {
       underline: { inline: 'u', exact: true },
       strikethrough: { inline: 's', exact: true }
     },
-    paste_preprocess(plugin: any, args: any) {
-      args.content = sanitize(args.content, {
-        allowedTags: sanitize.defaults.allowedTags.concat([ 'img' ]),
-        allowedSchemes: [ 'data', 'http', 'https'],
-        allowedAttributes: {
-          img: ['src', 'alt', 'title', 'width', 'height', 'style', 'target'],
-          a: ['href', 'target'],
-          div: ['align', 'style'],
-          pre: ['align', 'style'],
-          p: ['align', 'style'],
-          h1: ['align', 'style'],
-          h2: ['align', 'style'],
-          h3: ['align', 'style'],
-          h4: ['align', 'style'],
-          h5: ['align', 'style'],
-          h6: ['align', 'style'],
-          span: ['align', 'style']
-        },
-        allowedStyles: {
-          '*': {
-            'text-align': [/.*/]
-          }
-        }
-      });
+    paste_preprocess: (plugin: any, args: any) => {
+      args.content = this.sanitizeContent(args.content);
     }
   };
 
   constructor(props: Props) {
     super(props);
-    this.data = props.defaultValue;
+    this.data = {
+      ...props.defaultValue,
+      value: this.sanitizeContent(props.defaultValue.value)
+    };
   }
 
   changeOverwriteDefault = (checked: boolean) => {
     this.data.overwriteDefault = !checked;
     if (!checked && this.props.overwriteDescriptionValue) {
-      this.data.value = this.props.overwriteDescriptionValue;
+      this.data.value = this.sanitizeContent(this.props.overwriteDescriptionValue);
     }
     this.update();
   };
@@ -131,7 +138,10 @@ export default class DescriptionInput extends React.Component<Props, State> {
   }
 
   render() {
-    this.data = this.props.defaultValue;
+    this.data = {
+      ...this.props.defaultValue,
+      value: this.sanitizeContent(this.props.defaultValue.value)
+    };
     const overwriteSwitch = this.props.hideOverwrite ? null : (
       <div>
         <span className="mr-2">
@@ -293,7 +303,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
         {this.props.defaultValue.overwriteDefault || this.props.hideOverwrite ? (
           <div className="relative">
             <Editor
-              value={this.props.defaultValue.value}
+              value={this.data.value}
               init={{
                 ...this.tinyMCESettings,
                 templates: this.props.descriptionTemplateStore!.templates
@@ -301,7 +311,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
               onEditorChange={this.handleDescriptionChange}
             />
             <div className="absolute bottom-0 text-gray-600 mr-1 right-0 pointer-events-none">
-              {this.getLength(this.props.defaultValue.value)}
+              {this.getLength(this.data.value)}
             </div>
           </div>
         ) : null}
