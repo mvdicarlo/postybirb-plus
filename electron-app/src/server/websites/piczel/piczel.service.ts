@@ -63,14 +63,14 @@ export class Piczel extends Website {
       const { username } = preloadedData.currentUser.data;
       status.username = username;
       this.storeAccountInformation(data._id, 'data', preloadedData);
-      this.getFolders(data._id, status.username);
+      this.getFolders(data._id);
     }
     return status;
   }
 
-  private async getFolders(profileId: string, username: string) {
+  private async getFolders(profileId: string) {
     const res = await Http.get<{ id: number; name: string }[]>(
-      `${this.BASE_URL}/api/users/${username}/gallery/folders`,
+      'https://api.piczel.tv/users/me/gallery/folders',
       profileId,
       {
         requestOptions: { json: true },
@@ -104,18 +104,11 @@ export class Piczel extends Website {
     data: FilePostData<PiczelFileOptions>,
   ): Promise<PostResponse> {
     const form: any = {
-      nsfw: data.rating !== SubmissionRating.GENERAL,
+      nsfw: data.rating !== SubmissionRating.GENERAL ? 'true' : 'false',
       description: data.description,
       title: data.title || 'New Submission',
-      tags: this.formatTags(data.tags),
-      files: [data.primary, ...data.additional]
-        .filter(f => f)
-        .map(f => ({
-          name: f.file.options.filename,
-          size: f.file.value.length,
-          type: f.file.options.contentType,
-          data: `data:${f.file.options.contentType};base64,${f.file.value.toString('base64')}`,
-        })),
+      'tags[]': this.formatTags(data.tags),
+      'files[]': [data.primary, ...data.additional].filter(f => f).map(f => f.file),
       uploadMode: 'PUBLISH',
       thumbnail_id: '0',
     };
@@ -129,12 +122,16 @@ export class Piczel extends Website {
     };
 
     this.checkCancelled(cancellationToken);
-    const postResponse = await Http.post<any>(`https://api.piczel.tv/gallery`, data.part.accountId, {
-      type: 'json',
-      data: form,
-      headers,
-      requestOptions: { json: true },
-    });
+    const postResponse = await Http.post<any>(
+      `https://api.piczel.tv/gallery`,
+      data.part.accountId,
+      {
+        type: 'multipart',
+        data: form,
+        headers,
+        requestOptions: { json: true },
+      },
+    );
 
     this.verifyResponse(postResponse, 'Post');
 
