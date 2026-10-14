@@ -62,6 +62,11 @@ export default class DescriptionInput extends React.Component<Props, State> {
     });
   }
 
+  private sanitizeReceivedContent(content: string): string {
+    const containsUnsafeHtml = /<\s*script\b|(?:\s|\/)on[a-z][\w:-]*\s*=/i.test(content);
+    return containsUnsafeHtml ? this.sanitizeContent(content) : content;
+  }
+
   private tinyMCESettings: any = {
     suffix: '.min',
     skin: uiStore!.state.theme === 'dark' ? 'oxide-dark' : 'oxide',
@@ -95,14 +100,14 @@ export default class DescriptionInput extends React.Component<Props, State> {
     super(props);
     this.data = {
       ...props.defaultValue,
-      value: this.sanitizeContent(props.defaultValue.value)
+      value: this.sanitizeReceivedContent(props.defaultValue.value)
     };
   }
 
   changeOverwriteDefault = (checked: boolean) => {
     this.data.overwriteDefault = !checked;
     if (!checked && this.props.overwriteDescriptionValue) {
-      this.data.value = this.sanitizeContent(this.props.overwriteDescriptionValue);
+      this.data.value = this.sanitizeReceivedContent(this.props.overwriteDescriptionValue);
     }
     this.update();
   };
@@ -140,7 +145,7 @@ export default class DescriptionInput extends React.Component<Props, State> {
   render() {
     this.data = {
       ...this.props.defaultValue,
-      value: this.sanitizeContent(this.props.defaultValue.value)
+      value: this.sanitizeReceivedContent(this.props.defaultValue.value)
     };
     const overwriteSwitch = this.props.hideOverwrite ? null : (
       <div>

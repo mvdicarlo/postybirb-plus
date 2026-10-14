@@ -103,6 +103,7 @@ export class Pixiv extends Website {
       sexual: options.sexual ? 'true' : 'false',
       aiType: options.aiGenerated ? 'aiGenerated' : 'notAiGenerated',
       restrict: 'public',
+      allowCitationWork: '1',
       responseAutoAccept: 'false',
       'suggestedtags[]': '',
       original: options.original ? 'true' : 'false',
