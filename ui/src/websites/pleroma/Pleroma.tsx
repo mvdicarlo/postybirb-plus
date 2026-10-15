@@ -21,6 +21,7 @@ export class Pleroma extends WebsiteImpl {
   name: string = 'Pleroma Instance';
   supportsAdditionalFiles: boolean = true;
   supportsTags: boolean = true;
+  supportsParentId: boolean = true;
   loginUrl: string = '';
 
   LoginDialog = (props: LoginDialogProps) => <PleromaLogin {...props} />;
@@ -93,6 +94,7 @@ class PleromaNotificationSubmissionForm extends GenericSubmissionSection<
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+        <p>Will be filled with the URL of the parent submission.</p>
       </Form.Item>,
     );
     return elements;
@@ -138,6 +140,7 @@ export class PleromaFileSubmissionForm extends GenericFileSubmissionSection<Pler
       </Form.Item>,
       <Form.Item label="Reply To Post URL">
         <Input value={data.replyToUrl} onChange={this.handleValueChange.bind(this, 'replyToUrl')} />
+        <p>Will be filled with the URL of the parent submission.</p>
       </Form.Item>,
     );
     return elements;

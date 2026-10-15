@@ -1,4 +1,4 @@
-import { SubmissionPart } from 'postybirb-commons';
+import { SubmissionPart, SubmissionType } from 'postybirb-commons';
 import { Submission } from 'postybirb-commons';
 import { DefaultOptions } from 'postybirb-commons';
 import { Problem } from 'postybirb-commons';
@@ -11,4 +11,5 @@ export interface SubmissionSectionProps<T extends Submission, K extends DefaultO
   problems?: Problem;
   submission: T;
   settingsStore?: SettingsStore;
+  parentOptions?: { id: string; type: SubmissionType; title: string }[];
 }

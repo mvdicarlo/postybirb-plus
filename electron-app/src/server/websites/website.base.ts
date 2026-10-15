@@ -281,4 +281,11 @@ export abstract class Website {
       });
     }
   }
+
+  async updateChildPart(
+    part: SubmissionPart<any>,
+    getSource: () => Promise<string | undefined>,
+  ): Promise<boolean> {
+    return false; // Override me, return true if something changed.
+  }
 }
